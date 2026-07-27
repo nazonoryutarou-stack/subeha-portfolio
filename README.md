@@ -28,10 +28,19 @@
 
 撮影済み。公開後、サイトの小さいテレビ部分へ本編を接続する。
 
-## ファイル
+## ファイルとディレクトリ
 
-- `index.html`：ページ本体
-- `style.css`：画面デザイン、部屋と物品のCSS表現
+- `index.html`：本拠地ページ
+- `style.css`：本拠地の画面デザイン
+- `works/`：特設ページ・作品サイトの正本
+  - `ninja-kaishaku/`：短編小説「忍者解釈」事件DB版
+  - `bari-rebechi/`：パない神「バリ・レベチ」様
+  - `kamonohashi-operation/`：カモノハシ式神40体海上輸送作戦
+- `docs/backup-policy.md`：制作物の保存・復旧ルール
+
+## バックアップ方針
+
+GitHubを正本とする。チャット添付、Neocities、端末内ZIPは複製物として扱い、完成版のソース・OGP・READMEを必ず`works/`へ保存する。
 
 ## 次に必要なもの
 
