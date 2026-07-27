@@ -1,84 +1,190 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="祭祀技師・すべ歯による霊視相談。怖がらせず、状況と次の一手を整理します。">
-  <meta name="theme-color" content="#160d1c">
-  <title>すべての歯が見える｜霊視相談</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="祭祀技師・すべての歯が見えるによる霊視・電話占い。怖がらせず、今の状況と次の一手を整理します。">
+  <meta name="theme-color" content="#050403">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="すべての歯が見える｜霊視・電話占い">
+  <meta property="og:description" content="怖がらせず、現実へ戻れる読みを。ココナラで電話占いを受付中。">
+  <meta property="og:image" content="assets/ogp.svg">
+  <meta property="og:site_name" content="すべての歯が見える">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>すべての歯が見える｜霊視・電話占い</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "霊視・電話占い",
+    "provider": {"@type": "Person", "name": "すべての歯が見える"},
+    "description": "怖がらせず、状況と次の一手を整理する電話相談。",
+    "areaServed": "JP",
+    "url": "https://coconala.com/services/4329584"
+  }
+  </script>
 </head>
-<body>
-  <div class="noise" aria-hidden="true"></div>
+<body class="p-home">
+  <a class="skip-link" href="#consultation">相談内容へ移動</a>
 
-  <header class="site-header">
-    <a class="brand" href="#top">すべての歯が見える</a>
-    <a class="small-link" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer">相談する</a>
+  <canvas class="aura" id="aura" aria-hidden="true"></canvas>
+  <div class="oral-field" aria-hidden="true">
+    <div class="oral-field__throat"></div>
+    <div class="oral-field__fiber oral-field__fiber--a"></div>
+    <div class="oral-field__fiber oral-field__fiber--b"></div>
+    <div class="oral-field__fiber oral-field__fiber--c"></div>
+  </div>
+
+  <div class="jaw jaw--upper" id="upperJaw" aria-hidden="true"><div class="jaw__gum"><div class="jaw__teeth" id="upperTeeth"></div></div></div>
+  <div class="jaw jaw--lower" id="lowerJaw" aria-hidden="true"><div class="jaw__gum"><div class="jaw__teeth" id="lowerTeeth"></div></div></div>
+
+  <header class="site-chrome">
+    <div class="site-chrome__brand">
+      <span class="site-chrome__code">ORAL OBSERVATORY 091</span>
+      <span class="site-chrome__name">すべての歯が見える</span>
+    </div>
+    <div class="site-chrome__status" aria-live="polite">
+      <span class="status-dot"></span>
+      <span id="statusText">電話占い・受付中</span>
+      <time id="clock">--:--:--</time>
+    </div>
   </header>
 
-  <main id="top">
-    <section class="hero">
-      <p class="eyebrow">RITUAL TECHNICIAN / OBSERVATION DESK</p>
-      <h1>怖がらせず、<br>現実へ戻れる読みを。</h1>
-      <p class="lead">霊視を用いて、いま何が起きているか、問題がどこで絡まっているか、次に何をすべきかを整理します。</p>
-      <div class="actions">
-        <a class="button primary" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer">ココナラで電話相談する</a>
-        <a class="button ghost" href="#about">考え方を読む</a>
+  <aside class="readout" aria-hidden="true">
+    <span id="readoutLabel">唾液粘度</span>
+    <strong id="readoutValue">34.2</strong>
+    <i><b id="readoutBar"></b></i>
+  </aside>
+
+  <div class="scene-index" aria-hidden="true">
+    <span id="sceneNo">01</span><small>/</small><span id="sceneTotal">05</span>
+  </div>
+
+  <nav class="scene-controls" aria-label="画面移動">
+    <button class="scene-controls__button" id="prevScene" type="button" aria-label="前の画面へ">←</button>
+    <button class="scene-controls__button" id="nextScene" type="button" aria-label="次の画面へ">→</button>
+  </nav>
+
+  <main class="scroller" id="scroller">
+    <section class="scene scene--hero" data-scene="入口" id="top">
+      <div class="scene__inner hero">
+        <p class="hero__classification">祭祀技師 ／ 電話相談 ／ 観測記録</p>
+        <div class="hero__warning" aria-hidden="true">口腔内に観測所があります</div>
+        <h1 class="hero__title"><span>すべての歯が</span><span>見える</span></h1>
+        <p class="hero__purpose"><strong>霊視・電話占い</strong><br>怖がらせず、今の状況と次の一手を整理します。</p>
+        <div class="hero__actions">
+          <a class="tooth-button tooth-button--gold" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer">
+            <span class="tooth-button__serial">GOLD TOOTH / 01</span>
+            <span class="tooth-button__main">ココナラで電話相談する</span>
+            <span class="tooth-button__sub">商品ページが開きます</span>
+          </a>
+          <button class="quiet-button" type="button" data-goto="1">観測所の内部を見る →</button>
+        </div>
+        <p class="hero__note">恋愛、人間関係、仕事、進路、創作、説明しづらい違和感。話がまとまっていなくても構いません。</p>
       </div>
-      <p class="status">ココナラで受付中｜電話相談</p>
+      <div class="specimen-label specimen-label--hero" aria-hidden="true">
+        <span>分類</span><b>生体端末</b><span>状態</span><b>営業中</b><span>欠損</span><b>一歯</b>
+      </div>
     </section>
 
-    <section class="panel" id="about">
-      <p class="section-no">観測記録 01</p>
-      <h2>未来を断定するより、<br>次の一手を増やす。</h2>
-      <p>良い結果だけを保証したり、不安をあおって追加購入を迫ったりはしません。鑑定結果は、現実の選択肢を整理するための観測記録として扱います。</p>
+    <section class="scene scene--directory" data-scene="歯列目次">
+      <div class="scene__inner directory">
+        <div class="section-heading">
+          <p>歯式番号 01–07</p>
+          <h2>噛み合わせるものを選ぶ</h2>
+          <span>ひとつだけ金属冠です。そこが相談窓口です。</span>
+        </div>
+        <nav class="dental-chart" aria-label="主要コンテンツ">
+          <a class="dental-chart__item dental-chart__item--gold" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer">
+            <span class="dental-chart__no">01</span><strong>霊視・電話占い</strong><small>受付中 / coconala</small><i></i>
+          </a>
+          <a class="dental-chart__item" href="placeholder.html?room=shindan"><span class="dental-chart__no">02</span><strong>十六霊感診断</strong><small>diagnosis</small><i></i></a>
+          <a class="dental-chart__item" href="placeholder.html?room=bakemongo"><span class="dental-chart__no">03</span><strong>バケモンGO</strong><small>hunt</small><i></i></a>
+          <a class="dental-chart__item" href="placeholder.html?room=yaniv"><span class="dental-chart__no">04</span><strong>ヤニブ</strong><small>cards</small><i></i></a>
+          <a class="dental-chart__item" href="placeholder.html?room=kujou"><span class="dental-chart__no">05</span><strong>苦情受付</strong><small>claims</small><i></i></a>
+          <a class="dental-chart__item" href="https://x.com/subetenoha" target="_blank" rel="noopener noreferrer"><span class="dental-chart__no">06</span><strong>交信</strong><small>X / signal</small><i></i></a>
+          <a class="dental-chart__item" href="https://note.com/light_dill8112" target="_blank" rel="noopener noreferrer"><span class="dental-chart__no">07</span><strong>手記</strong><small>note / records</small><i></i></a>
+        </nav>
+      </div>
     </section>
 
-    <section class="panel" id="scope">
-      <p class="section-no">相談範囲</p>
-      <h2>無料では輪郭まで。<br>解決設計は有料で。</h2>
-      <p>短い雑談や公開配信では、論点の発見や簡単な見立てまでお伝えします。個別事情を深く読み、具体策を組み立て、文章として残す作業は有料相談で扱います。</p>
-      <dl>
-        <div><dt>無料</dt><dd>短い観測・論点の提示</dd></div>
-        <div><dt>有料</dt><dd>背景整理・霊視・具体策</dd></div>
-        <div><dt>成果物</dt><dd>次にやることを言語化</dd></div>
-      </dl>
+    <section class="scene scene--consult" data-scene="金歯相談室" id="consultation">
+      <div class="scene__inner consultation">
+        <div class="consultation__tooth" aria-hidden="true"><span>01</span></div>
+        <div class="consultation__copy">
+          <p class="section-kicker">MAIN SERVICE / GOLD CROWN</p>
+          <h2>怖がらせず、<br>現実へ戻れる読みを。</h2>
+          <p>未来を一方的に断定するより、何が絡まっているかを見て、現実の選択肢を増やします。無理に話を整えてから来る必要はありません。</p>
+          <dl class="consultation__facts">
+            <div><dt>形式</dt><dd>ココナラ電話相談</dd></div>
+            <div><dt>目安</dt><dd>20〜30分</dd></div>
+            <div><dt>無料の場</dt><dd>輪郭と論点まで</dd></div>
+            <div><dt>個別相談</dt><dd>背景整理・霊視・次の一手</dd></div>
+          </dl>
+          <a class="cta-line" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer"><span>霊視・電話占いを申し込む</span><b>↗</b></a>
+        </div>
+        <div class="consultation__boundaries">
+          <p>対応境界</p>
+          <ul>
+            <li>恐怖を使った継続購入の誘導はしません。</li>
+            <li>医療・法律・投資・生死を断定しません。</li>
+            <li>希望時間があれば、その時間内でまとめます。</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
-    <section class="services" id="request">
-      <article class="service-card featured">
-        <p class="tag">MAIN SERVICE</p>
-        <h2>霊視・電話占い</h2>
-        <p>恋愛、人間関係、仕事、進路、創作活動、説明しづらい違和感など。話がまとまっていなくても、質問しながら一緒に整理します。</p>
-        <dl>
-          <div><dt>形式</dt><dd>ココナラ電話相談</dd></div>
-          <div><dt>目安</dt><dd>20〜30分</dd></div>
-          <div><dt>受付</dt><dd>受付中</dd></div>
-        </dl>
-        <a class="button primary" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer">商品ページを開く</a>
-      </article>
-
-      <article class="service-card">
-        <p class="tag">COMING NEXT</p>
-        <h2>作戦会議</h2>
-        <p>活動、商売、創作、人生が散らかっている人へ。状況を分解し、終了後に「次にやること3つ」を文章で渡します。</p>
-      </article>
+    <section class="scene scene--quarantine" data-scene="返却不能物">
+      <div class="scene__inner quarantine">
+        <div class="section-heading section-heading--left">
+          <p>UNRETURNABLE MATTER / 04</p>
+          <h2>持ち主へ戻せないもの</h2>
+          <span>相談の途中で混入しがちな、本人のものではない責任を仮置きしています。</span>
+        </div>
+        <div class="quarantine__grid">
+          <article class="matter-card matter-card--tall"><span>受付 0207</span><h3>他人の期待</h3><p>宛先不明。本人の荷物として長期保管されていた。</p><b>返送準備中</b></article>
+          <article class="matter-card"><span>受付 0314</span><h3>まだ起きていない失敗</h3><p>未来便。開封痕なし。</p><b>保留</b></article>
+          <article class="matter-card matter-card--void"><span>受付 0000</span><h3>説明できない違和感</h3><p>重量だけが記録され、内容物がない。</p><b>観測継続</b></article>
+          <article class="matter-card"><span>受付 0619</span><h3>善意の残骸</h3><p>使用期限切れ。捨てると罪悪感が発生する。</p><b>分別中</b></article>
+        </div>
+      </div>
     </section>
 
-    <section class="panel compact">
-      <p class="section-no">対応方針</p>
-      <ul>
-        <li>恐怖を利用した継続購入の誘導をしません。</li>
-        <li>医療、法律、投資、生死を断定しません。</li>
-        <li>無料の場では個別案件を解決まで扱いません。</li>
-        <li>希望時間があれば、その時間内でまとめます。</li>
-      </ul>
+    <section class="scene scene--records" data-scene="観測記録" id="recordsIndex">
+      <div class="scene__inner record-index">
+        <div class="section-heading section-heading--left">
+          <p>FIELD NOTES / LIVE ARCHIVE</p>
+          <h2>記録は歯髄に残る</h2>
+          <span>手記・制作・観測記録を読み込みます。検索結果は、この先に一枚ずつ現れます。</span>
+        </div>
+        <div class="record-console">
+          <label><span>検索</span><input type="search" id="recordQuery" placeholder="語句を入力" autocomplete="off"></label>
+          <label><span>種類</span><select id="recordFilter"><option value="">すべて</option></select></label>
+          <div class="record-console__sort" role="group" aria-label="並べ替え">
+            <button type="button" id="sortNew" class="is-active">新しい順</button><button type="button" id="sortOld">古い順</button>
+          </div>
+          <p><strong id="recordCount">--</strong> 件を検出</p>
+        </div>
+        <button class="quiet-button quiet-button--records" type="button" id="openFirstRecord">最初の記録へ →</button>
+      </div>
     </section>
   </main>
 
-  <footer>
-    <p>祭祀技師／霊視・儀式設計・霊能実務支援</p>
-    <p class="muted">© すべての歯が見える</p>
-  </footer>
+  <div class="record-status" id="recordStatus" role="status">記録を照合中</div>
+
+  <div class="progress" aria-hidden="true"><i id="progressBar"></i><span id="progressLabel">入口</span></div>
+
+  <a class="fixed-consult" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer">
+    <span class="fixed-consult__tooth">01</span>
+    <span><strong>霊視・電話占い</strong><small>ココナラで受付中</small></span>
+  </a>
+
+  <button class="motion-toggle" id="motionToggle" type="button" hidden>演出を停止する</button>
+  <script src="app.js" defer></script>
 </body>
 </html>

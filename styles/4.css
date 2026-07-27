@@ -1,0 +1,70 @@
+@charset "UTF-8";
+@media (max-width: 767px) {
+  .site-chrome { left: .8rem; right: .8rem; }
+  .site-chrome__code, #clock { display: none; }
+  .site-chrome__status { max-width: 48vw; }
+  .readout { top: 3.9rem; left: .8rem; width: 86px; }
+  .scene-index { top: 3.9rem; right: .8rem; }
+  .scene { padding-left: 1rem; padding-right: 1rem; }
+  .jaw { height: 118px; }
+  .jaw__teeth { gap: 1px; }
+  .tooth { flex-basis: 9vw; }
+  .specimen-label--hero { display: none; }
+  .hero__warning { top: -2.5rem; }
+  .hero__title { font-size: clamp(2.65rem, 13.5vw, 4.7rem); }
+  .hero__note { max-width: 28rem; padding-inline: .8rem; }
+  .dental-chart { grid-template-columns: 1fr; width: min(94vw, 470px); }
+  .dental-chart__item { min-height: 58px; padding: .58rem .75rem; }
+  .consultation { grid-template-columns: 82px minmax(0, 1fr); gap: 1rem; }
+  .consultation__tooth { min-height: 260px; }
+  .consultation__boundaries { display: block; }
+  .consultation__boundaries p { margin-bottom: .55rem; }
+  .quarantine__grid { grid-template-columns: 1fr 1fr; }
+  .matter-card { min-height: 120px; padding: .75rem; }
+  .matter-card--tall { min-height: 160px; }
+  .matter-card h3 { font-size: .82rem; }
+  .matter-card p { font-size: .58rem; }
+  .record-index { grid-template-columns: 1fr; gap: 1.2rem; }
+  .record-console { padding: .8rem; }
+  .record-sheet { width: min(91vw, 630px); min-height: 57vh; padding: 1rem; }
+  .record-sheet__content { max-height: 47vh; }
+  .fixed-consult { left: 50%; bottom: calc(2rem + var(--safe-bottom)); transform: translateX(-50%); width: min(88vw, 390px); justify-content: center; }
+  .fixed-consult:hover { transform: translateX(-50%) translateY(-2px); }
+  .scene-controls { right: .75rem; bottom: calc(6.6rem + var(--safe-bottom)); }
+  .scene-controls__button { width: 38px; height: 38px; }
+  .record-status { bottom: calc(1.15rem + var(--safe-bottom)); }
+}
+
+@media (max-width: 420px) {
+  .hero__classification { letter-spacing: .14em; }
+  .hero__purpose { font-size: .82rem; }
+  .tooth-button { min-height: 76px; padding-right: 3.3rem; }
+  .section-heading h2, .consultation__copy h2 { font-size: 1.55rem; }
+  .section-heading > span { font-size: .68rem; }
+  .consultation { grid-template-columns: 64px minmax(0, 1fr); }
+  .consultation__tooth { min-height: 230px; }
+  .consultation__facts dt, .consultation__facts dd { font-size: .61rem; }
+  .quarantine__grid { gap: .42rem; }
+  .matter-card { min-height: 110px; }
+  .matter-card h3 { font-size: .72rem; }
+  .matter-card p { font-size: .52rem; }
+  .matter-card b { font-size: .38rem; }
+}
+
+@media (min-width: 768px) {
+  .site-chrome { left: 2rem; right: 2rem; top: 1.35rem; }
+  .readout { left: 2rem; top: 6rem; }
+  .scene-index { right: 2rem; top: 6rem; }
+  .scene-controls { right: 2rem; bottom: calc(4.5rem + var(--safe-bottom)); }
+  .fixed-consult { left: 2rem; bottom: calc(2.1rem + var(--safe-bottom)); }
+  .progress { left: 2rem; right: 2rem; }
+  .record-status { bottom: calc(1.55rem + var(--safe-bottom)); }
+}
+
+html.motion-off *, html.motion-off *::before, html.motion-off *::after { animation: none !important; transition-duration: .001ms !important; }
+html.motion-off .oral-field__throat { transform: translate(-50%,-50%); }
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.force-motion) .oral-field__throat,
+  html:not(.force-motion) .status-dot { animation: none; }
+}
