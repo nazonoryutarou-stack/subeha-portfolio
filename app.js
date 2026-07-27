@@ -1,518 +1,329 @@
 "use strict";
-
+const COCONALA_URL = "https://coconala.com/services/4329584";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRA1AuFPfz23AiuyNHirTIn8pslZOn8UHyaFzB0SaBWewcErvPV6YIMBy_6tA6MyNTMLjEY11jwDL0w/pub?output=csv";
-const sc = document.getElementById("scroller");
-const ghostnoEl = document.getElementById("ghostno");
-const loadingEl = document.getElementById("loading");
-const queryEl = document.getElementById("q");
-const filterEl = document.getElementById("filter");
+const scroller = document.getElementById("scroller");
+const progressBar = document.getElementById("progressBar");
+const progressLabel = document.getElementById("progressLabel");
+const sceneNo = document.getElementById("sceneNo");
+const sceneTotal = document.getElementById("sceneTotal");
+const recordStatus = document.getElementById("recordStatus");
+const recordQuery = document.getElementById("recordQuery");
+const recordFilter = document.getElementById("recordFilter");
+const recordCount = document.getElementById("recordCount");
+const BASE_SCENES = 5;
+const BATCH_SIZE = 8;
 let allRecords = [];
-let viewRecords = [];
-let sortNewest = true;
-let shown = 0;
-const BATCH = 8;
-
+let visibleRecords = [];
+let renderedCount = 0;
+let newestFirst = true;
+let activeSceneIndex = 0;
+let wheelLocked = false;
+const FALLBACK_RECORDS = [
+  { date: "2026.07.27", kind: "霊務", head: "日雇い霊能者、来ず", text: "霊は来ないことがある。霊能者も来ないことがある。\n予約時間に厳しいのは神仏より人間だった。" },
+  { date: "2026.07.26", kind: "短編", head: "腹に顔描く霊能者", text: "VTuberになりたかったが、機材も技術もなかった。\nそこで腹に顔を描き、生体Live2Dと呼んだ。" },
+  { date: "2026.07.25", kind: "観測", head: "無料では輪郭まで", text: "無料の場で見えるのは、問題の場所と形まで。\n解決の順番を組む仕事は、個別相談で扱う。" },
+  { date: "2026.07.24", kind: "制作", head: "用途未確定の勾玉", text: "効能を先に決めると、物は説明の奴隷になる。\nまずは手に残る形から始める。" },
+  { date: "2026.07.23", kind: "物流", head: "本人の責任ではない荷物", text: "感情仕分け場で、宛先の違う責任が見つかった。\n返送には送り状が必要である。" }
+];
 function escapeHtml(value) {
-  return String(value || "")
+  return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
-
-function parseCSV(text) {
+function parseCsv(text) {
   const rows = [];
   let row = [];
   let current = "";
   let quoted = false;
-  for (let i = 0; i < text.length; i += 1) {
-    const char = text[i];
-    const next = text[i + 1];
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
     if (quoted) {
-      if (char === '"' && next === '"') {
-        current += '"';
-        i += 1;
-      } else if (char === '"') {
-        quoted = false;
-      } else {
-        current += char;
-      }
-    } else if (char === '"') {
-      quoted = true;
-    } else if (char === ",") {
-      row.push(current);
-      current = "";
-    } else if (char === "\n") {
-      row.push(current);
-      rows.push(row);
-      row = [];
-      current = "";
-    } else if (char !== "\r") {
-      current += char;
-    }
+      if (char === '"' && next === '"') { current += '"'; index += 1; }
+      else if (char === '"') quoted = false;
+      else current += char;
+    } else if (char === '"') quoted = true;
+    else if (char === ",") { row.push(current); current = ""; }
+    else if (char === "\n") { row.push(current); rows.push(row); row = []; current = ""; }
+    else if (char !== "\r") current += char;
   }
-  if (current !== "" || row.length) {
-    row.push(current);
-    rows.push(row);
-  }
+  if (current !== "" || row.length) { row.push(current); rows.push(row); }
   return rows;
 }
-
 function parseTime(value) {
   const match = String(value || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})(?:\D+(\d{1,2})\D+(\d{1,2})(?:\D+(\d{1,2}))?)?/);
   if (!match) return Number.NaN;
-  return new Date(
-    Number(match[1]),
-    Number(match[2]) - 1,
-    Number(match[3]),
-    Number(match[4] || 0),
-    Number(match[5] || 0),
-    Number(match[6] || 0)
-  ).getTime();
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4] || 0), Number(match[5] || 0), Number(match[6] || 0)).getTime();
 }
-
-function combineDigits(value) {
-  const normalized = value.replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0));
-  return normalized.replace(/\d+/g, (match) => {
-    return match.length >= 2 && match.length <= 4 ? `<span class="tcy">${match}</span>` : match;
-  });
+function normalizeRecords(rows) {
+  let start = 0;
+  if (rows[0] && /タイムスタンプ|日付|コンテンツ|見出し|本文/.test(rows[0].join(""))) start = 1;
+  return rows.slice(start).map((row, index) => {
+    const date = String(row[0] || "").trim();
+    const kind = String(row[1] || "記録").trim() || "記録";
+    const head = String(row[2] || "（無題）").trim() || "（無題）";
+    const text = String(row[3] || "").trim();
+    const timestamp = parseTime(date);
+    return { date, kind, head, text, timestamp: Number.isNaN(timestamp) ? index : timestamp };
+  }).filter((record) => record.head || record.text);
 }
-
-function makePanel(record, index) {
-  const section = document.createElement("section");
-  section.className = "panel doc-panel";
-  section.dataset.no = `No.${String(index + 1).padStart(4, "0")}`;
-  section.innerHTML = `
-    <div class="reveal doc on">
-      <div class="kind">${escapeHtml(record.kind)}${record.date ? `　／　${escapeHtml(record.date)}` : ""}</div>
-      <div class="doc-body">
-        <div class="head">${combineDigits(escapeHtml(record.head))}</div>
-        <div class="text">${escapeHtml(record.text)}</div>
-      </div>
+function seedRecordInterface(records, source) {
+  allRecords = records.map((record, index) => ({ ...record, timestamp: record.timestamp ?? parseTime(record.date) ?? index }));
+  const kinds = [...new Set(allRecords.map((record) => record.kind))];
+  recordFilter.replaceChildren(new Option("すべて", ""));
+  kinds.forEach((kind) => recordFilter.add(new Option(kind, kind)));
+  recordStatus.textContent = source === "remote" ? "公開記録と同期済み" : "予備記録を表示中";
+  applyRecordView(false);
+}
+function removeRecordScenes() {
+  scroller.querySelectorAll(".record-scene, .more-scene, .empty-scene").forEach((scene) => scene.remove());
+  renderedCount = 0;
+}
+function makeRecordScene(record, index) {
+  const scene = document.createElement("section");
+  scene.className = "scene record-scene";
+  scene.dataset.scene = `記録 ${String(index + 1).padStart(2, "0")}`;
+  scene.style.setProperty("--record-tilt", `${((index % 5) - 2) * 0.22}deg`);
+  scene.innerHTML = `
+    <div class="scene__inner">
+      <article class="record-sheet" data-record-no="OBS-${String(index + 1).padStart(4, "0")}">
+        <div class="record-sheet__meta">${escapeHtml(record.kind)} / ${escapeHtml(record.date || "日付不明")}</div>
+        <div class="record-sheet__content">
+          <h2>${escapeHtml(record.head)}</h2>
+          <p>${escapeHtml(record.text)}</p>
+        </div>
+      </article>
     </div>`;
-  return section;
+  return scene;
 }
-
-function makeMorePanel() {
-  const section = document.createElement("section");
-  section.className = "panel doc-panel more-panel";
-  section.dataset.no = "続";
-  const remaining = viewRecords.length - shown;
-  section.innerHTML = `<div class="reveal doc on"><button class="morebtn" type="button">続きを読む　──　残り ${remaining} 件</button></div>`;
-  section.querySelector("button").addEventListener("click", () => {
-    section.remove();
-    appendMore();
+function makeMoreScene() {
+  const scene = document.createElement("section");
+  scene.className = "scene more-scene";
+  scene.dataset.scene = "記録継続";
+  const remain = visibleRecords.length - renderedCount;
+  scene.innerHTML = `<button type="button">続きを読む　／　残り ${remain} 件</button>`;
+  scene.querySelector("button").addEventListener("click", () => {
+    scene.remove();
+    appendRecordBatch();
+    updateSceneTotals();
   });
-  return section;
+  return scene;
 }
-
-function clearDocs() {
-  document.querySelectorAll(".doc-panel").forEach((panel) => panel.remove());
-  shown = 0;
+function appendRecordBatch() {
+  const end = Math.min(renderedCount + BATCH_SIZE, visibleRecords.length);
+  for (let index = renderedCount; index < end; index += 1) scroller.appendChild(makeRecordScene(visibleRecords[index], index));
+  renderedCount = end;
+  if (renderedCount < visibleRecords.length) scroller.appendChild(makeMoreScene());
 }
-
-function appendMore() {
-  const end = Math.min(shown + BATCH, viewRecords.length);
-  for (let index = shown; index < end; index += 1) {
-    const panel = makePanel(viewRecords[index], index);
-    sc.appendChild(panel);
-    observePanel(panel);
-  }
-  shown = end;
-  if (shown < viewRecords.length) {
-    const morePanel = makeMorePanel();
-    sc.appendChild(morePanel);
-    observePanel(morePanel);
-  }
-  onScrollHome();
-}
-
-function render() {
-  clearDocs();
-  appendMore();
-}
-
-function applyView() {
-  const query = queryEl.value.trim();
-  const kind = filterEl.value;
-  viewRecords = allRecords.filter((record) => {
+function applyRecordView(keepPosition = true) {
+  const query = recordQuery.value.trim();
+  const kind = recordFilter.value;
+  visibleRecords = allRecords.filter((record) => {
     if (kind && record.kind !== kind) return false;
     if (query && !`${record.head} ${record.text} ${record.kind}`.includes(query)) return false;
     return true;
   });
-  viewRecords.sort((a, b) => (sortNewest ? b.time - a.time : a.time - b.time));
-  render();
+  visibleRecords.sort((a, b) => newestFirst ? b.timestamp - a.timestamp : a.timestamp - b.timestamp);
+  recordCount.textContent = String(visibleRecords.length);
+  removeRecordScenes();
+  if (visibleRecords.length) appendRecordBatch();
+  else {
+    const scene = document.createElement("section");
+    scene.className = "scene empty-scene";
+    scene.dataset.scene = "該当なし";
+    scene.innerHTML = `<div><p>該当する記録はありません。</p><small>検索語を変えてください。</small></div>`;
+    scroller.appendChild(scene);
+  }
+  updateSceneTotals();
+  if (!keepPosition) scroller.scrollTo({ left: 0, behavior: "auto" });
 }
-
-fetch(CSV_URL)
-  .then((response) => {
+async function loadRemoteRecords() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch(CSV_URL, { signal: controller.signal, cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.text();
-  })
-  .then((text) => {
-    loadingEl.textContent = `取得 ${text.length}字 解析中…`;
-    const rows = parseCSV(text);
-    let start = 0;
-    if (rows.length) {
-      const header = `${rows[0][0] || ""}${rows[0][1] || ""}${rows[0][2] || ""}`;
-      if (/タイムスタンプ|日付|コンテンツ|見出し|本文/.test(header)) start = 1;
-    }
-    for (let rowIndex = start; rowIndex < rows.length; rowIndex += 1) {
-      const row = rows[rowIndex] || [];
-      const date = (row[0] || "").trim();
-      const kind = (row[1] || "").trim();
-      const head = (row[2] || "").trim();
-      const textBody = (row[3] || "").trim();
-      if (!head && !textBody) continue;
-      const parsed = parseTime(date);
-      allRecords.push({
-        date,
-        kind: kind || "記録",
-        head: head || "（無題）",
-        text: textBody,
-        time: Number.isNaN(parsed) ? rowIndex : parsed
-      });
-    }
-    const kinds = [...new Set(allRecords.map((record) => record.kind))];
-    kinds.forEach((kind) => {
-      const option = document.createElement("option");
-      option.value = kind;
-      option.textContent = kind;
-      filterEl.appendChild(option);
-    });
-    document.getElementById("cnt").textContent = String(allRecords.length);
-    applyView();
-    loadingEl.textContent = allRecords.length ? `読込 ${allRecords.length}件 ← 左へ` : "記録はまだありません";
-    setTimeout(() => { loadingEl.style.display = "none"; }, 2400);
-  })
-  .catch((error) => {
-    loadingEl.textContent = `記録の取得に失敗しました: ${error.message}`;
+    const text = await response.text();
+    const records = normalizeRecords(parseCsv(text));
+    if (records.length) seedRecordInterface(records, "remote");
+  } catch (error) {
+    recordStatus.textContent = "公開記録との通信が途絶えました";
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+function buildTeeth(container, lower = false) {
+  const shapes = ["molar", "molar", "", "canine", "", "", "", "", "", "canine", "", "molar", "molar"];
+  shapes.forEach((shape, index) => {
+    const tooth = document.createElement("span");
+    tooth.className = `tooth${shape ? ` tooth--${shape}` : ""}`;
+    if ((!lower && index === 1) || (lower && index === 8)) tooth.classList.add("tooth--missing");
+    if (lower && index === 4) tooth.classList.add("tooth--metal");
+    tooth.style.setProperty("--tooth-scale", String(.88 + ((index * 7) % 5) * .035));
+    tooth.style.setProperty("--tooth-y", `${(index % 3) - 1}px`);
+    container.appendChild(tooth);
   });
-
-queryEl.addEventListener("input", applyView);
-filterEl.addEventListener("change", applyView);
-document.getElementById("sortNew").addEventListener("click", function sortNew() {
-  sortNewest = true;
-  this.classList.add("on");
-  document.getElementById("sortOld").classList.remove("on");
-  applyView();
-});
-document.getElementById("sortOld").addEventListener("click", function sortOld() {
-  sortNewest = false;
-  this.classList.add("on");
-  document.getElementById("sortNew").classList.remove("on");
-  applyView();
-});
-
-/* 公開ページに認証鍵を埋めると、隠し扉ではなく看板になるため、記録入力は無効化。 */
-const admin = document.getElementById("admin");
-admin.setAttribute("aria-hidden", "true");
-document.getElementById("a_cancel").addEventListener("click", () => {
-  admin.classList.remove("on");
-  admin.setAttribute("aria-hidden", "true");
-});
-document.getElementById("a_send").addEventListener("click", () => {
-  document.getElementById("a_stat").textContent = "公開版からの送信は停止中。スプレッドシートから追加してください。";
-});
-
-function stripTags(value) {
-  return String(value || "").replace(/<[^>]*>/g, "").replace(/&[^;]+;/g, " ").replace(/\s+/g, " ").trim();
 }
-
-let fbiList = [];
-function showFbi() {
-  if (!fbiList.length) return;
-  const item = fbiList[Math.floor(Math.random() * fbiList.length)];
-  const image = item.images?.[0]?.large || item.images?.[0]?.original || item.images?.[0]?.thumb || "";
-  if (image) document.getElementById("fbiimg").src = image;
-  document.getElementById("fbiname").textContent = item.title || "UNKNOWN";
-  const charge = (item.subjects?.length ? item.subjects.join("、") : "") || stripTags(item.description) || stripTags(item.caution);
-  document.getElementById("fbicharge").textContent = charge.slice(0, 90);
-  document.getElementById("fbirew").textContent = item.reward_text ? `懸賞金 ${stripTags(item.reward_text).slice(0, 60)}` : "";
+buildTeeth(document.getElementById("upperTeeth"));
+buildTeeth(document.getElementById("lowerTeeth"), true);
+function scenes() { return [...scroller.querySelectorAll(":scope > .scene")]; }
+function updateSceneTotals() { sceneTotal.textContent = String(scenes().length).padStart(2, "0"); }
+function goToScene(index, behavior = "smooth") {
+  const allScenes = scenes();
+  const target = Math.max(0, Math.min(allScenes.length - 1, index));
+  scroller.scrollTo({ left: target * scroller.clientWidth, behavior });
 }
-
-fetch(`https://api.fbi.gov/wanted/v1/list?page=${1 + Math.floor(Math.random() * 30)}`)
-  .then((response) => response.json())
-  .then((data) => {
-    fbiList = (data.items || []).filter((item) => item.images?.length && (item.images[0].large || item.images[0].original));
-    if (fbiList.length) {
-      showFbi();
-      setInterval(showFbi, 9000);
-    } else {
-      document.getElementById("fbiname").textContent = "観測対象・該当なし";
-    }
-  })
-  .catch(() => {
-    document.getElementById("fbiname").textContent = "観測対象・通信途絶";
-  });
-
-let wispTarget = 1;
-const panelObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (!entry.isIntersecting) return;
-    entry.target.querySelector(".reveal")?.classList.add("on");
-    const panelNo = entry.target.dataset.no || "";
-    ghostnoEl.textContent = panelNo;
-    wispTarget = panelNo === "序" || panelNo === "目次" ? 1 : 0.28;
-    const fbi = document.getElementById("fbi");
-    if (fbi) fbi.style.display = panelNo === "序" ? "block" : "none";
-  });
-}, { threshold: 0.4 });
-
-function observePanel(panel) { panelObserver.observe(panel); }
-document.querySelectorAll(".panel").forEach(observePanel);
-
-const canvas = document.getElementById("void");
-const context = canvas.getContext("2d");
-let width;
-let height;
-let ratio;
-function resizeCanvas() {
-  ratio = Math.min(window.devicePixelRatio || 1, 2);
-  width = window.innerWidth;
-  height = window.innerHeight;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  canvas.width = width * ratio;
-  canvas.height = height * ratio;
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
-}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
-
-class Wisp {
-  constructor() { this.reset(true); }
-  reset(initial) {
-    this.x = Math.random() * width;
-    this.y = initial ? Math.random() * height : height + 40;
-    this.radius = 4 + Math.random() * 9;
-    this.velocityY = 0.15 + Math.random() * 0.5;
-    this.sway = 0.3 + Math.random() * 0.9;
-    this.phase = Math.random() * 6.28;
-    this.phaseSpeed = 0.005 + Math.random() * 0.015;
-    this.flicker = Math.random() * 6.28;
-    this.trail = [];
-  }
-  step() {
-    this.phase += this.phaseSpeed;
-    this.flicker += 0.04 + Math.random() * 0.03;
-    this.x += Math.sin(this.phase) * this.sway;
-    this.y -= this.velocityY;
-    this.trail.unshift({ x: this.x, y: this.y });
-    if (this.trail.length > 16) this.trail.pop();
-    if (this.y < -50) this.reset(false);
-  }
-  draw(brightness) {
-    const flicker = 0.55 + 0.45 * Math.sin(this.flicker);
-    for (let i = this.trail.length - 1; i >= 0; i -= 1) {
-      const point = this.trail[i];
-      const position = i / this.trail.length;
-      const alpha = (1 - position) * 0.15 * flicker * brightness;
-      const radius = this.radius * (0.4 + 0.6 * (1 - position));
-      const glow = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius * 2.4);
-      glow.addColorStop(0, `rgba(255,255,255,${alpha})`);
-      glow.addColorStop(1, "rgba(255,255,255,0)");
-      context.fillStyle = glow;
-      context.beginPath();
-      context.arc(point.x, point.y, radius * 2.4, 0, Math.PI * 2);
-      context.fill();
-    }
-    const glow = context.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 3.4);
-    glow.addColorStop(0, `rgba(255,255,255,${0.82 * flicker * brightness})`);
-    glow.addColorStop(0.22, `rgba(228,232,236,${0.42 * flicker * brightness})`);
-    glow.addColorStop(1, "rgba(200,210,220,0)");
-    context.fillStyle = glow;
-    context.beginPath();
-    context.arc(this.x, this.y, this.radius * 3.4, 0, Math.PI * 2);
-    context.fill();
-  }
-}
-
-class Fog {
-  constructor() {
-    this.x = Math.random() * width;
-    this.y = Math.random() * height;
-    this.radius = 180 + Math.random() * 260;
-    this.velocityX = (Math.random() - 0.5) * 0.16;
-    this.velocityY = (Math.random() - 0.5) * 0.1;
-    this.alpha = 0.014 + Math.random() * 0.028;
-  }
-  step() {
-    this.x += this.velocityX;
-    this.y += this.velocityY;
-    if (this.x < -this.radius) this.x = width + this.radius;
-    if (this.x > width + this.radius) this.x = -this.radius;
-    if (this.y < -this.radius) this.y = height + this.radius;
-    if (this.y > height + this.radius) this.y = -this.radius;
-  }
-  draw() {
-    const glow = context.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
-    glow.addColorStop(0, `rgba(180,185,195,${this.alpha})`);
-    glow.addColorStop(1, "rgba(180,185,195,0)");
-    context.fillStyle = glow;
-    context.beginPath();
-    context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    context.fill();
-  }
-}
-
-const wisps = Array.from({ length: window.innerWidth < 560 ? 13 : 20 }, () => new Wisp());
-const fogs = Array.from({ length: 6 }, () => new Fog());
-let wispBrightness = 1;
-function animationLoop() {
-  wispBrightness += (wispTarget - wispBrightness) * 0.05;
-  context.clearRect(0, 0, width, height);
-  context.fillStyle = "#000";
-  context.fillRect(0, 0, width, height);
-  context.globalCompositeOperation = "source-over";
-  fogs.forEach((fog) => { fog.step(); fog.draw(); });
-  context.globalCompositeOperation = "lighter";
-  wisps.forEach((wisp) => { wisp.step(); wisp.draw(wispBrightness); });
-  context.globalCompositeOperation = "source-over";
-  requestAnimationFrame(animationLoop);
-}
-animationLoop();
-
-const ekgCanvas = document.getElementById("ekg");
-const ekgContext = ekgCanvas.getContext("2d");
-let ekgTime = 0;
-function resizeEkg() {
-  ekgCanvas.width = Math.max(1, ekgCanvas.clientWidth);
-  ekgCanvas.height = Math.max(1, ekgCanvas.clientHeight);
-}
-resizeEkg();
-window.addEventListener("resize", resizeEkg);
-function drawEkg() {
-  const w = ekgCanvas.width;
-  const h = ekgCanvas.height;
-  ekgContext.clearRect(0, 0, w, h);
-  ekgContext.strokeStyle = "rgba(233,230,222,.75)";
-  ekgContext.lineWidth = 1;
-  ekgContext.beginPath();
-  let peak = 0;
-  for (let x = 0; x < w; x += 1) {
-    const y = h / 2 + Math.sin(x * 0.05 + ekgTime) * h * 0.24 + Math.sin(x * 0.14 + ekgTime * 1.7) * h * 0.12 + (Math.random() - 0.5) * h * 0.14;
-    peak = Math.max(peak, Math.abs(y - h / 2));
-    if (x === 0) ekgContext.moveTo(x, y); else ekgContext.lineTo(x, y);
-  }
-  ekgContext.stroke();
-  document.getElementById("ekgv").textContent = `±${(peak / h * 4).toFixed(2)}`;
-  ekgTime += 0.07;
-  requestAnimationFrame(drawEkg);
-}
-drawEkg();
-
-function pad(value) { return value < 10 ? `0${value}` : String(value); }
-function setMeter(id, value) { document.getElementById(id).style.width = `${Math.max(0, Math.min(100, value))}%`; }
-function tick() {
-  const now = new Date();
-  document.getElementById("clk").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  document.getElementById("coordHud").innerHTML = `N${(34.6 + Math.random() * 0.1).toFixed(4)}<br>E${(135.4 + Math.random() * 0.2).toFixed(4)}<br>標高 ${2 + Math.floor(Math.random() * 40)}m`;
-  document.getElementById("bars").textContent = ["▮▮▮▯", "▮▮▮▮", "▮▮▯▯", "▮▮▮▯"][Math.floor(Math.random() * 4)];
-  const pressure = 1004 + Math.floor(Math.random() * 16);
-  document.getElementById("m1v").textContent = String(pressure); setMeter("m1", (pressure - 1000) / 30 * 100);
-  const humidity = 58 + Math.floor(Math.random() * 14);
-  document.getElementById("m2v").textContent = `${humidity}%`; setMeter("m2", humidity);
-  const visibility = 6 + Math.floor(Math.random() * 5);
-  document.getElementById("m3v").textContent = `${visibility}km`; setMeter("m3", visibility / 12 * 100);
-  const temperature = 14 + Math.floor(Math.random() * 10);
-  document.getElementById("m4v").textContent = `${temperature}℃`; setMeter("m4", temperature / 30 * 100);
-  const wind = (1 + Math.random() * 5).toFixed(1);
-  document.getElementById("m5v").textContent = `${wind}m`; setMeter("m5", Number(wind) / 8 * 100);
-}
-tick();
-setInterval(tick, 1400);
-
-const hexRail = document.getElementById("hexrail");
-function updateHex() {
-  hexRail.textContent = Array.from({ length: 60 }, () => Math.floor(Math.random() * 16).toString(16)).join("\n");
-}
-updateHex();
-setInterval(updateHex, 900);
-
-const words = ["観測所", "第〇九一號", "記録", "受信", "北緯三四度", "東経一三五度", "気圧 一〇一二", "湿度 六四", "視界 良好", "現在 記録中"];
-document.getElementById("run").textContent = `${words.join("　・　")}　・　${words.join("　・　")}　・　`;
-
-const glitchLine = document.getElementById("glitch");
-function glitch() {
-  glitchLine.style.top = `${Math.random() * 100}%`;
-  glitchLine.style.opacity = "0.5";
-  setTimeout(() => { glitchLine.style.opacity = "0"; }, 90);
-  setTimeout(glitch, 4000 + Math.random() * 6000);
-}
-setTimeout(glitch, 5000);
-
-const progressLine = document.getElementById("prog");
-const wispBar = document.getElementById("wispbar");
-const wispKnob = document.getElementById("wispknob");
-let draggingWisp = false;
-function placeWispKnob(progress) {
-  const trackWidth = Math.max(0, wispBar.clientWidth - wispKnob.offsetWidth);
-  wispKnob.style.left = `${(1 - progress) * trackWidth}px`;
-}
-function onScrollHome() {
-  const maximum = sc.scrollWidth - sc.clientWidth;
-  const position = Math.abs(sc.scrollLeft);
-  progressLine.style.width = `${maximum > 0 ? position / maximum * 100 : 0}%`;
-  document.getElementById("edgehint").style.opacity = position > 30 ? "0" : "1";
-  const index = sc.clientWidth > 0 ? Math.round(position / sc.clientWidth) : 0;
-  wispBar.classList.toggle("show", index >= 2);
-  if (!draggingWisp) placeWispKnob(maximum > 0 ? position / maximum : 0);
-}
-sc.addEventListener("scroll", onScrollHome, { passive: true });
-
-let wheelLock = false;
-sc.addEventListener("wheel", (event) => {
+document.querySelectorAll("[data-goto]").forEach((button) => button.addEventListener("click", () => goToScene(Number(button.dataset.goto))));
+document.getElementById("prevScene").addEventListener("click", () => goToScene(activeSceneIndex - 1));
+document.getElementById("nextScene").addEventListener("click", () => goToScene(activeSceneIndex + 1));
+document.getElementById("openFirstRecord").addEventListener("click", () => goToScene(BASE_SCENES));
+scroller.addEventListener("scroll", () => {
+  const max = Math.max(1, scroller.scrollWidth - scroller.clientWidth);
+  const position = scroller.scrollLeft;
+  const progress = Math.max(0, Math.min(1, position / max));
+  const allScenes = scenes();
+  activeSceneIndex = Math.max(0, Math.min(allScenes.length - 1, Math.round(position / scroller.clientWidth)));
+  const active = allScenes[activeSceneIndex];
+  progressBar.style.width = `${progress * 100}%`;
+  sceneNo.textContent = String(activeSceneIndex + 1).padStart(2, "0");
+  progressLabel.textContent = active?.dataset.scene || "観測中";
+  document.documentElement.style.setProperty("--jaw-close", `${Math.min(24, progress * 24)}px`);
+  document.documentElement.style.setProperty("--scene-shift", String(progress * 22));
+}, { passive: true });
+scroller.addEventListener("wheel", (event) => {
   if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
   event.preventDefault();
-  if (wheelLock || Math.abs(event.deltaY) < 6) return;
-  wheelLock = true;
-  const direction = event.deltaY > 0 ? -1 : 1;
-  sc.scrollBy({ left: direction * sc.clientWidth, behavior: "smooth" });
-  setTimeout(() => { wheelLock = false; }, 480);
+  if (wheelLocked || Math.abs(event.deltaY) < 5) return;
+  wheelLocked = true;
+  goToScene(activeSceneIndex + (event.deltaY > 0 ? 1 : -1));
+  setTimeout(() => { wheelLocked = false; }, 520);
 }, { passive: false });
-
-(function setupWispDrag() {
-  let maximum = 0;
-  let trackWidth = 1;
-  let sign = -1;
-  function snapNearest() {
-    if (sc.clientWidth <= 0) return;
-    const index = Math.round(Math.abs(sc.scrollLeft) / sc.clientWidth);
-    const currentSign = sc.scrollLeft > 0 ? 1 : -1;
-    sc.scrollTo({ left: currentSign * index * sc.clientWidth, behavior: "smooth" });
+window.addEventListener("keydown", (event) => {
+  if (["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName)) return;
+  if (event.key === "ArrowRight" || event.key === "PageDown") goToScene(activeSceneIndex + 1);
+  if (event.key === "ArrowLeft" || event.key === "PageUp") goToScene(activeSceneIndex - 1);
+  if (event.key === "Home") goToScene(0);
+  if (event.key === "End") goToScene(scenes().length - 1);
+});
+recordQuery.addEventListener("input", () => applyRecordView());
+recordFilter.addEventListener("change", () => applyRecordView());
+document.getElementById("sortNew").addEventListener("click", (event) => {
+  newestFirst = true;
+  event.currentTarget.classList.add("is-active");
+  document.getElementById("sortOld").classList.remove("is-active");
+  applyRecordView();
+});
+document.getElementById("sortOld").addEventListener("click", (event) => {
+  newestFirst = false;
+  event.currentTarget.classList.add("is-active");
+  document.getElementById("sortNew").classList.remove("is-active");
+  applyRecordView();
+});
+function updateClock() {
+  const now = new Date();
+  document.getElementById("clock").textContent = [now.getHours(), now.getMinutes(), now.getSeconds()].map((part) => String(part).padStart(2, "0")).join(":");
+}
+updateClock();
+setInterval(updateClock, 1000);
+const readouts = [
+  ["唾液粘度", 34.2, ""],
+  ["責任混入率", 61, "%"],
+  ["説明不能率", 87, "%"],
+  ["現実復帰率", 72, "%"],
+  ["咬合圧", 18.4, "kg"]
+];
+let readoutIndex = 0;
+setInterval(() => {
+  readoutIndex = (readoutIndex + 1) % readouts.length;
+  const [label, value, suffix] = readouts[readoutIndex];
+  document.getElementById("readoutLabel").textContent = label;
+  document.getElementById("readoutValue").textContent = `${value}${suffix}`;
+  document.getElementById("readoutBar").style.width = `${Math.min(100, Number(value))}%`;
+}, 3100);
+const canvas = document.getElementById("aura");
+const context = canvas.getContext("2d", { alpha: false });
+let width = 0;
+let height = 0;
+let dpr = 1;
+let animationFrame = 0;
+let motionStopped = false;
+const particles = [];
+function resizeCanvas() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  width = window.innerWidth;
+  height = window.innerHeight;
+  canvas.width = Math.floor(width * dpr);
+  canvas.height = Math.floor(height * dpr);
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  context.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function seedParticles() {
+  particles.length = 0;
+  const count = width < 600 ? 12 : 22;
+  for (let index = 0; index < count; index += 1) {
+    particles.push({ x: Math.random() * width, y: Math.random() * height, r: 2 + Math.random() * 7, vx: (Math.random() - .5) * .16, vy: -.08 - Math.random() * .22, p: Math.random() * Math.PI * 2 });
   }
-  function start(event) {
-    draggingWisp = true;
-    wispKnob.style.animationPlayState = "paused";
-    sc.style.scrollSnapType = "none";
-    maximum = sc.scrollWidth - sc.clientWidth;
-    trackWidth = Math.max(1, wispBar.clientWidth - wispKnob.offsetWidth);
-    sign = sc.scrollLeft > 0 ? 1 : -1;
-    try { wispKnob.setPointerCapture(event.pointerId); } catch (_) { /* noop */ }
-    event.preventDefault();
-  }
-  function move(event) {
-    if (!draggingWisp) return;
-    const rectangle = wispBar.getBoundingClientRect();
-    let x = event.clientX - rectangle.left - wispKnob.offsetWidth / 2;
-    x = Math.max(0, Math.min(trackWidth, x));
-    wispKnob.style.left = `${x}px`;
-    const progress = 1 - x / trackWidth;
-    sc.scrollLeft = sign * progress * maximum;
-  }
-  function end(event) {
-    if (!draggingWisp) return;
-    draggingWisp = false;
-    wispKnob.style.animationPlayState = "";
-    sc.style.scrollSnapType = "";
-    try { wispKnob.releasePointerCapture(event.pointerId); } catch (_) { /* noop */ }
-    snapNearest();
-  }
-  wispKnob.addEventListener("pointerdown", start);
-  wispKnob.addEventListener("pointermove", move);
-  wispKnob.addEventListener("pointerup", end);
-  wispKnob.addEventListener("pointercancel", end);
-}());
-
-window.addEventListener("resize", onScrollHome);
-onScrollHome();
+}
+function drawAura() {
+  context.fillStyle = "#050403";
+  context.fillRect(0, 0, width, height);
+  const glow = context.createRadialGradient(width * .5, height * .52, 10, width * .5, height * .52, Math.max(width, height) * .58);
+  glow.addColorStop(0, "rgba(69,23,31,.24)");
+  glow.addColorStop(.42, "rgba(22,10,13,.16)");
+  glow.addColorStop(1, "rgba(0,0,0,0)");
+  context.fillStyle = glow;
+  context.fillRect(0, 0, width, height);
+  context.globalCompositeOperation = "screen";
+  particles.forEach((particle) => {
+    if (!motionStopped) {
+      particle.x += particle.vx + Math.sin(particle.p) * .05;
+      particle.y += particle.vy;
+      particle.p += .018;
+      if (particle.y < -20) { particle.y = height + 20; particle.x = Math.random() * width; }
+      if (particle.x < -20) particle.x = width + 20;
+      if (particle.x > width + 20) particle.x = -20;
+    }
+    const gradient = context.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.r * 5);
+    gradient.addColorStop(0, "rgba(235,228,213,.42)");
+    gradient.addColorStop(.16, "rgba(168,178,178,.18)");
+    gradient.addColorStop(1, "rgba(168,178,178,0)");
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.arc(particle.x, particle.y, particle.r * 5, 0, Math.PI * 2);
+    context.fill();
+  });
+  context.globalCompositeOperation = "source-over";
+  animationFrame = requestAnimationFrame(drawAura);
+}
+resizeCanvas();
+seedParticles();
+drawAura();
+window.addEventListener("resize", () => { resizeCanvas(); seedParticles(); goToScene(activeSceneIndex, "auto"); });
+const mediaReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+const motionToggle = document.getElementById("motionToggle");
+let storedMotion = "on";
+try { storedMotion = sessionStorage.getItem("subeha-motion") || "on"; } catch (_) {  }
+if (storedMotion === "off") {
+  motionStopped = true;
+  document.documentElement.classList.add("motion-off");
+}
+if (mediaReduced.matches) {
+  motionToggle.hidden = false;
+  if (!motionStopped) document.documentElement.classList.add("force-motion");
+}
+motionToggle.textContent = motionStopped ? "演出を再開する" : "演出を停止する";
+motionToggle.addEventListener("click", () => {
+  motionStopped = !motionStopped;
+  document.documentElement.classList.toggle("motion-off", motionStopped);
+  document.documentElement.classList.toggle("force-motion", !motionStopped);
+  motionToggle.textContent = motionStopped ? "演出を再開する" : "演出を停止する";
+  try { sessionStorage.setItem("subeha-motion", motionStopped ? "off" : "on"); } catch (_) {  }
+});
+seedRecordInterface(FALLBACK_RECORDS, "fallback");
+loadRemoteRecords();
+updateSceneTotals();
+requestAnimationFrame(() => scroller.dispatchEvent(new Event("scroll")));
+document.querySelectorAll(`a[href="${COCONALA_URL}"]`).forEach((link) => link.setAttribute("aria-label", `${link.textContent.trim()}（ココナラの商品ページを新しいタブで開く）`));
