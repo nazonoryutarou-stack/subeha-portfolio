@@ -1,84 +1,127 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="祭祀技師・すべ歯による霊視相談。怖がらせず、状況と次の一手を整理します。">
-  <meta name="theme-color" content="#160d1c">
-  <title>すべての歯が見える｜霊視相談</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="祭祀技師・すべての歯が見える。霊視・電話占い、診断、記録。">
+<meta name="theme-color" content="#000000">
+<title>すべての歯が見える｜霊視・電話占い</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="noise" aria-hidden="true"></div>
+  <canvas id="void"></canvas>
+  <div class="reticle"><span class="ln h"></span><span class="ln v"></span><span class="ring"></span><span class="ring2"></span></div>
+  <div class="ghostno" id="ghostno">序</div>
+  <div class="vig"></div><div class="grain"></div><div class="scan"></div>
+  <div class="glitch" id="glitch"></div>
 
-  <header class="site-header">
-    <a class="brand" href="#top">すべての歯が見える</a>
-    <a class="small-link" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer">相談する</a>
-  </header>
+  <div class="chrome">
+    <div class="br tl"></div><div class="br tr"></div><div class="br bl"></div><div class="br brr"></div>
+    <div class="ruler"></div><div class="ruler bottom"></div>
+    <div class="topbar"><span>観測所 ／ <span class="c">第〇九一號</span></span><span><span id="clk">--:--:--</span> ／ <span class="d">●</span> 記録中</span></div>
+    <div class="hud tl">受信 <span class="bars" id="bars">▮▮▮▯</span><br>記録 <b id="cnt">--</b> 件</div>
+    <div class="hud tr" id="coordHud">N--.----<br>E---.----<br>標高 ----m</div>
+    <div class="rail right"><span>すべての歯が見える</span></div>
+    <div class="hexrail" id="hexrail"></div>
 
-  <main id="top">
-    <section class="hero">
-      <p class="eyebrow">RITUAL TECHNICIAN / OBSERVATION DESK</p>
-      <h1>怖がらせず、<br>現実へ戻れる読みを。</h1>
-      <p class="lead">霊視を用いて、いま何が起きているか、問題がどこで絡まっているか、次に何をすべきかを整理します。</p>
-      <div class="actions">
-        <a class="button primary" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer">ココナラで電話相談する</a>
-        <a class="button ghost" href="#about">考え方を読む</a>
+    <div class="botwrap">
+      <div class="fbi" id="fbi">
+        <div class="fbilbl"><span>観測対象 ／ SUBJECT</span><span class="rec">● 照合中</span></div>
+        <div class="fbirow">
+          <img id="fbiimg" alt="観測対象">
+          <div class="fbimeta">
+            <div class="fbiname" id="fbiname">交信中…</div>
+            <div class="fbicharge" id="fbicharge"></div>
+            <div class="fbirew" id="fbirew"></div>
+          </div>
+        </div>
       </div>
-      <p class="status">ココナラで受付中｜電話相談</p>
+      <div class="meters">
+        <div class="m"><div class="ml"><span>気圧</span><span class="mv" id="m1v">----</span></div><div class="mb"><i id="m1"></i></div></div>
+        <div class="m"><div class="ml"><span>湿度</span><span class="mv" id="m2v">--%</span></div><div class="mb"><i id="m2"></i></div></div>
+        <div class="m"><div class="ml"><span>視界</span><span class="mv" id="m3v">--</span></div><div class="mb"><i id="m3"></i></div></div>
+        <div class="m"><div class="ml"><span>気温</span><span class="mv" id="m4v">--</span></div><div class="mb"><i id="m4"></i></div></div>
+        <div class="m"><div class="ml"><span>風速</span><span class="mv" id="m5v">--</span></div><div class="mb"><i id="m5"></i></div></div>
+      </div>
+      <div class="ekgwrap"><span class="lab">観測波形</span><canvas id="ekg" width="600" height="48"></canvas><span class="val" id="ekgv">±0.00</span></div>
+      <div class="ticker"><span class="run" id="run"></span></div>
+      <div class="progline"><i id="prog"></i></div>
+      <div class="dots" id="dots"></div>
+    </div>
+  </div>
+
+  <div class="ctrl">
+    <input type="text" id="q" placeholder="検索" aria-label="記録を検索">
+    <select id="filter" aria-label="種類で絞り込み"><option value="">すべて</option></select>
+    <div class="seg">
+      <button id="sortNew" class="on" type="button">新しい順</button>
+      <button id="sortOld" type="button">古い順</button>
+    </div>
+  </div>
+  <div class="loading" id="loading">記録を読み込んでいます…</div>
+  <div class="edgehint" id="edgehint"><span>‹</span><span>‹</span><span>‹</span><span class="lbl">記録</span></div>
+
+  <div class="admin" id="admin" aria-hidden="true">
+    <div class="admin-box">
+      <h3>観測所・記録</h3>
+      <div class="sub">RECORD ENTRY</div>
+      <label for="a_date">日付（空なら自動で今日）</label>
+      <input type="text" id="a_date" placeholder="2026.06.09">
+      <label for="a_kind">コンテンツ</label>
+      <input type="text" id="a_kind" placeholder="つぶやき / 名鑑 / 地図 …">
+      <label for="a_head">見出し</label>
+      <input type="text" id="a_head" placeholder="見出し">
+      <label for="a_text">本文（改行OK）</label>
+      <textarea id="a_text" placeholder="本文。改行はそのまま縦書きに反映される。"></textarea>
+      <div class="row2">
+        <div><label for="a_lat">緯度（地図の時だけ）</label><input type="text" id="a_lat" placeholder="34.6680"></div>
+        <div><label for="a_lng">経度（地図の時だけ）</label><input type="text" id="a_lng" placeholder="135.5010"></div>
+      </div>
+      <div class="btns">
+        <button id="a_cancel" type="button">閉じる</button>
+        <button id="a_send" class="send" type="button">送信</button>
+      </div>
+      <div class="stat" id="a_stat"></div>
+    </div>
+  </div>
+
+  <div class="scroller" id="scroller">
+    <section class="panel" data-no="序">
+      <div class="bigmark">視</div>
+      <div class="reveal on">
+        <div class="fang upper"><span>臣</span><span>死</span><span>且</span><span>不</span><span>避</span></div>
+        <h1 class="title">すべての歯が<br>見える</h1>
+        <div class="fang lower"><span>卮</span><span>酒</span><span>安</span><span>足</span><span>辞</span></div>
+        <div class="u-orn"></div>
+        <div class="subtitle">— observatory —</div>
+        <div class="scrollhint">← 左へ、記録へ</div>
+      </div>
     </section>
 
-    <section class="panel" id="about">
-      <p class="section-no">観測記録 01</p>
-      <h2>未来を断定するより、<br>次の一手を増やす。</h2>
-      <p>良い結果だけを保証したり、不安をあおって追加購入を迫ったりはしません。鑑定結果は、現実の選択肢を整理するための観測記録として扱います。</p>
+    <section class="panel menu-panel" data-no="目次">
+      <div class="reveal on">
+        <div class="lead">何を、視る</div>
+        <nav class="dir" aria-label="主要コンテンツ">
+          <a class="consult" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer"><span class="idx">〇一</span>霊視・電話占い<span class="en">consultation</span><span class="ar">▶</span></a>
+          <a href="shindan.html"><span class="idx">〇二</span>十六霊感診断<span class="en">diagnosis</span><span class="ar">▶</span></a>
+          <a href="bakemongo.html"><span class="idx">〇三</span>バケモンGO<span class="en">hunt</span><span class="ar">▶</span></a>
+          <a href="yaniv.html"><span class="idx">〇四</span>ヤニブ<span class="en">cards</span><span class="ar">▶</span></a>
+          <a href="kujou.html"><span class="idx">〇五</span>苦情受付<span class="en">claims</span><span class="ar">▶</span></a>
+          <a href="https://x.com/subetenoha" target="_blank" rel="noopener noreferrer"><span class="idx">〇六</span>交信<span class="en">signal</span><span class="ar">▶</span></a>
+          <a href="https://note.com/light_dill8112" target="_blank" rel="noopener noreferrer"><span class="idx">〇七</span>手記<span class="en">notes</span><span class="ar">▶</span></a>
+        </nav>
+        <p class="consult-note">電話占いはココナラで受付中。怖がらせず、現実へ戻れる読みを行います。</p>
+      </div>
     </section>
+  </div>
 
-    <section class="panel" id="scope">
-      <p class="section-no">相談範囲</p>
-      <h2>無料では輪郭まで。<br>解決設計は有料で。</h2>
-      <p>短い雑談や公開配信では、論点の発見や簡単な見立てまでお伝えします。個別事情を深く読み、具体策を組み立て、文章として残す作業は有料相談で扱います。</p>
-      <dl>
-        <div><dt>無料</dt><dd>短い観測・論点の提示</dd></div>
-        <div><dt>有料</dt><dd>背景整理・霊視・具体策</dd></div>
-        <div><dt>成果物</dt><dd>次にやることを言語化</dd></div>
-      </dl>
-    </section>
+  <div class="wispbar" id="wispbar" aria-hidden="true">
+    <div class="wisptrack"></div>
+    <div class="wispknob" id="wispknob"></div>
+    <div class="wlabel">霊道</div>
+  </div>
 
-    <section class="services" id="request">
-      <article class="service-card featured">
-        <p class="tag">MAIN SERVICE</p>
-        <h2>霊視・電話占い</h2>
-        <p>恋愛、人間関係、仕事、進路、創作活動、説明しづらい違和感など。話がまとまっていなくても、質問しながら一緒に整理します。</p>
-        <dl>
-          <div><dt>形式</dt><dd>ココナラ電話相談</dd></div>
-          <div><dt>目安</dt><dd>20〜30分</dd></div>
-          <div><dt>受付</dt><dd>受付中</dd></div>
-        </dl>
-        <a class="button primary" href="https://coconala.com/services/4329584" target="_blank" rel="noopener noreferrer">商品ページを開く</a>
-      </article>
-
-      <article class="service-card">
-        <p class="tag">COMING NEXT</p>
-        <h2>作戦会議</h2>
-        <p>活動、商売、創作、人生が散らかっている人へ。状況を分解し、終了後に「次にやること3つ」を文章で渡します。</p>
-      </article>
-    </section>
-
-    <section class="panel compact">
-      <p class="section-no">対応方針</p>
-      <ul>
-        <li>恐怖を利用した継続購入の誘導をしません。</li>
-        <li>医療、法律、投資、生死を断定しません。</li>
-        <li>無料の場では個別案件を解決まで扱いません。</li>
-        <li>希望時間があれば、その時間内でまとめます。</li>
-      </ul>
-    </section>
-  </main>
-
-  <footer>
-    <p>祭祀技師／霊視・儀式設計・霊能実務支援</p>
-    <p class="muted">© すべての歯が見える</p>
-  </footer>
+<script src="app.js" defer></script>
 </body>
 </html>
