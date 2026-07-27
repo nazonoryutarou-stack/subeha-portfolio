@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="移設中の観測室｜すべての歯が見える">
+<meta name="theme-color" content="#050403">
+<meta property="og:type" content="website">
+<meta property="og:title" content="移設中の観測室｜すべての歯が見える">
+<meta property="og:description" content="移設中の観測室です。">
+<meta property="og:image" content="assets/ogp.svg">
+<meta name="twitter:card" content="summary_large_image">
+<title>移設中の観測室｜すべての歯が見える</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box}html,body{min-height:100%;margin:0;background:#050403;color:#ebe4d5}body{display:grid;place-items:center;padding:24px;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;background:radial-gradient(circle at center,#32151a 0,#10090a 34%,#050403 72%)}main{width:min(720px,100%);padding:clamp(28px,7vw,70px);border:1px solid rgba(235,228,213,.25);background:rgba(5,4,3,.74);position:relative}main:before,main:after{content:"";position:absolute;left:8%;right:8%;height:34px;background:repeating-linear-gradient(90deg,#ebe4d5 0 7%,transparent 7% 9%)}main:before{top:-34px}main:after{bottom:-34px;transform:rotate(180deg)}p{color:#b9b0a0;line-height:1.9}small{font-family:monospace;color:#c8a75c;letter-spacing:.15em}h1{font-size:clamp(2rem,8vw,4rem);letter-spacing:.1em;margin:.5em 0}a{display:inline-block;margin-top:20px;padding:12px 18px;border:1px solid #c8a75c;color:#f0d990;text-decoration:none}a:focus-visible{outline:2px solid #fff;outline-offset:4px}
+</style>
+</head>
+<body>
+<main><small>ROOM RELOCATION / TEMPORARY</small><h1 id="roomTitle">観測室</h1><p id="roomText">この入口は移設中です。外形だけ先に定着しました。</p><a href="index.html">観測所へ戻る</a></main>
+<script>
+const rooms={shindan:["十六霊感診断","診断室は移設中です。記録が定着するまで、しばらくお待ちください。"],bakemongo:["バケモンGO","捕獲区域は封鎖中です。入口だけ先に移設されました。"],yaniv:["ヤニブ","カード室は調整中です。現在、札の噛み合わせを確認しています。"],kujou:["苦情受付","苦情箱は準備中です。苦情が先に到着した場合は、いったん口内で保管されます。"]};const key=new URLSearchParams(location.search).get("room");if(rooms[key]){document.getElementById("roomTitle").textContent=rooms[key][0];document.getElementById("roomText").textContent=rooms[key][1];document.title=rooms[key][0]+"｜すべての歯が見える";}
+</script>
+</body>
+</html>
