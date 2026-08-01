@@ -40,3 +40,7 @@
 ## 配布版
 
 ローカル配布用ZIPには、圧縮ランタイムではなく、展開済みのHTML・CSS・JavaScript・仮SVGを収録する。
+
+## 公開運用
+
+`main` ブランチへの更新をGitHub Pagesへ自動反映する。
