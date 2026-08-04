@@ -1,0 +1,23 @@
+/* VTuber model panel */
+.vtuber-lab{position:relative;display:grid;grid-template-columns:minmax(0,.82fr) minmax(290px,1.18fr);gap:clamp(1rem,4vw,4rem);align-items:center;margin:clamp(3rem,8vw,7rem) auto;padding:clamp(1.2rem,4vw,3rem);max-width:1180px;min-height:clamp(460px,68vw,720px);overflow:hidden;border:1px solid rgba(176,143,84,.28);background:linear-gradient(135deg,rgba(8,7,6,.96),rgba(22,16,13,.86));box-shadow:0 30px 90px rgba(0,0,0,.46)}
+.vtuber-lab::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 74% 45%,rgba(141,105,55,.17),transparent 36%),linear-gradient(90deg,rgba(0,0,0,.36),transparent 58%)}
+.vtuber-copy{position:relative;z-index:2;align-self:end;padding-bottom:clamp(.25rem,3vw,2rem)}
+.vtuber-kicker{margin:0 0 .9rem;color:#b79a65;font:600 .7rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.24em;text-transform:uppercase}
+.vtuber-copy h2{margin:0;color:#f1eadc;font-size:clamp(1.8rem,4vw,3.5rem);font-weight:500;letter-spacing:.05em}
+.vtuber-actions{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;margin-top:1.5rem}
+.vtuber-start{appearance:none;border:1px solid rgba(202,171,111,.68);background:#c2a46e;color:#100d09;padding:.85rem 1.15rem;font:700 .78rem/1.2 inherit;letter-spacing:.08em;cursor:pointer;transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
+.vtuber-start:hover{transform:translateY(-2px);background:#d0b47e;box-shadow:0 10px 28px rgba(0,0,0,.3)}
+.vtuber-start:disabled{cursor:wait;opacity:.62;transform:none}
+.vtuber-status{min-height:1.4em;margin:.8rem 0 0;color:#a99d8a;font-size:.78rem;line-height:1.6}
+.vtuber-stage{position:relative;z-index:1;align-self:stretch;min-height:430px;isolation:isolate}
+.vtuber-stage::after{content:"";position:absolute;z-index:3;left:8%;right:8%;bottom:4%;height:13%;pointer-events:none;background:radial-gradient(ellipse,rgba(0,0,0,.68),transparent 72%);filter:blur(12px)}
+.vtuber-poster,.vtuber-canvas{position:absolute;inset:0;width:100%;height:100%}
+.vtuber-poster{z-index:1;background-image:url("./vrm/subeha-vrm-poster.webp");background-position:50% 50%;background-repeat:no-repeat;background-size:contain;filter:drop-shadow(0 24px 26px rgba(0,0,0,.45));transform-origin:50% 78%;animation:vtuber-breathe 5.8s ease-in-out infinite}
+.vtuber-canvas{z-index:2;display:block;opacity:0;transition:opacity .5s ease;touch-action:pan-y}
+.vtuber-stage.is-live .vtuber-canvas{opacity:1}
+.vtuber-stage.is-live .vtuber-poster{opacity:0;transition:opacity .45s ease}
+.vtuber-fallback{position:absolute;z-index:4;left:50%;bottom:1rem;transform:translateX(-50%);display:none;max-width:90%;padding:.5rem .75rem;background:rgba(8,7,6,.82);border:1px solid rgba(176,143,84,.3);color:#c8bda8;font-size:.72rem;text-align:center}
+.vtuber-stage.has-error .vtuber-fallback{display:block}
+@keyframes vtuber-breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.004)}}
+@media(max-width:760px){.vtuber-lab{grid-template-columns:1fr;min-height:0;padding:1rem;margin:3rem .8rem}.vtuber-copy{order:2;padding:0 .35rem .5rem}.vtuber-stage{order:1;min-height:min(118vw,570px)}.vtuber-actions{margin-top:1rem}}
+@media(prefers-reduced-motion:reduce){.vtuber-poster{animation:none}.vtuber-start,.vtuber-canvas{transition:none}}
