@@ -14,9 +14,19 @@
   section.innerHTML = `
     <div class="vtuber-copy">
       <p class="vtuber-kicker">VTUBER MODEL / すべての歯が見える</p>
-      <h2 id="vtuber-title">3Dモデル</h2>
+      <h2 id="vtuber-title">制作者の3D標本</h2>
+      <p class="vtuber-intro">静止画では確認できない表情、視線、呼吸の揺れを観測できます。モデルデータはボタンを押した時だけ読み込みます。</p>
       <div class="vtuber-actions">
         <button class="vtuber-start" type="button" data-vrm-start disabled>3Dモデルを確認中</button>
+      </div>
+      <div class="vtuber-controls" data-vrm-controls hidden aria-label="3Dモデル操作">
+        <span>表情</span>
+        <button type="button" data-expression="neutral" class="is-active">平常</button>
+        <button type="button" data-expression="happy">笑</button>
+        <button type="button" data-expression="angry">怒</button>
+        <button type="button" data-expression="sad">沈</button>
+        <button type="button" data-expression="surprised">驚</button>
+        <button type="button" data-view-reset>正面へ戻す</button>
       </div>
       <p class="vtuber-status" data-vrm-status aria-live="polite">表示時のみモデルデータを読み込みます。</p>
     </div>
@@ -29,11 +39,12 @@
   main.append(section);
 
   const button = section.querySelector('[data-vrm-start]');
+  const controls = section.querySelector('[data-vrm-controls]');
   const status = section.querySelector('[data-vrm-status]');
   const stage = section.querySelector('[data-vrm-stage]');
   const canvas = section.querySelector('[data-vrm-canvas]');
   const base = location.hostname.endsWith('github.io') ? '/subeha-portfolio' : '';
-  const modelUrl = `${base}/assets/vrm/subeha-web.vrm`;
+  const modelUrl = `${base}/subeha-web-site.vrm`;
   const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const saveData = navigator.connection?.saveData === true;
   let started = false;
@@ -43,12 +54,12 @@
     button.disabled = false;
     button.textContent = '3Dモデルを表示';
     status.textContent = saveData
-      ? 'データセーバー使用中です。押すまで3Dデータは読み込みません。'
-      : '表示時のみモデルデータを読み込みます。';
+      ? 'データセーバー使用中です。押すまで約2.4MBのモデルは読み込みません。'
+      : '押すと約2.4MBのモデルを読み込みます。';
   }).catch(() => {
     button.disabled = true;
     button.textContent = '3Dモデル準備中';
-    status.textContent = '静止画版を先行公開しています。';
+    status.textContent = 'モデルデータを確認できませんでした。静止画を表示しています。';
   });
 
   button.addEventListener('click', async () => {
@@ -70,7 +81,6 @@
       const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
       renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.75));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
-      renderer.shadowMap.enabled = false;
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(28, 1, 0.01, 100);
@@ -107,6 +117,8 @@
       const initialHead = head?.rotation.clone();
       const initialChestScale = chest?.scale.clone();
       const target = { x: 0, y: 0 };
+      let bodyYaw = 0;
+      let activeExpression = 'neutral';
 
       stage.addEventListener('pointermove', event => {
         const rect = stage.getBoundingClientRect();
@@ -114,6 +126,32 @@
         target.y = THREE.MathUtils.clamp(((event.clientY - rect.top) / rect.height - 0.5) * 2, -1, 1);
       }, { passive: true });
       stage.addEventListener('pointerleave', () => { target.x = 0; target.y = 0; }, { passive: true });
+      stage.addEventListener('wheel', event => {
+        if (!event.shiftKey) return;
+        event.preventDefault();
+        bodyYaw = THREE.MathUtils.clamp(bodyYaw + event.deltaY * 0.0008, -0.55, 0.55);
+      }, { passive: false });
+
+      const setExpression = name => {
+        if (!vrm.expressionManager) return;
+        ['happy', 'angry', 'sad', 'relaxed', 'surprised'].forEach(key => vrm.expressionManager.setValue(key, 0));
+        if (name !== 'neutral') vrm.expressionManager.setValue(name, 0.82);
+        activeExpression = name;
+        controls.querySelectorAll('[data-expression]').forEach(control => {
+          control.classList.toggle('is-active', control.dataset.expression === name);
+        });
+      };
+
+      controls.addEventListener('click', event => {
+        const expressionButton = event.target.closest('[data-expression]');
+        if (expressionButton) setExpression(expressionButton.dataset.expression);
+        if (event.target.closest('[data-view-reset]')) {
+          target.x = 0;
+          target.y = 0;
+          bodyYaw = 0;
+          setExpression('neutral');
+        }
+      });
 
       const resize = () => {
         const rect = stage.getBoundingClientRect();
@@ -136,6 +174,7 @@
         const delta = Math.min(clock.getDelta(), 0.05);
         elapsed += delta;
 
+        vrm.scene.rotation.y = THREE.MathUtils.lerp(vrm.scene.rotation.y, bodyYaw, 0.06);
         if (head && initialHead && !prefersReducedMotion) {
           head.rotation.x = THREE.MathUtils.lerp(head.rotation.x, initialHead.x + target.y * 0.075, 0.045);
           head.rotation.y = THREE.MathUtils.lerp(head.rotation.y, initialHead.y + target.x * 0.13, 0.045);
@@ -153,6 +192,7 @@
             blink = 0;
           }
           vrm.expressionManager.setValue('blink', blink);
+          if (activeExpression !== 'neutral') vrm.expressionManager.setValue(activeExpression, 0.82);
         }
 
         vrm.update(delta);
@@ -161,8 +201,9 @@
       render();
 
       stage.classList.add('is-live');
+      controls.hidden = false;
       button.textContent = '3D表示中';
-      status.textContent = '視線がポインターを追います。';
+      status.textContent = '視線はポインターを追います。Shift＋スクロールで身体の向きを変えられます。';
 
       window.addEventListener('pagehide', () => {
         cancelAnimationFrame(raf);
