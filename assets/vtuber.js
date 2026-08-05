@@ -15,7 +15,7 @@
     <div class="vtuber-copy">
       <p class="vtuber-kicker">VTUBER MODEL / すべての歯が見える</p>
       <h2 id="vtuber-title">制作者の3D標本</h2>
-      <p class="vtuber-intro">静止画では確認できない表情、視線、呼吸の揺れを観測できます。モデルデータはボタンを押した時だけ読み込みます。</p>
+      <p class="vtuber-intro">自然な立ち姿、表情、視線、呼吸の揺れを観測できます。モデルはボタンを押した時だけ読み込みます。</p>
       <div class="vtuber-actions">
         <button class="vtuber-start" type="button" data-vrm-start disabled>3Dモデルを確認中</button>
       </div>
@@ -33,6 +33,7 @@
     <div class="vtuber-stage" data-vrm-stage>
       <div class="vtuber-poster" aria-hidden="true"></div>
       <canvas class="vtuber-canvas" data-vrm-canvas aria-label="すべての歯が見えるの3Dモデル"></canvas>
+      <p class="vtuber-gesture" data-vrm-gesture hidden>左右にスワイプして回転・ダブルタップで正面</p>
       <p class="vtuber-fallback">3D表示に失敗したため、静止画を表示しています。</p>
     </div>`;
 
@@ -43,6 +44,7 @@
   const status = section.querySelector('[data-vrm-status]');
   const stage = section.querySelector('[data-vrm-stage]');
   const canvas = section.querySelector('[data-vrm-canvas]');
+  const gesture = section.querySelector('[data-vrm-gesture]');
   const base = location.hostname.endsWith('github.io') ? '/subeha-portfolio' : '';
   const modelUrl = `${base}/subeha-web-site.vrm`;
   const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -79,7 +81,8 @@
       const { VRMLoaderPlugin, VRMUtils } = vrmModule;
 
       const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
-      renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.75));
+      const mobile = matchMedia('(max-width: 760px)').matches;
+      renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.25 : 1.75));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
 
       const scene = new THREE.Scene();
@@ -103,6 +106,51 @@
       VRMUtils.rotateVRM0?.(vrm);
       scene.add(vrm.scene);
 
+      const bone = name => vrm.humanoid?.getNormalizedBoneNode?.(name);
+      const hips = bone('hips');
+      const spine = bone('spine');
+      const chest = bone('chest');
+      const upperChest = bone('upperChest');
+      const neck = bone('neck');
+      const head = bone('head');
+      const leftShoulder = bone('leftShoulder');
+      const rightShoulder = bone('rightShoulder');
+      const leftUpperArm = bone('leftUpperArm');
+      const rightUpperArm = bone('rightUpperArm');
+      const leftLowerArm = bone('leftLowerArm');
+      const rightLowerArm = bone('rightLowerArm');
+      const leftUpperLeg = bone('leftUpperLeg');
+      const rightUpperLeg = bone('rightUpperLeg');
+      const leftLowerLeg = bone('leftLowerLeg');
+      const rightLowerLeg = bone('rightLowerLeg');
+
+      const initialHead = head?.rotation.clone();
+      const initialChestScale = chest?.scale.clone();
+
+      const addRotation = (node, x = 0, y = 0, z = 0) => {
+        if (!node) return;
+        node.rotation.x += x;
+        node.rotation.y += y;
+        node.rotation.z += z;
+      };
+
+      addRotation(hips, 0, -0.035, 0.025);
+      addRotation(spine, 0.015, 0.025, -0.018);
+      addRotation(chest, -0.018, -0.015, 0.018);
+      addRotation(upperChest, -0.012, 0.02, 0.01);
+      addRotation(neck, 0.018, 0, -0.012);
+      addRotation(head, -0.025, 0.02, 0.014);
+      addRotation(leftShoulder, 0.02, 0, -0.08);
+      addRotation(rightShoulder, 0.015, 0, 0.06);
+      addRotation(leftUpperArm, 0.08, 0.025, -0.32);
+      addRotation(rightUpperArm, -0.05, -0.02, 0.27);
+      addRotation(leftLowerArm, -0.18, 0.03, -0.08);
+      addRotation(rightLowerArm, -0.24, -0.025, 0.06);
+      addRotation(leftUpperLeg, 0.015, -0.025, -0.018);
+      addRotation(rightUpperLeg, -0.01, 0.025, 0.02);
+      addRotation(leftLowerLeg, 0.035, 0, 0);
+      addRotation(rightLowerLeg, 0.015, 0, 0);
+
       const bounds = new THREE.Box3().setFromObject(vrm.scene);
       const size = bounds.getSize(new THREE.Vector3());
       const center = bounds.getCenter(new THREE.Vector3());
@@ -112,25 +160,33 @@
       camera.position.set(0, size.y * 0.03, distance);
       camera.lookAt(0, size.y * 0.03, 0);
 
-      const head = vrm.humanoid?.getNormalizedBoneNode?.('head');
-      const chest = vrm.humanoid?.getNormalizedBoneNode?.('chest');
-      const initialHead = head?.rotation.clone();
-      const initialChestScale = chest?.scale.clone();
       const target = { x: 0, y: 0 };
       let bodyYaw = 0;
       let activeExpression = 'neutral';
+      let dragging = false;
+      let pointerStartX = 0;
+      let yawStart = 0;
 
+      stage.addEventListener('pointerdown', event => {
+        dragging = true;
+        pointerStartX = event.clientX;
+        yawStart = bodyYaw;
+        stage.setPointerCapture?.(event.pointerId);
+      });
       stage.addEventListener('pointermove', event => {
         const rect = stage.getBoundingClientRect();
         target.x = THREE.MathUtils.clamp(((event.clientX - rect.left) / rect.width - 0.5) * 2, -1, 1);
         target.y = THREE.MathUtils.clamp(((event.clientY - rect.top) / rect.height - 0.5) * 2, -1, 1);
+        if (dragging) bodyYaw = THREE.MathUtils.clamp(yawStart + (event.clientX - pointerStartX) * 0.006, -0.7, 0.7);
       }, { passive: true });
+      const endDrag = event => {
+        dragging = false;
+        stage.releasePointerCapture?.(event.pointerId);
+      };
+      stage.addEventListener('pointerup', endDrag);
+      stage.addEventListener('pointercancel', endDrag);
       stage.addEventListener('pointerleave', () => { target.x = 0; target.y = 0; }, { passive: true });
-      stage.addEventListener('wheel', event => {
-        if (!event.shiftKey) return;
-        event.preventDefault();
-        bodyYaw = THREE.MathUtils.clamp(bodyYaw + event.deltaY * 0.0008, -0.55, 0.55);
-      }, { passive: false });
+      stage.addEventListener('dblclick', () => { bodyYaw = 0; target.x = 0; target.y = 0; });
 
       const setExpression = name => {
         if (!vrm.expressionManager) return;
@@ -174,10 +230,10 @@
         const delta = Math.min(clock.getDelta(), 0.05);
         elapsed += delta;
 
-        vrm.scene.rotation.y = THREE.MathUtils.lerp(vrm.scene.rotation.y, bodyYaw, 0.06);
+        vrm.scene.rotation.y = THREE.MathUtils.lerp(vrm.scene.rotation.y, bodyYaw, 0.08);
         if (head && initialHead && !prefersReducedMotion) {
-          head.rotation.x = THREE.MathUtils.lerp(head.rotation.x, initialHead.x + target.y * 0.075, 0.045);
-          head.rotation.y = THREE.MathUtils.lerp(head.rotation.y, initialHead.y + target.x * 0.13, 0.045);
+          head.rotation.x = THREE.MathUtils.lerp(head.rotation.x, initialHead.x - 0.025 + target.y * 0.075, 0.045);
+          head.rotation.y = THREE.MathUtils.lerp(head.rotation.y, initialHead.y + 0.02 + target.x * 0.13, 0.045);
         }
         if (chest && initialChestScale && !prefersReducedMotion) {
           chest.scale.y = initialChestScale.y * (1 + Math.sin(elapsed * 1.2) * 0.0025);
@@ -202,8 +258,9 @@
 
       stage.classList.add('is-live');
       controls.hidden = false;
+      gesture.hidden = false;
       button.textContent = '3D表示中';
-      status.textContent = '視線はポインターを追います。Shift＋スクロールで身体の向きを変えられます。';
+      status.textContent = '左右にスワイプして回転。ダブルタップで正面に戻ります。';
 
       window.addEventListener('pagehide', () => {
         cancelAnimationFrame(raf);
