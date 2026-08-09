@@ -59,9 +59,9 @@
 
     try {
       const [THREE, loaderModule, vrmModule] = await Promise.all([
-        import('https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js'),
-        import('https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/loaders/GLTFLoader.js'),
-        import('https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.3/lib/three-vrm.module.min.js')
+        import('three'),
+        import('three/addons/loaders/GLTFLoader.js'),
+        import('@pixiv/three-vrm')
       ]);
       const { GLTFLoader } = loaderModule;
       const { VRMLoaderPlugin, VRMUtils } = vrmModule;
