@@ -4,35 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>妹字暗号ラボ｜不氣屋界隈</title>
-<meta name="description" content="呪文と秘密の読みから、一文字の妹字候補を生成して復号を試す実験室。">
+<meta name="description" content="呪文・秘密の読み・字形の三者を往復しながら、妹字暗号を検討する実験室。">
 <style>
 :root{--bg:#080706;--panel:#11100e;--ink:#eee8dd;--muted:#9f9689;--gold:#d2a84f;--line:#342d23;--red:#a74e42}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 30% 0,#17120c 0,#080706 42%);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;min-height:100vh}.wrap{width:min(1100px,calc(100% - 28px));margin:auto;padding:34px 0 80px}.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:22px}.kicker{font:700 11px/1.4 ui-monospace,monospace;letter-spacing:.18em;color:var(--gold)}h1{font-size:clamp(34px,7vw,72px);line-height:.95;margin:.16em 0}.lead{max-width:720px;color:var(--muted);line-height:1.8}.back{color:var(--gold);text-decoration:none;font-size:13px}.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.8fr);gap:20px;margin-top:24px}.panel{background:rgba(17,16,14,.92);border:1px solid var(--line);padding:20px}.panel h2{margin:0 0 16px;font-size:18px}.field{display:grid;gap:7px;margin:14px 0}.field label{font-size:12px;color:#c8bca9}.field textarea,.field input{width:100%;background:#090806;color:var(--ink);border:1px solid #403728;padding:13px 14px;font:500 16px/1.5 ui-monospace,"Noto Sans JP",monospace;outline:none}.field textarea{min-height:90px;resize:vertical}.field input:focus,.field textarea:focus{border-color:var(--gold)}button{cursor:pointer;border:1px solid #a88039;background:#261b0c;color:#f5e3bb;padding:12px 16px;font-weight:700}.row{display:flex;gap:10px;flex-wrap:wrap}.ghost{background:transparent;border-color:#4a4033;color:#c9bda8}.glyph-stage{display:grid;place-items:center;aspect-ratio:1;background:#050504;border:1px solid #2f291f;position:relative}.glyph-stage:before{content:"BLACK WASHI / GOLD PIGMENT";position:absolute;top:12px;left:12px;font:600 9px/1 ui-monospace,monospace;letter-spacing:.14em;color:#6d6253}.glyph-stage svg{width:88%;height:88%;filter:drop-shadow(0 0 14px rgba(210,168,79,.12))}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}.meta div{border:1px solid var(--line);padding:10px}.meta small{display:block;color:#877d70;font-size:10px}.meta b{display:block;margin-top:4px;font:600 13px/1.4 ui-monospace,monospace;overflow-wrap:anywhere}.ok{color:#8fbd86}.bad{color:#d77c70}.explain{margin-top:20px;color:var(--muted);line-height:1.8;font-size:14px}.bits{margin-top:16px;max-height:190px;overflow:auto;background:#070605;border:1px solid var(--line);padding:12px;font:11px/1.7 ui-monospace,monospace;color:#988d7e;word-break:break-all}.warning{border-left:3px solid var(--red);padding-left:12px;color:#baaca0;margin-top:18px;font-size:13px;line-height:1.7}@media(max-width:800px){.grid{grid-template-columns:1fr}.top{display:block}.back{display:inline-block;margin-top:10px}}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 30% 0,#17120c 0,#080706 42%);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;min-height:100vh}.wrap{width:min(1180px,calc(100% - 28px));margin:auto;padding:34px 0 80px}.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:22px}.kicker{font:700 11px/1.4 ui-monospace,monospace;letter-spacing:.18em;color:var(--gold)}h1{font-size:clamp(34px,7vw,72px);line-height:.95;margin:.16em 0}.lead{max-width:780px;color:var(--muted);line-height:1.8}.back{color:var(--gold);text-decoration:none;font-size:13px}.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.8fr);gap:20px;margin-top:24px}.panel{background:rgba(17,16,14,.92);border:1px solid var(--line);padding:20px}.panel h2{margin:0 0 16px;font-size:18px}.field{display:grid;gap:7px;margin:14px 0}.field label{font-size:12px;color:#c8bca9}.field textarea,.field input{width:100%;background:#090806;color:var(--ink);border:1px solid #403728;padding:13px 14px;font:500 16px/1.5 ui-monospace,"Noto Sans JP",monospace;outline:none}.field textarea{min-height:90px;resize:vertical}.field input:focus,.field textarea:focus{border-color:var(--gold)}button{cursor:pointer;border:1px solid #a88039;background:#261b0c;color:#f5e3bb;padding:12px 16px;font-weight:700}.row{display:flex;gap:10px;flex-wrap:wrap}.ghost{background:transparent;border-color:#4a4033;color:#c9bda8}.glyph-stage{display:grid;place-items:center;aspect-ratio:1;background:#050504;border:1px solid #2f291f;position:relative}.glyph-stage:before{content:"BLACK WASHI / GOLD PIGMENT";position:absolute;top:12px;left:12px;font:600 9px/1 ui-monospace,monospace;letter-spacing:.14em;color:#6d6253}.glyph-stage svg{width:88%;height:88%;filter:drop-shadow(0 0 14px rgba(210,168,79,.12))}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}.meta div{border:1px solid var(--line);padding:10px}.meta small{display:block;color:#877d70;font-size:10px}.meta b{display:block;margin-top:4px;font:600 13px/1.4 ui-monospace,monospace;overflow-wrap:anywhere}.ok{color:#8fbd86}.bad{color:#d77c70}.explain{margin-top:20px;color:var(--muted);line-height:1.8;font-size:14px}.bits{margin-top:16px;max-height:190px;overflow:auto;background:#070605;border:1px solid var(--line);padding:12px;font:11px/1.7 ui-monospace,monospace;color:#988d7e;word-break:break-all}.warning{border-left:3px solid var(--red);padding-left:12px;color:#baaca0;margin-top:18px;font-size:13px;line-height:1.7}.glyph-input{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}.glyph-input textarea{min-height:140px;font-size:12px;line-height:1.55}.hint{font-size:12px;color:#8f8578;line-height:1.65;margin-top:7px}@media(max-width:800px){.grid{grid-template-columns:1fr}.top{display:block}.back{display:inline-block;margin-top:10px}}
 </style>
 </head>
 <body>
 <main class="wrap">
   <div class="top">
-    <div><div class="kicker">IMOJI CRYPTOGRAPHY / EXPERIMENT 0.1</div><h1>妹字暗号ラボ</h1><p class="lead">秘密の呪文と、作者だけが保管する「読み」から、一文字の妹字候補を生成する実験ページ。字形と読みを残して呪文を消した後、同じ規則で元文が戻るかまで確認する。</p></div>
+    <div><div class="kicker">IMOJI CRYPTOGRAPHY / EXPERIMENT 0.2</div><h1>妹字暗号ラボ</h1><p class="lead">呪文・作者だけが知る「読み」・妹字の字形を三者で往復する実験ページ。生成された妹字だけでなく、字形データを外から入力して復号を試せる。</p></div>
     <a class="back" href="../">← すべての歯が見える</a>
   </div>
 
   <div class="grid">
     <section class="panel">
-      <h2>入力</h2>
+      <h2>暗号化</h2>
       <div class="field"><label for="spell">込める呪文</label><textarea id="spell">使徒、襲来</textarea></div>
       <div class="field"><label for="reading">秘密の読み</label><input id="reading" value="ポコペン"></div>
-      <div class="row"><button id="generate">妹字を生成</button><button class="ghost" id="forget">元の呪文を隠す</button><button class="ghost" id="restore">字形＋読みから復号</button></div>
+      <div class="row"><button id="generate">妹字を生成</button><button class="ghost" id="forget">元の呪文を隠す</button><button class="ghost" id="restore">現在の字形＋読みから復号</button></div>
+
+      <div class="glyph-input">
+        <h2>字形を入力</h2>
+        <div class="field"><label for="glyphInput">字形データ（生成SVG または 0/1 のビット列）</label><textarea id="glyphInput" placeholder="ここに生成されたSVGを貼る、または010101...のビット列を直接入力"></textarea></div>
+        <div class="row"><button id="loadGlyph">字形を読み込む</button><button class="ghost" id="copyGlyph">現在の字形データをコピー</button></div>
+        <p class="hint">試作0.2では、字形そのものから線を画像認識して復号するのではなく、SVG内の <code>data-imoji-bits</code> またはビット列を「字形データ」として読む。最終版では手描き字形から特徴量を読める方式へ置き換える予定。</p>
+      </div>
+
       <p class="warning">これは妹字の造形と可逆性を検討するための試作暗号です。現時点では実用的な情報セキュリティ用途を想定していません。</p>
       <div class="explain">
         <b>試作方式</b><br>
-        呪文をUTF-8のバイト列へ変換し、「読み」から作った疑似鍵でXORする。暗号化されたビット列を、中央骨格から生える線の方向・長さ・枝・鉤・点へ順番に割り当て、一文字の字形として描画する。復号時はSVG内部に保持した同じビット列を字形情報として読み戻し、読みを鍵にして元文へ戻す。
+        呪文をUTF-8のバイト列へ変換し、「読み」から作った疑似鍵でXORする。暗号化されたビット列を、中央骨格から生える線の方向・長さ・枝・鉤・点へ順番に割り当て、一文字の字形として描画する。復号時は字形データとして保持した同じビット列を読み戻し、読みを鍵にして元文へ戻す。
       </div>
       <div class="bits" id="bits"></div>
     </section>
 
     <section class="panel">
-      <h2>生成候補</h2>
+      <h2>字形</h2>
       <div class="glyph-stage" id="stage"></div>
       <div class="meta">
         <div><small>READING / SECRET KEY</small><b id="mReading">ポコペン</b></div>
@@ -46,7 +54,7 @@
 <script>
 (()=>{
   const $=s=>document.querySelector(s), enc=new TextEncoder(), dec=new TextDecoder();
-  const state={cipher:null,length:0,svgBits:""};
+  const state={cipher:null,length:0,svgBits:"",svg:""};
   function hashKey(str){let h=2166136261>>>0;for(const b of enc.encode(str)){h^=b;h=Math.imul(h,16777619)>>>0}return h>>>0}
   function stream(key,n){let x=key||0x9e3779b9,out=new Uint8Array(n);for(let i=0;i<n;i++){x^=x<<13;x^=x>>>17;x^=x<<5;x>>>=0;out[i]=x&255}return out}
   function xor(data,reading){const ks=stream(hashKey(reading),data.length),out=new Uint8Array(data.length);for(let i=0;i<data.length;i++)out[i]=data[i]^ks[i];return out}
@@ -54,8 +62,7 @@
   function bitsToBytes(bits){const n=Math.ceil(bits.length/8),out=new Uint8Array(n);for(let i=0;i<n;i++)out[i]=parseInt(bits.slice(i*8,i*8+8).padEnd(8,'0'),2);return out}
   function chunk(bits,size){const a=[];for(let i=0;i<bits.length;i+=size)a.push(bits.slice(i,i+size).padEnd(size,'0'));return a}
   function glyph(bits){
-    const cells=chunk(bits,5); const cx=160,cy=160; let paths=[]; let dots=[];
-    // central spine: makes the payload read as one character rather than a barcode
+    const cells=chunk(bits,5); const cx=160; let paths=[]; let dots=[];
     paths.push(`<path d="M160 35 C151 86 169 121 160 286"/>`);
     cells.forEach((c,i)=>{
       const v=parseInt(c,2), side=(v&1)?1:-1, band=i%18, ring=Math.floor(i/18);
@@ -69,23 +76,42 @@
       if(v%5===0)dots.push(`<circle cx="${(x2+side*8).toFixed(1)}" cy="${(yy+(v&2?9:-8)).toFixed(1)}" r="3.2"/>`);
       if(v%7===0)paths.push(`<path d="M${x2.toFixed(1)} ${(yy+(v&2?13:-11)).toFixed(1)} l${(side*10).toFixed(1)} -12"/>`);
     });
-    return `<svg viewBox="0 0 320 320" role="img" aria-label="生成された妹字"><g fill="none" stroke="#d6aa4e" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">${paths.join('')}</g><g fill="#d6aa4e">${dots.join('')}</g></svg>`;
+    return `<svg viewBox="0 0 320 320" role="img" aria-label="生成された妹字" data-imoji-bits="${bits}"><g fill="none" stroke="#d6aa4e" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">${paths.join('')}</g><g fill="#d6aa4e">${dots.join('')}</g></svg>`;
+  }
+  function renderBits(bits){
+    state.svgBits=bits.replace(/[^01]/g,'');
+    state.svg=glyph(state.svgBits);
+    $('#stage').innerHTML=state.svg;
+    $('#bits').textContent=`暗号ビット列 (${state.svgBits.length} bit)\n${state.svgBits}`;
+    $('#mCells').textContent=`${Math.ceil(state.svgBits.length/5)} cells`;
+    $('#glyphInput').value=state.svg;
   }
   function generate(){
     const spell=$('#spell').value, reading=$('#reading').value.trim(); if(!spell||!reading)return;
     const plain=enc.encode(spell); if(plain.length>64){alert('試作版はUTF-8で64バイトまでです。');return}
     const payload=new Uint8Array(plain.length+1);payload[0]=plain.length;payload.set(plain,1);
-    state.cipher=xor(payload,reading);state.length=plain.length;state.svgBits=bytesToBits(state.cipher);
-    $('#stage').innerHTML=glyph(state.svgBits);$('#bits').textContent=`暗号ビット列 (${state.svgBits.length} bit)\n${state.svgBits}`;
-    $('#mReading').textContent=reading;$('#mBytes').textContent=`${payload.length} bytes / ${state.svgBits.length} bits`;$('#mCells').textContent=`${Math.ceil(state.svgBits.length/5)} cells`;$('#mStatus').textContent='生成済み';$('#mStatus').className='';
+    state.cipher=xor(payload,reading);state.length=plain.length;
+    renderBits(bytesToBits(state.cipher));
+    $('#mReading').textContent=reading;$('#mBytes').textContent=`${payload.length} bytes / ${state.svgBits.length} bits`;$('#mStatus').textContent='生成済み';$('#mStatus').className='';
   }
   function restore(){
-    if(!state.svgBits){generate();if(!state.svgBits)return} const reading=$('#reading').value.trim();
-    const cipher=bitsToBytes(state.svgBits);const payload=xor(cipher,reading);const len=payload[0];let txt='';
+    if(!state.svgBits){alert('先に字形を生成するか、字形データを入力してください。');return}
+    const reading=$('#reading').value.trim(); const cipher=bitsToBytes(state.svgBits);const payload=xor(cipher,reading);const len=payload[0];let txt='';
     try{txt=dec.decode(payload.slice(1,1+len))}catch(e){txt='復号失敗'}
     $('#spell').value=txt;const ok=len<=63&&txt.length>0&&!txt.includes('\ufffd');$('#mStatus').textContent=ok?`復号: ${txt}`:'復号失敗';$('#mStatus').className=ok?'ok':'bad';
   }
-  $('#generate').onclick=generate;$('#forget').onclick=()=>{$('#spell').value='';$('#mStatus').textContent='元文を画面から消去';$('#mStatus').className=''};$('#restore').onclick=restore;
+  function loadGlyph(){
+    const raw=$('#glyphInput').value.trim(); if(!raw)return;
+    let bits='';
+    const m=raw.match(/data-imoji-bits=["']([01]+)["']/); if(m)bits=m[1]; else bits=raw.replace(/\s/g,'');
+    if(!/^[01]+$/.test(bits)){alert('SVG内に data-imoji-bits が無いか、0/1以外の文字が含まれています。');return}
+    renderBits(bits); $('#mBytes').textContent=`入力字形 / ${bits.length} bits`;$('#mStatus').textContent='字形を読込済み';$('#mStatus').className='';
+  }
+  async function copyGlyph(){
+    if(!state.svg){alert('先に字形を生成してください。');return}
+    try{await navigator.clipboard.writeText(state.svg);$('#mStatus').textContent='字形SVGをコピー';$('#mStatus').className='ok'}catch(e){$('#glyphInput').value=state.svg;$('#glyphInput').select()}
+  }
+  $('#generate').onclick=generate;$('#forget').onclick=()=>{$('#spell').value='';$('#mStatus').textContent='元文を画面から消去';$('#mStatus').className=''};$('#restore').onclick=restore;$('#loadGlyph').onclick=loadGlyph;$('#copyGlyph').onclick=copyGlyph;
   generate();
 })();
 </script>
