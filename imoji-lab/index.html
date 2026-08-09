@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>妹字暗号ラボ 0.5｜不氣屋界隈</title>
+<title>妹字暗号ラボ 0.6｜不氣屋界隈</title>
 <style>
 :root{--bg:#080706;--panel:#11100e;--ink:#eee8dd;--muted:#9f9689;--gold:#d2a84f;--line:#342d23;--red:#b65b50;--green:#8fbd86}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 30% 0,#17120c 0,#080706 42%);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}.wrap{width:min(1260px,calc(100% - 28px));margin:auto;padding:32px 0 80px}.top{border-bottom:1px solid var(--line);padding-bottom:20px}.kicker{font:700 11px ui-monospace,monospace;letter-spacing:.18em;color:var(--gold)}h1{font-size:clamp(34px,7vw,70px);margin:.15em 0}.lead{max-width:900px;color:var(--muted);line-height:1.8}.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:20px;margin-top:24px}.panel{background:#11100eee;border:1px solid var(--line);padding:20px}.field{display:grid;gap:7px;margin:12px 0}.field label{font-size:12px;color:#c8bca9}.field input,.field textarea{width:100%;background:#090806;color:var(--ink);border:1px solid #403728;padding:12px 13px;font:500 15px/1.5 ui-monospace,"Noto Sans JP",monospace}.row{display:flex;gap:10px;flex-wrap:wrap}button{cursor:pointer;border:1px solid #a88039;background:#261b0c;color:#f5e3bb;padding:11px 15px;font-weight:700}.ghost{background:transparent;border-color:#4a4033;color:#c9bda8}.stage{display:grid;place-items:center;aspect-ratio:1;background:#050504;border:1px solid #2f291f}.stage svg{width:92%;height:92%}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.meta div{border:1px solid var(--line);padding:10px}.meta small{display:block;color:#81776b;font-size:9px}.meta b{display:block;margin-top:4px;font:700 12px/1.5 ui-monospace,monospace;overflow-wrap:anywhere}.process{display:grid;gap:8px;margin-top:18px}.step{border:1px solid var(--line);background:#090806;padding:10px 12px;font:11px/1.65 ui-monospace,monospace;color:#b7aa99;word-break:break-all}.step b{color:var(--gold)}.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.legend div{border:1px solid var(--line);padding:9px;font-size:11px;color:#a99e90}.bone-legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.bone-legend div{border:1px solid var(--line);background:#090806;padding:10px;font-size:11px;line-height:1.55;color:#b7aa99}.bone-legend b{color:var(--gold)}.stroke-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.stroke{border:1px solid var(--line);background:#090806;padding:9px}.stroke strong{display:block;color:var(--gold);font:700 12px ui-monospace,monospace}.stroke span{display:block;margin-top:4px;font-size:10px;color:#b5aa9c;line-height:1.45}.warning{border-left:3px solid var(--red);padding-left:12px;color:#baaca0;margin-top:18px;font-size:13px;line-height:1.7}.ok{color:var(--green)}.hint{font-size:12px;color:#8f8578;line-height:1.65}@media(max-width:900px){.grid{grid-template-columns:1fr}.stroke-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.legend,.bone-legend,.stroke-grid,.meta{grid-template-columns:1fr}}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 30% 0,#17120c 0,#080706 42%);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}.wrap{width:min(1260px,calc(100% - 28px));margin:auto;padding:32px 0 80px}.top{border-bottom:1px solid var(--line);padding-bottom:20px}.kicker{font:700 11px ui-monospace,monospace;letter-spacing:.18em;color:var(--gold)}h1{font-size:clamp(34px,7vw,70px);margin:.15em 0}.lead{max-width:900px;color:var(--muted);line-height:1.8}.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:20px;margin-top:24px}.panel{background:#11100eee;border:1px solid var(--line);padding:20px}.field{display:grid;gap:7px;margin:12px 0}.field label{font-size:12px;color:#c8bca9}.field input,.field textarea{width:100%;background:#090806;color:var(--ink);border:1px solid #403728;padding:12px 13px;font:500 15px/1.5 ui-monospace,"Noto Sans JP",monospace}.row{display:flex;gap:10px;flex-wrap:wrap}button{cursor:pointer;border:1px solid #a88039;background:#261b0c;color:#f5e3bb;padding:11px 15px;font-weight:700}.ghost{background:transparent;border-color:#4a4033;color:#c9bda8}.stage{display:grid;place-items:center;aspect-ratio:1;background:#050504;border:1px solid #2f291f}.stage svg{width:92%;height:92%}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.meta div{border:1px solid var(--line);padding:10px}.meta small{display:block;color:#81776b;font-size:9px}.meta b{display:block;margin-top:4px;font:700 12px/1.5 ui-monospace,monospace;overflow-wrap:anywhere}.process{display:grid;gap:8px;margin-top:18px}.step{border:1px solid var(--line);background:#090806;padding:10px 12px;font:11px/1.65 ui-monospace,monospace;color:#b7aa99;word-break:break-all}.step b{color:var(--gold)}.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.legend div,.bone-legend div{border:1px solid var(--line);background:#090806;padding:9px;font-size:11px;color:#a99e90;line-height:1.55}.bone-legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.bone-legend b{color:var(--gold)}.stroke-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.stroke{border:1px solid var(--line);background:#090806;padding:9px}.stroke strong{display:block;color:var(--gold);font:700 12px ui-monospace,monospace}.stroke span{display:block;margin-top:4px;font-size:10px;color:#b5aa9c;line-height:1.45}.warning{border-left:3px solid var(--red);padding-left:12px;color:#baaca0;margin-top:18px;font-size:13px;line-height:1.7}.ok{color:var(--green)}.hint{font-size:12px;color:#8f8578;line-height:1.65}@media(max-width:900px){.grid{grid-template-columns:1fr}.stroke-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.legend,.bone-legend,.stroke-grid,.meta{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <main class="wrap">
-<div class="top"><div class="kicker">IMOJI CRYPTOGRAPHY / EXPERIMENT 0.5</div><h1>妹字暗号ラボ</h1><p class="lead">装飾ゼロ。見えている形状差はすべて暗号情報。呪文と読みを指定すると、各線の長さ・曲がり方・曲がる向き・点の有無、さらに中央骨格の形まで暗号から決まる。</p></div>
+<div class="top"><div class="kicker">IMOJI CRYPTOGRAPHY / EXPERIMENT 0.6</div><h1>妹字暗号ラボ</h1><p class="lead">装飾ゼロ。中央骨格も周囲18本もすべて暗号情報。0.6では周囲線の左右配置をストローク番号ではなく暗号bitそのものから決める。したがって同じ左向きコードが続けば、実際に左側へ連続して生える。</p></div>
 <div class="grid">
 <section class="panel">
 <h2>生成</h2>
@@ -27,28 +27,28 @@
 <div class="step"><b>5. 暗号を字形の部品へ割り当てる</b><br><span id="pCells">-</span></div>
 </div>
 <h2 style="margin-top:22px">中央骨格の意味</h2>
-<p class="hint">暗号の最初の8bitは、中央骨格そのものに割り当てる。左から順に bit1〜bit8。1ならその特徴を使い、0なら使わない。ただしbit1だけは「有無」ではなく主幹の形を選ぶ。</p>
+<p class="hint">暗号の最初の8bitを骨格へ使う。左からbit1〜bit8。</p>
 <div class="bone-legend">
-<div><b>bit1 / 主幹</b><br>0＝湾曲した一本主幹<br>1＝まっすぐな一本主幹</div>
-<div><b>bit2 / 左副幹</b><br>0＝なし<br>1＝主幹の左に縦線を一本追加</div>
-<div><b>bit3 / 右副幹</b><br>0＝なし<br>1＝主幹の右に縦線を一本追加</div>
-<div><b>bit4 / 上横線</b><br>0＝なし<br>1＝骨格上部を横切る線を追加</div>
-<div><b>bit5 / 下横線</b><br>0＝なし<br>1＝骨格下部を横切る線を追加</div>
-<div><b>bit6 / 中央の囲み</b><br>0＝なし<br>1＝中央に目・舟形の囲みを追加</div>
-<div><b>bit7 / 中央横線</b><br>0＝なし<br>1＝骨格中央を横切る線を追加</div>
-<div><b>bit8 / 下端の鉤</b><br>0＝なし<br>1＝主幹の下端に上向きの鉤を追加</div>
+<div><b>bit1 / 主幹</b><br>0＝湾曲した主幹 / 1＝直線主幹</div>
+<div><b>bit2 / 左副幹</b><br>0＝なし / 1＝あり</div>
+<div><b>bit3 / 右副幹</b><br>0＝なし / 1＝あり</div>
+<div><b>bit4 / 上横線</b><br>0＝なし / 1＝あり</div>
+<div><b>bit5 / 下横線</b><br>0＝なし / 1＝あり</div>
+<div><b>bit6 / 中央囲み</b><br>0＝なし / 1＝あり</div>
+<div><b>bit7 / 中央横線</b><br>0＝なし / 1＝あり</div>
+<div><b>bit8 / 下端鉤</b><br>0＝なし / 1＝あり</div>
 </div>
 <div class="step" style="margin-top:10px"><b>今回の骨格</b><br><span id="boneMeaning">-</span></div>
 <h2 style="margin-top:22px">周囲18本の意味</h2>
-<div class="legend"><div><b>bit1</b><br>0=短い / 1=長い</div><div><b>bit2</b><br>0=直線 / 1=湾曲</div><div><b>bit3</b><br>0=左へ曲がる / 1=右へ曲がる</div><div><b>bit4</b><br>0=点なし / 1=点あり</div></div>
-<p class="hint">直線のときもbit3は無駄にしない。直線の「傾く向き」として読む。つまり4bit全部が常に意味を持つ。</p>
+<div class="legend"><div><b>bit1</b><br>0＝短い / 1＝長い</div><div><b>bit2</b><br>0＝直線 / 1＝湾曲</div><div><b>bit3</b><br>0＝左側 / 1＝右側</div><div><b>bit4</b><br>0＝点なし / 1＝点あり</div></div>
+<p class="hint">ストローク番号01〜18は上から下への「高さ」だけを決める。左右はbit3だけが決める。湾曲線は左なら左向き、右なら右向きに同じ規則で描くため、余計な「曲がる向き」の情報は存在しない。</p>
 <div class="stroke-grid" id="strokeGrid"></div>
 <div class="field"><label>妹字コード</label><textarea id="glyphCode" rows="3"></textarea></div>
 <div class="row"><button id="decode">このコード＋読みで復号</button><button class="ghost" id="copy">コードをコピー</button></div>
 <div id="status" class="hint">未実行</div>
-<p class="warning">これは作品用の可逆符号。実用暗号ではない。0.5では中央骨格も情報を持つため、意味のない固定部品は存在しない。</p>
+<p class="warning">作品用の可逆符号。実用暗号ではない。コード12（1100）が連続した場合は、どちらも「長い・湾曲・左・点なし」として、異なる高さに左側へ並ぶ。</p>
 </section>
-<section class="panel"><h2>生成された妹字</h2><div class="stage" id="stage"></div><div class="meta"><div><small>READING</small><b id="mReading">-</b></div><div><small>CAPACITY</small><b>骨格8bit + 18線×4bit = 80bit</b></div><div><small>GLYPH CODE</small><b id="mCode">-</b></div><div><small>RESTORE</small><b id="mStatus">未実行</b></div></div><p class="hint">中央骨格の8bitにも意味がある。骨格コードを見れば、なぜ主幹が曲がるのか、なぜ横線や囲みが存在するのかまで追える。</p></section>
+<section class="panel"><h2>生成された妹字</h2><div class="stage" id="stage"></div><div class="meta"><div><small>READING</small><b id="mReading">-</b></div><div><small>CAPACITY</small><b>骨格8bit + 18線×4bit = 80bit</b></div><div><small>GLYPH CODE</small><b id="mCode">-</b></div><div><small>RESTORE</small><b id="mStatus">未実行</b></div></div><p class="hint">左右の偏りも暗号の結果。見栄えのための左右均等化はしない。</p></section>
 </div>
 </main>
 <script>
@@ -58,7 +58,7 @@ const TOTAL=80, STROKES=18;let state={cipher:'',cells:[],bone:0};
 function bits(n,w){return n.toString(2).padStart(w,'0')}
 function normalize(s){return s.trim().replace(/\s+/g,'　')}
 function codeOf(ch){const cp=ch.codePointAt(0);if(cp>=0x30A0&&cp<=0x30FF)return cp-0x30A0;if(ch==='、')return 96;if(ch==='。')return 97;if(ch==='　')return 98;throw new Error('使用できない文字: '+ch)}
-function charOf(n){if(n<=95)return String.fromCodePoint(0x30A0+n);if(n===96)return '、';if(n===97)return '。';if(n===98)return '　';throw new Error('復号値が範囲外')}
+function charOf(n){if(n>=0&&n<=95)return String.fromCodePoint(0x30A0+n);if(n===96)return '、';if(n===97)return '。';if(n===98)return '　';throw new Error('復号値が範囲外')}
 function pack(spell){const a=[...spell];if(a.length>10)throw new Error('10文字まで');let out=bits(a.length,4);for(const ch of a)out+=bits(codeOf(ch),7);return out.padEnd(TOTAL,'0')}
 function unpack(raw){const len=parseInt(raw.slice(0,4),2);if(len>10)throw new Error('長さ情報不正');let s='';for(let i=0;i<len;i++)s+=charOf(parseInt(raw.slice(4+i*7,11+i*7),2));return s}
 function hash32(str){let h=2166136261>>>0;for(const b of enc.encode(str)){h^=b;h=Math.imul(h,16777619)>>>0}return h>>>0}
@@ -67,14 +67,12 @@ function xor(a,b){let o='';for(let i=0;i<a.length;i++)o+=a[i]===b[i]?'0':'1';ret
 function feature(v){return `${v&8?'長':'短'}・${v&4?'湾曲':'直線'}・${v&2?'右':'左'}・${v&1?'点あり':'点なし'}`}
 function boneFeature(v){const b=bits(v,8);return `主幹=${b[0]==='1'?'直線':'湾曲'} / 左副幹=${b[1]==='1'?'あり':'なし'} / 右副幹=${b[2]==='1'?'あり':'なし'} / 上横線=${b[3]==='1'?'あり':'なし'} / 下横線=${b[4]==='1'?'あり':'なし'} / 中央囲み=${b[5]==='1'?'あり':'なし'} / 中央横線=${b[6]==='1'?'あり':'なし'} / 下端鉤=${b[7]==='1'?'あり':'なし'}`}
 function parseCipher(c){const bone=parseInt(c.slice(0,8),2),cells=[];for(let i=0;i<STROKES;i++)cells.push(parseInt(c.slice(8+i*4,12+i*4),2));return {bone,cells}}
-function boneSvg(v){let a=[];const L=(x1,y1,x2,y2)=>`<path d="M${x1} ${y1} L${x2} ${y2}"/>`,P=d=>`<path d="${d}"/>`;
-if(v&1)a.push(L(160,42,160,278));else a.push(P('M160 42 Q142 110 160 160 Q178 220 160 278'));
-if(v&2)a.push(L(142,48,142,270));if(v&4)a.push(L(178,48,178,270));if(v&8)a.push(L(125,92,195,92));if(v&16)a.push(L(125,220,195,220));if(v&32)a.push(P('M130 132 Q160 112 190 132 Q160 152 130 132'));if(v&64)a.push(L(128,160,192,160));if(v&128)a.push(P('M145 255 Q160 286 175 255'));return a.join('')}
-function strokeSvg(i,v){const left=i%2===0,row=Math.floor(i/2),side=left?-1:1,y=58+row*24,x0=160+side*(14+(row%3)*3),len=(v&8)?112:70,x1=160+side*len,curve=!!(v&4),dir=(v&2)?1:-1,dot=!!(v&1);let out='';if(curve){const cx=160+side*(len*.58),cy=y+dir*24;out+=`<path d="M${x0} ${y} Q${cx} ${cy} ${x1} ${y+dir*8}"/>`}else{out+=`<path d="M${x0} ${y} L${x1} ${y+dir*14}"/>`}if(dot)out+=`<circle cx="${x1+side*8}" cy="${y+dir*(curve?8:14)}" r="4" fill="#d6aa4e" stroke="none"/>`;return out}
+function boneSvg(v){let a=[];const L=(x1,y1,x2,y2)=>`<path d="M${x1} ${y1} L${x2} ${y2}"/>`,P=d=>`<path d="${d}"/>`;if(v&1)a.push(L(160,42,160,278));else a.push(P('M160 42 Q142 110 160 160 Q178 220 160 278'));if(v&2)a.push(L(142,48,142,270));if(v&4)a.push(L(178,48,178,270));if(v&8)a.push(L(125,92,195,92));if(v&16)a.push(L(125,220,195,220));if(v&32)a.push(P('M130 132 Q160 112 190 132 Q160 152 130 132'));if(v&64)a.push(L(128,160,192,160));if(v&128)a.push(P('M145 255 Q160 286 175 255'));return a.join('')}
+function strokeSvg(i,v){const side=(v&2)?1:-1;const y=48+i*(224/(STROKES-1));const x0=160+side*14;const len=(v&8)?112:70;const x1=160+side*len;const curve=!!(v&4);const dot=!!(v&1);let out='';if(curve){const cx=160+side*(len*.56);const cy=y-18;out+=`<path d="M${x0.toFixed(1)} ${y.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x1.toFixed(1)} ${y.toFixed(1)}"/>`}else{out+=`<path d="M${x0.toFixed(1)} ${y.toFixed(1)} L${x1.toFixed(1)} ${y.toFixed(1)}"/>`}if(dot)out+=`<circle cx="${(x1+side*8).toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#d6aa4e" stroke="none"/>`;return out}
 function glyph(bone,cells){let s=boneSvg(bone);cells.forEach((v,i)=>s+=strokeSvg(i,v));return `<svg viewBox="0 0 320 320"><g fill="none" stroke="#d6aa4e" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">${s}</g></svg>`}
-function render(cipher,reading){const p=parseCipher(cipher);state={cipher,cells:p.cells,bone:p.bone};$('#stage').innerHTML=glyph(p.bone,p.cells);$('#boneMeaning').textContent=`${bits(p.bone,8)} → ${boneFeature(p.bone)}`;$('#strokeGrid').innerHTML=p.cells.map((v,i)=>`<div class="stroke"><strong>${String(i+1).padStart(2,'0')} / ${bits(v,4)}</strong><span>${feature(v)}</span></div>`).join('');const code=[p.bone,...p.cells].join('-');$('#glyphCode').value=code;$('#mCode').textContent=code;$('#mReading').textContent=reading}
-function generate(){try{const spell=normalize($('#spell').value),reading=$('#reading').value.trim();const raw=pack(spell),key=keyStream(reading,TOTAL),cipher=xor(raw,key);render(cipher,reading);$('#pPlain').textContent=spell;$('#pRaw').textContent=raw;$('#pKey').textContent=key;$('#pCipher').textContent=cipher;$('#pCells').textContent=`骨格=${bits(parseInt(cipher.slice(0,8),2),8)} / `+state.cells.map(v=>bits(v,4)).join(' ');$('#status').textContent='生成済み';$('#mStatus').textContent='生成済み'}catch(e){alert(e.message)}}
-function decode(){try{const parts=$('#glyphCode').value.trim().split('-').map(Number);if(parts.length!==19)throw new Error('骨格1個＋18ストロークの19個必要');const cipher=bits(parts[0],8)+parts.slice(1).map(v=>bits(v,4)).join('');const key=keyStream($('#reading').value.trim(),TOTAL),raw=xor(cipher,key),spell=unpack(raw);$('#spell').value=spell;$('#status').textContent='復号: '+spell;$('#status').className='ok';$('#mStatus').textContent=spell;$('#mStatus').className='ok'}catch(e){$('#status').textContent='復号失敗: '+e.message;$('#mStatus').textContent='復号失敗'}}
+function render(cipher,reading){const p=parseCipher(cipher);state={cipher,cells:p.cells,bone:p.bone};$('#stage').innerHTML=glyph(p.bone,p.cells);$('#boneMeaning').textContent=`${bits(p.bone,8)} → ${boneFeature(p.bone)}`;$('#strokeGrid').innerHTML=p.cells.map((v,i)=>`<div class="stroke"><strong>${String(i+1).padStart(2,'0')} / ${bits(v,4)} / ${v}</strong><span>${feature(v)}</span></div>`).join('');const code=[p.bone,...p.cells].join('-');$('#glyphCode').value=code;$('#mCode').textContent=code;$('#mReading').textContent=reading}
+function generate(){try{const spell=normalize($('#spell').value),reading=$('#reading').value.trim();if(!reading)throw new Error('読みを入力してください');const raw=pack(spell),key=keyStream(reading,TOTAL),cipher=xor(raw,key);render(cipher,reading);$('#pPlain').textContent=spell;$('#pRaw').textContent=raw;$('#pKey').textContent=key;$('#pCipher').textContent=cipher;$('#pCells').textContent=`骨格=${bits(parseInt(cipher.slice(0,8),2),8)} / `+state.cells.map(v=>bits(v,4)).join(' ');$('#status').textContent='生成済み';$('#mStatus').textContent='生成済み'}catch(e){alert(e.message)}}
+function decode(){try{const parts=$('#glyphCode').value.trim().split('-').map(Number);if(parts.length!==19)throw new Error('骨格1個＋18ストロークの19個必要');if(parts.some((v,i)=>!Number.isInteger(v)||v<0||v>(i===0?255:15)))throw new Error('コード値が範囲外');const cipher=bits(parts[0],8)+parts.slice(1).map(v=>bits(v,4)).join('');const key=keyStream($('#reading').value.trim(),TOTAL),raw=xor(cipher,key),spell=unpack(raw);$('#spell').value=spell;$('#status').textContent='復号: '+spell;$('#status').className='ok';$('#mStatus').textContent=spell;$('#mStatus').className='ok'}catch(e){$('#status').textContent='復号失敗: '+e.message;$('#mStatus').textContent='復号失敗'}}
 $('#generate').onclick=generate;$('#decode').onclick=decode;$('#forget').onclick=()=>$('#spell').value='';$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#glyphCode').value);$('#status').textContent='コードをコピーした'}catch(e){}};generate();
 })();
 </script>
