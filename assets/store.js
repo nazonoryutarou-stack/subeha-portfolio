@@ -18,21 +18,21 @@
     <div class="real-store-grid" data-store-grid></div>
     <div class="store-note">
       <b>販売について</b>
-      <p>一点物は売約後に搬出済表示へ切り替えます。超常的効果を保証する商品ではありません。</p>
+      <p>受注生産品は決済確認後に制作します。一点物は売約後に搬出済表示へ切り替えます。超常的効果を保証する商品ではありません。</p>
     </div>`;
   main.prepend(section);
 
   const grid = section.querySelector('[data-store-grid]');
-  const key = cfg.stripePublishableKey || '';
-  const readyKey = key.startsWith('pk_');
 
   for (const product of (cfg.products || [])) {
     const article = document.createElement('article');
     article.className = 'store-product';
     article.dataset.productId = product.id;
+    const badge = product.madeToOrder ? '受注生産' : (product.leadTime === '一点物' ? '一点物' : '販売品');
     article.innerHTML = `
       <div class="store-product-index">${product.id}</div>
       <div class="store-product-body">
+        <div class="store-product-meta"><span class="store-product-badge">${badge}</span>${product.leadTime ? `<span>${product.leadTime}</span>` : ''}</div>
         <h2>${product.name}</h2>
         <p>${product.description || ''}</p>
       </div>
@@ -41,11 +41,13 @@
         <div class="store-buy-slot"></div>
       </div>`;
     const slot = article.querySelector('.store-buy-slot');
-    if (readyKey && product.buyButtonId) {
-      const buy = document.createElement('stripe-buy-button');
-      buy.setAttribute('buy-button-id', product.buyButtonId);
-      buy.setAttribute('publishable-key', key);
-      buy.setAttribute('client-reference-id', product.id);
+    if (product.paymentLink) {
+      const buy = document.createElement('a');
+      buy.className = 'store-buy-link';
+      buy.href = product.paymentLink;
+      buy.target = '_blank';
+      buy.rel = 'noopener noreferrer';
+      buy.textContent = '棚から取る';
       slot.append(buy);
     } else {
       const pending = document.createElement('button');
@@ -56,13 +58,5 @@
       slot.append(pending);
     }
     grid.append(article);
-  }
-
-  if (!document.querySelector('script[data-stripe-buy]')) {
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://js.stripe.com/v3/buy-button.js';
-    script.dataset.stripeBuy = '';
-    document.body.append(script);
   }
 })();
