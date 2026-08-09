@@ -4,73 +4,78 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>不氣屋アーケード｜すべての歯が見える</title>
+<title>不氣屋アーケード WIP 0.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#eee6dc;--dim:#8b827a;--line:#3a302b;--bg:#070807;--red:#ff3155;--cyan:#47f3df;--vio:#aa68ff;--serif:'Shippori Mincho B1',serif;--mono:'IBM Plex Mono',monospace}
-*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink)}body{font-family:var(--serif);touch-action:none}#c{position:fixed;inset:0;width:100%;height:100%;display:block}.grade{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.68) 100%),linear-gradient(180deg,rgba(20,8,30,.14),rgba(0,0,0,.2));mix-blend-mode:multiply}.grain{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.14;background-image:radial-gradient(circle,rgba(255,255,255,.22) 0 1px,transparent 1px);background-size:3px 3px;mix-blend-mode:overlay}.top{position:fixed;left:0;right:0;top:0;z-index:8;display:flex;align-items:center;gap:10px;padding:calc(9px + env(safe-area-inset-top)) 12px 8px;background:linear-gradient(180deg,rgba(5,6,6,.8),transparent);pointer-events:none}.top b{font-size:.84rem;letter-spacing:.18em}.top small{font:500 .48rem/1 var(--mono);letter-spacing:.2em;color:#a99c91}.top .sp{flex:1}.top button{pointer-events:auto;border:1px solid #5a4d46;background:rgba(8,8,8,.7);color:#ddd1c5;padding:7px 9px;font:500 .54rem var(--mono)}.hud{position:fixed;left:12px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:8;padding:9px 11px;border:1px solid rgba(140,120,105,.28);background:rgba(5,6,6,.62);backdrop-filter:blur(4px);font:.5rem/1.8 var(--mono);letter-spacing:.08em;color:#9f938a;pointer-events:none}.caption{position:fixed;right:12px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:8;width:min(48vw,360px);padding:10px 12px;border:1px solid rgba(110,97,89,.34);background:rgba(8,7,8,.73);backdrop-filter:blur(5px)}.caption b{font-size:.76rem;letter-spacing:.16em}.caption p{margin:6px 0 0;font-size:.62rem;line-height:1.8;color:#bbb0a6}.controls{position:fixed;left:0;right:0;bottom:calc(12px + env(safe-area-inset-bottom));z-index:10;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 12px}.controls button{min-height:54px;border:1px solid #4d423c;background:linear-gradient(180deg,rgba(28,21,22,.92),rgba(8,8,8,.92));color:#eee4d8;font:800 .76rem var(--serif);letter-spacing:.12em}.veil{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;background:radial-gradient(ellipse at center,#1f1520,#070807 70%)}.veil.off{display:none}.veil small{font:.54rem var(--mono);letter-spacing:.36em;color:#a18d87}.veil h1{margin:15px 0 8px;font-size:clamp(2.2rem,10vw,4.5rem);letter-spacing:.12em}.veil p{max-width:32em;font-size:.76rem;line-height:2;color:#b8aaa0}.veil button{margin-top:28px;border:1px solid #827168;background:#0a090a;color:#eee4d8;padding:14px 44px;font:800 .9rem var(--serif);letter-spacing:.25em}.neonLegend{display:flex;gap:6px;margin-top:14px}.neonLegend i{display:block;width:34px;height:2px;box-shadow:0 0 12px currentColor}.neonLegend i:nth-child(1){color:var(--red);background:var(--red)}.neonLegend i:nth-child(2){color:var(--cyan);background:var(--cyan)}.neonLegend i:nth-child(3){color:var(--vio);background:var(--vio)}
-@media(max-width:700px){.caption{width:54vw}.hud{display:none}.controls{grid-template-columns:repeat(4,1fr)}.controls button{font-size:.66rem;letter-spacing:.06em}}
+:root{--ink:#eee6dc;--dim:#95887e;--line:#4a3b35;--bg:#050606;--red:#ff3155;--cyan:#47f3df;--vio:#aa68ff;--serif:'Shippori Mincho B1',serif;--mono:'IBM Plex Mono',monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink)}body{font-family:var(--serif);touch-action:none}#c{position:fixed;inset:0;width:100%;height:100%;display:block}.grade{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at 50% 42%,transparent 30%,rgba(0,0,0,.72) 100%),linear-gradient(180deg,rgba(20,4,25,.08),rgba(0,0,0,.28));mix-blend-mode:multiply}.grain{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.11;background-image:radial-gradient(circle,rgba(255,255,255,.22) 0 1px,transparent 1px);background-size:3px 3px;mix-blend-mode:overlay}.top{position:fixed;z-index:8;left:0;right:0;top:0;display:flex;gap:10px;align-items:center;padding:calc(9px + env(safe-area-inset-top)) 12px 8px;background:linear-gradient(180deg,rgba(4,5,5,.9),transparent);pointer-events:none}.top small{font:500 .48rem var(--mono);letter-spacing:.2em;color:#a99c91}.top b{font-size:.86rem;letter-spacing:.17em}.top .sp{flex:1}.top button{pointer-events:auto;border:1px solid #5d4b43;background:rgba(8,8,8,.78);color:#ddd1c5;padding:7px 9px;font:500 .54rem var(--mono)}.readout{position:fixed;z-index:8;left:12px;top:calc(48px + env(safe-area-inset-top));font:500 .5rem/1.75 var(--mono);letter-spacing:.08em;color:#a79a90;text-shadow:0 1px 6px #000;pointer-events:none}.caption{position:fixed;z-index:8;right:12px;bottom:calc(88px + env(safe-area-inset-bottom));width:min(55vw,350px);padding:10px 12px;border:1px solid rgba(100,85,78,.4);background:rgba(7,7,8,.76);backdrop-filter:blur(5px)}.caption b{font-size:.76rem;letter-spacing:.15em}.caption p{margin:5px 0 0;color:#b9aea4;font-size:.61rem;line-height:1.8}.controls{position:fixed;z-index:10;left:0;right:0;bottom:calc(12px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 12px}.controls button{min-height:56px;border:1px solid #4d423c;background:linear-gradient(180deg,rgba(30,21,22,.94),rgba(7,7,8,.94));color:#eee4d8;font:800 .72rem var(--serif);letter-spacing:.08em;touch-action:none}.controls button.is-held{background:#eee4d8;color:#160f10}.veil{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;background:radial-gradient(ellipse at center,#211420,#050606 72%)}.veil.off{display:none}.veil small{font:.52rem var(--mono);letter-spacing:.32em;color:#a18d87}.veil h1{margin:14px 0 8px;font-size:clamp(2.2rem,10vw,4.4rem);letter-spacing:.11em}.veil p{max-width:31em;font-size:.76rem;line-height:2;color:#b9aaa1}.veil button{margin-top:26px;border:1px solid #827168;background:#090808;color:#eee4d8;padding:14px 44px;font:800 .9rem var(--serif);letter-spacing:.24em}.meter{margin-top:16px;font:500 .52rem var(--mono);color:#8f8178;letter-spacing:.08em}.error{color:#ff9aa7}
+@media(max-width:700px){.readout{font-size:.46rem}.caption{width:58vw}.controls button{font-size:.66rem}}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas><div class="grade"></div><div class="grain"></div>
-<div class="top"><small>BUKIYA ARCADE / WIP 0.1</small><b>不氣屋アーケード</b><span class="sp"></span><button id="reset">視点戻</button></div>
-<div class="hud">ドラッグ：見る<br>ホイール：寄る / 引く<br>前後：店を送る<br>アーケード幅：狭い</div>
-<div class="caption"><b id="name">不氣屋 仮店舗</b><p id="whisper">何のための配管か、誰も説明できない。</p></div>
-<div class="controls"><button id="prev">前</button><button id="next">次</button><button id="left">左列</button><button id="right">右列</button></div>
-<div class="veil" id="veil"><small>観測所・余興 / 改装中</small><h1>不氣屋アーケード</h1><p>狭い。汚い。天井は低い。<br>看板は半分死んでいて、配管はどこにも繋がっていない。<br>それでも店だけは、まだ残っている。</p><div class="neonLegend"><i></i><i></i><i></i></div><button id="enter">入る</button></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-(()=>{
-if(!window.THREE)return;
-const cv=document.getElementById('c');
-const r=new THREE.WebGLRenderer({canvas:cv,antialias:true});r.setPixelRatio(Math.min(2,devicePixelRatio||1));r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=.9;if(THREE.sRGBEncoding)r.outputEncoding=THREE.sRGBEncoding;
-const s=new THREE.Scene();s.background=new THREE.Color(0x060707);s.fog=new THREE.Fog(0x0b0a0c,8,62);
-const cam=new THREE.PerspectiveCamera(47,1,.1,120);
-const resize=()=>{r.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()};addEventListener('resize',resize);resize();
-const std=(c,rough=.92,metal=.04,extra={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:rough,metalness:metal},extra));
+<div class="top"><small>BUKIYA ARCADE / WIP 0.2</small><b>不氣屋アーケード</b><span class="sp"></span><button id="reset">視点戻</button></div>
+<div class="readout" id="readout">実寸基準：1 unit = 1 m<br>人物：185 cm<br>通路幅：約3.6 m<br>天井高：約4.15 m</div>
+<div class="caption"><b id="shopName">妹字屋</b><p id="shopText">読める。意味は、まだ読めない。</p></div>
+<div class="controls"><button id="back">後退</button><button id="forward">前進</button><button id="turnL">左を見る</button><button id="turnR">右を見る</button></div>
+<div class="veil" id="veil"><small>観測所・余興 / 改装中</small><h1>不氣屋アーケード</h1><p>視点と建物を実寸寄りに組み直した。<br>185cmの制作者本人を歩かせて、店の大きさを測る。<br>狭い。汚い。配管は相変わらず意味がない。</p><div class="meter" id="loadState">3Dモデル：約2.4MB</div><button id="enter">入る</button></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.88;renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x050607);scene.fog=new THREE.Fog(0x09090b,7,44);
+const camera=new THREE.PerspectiveCamera(52,1,.05,100);
+const resize=()=>{renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()};addEventListener('resize',resize);resize();
+const mat=(c,r=.92,m=.03)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const box=(w,h,d,m)=>new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);
-const cyl=(a,b,h,n,m)=>new THREE.Mesh(new THREE.CylinderGeometry(a,b,h,n||10),m);
-const lineMat=c=>new THREE.MeshStandardMaterial({color:c,emissive:new THREE.Color(c),emissiveIntensity:1.5,roughness:.5,metalness:.1});
-const dirty=(base)=>{const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');g.fillStyle=base;g.fillRect(0,0,512,512);for(let i=0;i<1800;i++){g.fillStyle=`rgba(${Math.random()<.5?'0,0,0':'255,255,255'},${Math.random()*.05})`;g.fillRect(Math.random()*512,Math.random()*512,1+Math.random()*18,1+Math.random()*3)}for(let i=0;i<30;i++){g.fillStyle=`rgba(60,35,25,${.03+Math.random()*.08})`;g.fillRect(Math.random()*500,280+Math.random()*220,6+Math.random()*25,30+Math.random()*140)}const t=new THREE.CanvasTexture(c);if(THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;return t};
-const signTex=(text,bg,fg)=>{const c=document.createElement('canvas');c.width=640;c.height=180;const g=c.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,c.width,c.height);g.fillStyle=fg;g.textAlign='center';g.textBaseline='middle';g.font="800 64px 'Shippori Mincho B1',serif";g.fillText(text,320,92);for(let i=0;i<140;i++){g.fillStyle=`rgba(0,0,0,${Math.random()*.1})`;g.fillRect(Math.random()*640,Math.random()*180,Math.random()*15,1)}const t=new THREE.CanvasTexture(c);if(THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;return t};
-const stores=[
-['不氣屋 仮店舗','#171311','#8d6930','#f4d99b','何のための配管か、誰も説明できない。'],
-['妹字屋','#171015','#5a315f','#ffd2fb','読める。意味は、まだ読めない。'],
-['ヤニヴ','#181410','#6b3d26','#ffb37c','店内より灰皿の方が多い。'],
-['理論堂','#11161a','#234f55','#9ffbf1','説明は増えたが、納得は減った。'],
-['空店舗','#161616','#3d3b39','#9b918b','閉店理由だけが貼られていない。'],
-['妹字材料','#15120f','#554529','#ead39b','黒い紙と金だけは、いつでも足りない。'],
-['壊傘','#141518','#33385d','#b9c8ff','壊れたものだけを、壊れていない顔で売る。'],
-['祭祀具','#15100f','#5b222d','#ff9aa7','効能より先に、置いた時の気配を考える。']
-];
-const arcade=new THREE.Group();s.add(arcade);
-const road=box(4.2,.12,110,std(0x242322,.98,0));road.position.y=-.06;arcade.add(road);
-const walkL=box(1.5,.16,110,std(0x4a4540,.98,0));walkL.position.set(-2.75,0,0);arcade.add(walkL);const walkR=walkL.clone();walkR.position.x=2.75;arcade.add(walkR);
-// low translucent arcade roof
-const roof=box(7.3,.12,110,new THREE.MeshStandardMaterial({color:0x2e3033,transparent:true,opacity:.28,roughness:.35,metalness:.18,side:THREE.DoubleSide}));roof.position.y=5.9;arcade.add(roof);
-for(let z=-52;z<=52;z+=5.5){const rib=box(7.1,.12,.16,std(0x3b3c3d,.75,.18));rib.position.set(0,5.82,z);arcade.add(rib)}
-function addPipe(side,z,seed){const g=new THREE.Group();const x=side*3.22;const col=[0x5d5a55,0x6b4a3d,0x455a59][seed%3];for(let i=0;i<3+(seed%4);i++){const p=cyl(.035,.035,2.2+(i%3)*.7,8,std(col,.78,.18));p.position.set(x+side*(.08*i),2.7+(i%2)*.7,z-2.6+i*.9);p.rotation.z=(i%2?.18:-.12)*side;g.add(p)}for(let j=0;j<2;j++){const q=cyl(.03,.03,2.2,8,std(col,.78,.18));q.rotation.z=Math.PI/2;q.position.set(x+side*.05,3.4+j*.8,z-1.2+j*1.9);g.add(q)}arcade.add(g)}
-function addNeon(side,z,idx){const colors=[0xff3155,0x47f3df,0xaa68ff];const c=colors[idx%3];const bar=box(.12,.12,1.9,lineMat(c));bar.position.set(side*2.92,3.35,z+2.7);bar.rotation.x=.2*(idx%2?-1:1);arcade.add(bar);const pl=new THREE.PointLight(c,.8,6);pl.position.set(side*2.5,3.2,z+2.7);arcade.add(pl);pl.userData={seed:idx*7.13};neons.push(pl)}
-const neons=[];const anchors=[];const gap=7.4;const start=-26;
-for(let i=0;i<stores.length;i++){
- const z=start+i*gap;for(const side of [-1,1]){const d=stores[(i+(side>0?3:0))%stores.length];const g=new THREE.Group();arcade.add(g);const wall=new THREE.MeshStandardMaterial({map:dirty(d[1]),roughness:.98,metalness:.01});const b=box(2.6,5.5,6.6,wall);b.position.set(side*4.0,2.75,z);g.add(b);const shutter=box(.12,2.2,3.3,std(0x53504c,.9,.1));shutter.position.set(side*2.65,1.2,z);g.add(shutter);for(let sy=0;sy<9;sy++){const sl=box(.08,.03,3.18,std(0x272626,.9,.04));sl.position.set(side*2.56,.3+sy*.23,z);g.add(sl)}const sign=box(.25,.88,4.7,std(parseInt(d[2].slice(1),16),.82,.04));sign.position.set(side*2.58,4.08,z);g.add(sign);const face=new THREE.Mesh(new THREE.PlaneGeometry(4.5,.75),new THREE.MeshBasicMaterial({map:signTex(d[0],d[2],d[3]),side:THREE.DoubleSide}));face.position.set(side*2.43,4.08,z);face.rotation.y=side<0?Math.PI/2:-Math.PI/2;g.add(face);for(let j=0;j<3;j++){const crate=box(.55,.36,.55,std(0x46392f,.96,.01));crate.position.set(side*2.25,.2+j*.22,z-2.1+j*.45);g.add(crate)}addPipe(side,z,i+(side>0?11:0));if((i+side+5)%2===0)addNeon(side,z,i+(side>0?4:0));anchors.push({side,z,name:d[0],whisper:d[4],target:new THREE.Vector3(side*2.55,2.0,z)});g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}})}
-}
-// hanging meaningless service cables
-for(let z=-42;z<44;z+=9){for(let k=0;k<3;k++){const p=cyl(.022,.022,5.8,6,std(k===0?0x493f3d:0x303638,.82,.15));p.rotation.z=Math.PI/2;p.position.set(0,4.9-k*.22,z+k*.3);arcade.add(p)}}
-const hemi=new THREE.HemisphereLight(0x5d6070,0x1c1518,.35);s.add(hemi);const amb=new THREE.AmbientLight(0x30272e,.42);s.add(amb);for(let z=-40;z<45;z+=13){const l=new THREE.PointLight(0xd4c0a8,.45,10);l.position.set(0,5.2,z);s.add(l)}
-let idx=0,side=-1,drag=false,lx=0,ly=0,yaw=0,pitch=.08,dist=6.3;const target=new THREE.Vector3(),curT=new THREE.Vector3(),curP=new THREE.Vector3();
-const getA=()=>anchors.find(a=>a.side===side&&Math.abs(a.z-(start+idx*gap))<.1)||anchors[0];
-function updateCaption(){const a=getA();document.getElementById('name').textContent=a.name;document.getElementById('whisper').textContent=a.whisper}
-function sph(t,y,p,d){const cp=Math.cos(p);return new THREE.Vector3(t.x+Math.cos(y)*d*cp,t.y+Math.sin(p)*d,t.z+Math.sin(y)*d*cp)}
-function baseYaw(){return side<0?-.42:Math.PI+.42}
-function reset(){yaw=0;pitch=.08;dist=6.3}
-document.getElementById('reset').onclick=reset;document.getElementById('prev').onclick=()=>{idx=Math.max(0,idx-1);reset();updateCaption()};document.getElementById('next').onclick=()=>{idx=Math.min(stores.length-1,idx+1);reset();updateCaption()};document.getElementById('left').onclick=()=>{side=-1;reset();updateCaption()};document.getElementById('right').onclick=()=>{side=1;reset();updateCaption()};
-cv.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;yaw+=dx*.005;pitch=Math.max(-.02,Math.min(.32,pitch-dy*.003))});cv.addEventListener('pointerup',()=>drag=false);addEventListener('wheel',e=>{dist=Math.max(4.1,Math.min(9.4,dist+e.deltaY*.004))},{passive:true});
-let running=false;function anim(t){if(!running)return;const a=getA();target.copy(a.target);curT.lerp(target,.09);const dp=sph(curT,baseYaw()+yaw,pitch,dist);curP.lerp(dp,.085);cam.position.copy(curP);cam.lookAt(curT);neons.forEach((n,i)=>{const f=Math.sin(t*.007+n.userData.seed)*Math.sin(t*.0023+n.userData.seed*1.7);n.intensity=f>-.35?.45+(i%3)*.18:.04});r.render(s,cam);requestAnimationFrame(anim)}
-updateCaption();const a0=getA();curT.copy(a0.target);curP.copy(sph(curT,baseYaw(),pitch,dist));cam.position.copy(curP);cam.lookAt(curT);r.render(s,cam);
-document.getElementById('enter').onclick=()=>{document.getElementById('veil').classList.add('off');running=true;requestAnimationFrame(anim)};
-})();
+const cyl=(r,h,m)=>new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,8),m);
+const add=(o,x,y,z)=>{o.position.set(x,y,z);scene.add(o);return o};
+scene.add(new THREE.HemisphereLight(0x87738e,0x171312,.7));
+const key=new THREE.DirectionalLight(0x8d6b5d,.65);key.position.set(-3,7,4);scene.add(key);
+
+// 1 unit = 1 metre. Human scale is calibrated to 1.85 m after loading.
+const FLOOR_Y=0, PASSAGE_HALF=1.8, SHOP_FRONT=2.0, ROOF_Y=4.15;
+add(box(PASSAGE_HALF*2,.08,100,mat(0x282625,.98,0)),0,-.04,-18);
+add(box(.16,.12,100,mat(0x55504b,.98,0)),-PASSAGE_HALF,.04,-18);add(box(.16,.12,100,mat(0x55504b,.98,0)),PASSAGE_HALF,.04,-18);
+const roof=add(box(4.15,.08,100,new THREE.MeshStandardMaterial({color:0x2e3033,transparent:true,opacity:.35,roughness:.42,metalness:.16})),0,ROOF_Y,-18);
+for(let z=-65;z<30;z+=3.4)add(box(4.05,.09,.12,mat(0x3d3d3f,.8,.18)),0,ROOF_Y-.05,z);
+
+function texSign(text,bg,fg){const c=document.createElement('canvas');c.width=600;c.height=180;const g=c.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,600,180);for(let i=0;i<120;i++){g.fillStyle=`rgba(0,0,0,${Math.random()*.12})`;g.fillRect(Math.random()*600,Math.random()*180,2+Math.random()*22,1+Math.random()*2)}g.fillStyle=fg;g.font="800 64px 'Shippori Mincho B1',serif";g.textAlign='center';g.textBaseline='middle';g.fillText(text,300,92);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t}
+const shops=[['妹字屋','#2c182f','#ffd0f2','読める。意味は、まだ読めない。'],['ヤニヴ','#613423','#ffb986','灰皿の数だけは信用できる。'],['理論堂','#163f42','#a6fff4','説明は増えたが、納得は減った。'],['空店舗','#363332','#aea49d','閉店理由だけが貼られていない。'],['祭祀具','#5b222d','#ff9baa','効能より、置いた時の気配。'],['壊傘','#30375d','#c5d0ff','壊れたものだけが整然と並ぶ。']];
+const shopCenters=[];
+function storefront(side,z,data,idx){const x=side*3.0;const body=add(box(2.0,4.0,6.0,mat(0x171515,.97,.01)),x,2.0,z);body.castShadow=body.receiveShadow=true;const frontX=side*SHOP_FRONT;const shutter=add(box(.10,2.05,3.25,mat(0x4b4948,.9,.12)),frontX,1.05,z);for(let y=.2;y<2;y+=.21)add(box(.055,.025,3.1,mat(0x232223,.9,.05)),frontX-side*.06,y,z);const sign=add(box(.18,.72,4.4,mat(parseInt(data[1].slice(1),16),.78,.05)),frontX,3.18,z);const face=new THREE.Mesh(new THREE.PlaneGeometry(4.2,.62),new THREE.MeshBasicMaterial({map:texSign(data[0],data[1],data[2]),side:THREE.DoubleSide}));face.position.set(frontX-side*.10,3.18,z);face.rotation.y=side<0?Math.PI/2:-Math.PI/2;scene.add(face);
+// dirty crates and bins at actual human scale
+for(let j=0;j<2+(idx%3);j++)add(box(.45,.32,.48,mat(0x41342d,.96,.01)),side*1.63,.16+j*.18,z-1.85+j*.48);
+// pipes: intentionally excessive, but with plausible diameters 5-9cm
+for(let p=0;p<4+(idx%3);p++){const pipe=cyl(.035+(p%2)*.012,2.2+(p%3)*.35,mat(p%2?0x5b5550:0x495957,.78,.22));pipe.position.set(side*(1.92+.08*p),2.25+(p%2)*.38,z-2.3+p*.78);pipe.rotation.z=side*(p%2?.12:-.08);scene.add(pipe)}
+if(idx%2===0){const c=[0xff3155,0x47f3df,0xaa68ff][idx%3];const n=add(box(.08,.08,1.25,new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:2.2,roughness:.45})),side*1.87,2.6,z+2.25);n.rotation.x=.18;const pl=new THREE.PointLight(c,.55,4.5);pl.position.set(side*1.5,2.5,z+2.2);pl.userData.seed=idx*3.7;scene.add(pl);neons.push(pl)}
+shopCenters.push({z,side,name:data[0],text:data[3]});}
+const neons=[];let idx=0;for(let z=18;z>-64;z-=6.7){storefront(-1,z,shops[idx%shops.length],idx);storefront(1,z,shops[(idx+3)%shops.length],idx+1);idx++}
+// overhead pipes and cables lower than the roof, forcing a cramped feeling
+for(let z=20;z>-64;z-=7.2){for(let k=0;k<3;k++){const p=cyl(.025+k*.008,3.7,mat(k===1?0x58433b:0x30383a,.78,.18));p.rotation.z=Math.PI/2;p.position.set(0,3.55-k*.18,z+k*.18);scene.add(p)}}
+
+let player=new THREE.Group();scene.add(player);player.position.set(0,0,15);let vrmRoot=null,bones={},baseRot={};
+const modelUrl=(location.hostname.endsWith('github.io')?'/subeha-portfolio':'')+'/subeha-web-site.vrm';
+const loader=new GLTFLoader();
+function findBone(root,patterns){let found=null;root.traverse(o=>{if(found)return;const n=(o.name||'').toLowerCase().replace(/[^a-z0-9]/g,'');if(o.isBone&&patterns.some(p=>n.includes(p)))found=o});return found}
+async function loadModel(){const gltf=await loader.loadAsync(modelUrl);vrmRoot=gltf.scene;const bounds=new THREE.Box3().setFromObject(vrmRoot),size=bounds.getSize(new THREE.Vector3());const scale=1.85/Math.max(.001,size.y);vrmRoot.scale.setScalar(scale);vrmRoot.updateMatrixWorld(true);const b2=new THREE.Box3().setFromObject(vrmRoot);const min=b2.min;vrmRoot.position.y-=min.y;vrmRoot.rotation.y=Math.PI;player.add(vrmRoot);vrmRoot.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+bones={lUL:findBone(vrmRoot,['jbiplupperleg','leftupperleg']),rUL:findBone(vrmRoot,['jbiprupperleg','rightupperleg']),lLL:findBone(vrmRoot,['jbipllowerleg','leftlowerleg']),rLL:findBone(vrmRoot,['jbiprlowerleg','rightlowerleg']),lUA:findBone(vrmRoot,['jbiplupperarm','leftupperarm']),rUA:findBone(vrmRoot,['jbiprupperarm','rightupperarm']),hips:findBone(vrmRoot,['jbipc hips'.replace(/ /g,''),'hips'])};Object.entries(bones).forEach(([k,b])=>{if(b)baseRot[k]=b.rotation.clone()});document.getElementById('loadState').textContent='185cmに実寸補正済み';}
+loadModel().catch(e=>{console.error(e);document.getElementById('loadState').innerHTML='<span class="error">VRM読込失敗。街だけ表示する。</span>'});
+
+let moving=0,lookYaw=0,targetLookYaw=0,pitch=.04,camDist=3.4,walkT=0,started=false,drag=false,lastX=0,lastY=0;
+function poseWalk(speed,dt){if(!vrmRoot)return;walkT+=dt*(speed?7.5:2);const a=speed?Math.sin(walkT)*.52:Math.sin(walkT*.35)*.02;const arm=-a*.72;const set=(b,base,x=0,y=0,z=0)=>{if(!b||!base)return;b.rotation.set(base.x+x,base.y+y,base.z+z)};set(bones.lUL,baseRot.lUL,a);set(bones.rUL,baseRot.rUL,-a);set(bones.lLL,baseRot.lLL,Math.max(0,-a)*.62);set(bones.rLL,baseRot.rLL,Math.max(0,a)*.62);set(bones.lUA,baseRot.lUA,arm);set(bones.rUA,baseRot.rUA,-arm);if(bones.hips&&baseRot.hips)bones.hips.position.y=Math.abs(Math.sin(walkT*2))*.018;}
+function nearestShop(){let best=shopCenters[0],d=1e9;for(const q of shopCenters){const dd=Math.abs(q.z-player.position.z);if(dd<d){d=dd;best=q}}document.getElementById('shopName').textContent=best.name;document.getElementById('shopText').textContent=best.text;}
+function bindHold(id,val){const b=document.getElementById(id);const on=e=>{e.preventDefault();moving=val;b.classList.add('is-held')};const off=e=>{e.preventDefault();if(moving===val)moving=0;b.classList.remove('is-held')};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off)}
+bindHold('forward',1);bindHold('back',-1);document.getElementById('turnL').onclick=()=>targetLookYaw=Math.max(-1.1,targetLookYaw-.35);document.getElementById('turnR').onclick=()=>targetLookYaw=Math.min(1.1,targetLookYaw+.35);document.getElementById('reset').onclick=()=>{targetLookYaw=0;pitch=.04;camDist=3.4};
+canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY});canvas.addEventListener('pointermove',e=>{if(!drag)return;targetLookYaw+= (e.clientX-lastX)*.006;pitch-= (e.clientY-lastY)*.003;targetLookYaw=THREE.MathUtils.clamp(targetLookYaw,-1.2,1.2);pitch=THREE.MathUtils.clamp(pitch,-.06,.28);lastX=e.clientX;lastY=e.clientY});canvas.addEventListener('pointerup',()=>drag=false);canvas.addEventListener('pointercancel',()=>drag=false);addEventListener('wheel',e=>{camDist=THREE.MathUtils.clamp(camDist+e.deltaY*.004,2.6,5.8)},{passive:true});
+addEventListener('keydown',e=>{if(e.key==='w'||e.key==='ArrowUp')moving=1;if(e.key==='s'||e.key==='ArrowDown')moving=-1;if(e.key==='a'||e.key==='ArrowLeft')targetLookYaw-=.16;if(e.key==='d'||e.key==='ArrowRight')targetLookYaw+=.16});addEventListener('keyup',e=>{if(['w','s','ArrowUp','ArrowDown'].includes(e.key))moving=0});
+
+const clock=new THREE.Clock();function animate(t){requestAnimationFrame(animate);if(!started)return;const dt=Math.min(clock.getDelta(),.05);if(moving){player.position.z-=moving*1.15*dt;player.position.z=THREE.MathUtils.clamp(player.position.z,-60,20);nearestShop()}poseWalk(moving,dt);lookYaw=THREE.MathUtils.lerp(lookYaw,targetLookYaw,.1);const followZ=player.position.z+camDist;const cx=Math.sin(lookYaw)*camDist*.8;camera.position.lerp(new THREE.Vector3(cx,1.58+Math.sin(pitch)*.55,followZ),.12);camera.lookAt(player.position.x+Math.sin(lookYaw)*1.4,1.20+pitch,player.position.z-1.05);for(const n of neons)n.intensity=.38+.28*(Math.sin(t*.008+n.userData.seed)>.12?1:.12);renderer.render(scene,camera)}requestAnimationFrame(animate);
+document.getElementById('enter').onclick=()=>{document.getElementById('veil').classList.add('off');started=true;clock.start();nearestShop()};
 </script>
 </body>
 </html>
