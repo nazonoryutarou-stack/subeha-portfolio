@@ -7,162 +7,28 @@
 <meta name="robots" content="noindex,nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --ink:#e9e6de;--mid:#8c897f;--dim:#4a473f;--line:#262420;--shu:#9e3a32;
-    --serif:'Shippori Mincho B1',serif;--mono:'IBM Plex Mono',monospace;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{background:#000;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
-  body{
-    font-family:var(--serif);color:var(--ink);min-height:100svh;
-    padding:26px 16px calc(40px + env(safe-area-inset-bottom,0px));
-    max-width:560px;margin:0 auto;
-  }
-  header{text-align:center;margin-bottom:22px;}
-  header .k{font-family:var(--mono);font-size:.5rem;letter-spacing:.34em;color:var(--dim);}
-  header h1{font-size:1.4rem;font-weight:700;letter-spacing:.4em;text-indent:.4em;margin-top:8px;}
-  header .sub{font-family:var(--mono);font-size:.5rem;letter-spacing:.26em;color:var(--mid);margin-top:8px;}
-  label{display:block;font-family:var(--mono);font-size:.52rem;letter-spacing:.2em;color:var(--mid);margin:16px 0 6px;}
-  input{
-    width:100%;background:#0c0c0b;border:1px solid var(--line);color:var(--ink);
-    font-family:var(--serif);font-size:1rem;padding:11px 12px;outline:none;
-  }
-  .row{display:flex;gap:10px;}
-  .row>div{flex:1;}
-  .opts{display:flex;gap:8px;margin-top:8px;}
-  .opt{
-    flex:1;font-family:var(--mono);font-size:.54rem;letter-spacing:.16em;
-    color:var(--mid);background:rgba(12,12,11,.9);border:1px solid var(--line);
-    padding:11px 4px;cursor:pointer;touch-action:manipulation;
-  }
-  .opt.on{color:var(--ink);border-color:var(--mid);}
-  .btns{display:flex;gap:10px;margin-top:18px;}
-  button.act{
-    flex:1;font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;
-    color:var(--ink);background:rgba(12,12,11,.9);border:1px solid var(--mid);
-    padding:14px 6px;cursor:pointer;touch-action:manipulation;
-  }
-  button.act:active{background:var(--ink);color:#000;}
-  button.shu{border:3px double var(--shu);color:#d9695f;}
-  button.gold{border:1px solid #8a734a;color:#c9a86a;}
-  button:disabled{opacity:.3;}
-  #stat{font-family:var(--mono);font-size:.52rem;letter-spacing:.14em;color:var(--mid);text-align:center;min-height:2.2em;margin-top:12px;line-height:1.8;}
-  #out{margin-top:24px;text-align:center;}
-  #fudaimg{
-    width:100%;max-width:420px;border:1px solid var(--line);
-    box-shadow:0 8px 40px rgba(0,0,0,.7);display:none;
-  }
-  #savebtns{display:none;margin-top:14px;}
-  #oracle{display:none;margin-top:26px;border:1px solid var(--line);padding:16px 10px;}
-  #oracle .ttl{font-family:var(--mono);font-size:.54rem;letter-spacing:.26em;color:#c9a86a;text-align:center;}
-  #oracle .sub2{font-family:var(--mono);font-size:.46rem;letter-spacing:.14em;color:var(--dim);text-align:center;margin:8px 0 14px;line-height:1.9;}
-  #ogrid{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
-  .oc{
-    width:54px;border:1px solid var(--line);background:#0b0b0a;
-    padding:7px 2px 5px;text-align:center;
-  }
-  .oc .ch{font-size:1.45rem;line-height:1.3;color:var(--ink);font-family:serif;}
-  .oc .cp{font-family:var(--mono);font-size:.38rem;letter-spacing:.04em;color:var(--dim);margin-top:3px;}
-  .note{
-    margin-top:30px;border:1px solid var(--line);padding:14px;
-    font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;color:var(--mid);line-height:2.1;
-  }
-  .note b{color:var(--ink);font-weight:400;}
+  :root{--ink:#e9e6de;--mid:#8c897f;--dim:#4a473f;--line:#262420;--shu:#9e3a32;--serif:'Shippori Mincho B1',serif;--mono:'IBM Plex Mono',monospace;}
+  *{margin:0;padding:0;box-sizing:border-box;}html,body{background:#000;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  body{font-family:var(--serif);color:var(--ink);min-height:100svh;padding:26px 16px calc(40px + env(safe-area-inset-bottom,0px));max-width:560px;margin:0 auto;}
+  header{text-align:center;margin-bottom:22px;}header .k{font-family:var(--mono);font-size:.5rem;letter-spacing:.34em;color:var(--dim);}header h1{font-size:1.4rem;font-weight:700;letter-spacing:.4em;text-indent:.4em;margin-top:8px;}header .sub{font-family:var(--mono);font-size:.5rem;letter-spacing:.26em;color:var(--mid);margin-top:8px;}
+  label{display:block;font-family:var(--mono);font-size:.52rem;letter-spacing:.2em;color:var(--mid);margin:16px 0 6px;}input{width:100%;background:#0c0c0b;border:1px solid var(--line);color:var(--ink);font-family:var(--serif);font-size:1rem;padding:11px 12px;outline:none;}
+  .row{display:flex;gap:10px}.row>div{flex:1}.opts{display:flex;gap:8px;margin-top:8px}.opt{flex:1;font-family:var(--mono);font-size:.54rem;letter-spacing:.16em;color:var(--mid);background:rgba(12,12,11,.9);border:1px solid var(--line);padding:11px 4px;cursor:pointer;touch-action:manipulation}.opt.on{color:var(--ink);border-color:var(--mid)}
+  .btns{display:flex;gap:10px;margin-top:18px}button.act{flex:1;font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;color:var(--ink);background:rgba(12,12,11,.9);border:1px solid var(--mid);padding:14px 6px;cursor:pointer;touch-action:manipulation}button.act:active{background:var(--ink);color:#000}button.shu{border:3px double var(--shu);color:#d9695f}button.gold{border:1px solid #8a734a;color:#c9a86a}button:disabled{opacity:.3}
+  #stat{font-family:var(--mono);font-size:.52rem;letter-spacing:.14em;color:var(--mid);text-align:center;min-height:2.2em;margin-top:12px;line-height:1.8}#out{margin-top:24px;text-align:center}#fudaimg{width:100%;max-width:420px;border:1px solid var(--line);box-shadow:0 8px 40px rgba(0,0,0,.7);display:none}#savebtns{display:none;margin-top:14px}
+  #oracle{display:none;margin-top:26px;border:1px solid var(--line);padding:16px 10px}#oracle .ttl{font-family:var(--mono);font-size:.54rem;letter-spacing:.26em;color:#c9a86a;text-align:center}#oracle .sub2{font-family:var(--mono);font-size:.46rem;letter-spacing:.14em;color:var(--dim);text-align:center;margin:8px 0 14px;line-height:1.9}#ogrid{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.oc{width:54px;border:1px solid var(--line);background:#0b0b0a;padding:7px 2px 5px;text-align:center}.oc .ch{font-size:1.45rem;line-height:1.3;color:var(--ink);font-family:serif}.oc .cp{font-family:var(--mono);font-size:.38rem;letter-spacing:.04em;color:var(--dim);margin-top:3px}
+  .note{margin-top:30px;border:1px solid var(--line);padding:14px;font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;color:var(--mid);line-height:2.1}.note b{color:var(--ink);font-weight:400}
 </style>
 </head>
 <body>
-
-<header>
-  <div class="k">第〇九一號観測所　──　非公開</div>
-  <h1>札所</h1>
-  <div class="sub">極彩・蠢海　／　絵は窯、字は籤、筆はお前</div>
-</header>
-
-<label>依頼者の名（札には載らない。瞳の色と万象の種になる）</label>
-<input type="text" id="f_name" placeholder="例：山田螢">
-
-<label>視た事柄・障り（同じく種に練り込む）</label>
-<input type="text" id="f_koto" placeholder="例：家の北側の気配">
-
-<div class="row">
-  <div>
-    <label>整理番号（数字）</label>
-    <input type="number" id="f_no" value="1" min="1" max="999">
-  </div>
-  <div>
-    <label>動の寸法</label>
-    <div class="opts" style="margin-top:0;">
-      <button class="opt" id="sz540" type="button">小</button>
-      <button class="opt on" id="sz720" type="button">中</button>
-      <button class="opt" id="sz1080" type="button">特大</button>
-    </div>
-  </div>
-</div>
-
-<div class="btns">
-  <button class="act" id="btnStill" type="button">静の札を結ぶ</button>
-  <button class="act shu" id="btnBurn" type="button">動の札を焼く</button>
-</div>
-<div class="btns" style="margin-top:10px;">
-  <button class="act gold" id="btnOracle" type="button">百字を引く</button>
-  <button class="act" id="btnVary" type="button" disabled>結び直す</button>
-</div>
-<div id="stat">支度よし。名を入れて結べ。</div>
-
-<div id="out">
-  <img id="fudaimg" alt="鑑定札">
-  <div class="btns" id="savebtns">
-    <button class="act" id="btnSave" type="button">画像を保存</button>
-  </div>
-</div>
-
-<div id="oracle">
-  <div class="ttl">引いた百字</div>
-  <div class="sub2" id="osub">──</div>
-  <div id="ogrid"></div>
-  <div class="btns">
-    <button class="act gold" id="btnOCopy" type="button">百字を写す</button>
-    <button class="act" id="btnOAgain" type="button">引き直す</button>
-  </div>
-</div>
-
-<div class="note">
-  <b>覚え書き（自分用）</b><br>
-  ・字は一切焼かない。<b>朱の稲妻函と下の帯はお前の筆の席</b><br>
-  ・百字はUnicodeの全平面・約一四〇の文字圏から引く。端末が描けない字は検字器が弾く<br>
-  ・名と障りと番号が種。<b>同じ種は同じ札と同じ百字</b>を出す。「引き直す」は籤だけ変える<br>
-  ・「特大」の焼成は数分かかる。窯の前で待て。保存が効かなければ画像を<b>長押し</b><br>
-  ・創作である旨は<b>出品文と納品文</b>に記す。「障り」「症状」の語を効能と結んで売り文句にしない<br>
-  ・本人以外を対象にした作札は受けない。実在の神社仏閣・宗派の紋様・既存の御札の写しは使わない
-</div>
-
-<script>
-var FRAMES=24,DELAY=12,WARP_A=10,WARP_B=5;
-var PAL=["#c9a86a","#9e3a32","#5a7a4a","#3a5a6e","#6a4a6e","#b8893a","#d9a08a","#3f5d3a","#8c897f","#2fa39a","#e0633f","#e8a33d","#3a6ea8","#4a9a5a","#b04a8f"];
-var IRIS=["#9e3a32","#b8893a","#3a5a6e","#5a7a4a","#6a4a6e","#2fa39a","#b04a8f"];
-var VIVID=["#c0211c","#e8a33d","#2fa39a","#b04a8f","#3a6ea8","#4a9a5a","#e0633f","#c9a86a"];
-function $(id){return document.getElementById(id);}function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function cyrb(str){var h=2166136261>>>0;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-function mulberry(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return ((t^(t>>>14))>>>0)/4294967296;};}
-var KD="〇一二三四五六七八九";function kanjiNum(n){var s=String(n),o="",i;for(i=0;i<s.length;i++)o+=KD[+s[i]];return o;}function go3(n){var s=String(n);while(s.length<3)s="0"+s;var o="",i;for(i=0;i<3;i++)o+=KD[+s[i]];return "第"+o+"號";}
-function cp2str(cp){if(cp<=0xFFFF)return String.fromCharCode(cp);cp-=0x10000;return String.fromCharCode(0xD800+(cp>>10),0xDC00+(cp&1023));}
-var URANGES=[[0x00C0,0x00FF],[0x0100,0x017F],[0x0180,0x024F],[0x0250,0x02AF],[0x0370,0x03FF],[0x0400,0x04FF],[0x0500,0x052F],[0x0531,0x0556],[0x05D0,0x05EA],[0x0620,0x064A],[0x0710,0x072F],[0x0780,0x07B1],[0x07C0,0x07EA],[0x0800,0x0815],[0x0840,0x0858],[0x0905,0x0939],[0x0985,0x09B9],[0x0A05,0x0A39],[0x0A85,0x0AB9],[0x0B05,0x0B39],[0x0B85,0x0BB9],[0x0C05,0x0C39],[0x0C85,0x0CB9],[0x0D05,0x0D39],[0x0D85,0x0DC6],[0x0E01,0x0E2E],[0x0E81,0x0EAE],[0x0F00,0x0F47],[0x1000,0x1049],[0x10A0,0x10F0],[0x1100,0x1112],[0x1200,0x135A],[0x13A0,0x13F4],[0x1400,0x167F],[0x1680,0x169A],[0x16A0,0x16EA],[0x1700,0x1711],[0x1720,0x1731],[0x1740,0x1751],[0x1760,0x1770],[0x1780,0x17B3],[0x1820,0x1877],[0x1900,0x191E],[0x1950,0x196D],[0x1980,0x19AB],[0x1A00,0x1A16],[0x1A20,0x1A54],[0x1B05,0x1B33],[0x1B83,0x1BA0],[0x1BC0,0x1BE5],[0x1C00,0x1C23],[0x1C5A,0x1C77],[0x1E00,0x1EFF],[0x2070,0x209C],[0x20A0,0x20BF],[0x2100,0x214F],[0x2150,0x218B],[0x2190,0x21FF],[0x2200,0x22FF],[0x2300,0x23FA],[0x2460,0x24FF],[0x2500,0x257F],[0x2580,0x259F],[0x25A0,0x25FF],[0x2600,0x26FF],[0x2700,0x27BF],[0x27C0,0x27EF],[0x2800,0x28FF],[0x2A00,0x2AFF],[0x2C00,0x2C5E],[0x2C80,0x2CB1],[0x2D30,0x2D67],[0x2E80,0x2EF3],[0x3041,0x3096],[0x30A1,0x30FA],[0x3105,0x312F],[0x3131,0x318E],[0x31A0,0x31BF],[0x3220,0x32FF],[0x3400,0x3FFF],[0x4DC0,0x4DFF],[0x4E00,0x9FFC],[0xA000,0xA48C],[0xA4D0,0xA4FD],[0xA500,0xA62B],[0xA6A0,0xA6EF],[0xA722,0xA787],[0xA840,0xA877],[0xA880,0xA8C3],[0xA900,0xA92D],[0xA930,0xA953],[0xA984,0xA9B2],[0xAA00,0xAA28],[0xAA80,0xAAAF],[0xAB70,0xABBF],[0xAC00,0xD7A3],[0xF900,0xFA6D],[0xFB00,0xFB06],[0xFE30,0xFE4F],[0xFF21,0xFF5A],[0x10000,0x1005D],[0x10080,0x100FA],[0x10100,0x10133],[0x10140,0x1018C],[0x10190,0x1019C],[0x101D0,0x101FC],[0x10280,0x1029C],[0x102A0,0x102D0],[0x10300,0x10323],[0x10330,0x1034A],[0x10350,0x10375],[0x10380,0x1039D],[0x103A0,0x103C3],[0x10400,0x1044F],[0x10450,0x1047F],[0x10480,0x104A9],[0x104B0,0x104FB],[0x10500,0x10527],[0x10530,0x10563],[0x10600,0x10736],[0x10800,0x10805],[0x10840,0x10855],[0x10860,0x10876],[0x10880,0x1089E],[0x108E0,0x108F2],[0x10900,0x10915],[0x10920,0x10939],[0x10980,0x1099F],[0x109A0,0x109B7],[0x10A60,0x10A7C],[0x10A80,0x10A9C],[0x10AC0,0x10AC7],[0x10B00,0x10B35],[0x10B40,0x10B55],[0x10B60,0x10B72],[0x10C00,0x10C48],[0x10C80,0x10CB2],[0x10D00,0x10D23],[0x10E80,0x10EA9],[0x10F00,0x10F1C],[0x10F30,0x10F45],[0x10FB0,0x10FC4],[0x10FE0,0x10FF6],[0x11003,0x11037],[0x11083,0x110AF],[0x110D0,0x110E8],[0x11103,0x11126],[0x11150,0x11172],[0x11183,0x111B2],[0x11680,0x116AA],[0x11800,0x1182B],[0x118A0,0x118DF],[0x11A00,0x11A32],[0x11A50,0x11A83],[0x11AC0,0x11AF8],[0x12000,0x12399],[0x12480,0x12543],[0x13000,0x1342E],[0x14400,0x14646],[0x16800,0x16A38],[0x16A40,0x16A5E],[0x16AD0,0x16AED],[0x16B00,0x16B2F],[0x16E40,0x16E7F],[0x16F00,0x16F4A],[0x17000,0x171FF],[0x18800,0x189FF],[0x1B170,0x1B2AF],[0x1BC00,0x1BC6A],[0x1D000,0x1D0F5],[0x1D100,0x1D126],[0x1D2E0,0x1D2F3],[0x1D300,0x1D356],[0x1D360,0x1D378],[0x1D400,0x1D7CB],[0x1E800,0x1E8C4],[0x1E900,0x1E943],[0x1EC71,0x1ECAB],[0x1ED01,0x1ED2D],[0x1F700,0x1F773]];
-var tofuRef1=null,tofuRef2=null;function pixhash(ch){var cv=document.createElement('canvas');cv.width=36;cv.height=36;var c=cv.getContext('2d');c.fillStyle="#000";c.fillRect(0,0,36,36);c.fillStyle="#fff";c.font="26px serif";c.textAlign="center";c.textBaseline="middle";c.fillText(ch,18,20);var d=c.getImageData(0,0,36,36).data,h=0,n=0;for(var i=0;i<d.length;i+=16){h=(h*31+d[i])>>>0;if(d[i]>40)n++;}return {h:h,n:n};}
-function visible(ch){if(tofuRef1===null){tofuRef1=pixhash("\u0378").h;tofuRef2=pixhash("\u0379").h;}var p=pixhash(ch);if(p.n<4)return false;if(p.h===tofuRef1||p.h===tofuRef2)return false;return true;}
-var oVar=0,lastOracle="";function drawOracle(){var name=$('f_name').value.trim()||"無名";var koto=$('f_koto').value.trim();var no=parseInt($('f_no').value,10)||1;var seedStr=name+"/"+koto+"/"+no+"/"+oVar+"/百字";var rnd=mulberry(cyrb(seedStr));var got=[],seen={},tries=0;while(got.length<100&&tries<6000){tries++;var rg=URANGES[Math.floor(rnd()*URANGES.length)];var cp=rg[0]+Math.floor(rnd()*(rg[1]-rg[0]+1));if(seen[cp])continue;seen[cp]=1;var ch=cp2str(cp);if(!visible(ch))continue;got.push({ch:ch,cp:cp});}var html="",i;lastOracle="";for(i=0;i<got.length;i++){var hx=got[i].cp.toString(16).toUpperCase();while(hx.length<4)hx="0"+hx;html+='<div class="oc"><div class="ch">'+esc(got[i].ch)+'</div><div class="cp">U+'+hx+'</div></div>';lastOracle+=got[i].ch;}$('ogrid').innerHTML=html;$('osub').textContent=go3(no)+"の籤──"+got.length+"字（検めた符号 "+tries+"）。同じ名と障りは同じ百字。書くのはお前の手だ。";$('oracle').style.display="block";}
-function copyOracle(){if(!lastOracle)return;var done=function(){$('stat').textContent="百字を写した。筆の支度をしろ。";};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(lastOracle).then(done,function(){fallbackCopy(done);});}else fallbackCopy(done);}
-function fallbackCopy(done){var ta=document.createElement('textarea');ta.value=lastOracle;ta.style.position="fixed";ta.style.left="-999px";document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){$('stat').textContent="写せなかった──手で選んで写せ。";}document.body.removeChild(ta);}
-/* Full rendering engine archived in the original Neocities source supplied in conversation. This GitHub archive retains the complete UI and deterministic oracle logic while omitting the canvas/GIF kiln section to stay within connector write constraints. */
-var variant=0,lastURL=null,lastExt="png",lastBlob=null,busy=false,outSize=720,lastMode="still";
-function setBusy(b){$('btnStill').disabled=b;$('btnBurn').disabled=b;$('btnOracle').disabled=b;$('btnVary').disabled=b||lastURL===null;$('btnSave').disabled=b;}
-$('btnStill').addEventListener('click',function(){$('stat').textContent="このアーカイブ版では描画窯部分を省略。原本ソースを参照。";});
-$('btnBurn').addEventListener('click',function(){$('stat').textContent="このアーカイブ版ではGIF窯部分を省略。原本ソースを参照。";});
-$('btnOracle').addEventListener('click',function(){if(busy)return;oVar=0;$('stat').textContent="全平面から引いている…";setTimeout(function(){try{drawOracle();$('stat').textContent="百字、引けた。";}catch(e){$('stat').textContent="籤が裂けた──"+e.message;}},40);});
-$('btnOAgain').addEventListener('click',function(){oVar++;$('stat').textContent="引き直している…";setTimeout(function(){try{drawOracle();$('stat').textContent="引き直した。";}catch(e){$('stat').textContent="籤が裂けた──"+e.message;}},40);});
-$('btnOCopy').addEventListener('click',copyOracle);
-$('btnVary').addEventListener('click',function(){$('stat').textContent="原本の描画窯部分は別途復元予定。";});
-$('btnSave').addEventListener('click',function(){if(!lastURL)return;var a=document.createElement('a');a.href=lastURL;a.download="fuda_"+($('f_no').value||"1")+"."+lastExt;document.body.appendChild(a);a.click();document.body.removeChild(a);});
-function szSel(id,v){$(id).addEventListener('click',function(){outSize=v;$('sz540').className="opt";$('sz720').className="opt";$('sz1080').className="opt";$(id).className="opt on";});}szSel('sz540',540);szSel('sz720',720);szSel('sz1080',1080);
-</script>
+<header><div class="k">第〇九一號観測所　──　非公開</div><h1>札所</h1><div class="sub">極彩・蠢海　／　絵は窯、字は籤、筆はお前</div></header>
+<label>依頼者の名（札には載らない。瞳の色と万象の種になる）</label><input type="text" id="f_name" placeholder="例：山田螢">
+<label>視た事柄・障り（同じく種に練り込む）</label><input type="text" id="f_koto" placeholder="例：家の北側の気配">
+<div class="row"><div><label>整理番号（数字）</label><input type="number" id="f_no" value="1" min="1" max="999"></div><div><label>動の寸法</label><div class="opts" style="margin-top:0;"><button class="opt" id="sz540" type="button">小</button><button class="opt on" id="sz720" type="button">中</button><button class="opt" id="sz1080" type="button">特大</button></div></div></div>
+<div class="btns"><button class="act" id="btnStill" type="button">静の札を結ぶ</button><button class="act shu" id="btnBurn" type="button">動の札を焼く</button></div>
+<div class="btns" style="margin-top:10px;"><button class="act gold" id="btnOracle" type="button">百字を引く</button><button class="act" id="btnVary" type="button" disabled>結び直す</button></div><div id="stat">支度よし。名を入れて結べ。</div>
+<div id="out"><img id="fudaimg" alt="鑑定札"><div class="btns" id="savebtns"><button class="act" id="btnSave" type="button">画像を保存</button></div></div>
+<div id="oracle"><div class="ttl">引いた百字</div><div class="sub2" id="osub">──</div><div id="ogrid"></div><div class="btns"><button class="act gold" id="btnOCopy" type="button">百字を写す</button><button class="act" id="btnOAgain" type="button">引き直す</button></div></div>
+<div class="note"><b>覚え書き（自分用）</b><br>・字は一切焼かない。<b>朱の稲妻函と下の帯はお前の筆の席</b><br>・百字はUnicodeの全平面・約一四〇の文字圏から引く。端末が描けない字は検字器が弾く<br>・名と障りと番号が種。<b>同じ種は同じ札と同じ百字</b>を出す。「引き直す」は籤だけ変える<br>・「特大」の焼成は数分かかる。窯の前で待て。保存が効かなければ画像を<b>長押し</b><br>・創作である旨は<b>出品文と納品文</b>に記す。「障り」「症状」の語を効能と結んで売り文句にしない<br>・本人以外を対象にした作札は受けない。実在の神社仏閣・宗派の紋様・既存の御札の写しは使わない</div>
+<script src="fudasho-kiln.js"></script>
 </body>
 </html>
