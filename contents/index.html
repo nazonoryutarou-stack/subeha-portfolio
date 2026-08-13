@@ -3,9 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="すべての歯が見えるの無料コンテンツ。診断、ゲーム、読み物、実験的なWebページ。">
+<meta name="description" content="すべての歯が見えるの無料コンテンツ総覧。診断、実験、ゲーム、アーカイブ、運用ツール。">
 <title>コンテンツ | すべての歯が見える</title>
 <link rel="stylesheet" href="../assets/home-redesign.css">
+<style>
+.inventory-note{margin:0 0 26px;padding:18px 20px;border:1px solid var(--line);font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;line-height:1.8;color:var(--muted);background:var(--paper)}
+.status{display:inline-block;margin-top:10px;padding:4px 7px;border:1px solid var(--line);font:700 9px/1.2 var(--mono);letter-spacing:.12em;color:var(--muted)}
+.status.live{color:var(--rust);border-color:var(--rust)}
+.status.old{opacity:.7}
+.group-title{margin:54px 0 16px;font-size:clamp(30px,5vw,50px);font-weight:600}.group-desc{margin:0 0 22px;max-width:760px;color:var(--muted);font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;line-height:1.9}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -28,18 +35,43 @@
   <div class="brand-home">
     <section class="hub-section" aria-labelledby="contents-title">
       <div class="hub-heading">
-        <p class="section-label">CONTENTS</p>
+        <p class="section-label">CONTENTS / COMPLETE INDEX</p>
         <h1 id="contents-title">コンテンツ</h1>
-        <p>無料で触れる診断、ゲーム、読み物、実験的なWebコンテンツを置きます。</p>
+        <p>リポジトリ内で一般公開できるWebコンテンツをここへ集約した。残す・畳むの判断も、まずここから実物を踏んで決める。</p>
       </div>
+      <p class="inventory-note">「存在するのに入口がない」を禁止した。現役、実験、作品、運用、旧版を分けて表示している。没にするまでは消さず、旧版も所在だけは分かるようにした。</p>
+
+      <h2 class="group-title">現役・実験</h2>
+      <p class="group-desc">今後育てる価値があるもの。診断、生成、体験型ページを含む。</p>
+      <div class="hub-grid hub-grid-three">
+        <a class="hub-card" href="/imoji-lab/"><small>EXPERIMENT</small><strong>妹字暗号ラボ</strong><span>読みと呪文から妹字を生成・復号する実験。<i class="status live">現役候補</i></span></a>
+        <a class="hub-card" href="/arcade/"><small>3D / ARCADE</small><strong>不氣屋アーケード</strong><span>一人称で歩く3D街路。店舗世界観の実験場。<i class="status live">現役候補</i></span></a>
+        <a class="hub-card" href="/mitchy-satchy/"><small>EXPERIENCE ARCHIVE</small><strong>ミッチー・サッチー騒動</strong><span>平成ワイドショーを再構成した体験型アーカイブ。<i class="status">作品</i></span></a>
+      </div>
+
+      <h2 class="group-title">作品・診断</h2>
+      <p class="group-desc">独立作品と診断系。サイト本体から孤立させず、ここを玄関にする。</p>
+      <div class="hub-grid hub-grid-three">
+        <a class="hub-card" href="/works/"><small>WORKS INDEX</small><strong>特設ページ保管庫</strong><span>独立作品の一覧。<i class="status">作品一覧</i></span></a>
+        <a class="hub-card" href="/works/bari-rebechi/"><small>DIAGNOSIS</small><strong>バリ・レベチ</strong><span>診断・体験型コンテンツ。<i class="status live">診断</i></span></a>
+        <a class="hub-card" href="/works/ninja-kaishaku/"><small>DIAGNOSIS / TEXT</small><strong>忍者解釈</strong><span>複数パックを使う読み物・診断系コンテンツ。<i class="status live">診断</i></span></a>
+      </div>
+
+      <h2 class="group-title">運用</h2>
+      <p class="group-desc">作品というより実際に使う道具。表側と管理側を混ぜない。</p>
       <div class="hub-grid">
-        <a class="hub-card" href="/works/"><small>ARCHIVE</small><strong>特設ページ保管庫</strong><span>独立して作った特設ページや実験的なWeb作品を見る。</span></a>
-        <a class="hub-card" href="/arcade/"><small>ARCADE</small><strong>アーケード</strong><span>遊べるもの、妙なもの、説明しづらいものをまとめた入口。</span></a>
+        <a class="hub-card" href="/miharai/"><small>MAP / OPERATION</small><strong>未祓いマップ</strong><span>未祓い地点の公開地図。<i class="status live">運用中</i></span></a>
+        <a class="hub-card" href="/miharai/admin.html"><small>ADMIN</small><strong>未祓いマップ管理</strong><span>Chromeから記録を追加・編集する管理画面。公開一覧とは役割を分離。<i class="status">管理</i></span></a>
       </div>
-      <div class="hub-heading" style="margin-top:2rem">
-        <p class="section-label">MORE</p>
-        <h2>診断・読み物</h2>
-        <p>準備中。</p>
+
+      <h2 class="group-title">旧版・保管</h2>
+      <p class="group-desc">Neocities時代などの旧版。現行へ統合するまで削除せず、入口だけ残す。</p>
+      <div class="hub-grid hub-grid-three">
+        <a class="hub-card" href="/archive/neocities/gyogen-rin-v1.0.2.html"><small>LEGACY</small><strong>魚言・旧版</strong><span>旧実装。文字化け等の確認対象。<i class="status old">旧版</i></span></a>
+        <a class="hub-card" href="/archive/neocities/fudasho-observation-091.html"><small>LEGACY</small><strong>札・観測所版</strong><span>札関連の旧ページ。<i class="status old">旧版</i></span></a>
+        <a class="hub-card" href="/archive/neocities/lowpoly-kone-uv.html"><small>TOOL</small><strong>ローポリ捏ね UV</strong><span>ブラウザ3D造形・UV・OBJ出力。<i class="status">道具</i></span></a>
+        <a class="hub-card" href="/archive/neocities/yaniv.html"><small>GAME</small><strong>ヤニブ</strong><span>カードゲーム実装。<i class="status">ゲーム</i></span></a>
+        <a class="hub-card" href="/archive/neocities/miharai-map.html"><small>LEGACY</small><strong>未祓いマップ旧版</strong><span>スプレッドシート時代の旧実装。<i class="status old">旧版</i></span></a>
       </div>
     </section>
   </div>
