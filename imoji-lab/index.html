@@ -2,83 +2,32 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>妹字暗号ラボ 0.8｜不氣屋界隈</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3efe4">
+<meta name="robots" content="index,follow">
+<title>コンテンツ | すべての歯が見える</title>
+<link rel="stylesheet" href="/assets/home-redesign.css">
 <style>
-:root{--bg:#080706;--panel:#11100e;--ink:#eee8dd;--muted:#9f9689;--gold:#d2a84f;--line:#342d23;--red:#b65b50;--green:#8fbd86}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 30% 0,#17120c 0,#080706 42%);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}.wrap{width:min(1260px,calc(100% - 28px));margin:auto;padding:32px 0 80px}.top{border-bottom:1px solid var(--line);padding-bottom:20px}.kicker{font:700 11px ui-monospace,monospace;letter-spacing:.18em;color:var(--gold)}h1{font-size:clamp(34px,7vw,70px);margin:.15em 0}.lead{max-width:900px;color:var(--muted);line-height:1.8}.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:20px;margin-top:24px}.panel{background:#11100eee;border:1px solid var(--line);padding:20px}.field{display:grid;gap:7px;margin:12px 0}.field label{font-size:12px;color:#c8bca9}.field input,.field textarea{width:100%;background:#090806;color:var(--ink);border:1px solid #403728;padding:12px 13px;font:500 15px/1.5 ui-monospace,"Noto Sans JP",monospace}.row{display:flex;gap:10px;flex-wrap:wrap}button{cursor:pointer;border:1px solid #a88039;background:#261b0c;color:#f5e3bb;padding:11px 15px;font-weight:700}.ghost{background:transparent;border-color:#4a4033;color:#c9bda8}.stage{display:grid;place-items:center;aspect-ratio:1;background:#050504;border:1px solid #2f291f}.stage svg{width:92%;height:92%}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.meta div{border:1px solid var(--line);padding:10px}.meta small{display:block;color:#81776b;font-size:9px}.meta b{display:block;margin-top:4px;font:700 12px/1.5 ui-monospace,monospace;overflow-wrap:anywhere}.process{display:grid;gap:8px;margin-top:18px}.step{border:1px solid var(--line);background:#090806;padding:10px 12px;font:11px/1.65 ui-monospace,monospace;color:#b7aa99;word-break:break-all}.step b{color:var(--gold)}.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.legend div,.bone-legend div{border:1px solid var(--line);background:#090806;padding:9px;font-size:11px;color:#a99e90;line-height:1.55}.bone-legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.bone-legend b{color:var(--gold)}.stroke-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.stroke{border:1px solid var(--line);background:#090806;padding:9px}.stroke strong{display:block;color:var(--gold);font:700 12px ui-monospace,monospace}.stroke span{display:block;margin-top:4px;font-size:10px;color:#b5aa9c;line-height:1.45}.warning{border-left:3px solid var(--red);padding-left:12px;color:#baaca0;margin-top:18px;font-size:13px;line-height:1.7}.ok{color:var(--green)}.hint{font-size:12px;color:#8f8578;line-height:1.65}@media(max-width:900px){.grid{grid-template-columns:1fr}.stroke-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.legend,.bone-legend,.stroke-grid,.meta{grid-template-columns:1fr}}
+html,body{height:100%;overflow:hidden}body{display:flex;flex-direction:column}.site-header{flex:0 0 auto}.content-frame{display:block;flex:1 1 auto;min-height:0;width:100%;border:0;background:#111}.frame-tools{position:absolute;right:92px;top:22px;z-index:80;display:flex;gap:8px}.frame-tools a{display:inline-flex;align-items:center;min-height:36px;padding:0 11px;border:1px solid var(--line);background:var(--paper);color:var(--ink);text-decoration:none;font:700 9px/1 var(--mono);letter-spacing:.1em}@media(max-width:700px){.frame-tools{right:76px;top:20px}.frame-tools a:first-child{display:none}}
 </style>
 </head>
 <body>
-<main class="wrap">
-<div class="top"><div class="kicker">IMOJI CRYPTOGRAPHY / EXPERIMENT 0.8</div><h1>妹字暗号ラボ</h1><p class="lead">中央囲みと下端鉤を廃止。説明しづらい造形は持たせず、中央骨格6bit＋周囲18本×4bitの78bitだけで構成する。見えている差はすべて暗号情報。</p></div>
-<div class="grid">
-<section class="panel">
-<h2>生成</h2>
-<div class="field"><label>隠したい呪文（カタカナ10文字まで）</label><input id="spell" value="シト、シュウライ"></div>
-<div class="field"><label>読み / 鍵</label><input id="reading" value="ポコペン"></div>
-<div class="row"><button id="generate">妹字を生成</button><button class="ghost" id="forget">呪文を消す</button></div>
-<p class="hint">同じ呪文＋同じ読みなら、毎回まったく同じ字形になる。</p>
-<div class="process">
-<div class="step"><b>1. 呪文を数字にする</b><br><span id="pPlain">-</span></div>
-<div class="step"><b>2. 0と1にする</b><br><span id="pRaw">-</span></div>
-<div class="step"><b>3. 読みから鍵を作る</b><br><span id="pKey">-</span></div>
-<div class="step"><b>4. XORで混ぜて暗号にする</b><br><span id="pCipher">-</span></div>
-<div class="step"><b>5. 暗号を字形の部品へ割り当てる</b><br><span id="pCells">-</span></div>
-</div>
-<h2 style="margin-top:22px">中央骨格の意味</h2>
-<p class="hint">暗号の最初の6bitを骨格へ使う。左からbit1〜bit6。曖昧な「中央囲み」「下端鉤」は廃止した。</p>
-<div class="bone-legend">
-<div><b>bit1 / 主幹</b><br>0＝湾曲した主幹 / 1＝直線主幹</div>
-<div><b>bit2 / 左副幹</b><br>0＝なし / 1＝あり</div>
-<div><b>bit3 / 右副幹</b><br>0＝なし / 1＝あり</div>
-<div><b>bit4 / 上横線</b><br>0＝なし / 1＝あり</div>
-<div><b>bit5 / 下横線</b><br>0＝なし / 1＝あり</div>
-<div><b>bit6 / 中央横線</b><br>0＝なし / 1＝あり</div>
-</div>
-<div class="step" style="margin-top:10px"><b>今回の骨格</b><br><span id="boneMeaning">-</span></div>
-<h2 style="margin-top:22px">周囲18本の意味</h2>
-<div class="legend"><div><b>bit1</b><br>0＝短い / 1＝長い</div><div><b>bit2</b><br>0＝直線 / 1＝湾曲</div><div><b>bit3</b><br>0＝左側 / 1＝右側</div><div><b>bit4</b><br>0＝点なし / 1＝点あり</div></div>
-<p class="hint">ストローク番号01〜18は上から下への高さだけを決める。左右はbit3だけが決める。</p>
-<div class="stroke-grid" id="strokeGrid"></div>
-<div class="field"><label>妹字コード</label><textarea id="glyphCode" rows="3"></textarea></div>
-<div class="row"><button id="decode">このコード＋読みで復号</button><button class="ghost" id="copy">コードをコピー</button></div>
-<div id="status" class="hint">未実行</div>
-<p class="warning">作品用の可逆符号。実用暗号ではない。78bitでも「文字数4bit＋カタカナ10文字×7bit＝74bit」を収容できるため、10文字上限は維持できる。</p>
-</section>
-<section class="panel"><h2>生成された妹字</h2><div class="stage" id="stage"></div><div class="meta"><div><small>READING</small><b id="mReading">-</b></div><div><small>CAPACITY</small><b>骨格6bit + 18線×4bit = 78bit</b></div><div><small>GLYPH CODE</small><b id="mCode">-</b></div><div><small>RESTORE</small><b id="mStatus">未実行</b></div></div><p class="hint">中央骨格は主幹・左右副幹・上横線・下横線・中央横線だけ。全部、見れば説明できる特徴に限定した。</p></section>
-</div>
-</main>
-<script>
-(()=>{
-const $=s=>document.querySelector(s), enc=new TextEncoder();
-const TOTAL=78, BONE_BITS=6, STROKES=18;let state={cipher:'',cells:[],bone:0};
-function bits(n,w){return n.toString(2).padStart(w,'0')}
-function normalize(s){return s.trim().replace(/\s+/g,'　')}
-function codeOf(ch){const cp=ch.codePointAt(0);if(cp>=0x30A0&&cp<=0x30FF)return cp-0x30A0;if(ch==='、')return 96;if(ch==='。')return 97;if(ch==='　')return 98;throw new Error('使用できない文字: '+ch)}
-function charOf(n){if(n>=0&&n<=95)return String.fromCodePoint(0x30A0+n);if(n===96)return '、';if(n===97)return '。';if(n===98)return '　';throw new Error('復号値が範囲外')}
-function pack(spell){const a=[...spell];if(a.length>10)throw new Error('10文字まで');let out=bits(a.length,4);for(const ch of a)out+=bits(codeOf(ch),7);return out.padEnd(TOTAL,'0')}
-function unpack(raw){const len=parseInt(raw.slice(0,4),2);if(len>10)throw new Error('長さ情報不正');let s='';for(let i=0;i<len;i++)s+=charOf(parseInt(raw.slice(4+i*7,11+i*7),2));return s}
-function hash32(str){let h=2166136261>>>0;for(const b of enc.encode(str)){h^=b;h=Math.imul(h,16777619)>>>0}return h>>>0}
-function keyStream(reading,len){let x=hash32(reading)||0x9e3779b9,o='';for(let i=0;i<len;i++){x^=x<<13;x^=x>>>17;x^=x<<5;x>>>=0;o+=((x>>>(i%31))&1)}return o}
-function xor(a,b){let o='';for(let i=0;i<a.length;i++)o+=a[i]===b[i]?'0':'1';return o}
-function feature(v){return `${v&8?'長':'短'}・${v&4?'湾曲':'直線'}・${v&2?'右':'左'}・${v&1?'点あり':'点なし'}`}
-function boneFeature(v){const b=bits(v,BONE_BITS);return `主幹=${b[0]==='1'?'直線':'湾曲'} / 左副幹=${b[1]==='1'?'あり':'なし'} / 右副幹=${b[2]==='1'?'あり':'なし'} / 上横線=${b[3]==='1'?'あり':'なし'} / 下横線=${b[4]==='1'?'あり':'なし'} / 中央横線=${b[5]==='1'?'あり':'なし'}`}
-function parseCipher(c){const bone=parseInt(c.slice(0,BONE_BITS),2),cells=[];for(let i=0;i<STROKES;i++)cells.push(parseInt(c.slice(BONE_BITS+i*4,BONE_BITS+(i+1)*4),2));return {bone,cells}}
-function boneSvg(v){let a=[];const L=(x1,y1,x2,y2)=>`<path d="M${x1} ${y1} L${x2} ${y2}"/>`,P=d=>`<path d="${d}"/>`;
-if(v&32)a.push(L(160,42,160,278));else a.push(P('M160 42 Q142 110 160 160 Q178 220 160 278'));
-if(v&16)a.push(L(142,48,142,270));
-if(v&8)a.push(L(178,48,178,270));
-if(v&4)a.push(L(125,92,195,92));
-if(v&2)a.push(L(125,220,195,220));
-if(v&1)a.push(L(128,160,192,160));
-return a.join('')}
-function strokeSvg(i,v){const side=(v&2)?1:-1;const y=48+i*(224/(STROKES-1));const x0=160+side*14;const len=(v&8)?112:70;const x1=160+side*len;const curve=!!(v&4);const dot=!!(v&1);let out='';if(curve){const cx=160+side*(len*.56);const cy=y-18;out+=`<path d="M${x0.toFixed(1)} ${y.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x1.toFixed(1)} ${y.toFixed(1)}"/>`}else{out+=`<path d="M${x0.toFixed(1)} ${y.toFixed(1)} L${x1.toFixed(1)} ${y.toFixed(1)}"/>`}if(dot)out+=`<circle cx="${(x1+side*8).toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#d6aa4e" stroke="none"/>`;return out}
-function glyph(bone,cells){let s=boneSvg(bone);cells.forEach((v,i)=>s+=strokeSvg(i,v));return `<svg viewBox="0 0 320 320"><g fill="none" stroke="#d6aa4e" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">${s}</g></svg>`}
-function render(cipher,reading){const p=parseCipher(cipher);state={cipher,cells:p.cells,bone:p.bone};$('#stage').innerHTML=glyph(p.bone,p.cells);$('#boneMeaning').textContent=`${bits(p.bone,BONE_BITS)} → ${boneFeature(p.bone)}`;$('#strokeGrid').innerHTML=p.cells.map((v,i)=>`<div class="stroke"><strong>${String(i+1).padStart(2,'0')} / ${bits(v,4)} / ${v}</strong><span>${feature(v)}</span></div>`).join('');const code=[p.bone,...p.cells].join('-');$('#glyphCode').value=code;$('#mCode').textContent=code;$('#mReading').textContent=reading}
-function generate(){try{const spell=normalize($('#spell').value),reading=$('#reading').value.trim();if(!reading)throw new Error('読みを入力してください');const raw=pack(spell),key=keyStream(reading,TOTAL),cipher=xor(raw,key);render(cipher,reading);$('#pPlain').textContent=spell;$('#pRaw').textContent=raw;$('#pKey').textContent=key;$('#pCipher').textContent=cipher;$('#pCells').textContent=`骨格=${bits(parseInt(cipher.slice(0,BONE_BITS),2),BONE_BITS)} / `+state.cells.map(v=>bits(v,4)).join(' ');$('#status').textContent='生成済み';$('#mStatus').textContent='生成済み'}catch(e){alert(e.message)}}
-function decode(){try{const parts=$('#glyphCode').value.trim().split('-').map(Number);if(parts.length!==19)throw new Error('骨格1個＋18ストロークの19個必要');if(parts.some((v,i)=>!Number.isInteger(v)||v<0||v>(i===0?63:15)))throw new Error('コード値が範囲外');const cipher=bits(parts[0],BONE_BITS)+parts.slice(1).map(v=>bits(v,4)).join('');const key=keyStream($('#reading').value.trim(),TOTAL),raw=xor(cipher,key),spell=unpack(raw);$('#spell').value=spell;$('#status').textContent='復号: '+spell;$('#status').className='ok';$('#mStatus').textContent=spell;$('#mStatus').className='ok'}catch(e){$('#status').textContent='復号失敗: '+e.message;$('#mStatus').textContent='復号失敗'}}
-$('#generate').onclick=generate;$('#decode').onclick=decode;$('#forget').onclick=()=>$('#spell').value='';$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#glyphCode').value);$('#status').textContent='コードをコピーした'}catch(e){}};generate();
-})();
-</script>
-</body></html>
+<header class="site-header">
+  <a class="logo" href="/home.html" aria-label="すべての歯が見える ホーム">
+    <img class="brand-crest" src="/hitotsu-ore-choji.png" alt="一つ折れ丁字">
+    <span><b>すべての歯が見える</b><small>WEB CONTENT</small></span>
+  </a>
+  <details class="menu-wrap">
+    <summary class="menu-button">MENU</summary>
+    <nav class="global-nav" aria-label="主要メニュー">
+      <a href="/home.html">ホーム</a>
+      <a href="/contents/">コンテンツ総覧</a>
+      <a href="/works/">作品保管庫</a>
+      <a href="/research/">研究</a>
+    </nav>
+  </details>
+</header>
+<div class="frame-tools"><a href="/contents/">一覧へ戻る</a><a href="app.html" target="_blank" rel="noopener">単体表示</a></div>
+<iframe class="content-frame" src="app.html" title="コンテンツ本体" allow="fullscreen; autoplay; clipboard-read; clipboard-write" allowfullscreen></iframe>
+</body>
+</html>
