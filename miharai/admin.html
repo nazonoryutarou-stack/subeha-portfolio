@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>未祓い記録端末</title><meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--panel:#0c0a08;--ink:#d8cdb8;--dim:#7d745f;--line:#2a251d;--red:#a51212;--gold:#ad8b4a;--mono:'IBM Plex Mono',monospace}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#15110c,#050505 42%);color:var(--ink);font-family:'Shippori Mincho',serif;min-height:100svh;padding:22px 14px 50px}.wrap{max-width:680px;margin:auto}.ey{font-family:var(--mono);color:var(--red);font-size:.56rem;letter-spacing:.24em}h1{font-size:1.55rem;letter-spacing:.18em;margin:7px 0 4px}.sub{color:var(--dim);font-size:.7rem;line-height:1.9;margin-bottom:18px}.box{border:1px solid var(--line);background:rgba(10,8,6,.9);padding:16px;margin:12px 0}label{display:block;font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;color:#9d927c;margin:13px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);background:#080706;color:var(--ink);padding:12px;font:inherit;font-size:.92rem;outline:none}textarea{min-height:108px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#786650}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{border:1px solid #6e6250;background:#0b0907;color:var(--ink);padding:12px 14px;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;cursor:pointer;flex:1}.btn.red{border-color:#7e1d1d;color:#e67c73}.btn.gold{border-color:#79633e;color:#d6b46f}.loc{font-family:var(--mono);font-size:.58rem;color:var(--dim);line-height:1.7;margin-top:8px;word-break:break-all}.status{font-family:var(--mono);font-size:.6rem;line-height:1.8;padding:11px 12px;border-left:2px solid var(--line);color:var(--dim);margin-top:12px;white-space:pre-wrap}.status.ok{border-color:#6c7d52;color:#aebe91}.status.err{border-color:var(--red);color:#db827b}.tiny{font-family:var(--mono);font-size:.5rem;color:#615a4d;line-height:1.8}.link{color:#9e927c;text-decoration:none}.setup{display:grid;gap:8px}.setup input{font-family:var(--mono);font-size:.72rem}.pill{display:inline-block;border:1px solid var(--line);padding:3px 6px;font-family:var(--mono);font-size:.48rem;color:var(--dim)}@media(max-width:560px){.row{grid-template-columns:1fr}}
+</style></head>
+<body><main class="wrap">
+<div class="ey">PRIVATE OBSERVATION TERMINAL</div><h1>未祓い記録端末</h1><div class="sub">現場で記録して、そのまま公開台帳へ送る。公開される座標は受付側でぼかされる。正確な位置はGitHubへ保存しない。</div>
+<section class="box setup"><span class="pill">初回だけ</span><label>受付 Worker URL</label><input id="endpoint" placeholder="https://miharai-api.example.workers.dev"><label>管理鍵</label><input id="key" type="password" autocomplete="off" placeholder="Worker に設定した ADMIN_KEY"><div class="actions"><button class="btn" id="saveSetup">この端末に保存</button><button class="btn" id="forgetSetup">消去</button></div><div class="tiny">URLはlocalStorage、管理鍵はsessionStorageに保存。共有端末では管理鍵を残さないこと。</div></section>
+<section class="box">
+<label>地点名</label><input id="name" placeholder="例：河川敷北側の階段">
+<div class="row"><div><label>地域</label><input id="area" placeholder="例：大阪市北部"></div><div><label>記録番号</label><input id="id" placeholder="空欄なら自動"></div></div>
+<div class="row"><div><label>分類</label><select id="type"><option>未分類</option><option>残留像</option><option>対話可能</option><option>移動性</option><option>反復現象</option><option>物品付着</option><option>環境性</option><option>判定不能</option></select></div><div><label>状態</label><select id="state"><option>観測中</option><option>未確認</option><option>経過観察</option><option>未処理</option><option>処理予定</option><option>処理不要</option><option>処理済</option><option>消失</option></select></div></div>
+<div class="row"><div><label>危険度</label><select id="risk"><option value="1">1 / 5</option><option value="2">2 / 5</option><option value="3">3 / 5</option><option value="4">4 / 5</option><option value="5">5 / 5</option></select></div><div><label>公開位置のぼかし</label><select id="blur"><option value="500">約500m</option><option value="1000" selected>約1km</option><option value="2000">約2km</option><option value="5000">約5km</option></select></div></div>
+<label>観測内容</label><textarea id="description" placeholder="観測した内容。断定と推測は分けて書く。"></textarea>
+<label>未処理理由</label><input id="reason" placeholder="例：処理の必要性を認めないため">
+<div class="row"><div><label>観測日</label><input id="observed" type="date"></div><div><label>最終更新日</label><input id="updated" type="date"></div></div>
+<label>位置</label><div class="actions"><button class="btn gold" id="locate">現在地を取得</button><button class="btn" id="clearLoc">位置を消す</button></div><div class="loc" id="locText">未取得</div>
+<div class="actions"><button class="btn red" id="submit">記 録 す る</button><button class="btn" id="reset">入力を空に</button></div><div class="status" id="status">待機中。</div>
+</section>
+<div class="tiny"><a class="link" href="./index.html">← 公開マップ</a></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);let coords=null;
+const today=()=>new Date().toISOString().slice(0,10);$('observed').value=today();$('updated').value=today();
+$('endpoint').value=localStorage.getItem('miharaiEndpoint')||'';$('key').value=sessionStorage.getItem('miharaiKey')||'';
+function stat(t,k=''){const e=$('status');e.textContent=t;e.className='status '+k}
+$('saveSetup').onclick=()=>{localStorage.setItem('miharaiEndpoint',$('endpoint').value.trim().replace(/\/$/,''));sessionStorage.setItem('miharaiKey',$('key').value);stat('端末設定を保存した。','ok')};
+$('forgetSetup').onclick=()=>{localStorage.removeItem('miharaiEndpoint');sessionStorage.removeItem('miharaiKey');$('endpoint').value='';$('key').value='';stat('端末設定を消去した。')};
+$('locate').onclick=()=>{if(!navigator.geolocation){stat('この端末は位置情報に対応していない。','err');return}stat('位置を取得中…');navigator.geolocation.getCurrentPosition(p=>{coords={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy};$('locText').textContent=`取得済み / 精度 約${Math.round(coords.accuracy)}m`;stat('位置を取得した。公開時に座標をぼかす。','ok')},e=>stat('位置情報を取得できない：'+e.message,'err'),{enableHighAccuracy:true,timeout:15000,maximumAge:0})};
+$('clearLoc').onclick=()=>{coords=null;$('locText').textContent='未取得'};
+function payload(){return{id:$('id').value.trim(),name:$('name').value.trim(),area:$('area').value.trim(),type:$('type').value,status:$('state').value,risk:Number($('risk').value),blur:Number($('blur').value),description:$('description').value.trim(),reason:$('reason').value.trim(),observed:$('observed').value,updated:$('updated').value,lat:coords?.lat,lng:coords?.lng}}
+$('submit').onclick=async()=>{const endpoint=$('endpoint').value.trim().replace(/\/$/,'');const key=$('key').value;if(!endpoint||!key){stat('先に Worker URL と管理鍵を設定してくれ。','err');return}const p=payload();if(!p.name){stat('地点名が空。','err');return}if(!coords){stat('位置が未取得。地域だけ公開する案件なら、Worker側仕様を変える必要がある。','err');return}stat('GitHub台帳へ送信中…');try{const r=await fetch(endpoint+'/records',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+key},body:JSON.stringify(p)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('HTTP '+r.status));stat(`記録した。\n${j.record?.id||''}\ncommit ${j.commit||''}`,'ok');$('id').value=''}catch(e){stat('記録できない：'+e.message,'err')}};
+$('reset').onclick=()=>{['id','name','area','description','reason'].forEach(x=>$(x).value='');$('type').selectedIndex=0;$('state').selectedIndex=0;$('risk').value='1';$('blur').value='1000';$('observed').value=today();$('updated').value=today();coords=null;$('locText').textContent='未取得';stat('入力を空にした。')};
+</script></body></html>
