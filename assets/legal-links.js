@@ -3,13 +3,14 @@
   var base=location.hostname.endsWith('github.io')?'/subeha-portfolio':'';
 
   function ensureTheme(){
-    if(!document.querySelector('link[data-unified-shell]')){
-      var css=document.createElement('link');
+    var css=document.querySelector('link[data-unified-shell],link[href$="assets/unified-shell.css"]');
+    if(!css){
+      css=document.createElement('link');
       css.rel='stylesheet';
       css.href=base+'/assets/unified-shell.css';
       css.dataset.unifiedShell='true';
-      document.head.appendChild(css);
     }
+    document.head.appendChild(css);
   }
 
   function repairBrand(){
@@ -39,7 +40,14 @@
     footer.appendChild(nav);
   }
 
-  function run(){ensureTheme();repairBrand();addLinks();}
+  function run(){
+    ensureTheme();
+    repairBrand();
+    addLinks();
+    requestAnimationFrame(ensureTheme);
+    setTimeout(ensureTheme,100);
+  }
+
   if(document.documentElement.dataset.ready==='true') run();
   else {
     var observer=new MutationObserver(function(){
