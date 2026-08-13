@@ -176,7 +176,7 @@
       smoothX = THREE.MathUtils.lerp(smoothX, pointerX, 0.08);
       smoothY = THREE.MathUtils.lerp(smoothY, pointerY, 0.08);
 
-      if (bones.head && headBase) {
+      if (!reducedMotion && bones.head && headBase) {
         bones.head.rotation.set(
           headBase.x + smoothY * 0.06,
           headBase.y - smoothX * 0.12,
