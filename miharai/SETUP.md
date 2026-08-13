@@ -1,43 +1,54 @@
 # 未祓いマップ運用セットアップ
 
-この版は Google スプレッドシートを使いません。
+この版は Google スプレッドシートを使いません。Chrome から直接 GitHub の `miharai/data.json` を更新します。
 
 ## 構成
 
 - `miharai/index.html` 公開マップ
 - `miharai/data.json` 公開台帳
-- `miharai/admin.html` スマホ用記録端末
-- `workers/miharai-worker.js` 記録受付。公開座標をぼかして GitHub の `data.json` を更新する
+- `miharai/admin.html` Chrome用記録端末
 
-## Cloudflare Worker に必要な設定
+## 最初の一回だけ
 
-Workerへ `workers/miharai-worker.js` を配置し、以下の環境変数／Secretを設定します。
+GitHub で Fine-grained personal access token を作成します。
 
-- `ADMIN_KEY` 管理端末から送る秘密鍵。長いランダム文字列を推奨
-- `GITHUB_TOKEN` このリポジトリの Contents を読み書きできる fine-grained personal access token。HTMLへは絶対に書かない
-- `GITHUB_REPO` `nazonoryutarou-stack/subeha-portfolio`（省略時もこの値）
-- `GITHUB_BRANCH` `main`（省略可）
-- `DATA_PATH` `miharai/data.json`（省略可）
-- `ALLOWED_ORIGIN` 公開サイトの origin。例 `https://example.com`。本番では設定推奨
+推奨設定：
 
-WorkerのURLが `https://miharai-api.example.workers.dev` なら、`miharai/admin.html` の初回設定欄へそのURLと `ADMIN_KEY` を入力します。
+- Repository access: `subeha-portfolio` のみ
+- Repository permissions: Contents = Read and write
+- 有効期限は必要な範囲で短めに設定
+
+トークンを `miharai/admin.html` の認証欄に貼り、「このタブに保持」を押します。
+
+トークンは `sessionStorage` にだけ保存されます。HTML、`data.json`、GitHubコミットには書き込みません。Chromeのタブを閉じると消えます。
 
 ## 日常運用
 
-1. スマホで `miharai/admin.html` を開く
-2. 地点名、分類、状態、観測内容などを入力
-3. 「現在地を取得」
-4. 公開位置のぼかし半径を選ぶ
-5. 「記録する」
-6. Worker が座標をずらしたうえで `miharai/data.json` をコミット
-7. `miharai/index.html` が次の読み込み時に反映
+1. Chromeで `miharai/admin.html` を開く
+2. 「現在地を取得」を押す、または地図をタップ
+3. 地点名、分類、状態、観測内容、未処理理由を入力
+4. 公開位置のぼかし距離を選ぶ
+5. 必要なら「公開位置をずらし直す」
+6. 「本番へ反映」を押す
+7. `miharai/data.json` がGitHub上で更新され、公開マップへ反映される
 
-## 位置情報について
+既存の点をタップすると編集できます。状態変更、再観測、処理済み・消失への変更、削除も同じ管理画面から行えます。
 
-正確な緯度・経度は Worker が受け取った時点で公開用座標へずらし、GitHubには保存しません。したがって、この構成だけでは正確な地点を後から復元できません。
+## 位置情報
 
-正確な場所を非公開で保存したくなった場合は、GitHubではなく Cloudflare D1 / KV 等の非公開ストレージを別途使います。
+GPSで取得した正確な座標はブラウザ内で公開位置を生成するためにだけ使用します。GitHubに保存するのは、指定距離だけずらした公開座標のみです。
 
-## 更新系を追加する場合
+標準のぼかし距離は約700m。300m / 500m / 700m / 1km / 2kmから選べます。
 
-現在の Worker は新規記録の追加専用です。再観測、状態変更、処理済みへの変更などは、次段階で `PATCH /records/:id` を追加し、変更履歴も保持する設計に拡張できます。
+重要：この構成では正確な地点を後から復元できません。将来、非公開の正確な位置も保存したくなった場合は、公開GitHubとは別の非公開ストレージを追加してください。
+
+## Chromeで位置情報が取れない場合
+
+- サイトを HTTPS で開いているか確認
+- Chromeのサイト設定で「位置情報」を許可
+- Android本体の位置情報をON
+- `file://` でHTMLを直接開かず、GitHub Pages等のHTTPS配信URLから開く
+
+## 公開側
+
+`miharai/index.html` は `data.json` を直接読み込みます。Google SheetsやCSV公開URLには依存しません。
