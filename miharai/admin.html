@@ -1,39 +1,91 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>未祓い記録端末</title><meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>未祓い記録端末</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#050505;--panel:#0c0a08;--ink:#d8cdb8;--dim:#7d745f;--line:#2a251d;--red:#a51212;--gold:#ad8b4a;--mono:'IBM Plex Mono',monospace}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#15110c,#050505 42%);color:var(--ink);font-family:'Shippori Mincho',serif;min-height:100svh;padding:22px 14px 50px}.wrap{max-width:680px;margin:auto}.ey{font-family:var(--mono);color:var(--red);font-size:.56rem;letter-spacing:.24em}h1{font-size:1.55rem;letter-spacing:.18em;margin:7px 0 4px}.sub{color:var(--dim);font-size:.7rem;line-height:1.9;margin-bottom:18px}.box{border:1px solid var(--line);background:rgba(10,8,6,.9);padding:16px;margin:12px 0}label{display:block;font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;color:#9d927c;margin:13px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);background:#080706;color:var(--ink);padding:12px;font:inherit;font-size:.92rem;outline:none}textarea{min-height:108px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#786650}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{border:1px solid #6e6250;background:#0b0907;color:var(--ink);padding:12px 14px;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;cursor:pointer;flex:1}.btn.red{border-color:#7e1d1d;color:#e67c73}.btn.gold{border-color:#79633e;color:#d6b46f}.loc{font-family:var(--mono);font-size:.58rem;color:var(--dim);line-height:1.7;margin-top:8px;word-break:break-all}.status{font-family:var(--mono);font-size:.6rem;line-height:1.8;padding:11px 12px;border-left:2px solid var(--line);color:var(--dim);margin-top:12px;white-space:pre-wrap}.status.ok{border-color:#6c7d52;color:#aebe91}.status.err{border-color:var(--red);color:#db827b}.tiny{font-family:var(--mono);font-size:.5rem;color:#615a4d;line-height:1.8}.link{color:#9e927c;text-decoration:none}.setup{display:grid;gap:8px}.setup input{font-family:var(--mono);font-size:.72rem}.pill{display:inline-block;border:1px solid var(--line);padding:3px 6px;font-family:var(--mono);font-size:.48rem;color:var(--dim)}@media(max-width:560px){.row{grid-template-columns:1fr}}
-</style></head>
-<body><main class="wrap">
-<div class="ey">PRIVATE OBSERVATION TERMINAL</div><h1>未祓い記録端末</h1><div class="sub">現場で記録して、そのまま公開台帳へ送る。公開される座標は受付側でぼかされる。正確な位置はGitHubへ保存しない。</div>
-<section class="box setup"><span class="pill">初回だけ</span><label>受付 Worker URL</label><input id="endpoint" placeholder="https://miharai-api.example.workers.dev"><label>管理鍵</label><input id="key" type="password" autocomplete="off" placeholder="Worker に設定した ADMIN_KEY"><div class="actions"><button class="btn" id="saveSetup">この端末に保存</button><button class="btn" id="forgetSetup">消去</button></div><div class="tiny">URLはlocalStorage、管理鍵はsessionStorageに保存。共有端末では管理鍵を残さないこと。</div></section>
-<section class="box">
-<label>地点名</label><input id="name" placeholder="例：河川敷北側の階段">
-<div class="row"><div><label>地域</label><input id="area" placeholder="例：大阪市北部"></div><div><label>記録番号</label><input id="id" placeholder="空欄なら自動"></div></div>
-<div class="row"><div><label>分類</label><select id="type"><option>未分類</option><option>残留像</option><option>対話可能</option><option>移動性</option><option>反復現象</option><option>物品付着</option><option>環境性</option><option>判定不能</option></select></div><div><label>状態</label><select id="state"><option>観測中</option><option>未確認</option><option>経過観察</option><option>未処理</option><option>処理予定</option><option>処理不要</option><option>処理済</option><option>消失</option></select></div></div>
-<div class="row"><div><label>危険度</label><select id="risk"><option value="1">1 / 5</option><option value="2">2 / 5</option><option value="3">3 / 5</option><option value="4">4 / 5</option><option value="5">5 / 5</option></select></div><div><label>公開位置のぼかし</label><select id="blur"><option value="500">約500m</option><option value="1000" selected>約1km</option><option value="2000">約2km</option><option value="5000">約5km</option></select></div></div>
-<label>観測内容</label><textarea id="description" placeholder="観測した内容。断定と推測は分けて書く。"></textarea>
-<label>未処理理由</label><input id="reason" placeholder="例：処理の必要性を認めないため">
-<div class="row"><div><label>観測日</label><input id="observed" type="date"></div><div><label>最終更新日</label><input id="updated" type="date"></div></div>
-<label>位置</label><div class="actions"><button class="btn gold" id="locate">現在地を取得</button><button class="btn" id="clearLoc">位置を消す</button></div><div class="loc" id="locText">未取得</div>
-<div class="actions"><button class="btn red" id="submit">記 録 す る</button><button class="btn" id="reset">入力を空に</button></div><div class="status" id="status">待機中。</div>
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Shippori Mincho',serif;min-height:100%;}
+body{background:radial-gradient(circle at 50% 0,#15110c,#050505 42%)}
+header{padding:18px 16px 12px;border-bottom:1px solid var(--line);display:flex;align-items:flex-end;gap:14px;position:relative;z-index:3;background:rgba(5,5,5,.94)}
+.ey{font-family:var(--mono);color:var(--red);font-size:.52rem;letter-spacing:.2em}.title{font-size:1.25rem;letter-spacing:.18em}.sp{flex:1}.mini{font-family:var(--mono);font-size:.52rem;color:var(--dim);letter-spacing:.1em}
+#map{height:55svh;min-height:390px;border-bottom:1px solid var(--line);filter:grayscale(.35) brightness(.78)}
+.leaflet-container{background:#090909}.leaflet-control-attribution{font-size:9px!important}.spot{width:15px;height:15px;border-radius:50%;background:var(--red);border:2px solid #eb5d55;box-shadow:0 0 10px rgba(165,18,18,.8)}.spot.edit{background:var(--gold);border-color:#edc16f;box-shadow:0 0 12px rgba(173,139,74,.75)}
+#hint{padding:10px 14px;text-align:center;font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;color:var(--dim);border-bottom:1px solid var(--line)}
+.panel{max-width:760px;margin:0 auto;padding:16px 14px 48px}.box{border:1px solid var(--line);background:rgba(10,8,6,.92);padding:15px;margin-top:12px}label{display:block;font-family:var(--mono);font-size:.54rem;letter-spacing:.13em;color:#9d927c;margin:12px 0 6px}input,select,textarea{width:100%;border:1px solid var(--line);background:#080706;color:var(--ink);padding:11px;font:inherit;font-size:.9rem;outline:none}textarea{min-height:96px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#786650}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{border:1px solid #6e6250;background:#0b0907;color:var(--ink);padding:11px 12px;font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;cursor:pointer;flex:1}.btn.red{border-color:#7e1d1d;color:#e67c73}.btn.gold{border-color:#79633e;color:#d6b46f}.btn:disabled{opacity:.35}.status{font-family:var(--mono);font-size:.58rem;line-height:1.8;padding:10px 11px;border-left:2px solid var(--line);color:var(--dim);margin-top:12px;white-space:pre-wrap}.status.ok{border-color:#6c7d52;color:#aebe91}.status.err{border-color:var(--red);color:#db827b}.tiny{font-family:var(--mono);font-size:.5rem;color:#615a4d;line-height:1.8}.pill{display:inline-block;border:1px solid var(--line);padding:3px 6px;font-family:var(--mono);font-size:.48rem;color:var(--dim)}.coords{font-family:var(--mono);font-size:.54rem;color:var(--gold);margin-top:9px}.hidden{display:none}.link{color:#9e927c;text-decoration:none}@media(max-width:560px){.row{grid-template-columns:1fr}#map{height:50svh}}
+</style>
+</head>
+<body>
+<header><div><div class="ey">PRIVATE OBSERVATION TERMINAL</div><div class="title">未祓い記録端末</div></div><span class="sp"></span><span class="mini" id="countLab">0 RECORDS</span></header>
+<div id="map"></div>
+<div id="hint">地図をタップして新規記録。既存の点をタップすると編集。</div>
+<main class="panel">
+<section class="box" id="authBox">
+<span class="pill">初回だけ</span>
+<label>GitHub Fine-grained token</label>
+<input id="token" type="password" autocomplete="off" placeholder="Contents: Read and write のトークン">
+<div class="actions"><button class="btn" id="saveToken">このタブに保持</button><button class="btn" id="forgetToken">消す</button></div>
+<div class="tiny">トークンはsessionStorageだけに置く。HTMLやGitHubには保存しない。対象リポジトリを <b>subeha-portfolio</b> のみに絞った Fine-grained token 推奨。</div>
 </section>
-<div class="tiny"><a class="link" href="./index.html">← 公開マップ</a></div>
+<section class="box hidden" id="formBox">
+<span class="pill" id="modeLab">NEW RECORD</span>
+<div class="coords" id="coordsLab"></div>
+<label>地点名</label><input id="name" placeholder="例：河川敷北側の階段">
+<div class="row"><div><label>地域</label><input id="area" placeholder="例：大阪市北部"></div><div><label>記録番号</label><input id="id" readonly></div></div>
+<div class="row"><div><label>分類</label><select id="type"><option>未分類</option><option>残留像</option><option>対話可能</option><option>移動性</option><option>反復現象</option><option>物品付着</option><option>環境性</option><option>判定不能</option></select></div><div><label>状態</label><select id="state"><option>観測中</option><option>未確認</option><option>経過観察</option><option>未処理</option><option>処理予定</option><option>処理不要</option><option>処理済</option><option>消失</option></select></div></div>
+<div class="row"><div><label>危険度</label><select id="risk"><option value="1">1 / 5</option><option value="2">2 / 5</option><option value="3">3 / 5</option><option value="4">4 / 5</option><option value="5">5 / 5</option></select></div><div><label>観測日</label><input id="observed" type="date"></div></div>
+<label>観測内容</label><textarea id="description" placeholder="観測内容。推測と観測は分けて書く。"></textarea>
+<label>未処理理由</label><input id="reason" placeholder="例：処理の必要性を認めないため">
+<label>最終更新日</label><input id="updated" type="date">
+<div class="actions"><button class="btn red" id="saveRec">本番へ反映</button><button class="btn" id="cancelRec">取消</button><button class="btn" id="deleteRec">削除</button></div>
+<div class="status" id="status">待機中。</div>
+</section>
+<div class="tiny" style="margin-top:14px"><a class="link" href="./index.html">← 公開マップを見る</a></div>
 </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-const $=id=>document.getElementById(id);let coords=null;
-const today=()=>new Date().toISOString().slice(0,10);$('observed').value=today();$('updated').value=today();
-$('endpoint').value=localStorage.getItem('miharaiEndpoint')||'';$('key').value=sessionStorage.getItem('miharaiKey')||'';
+(()=>{
+'use strict';
+const REPO='nazonoryutarou-stack/subeha-portfolio';
+const PATH='miharai/data.json';
+const BRANCH='main';
+const API=`https://api.github.com/repos/${REPO}/contents/${PATH}`;
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+let records=[], selectedIndex=-1, draftLatLng=null, editMarker=null;
+const map=L.map('map',{scrollWheelZoom:false}).setView([34.69,135.50],11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(map);
+const layer=L.layerGroup().addTo(map);
 function stat(t,k=''){const e=$('status');e.textContent=t;e.className='status '+k}
-$('saveSetup').onclick=()=>{localStorage.setItem('miharaiEndpoint',$('endpoint').value.trim().replace(/\/$/,''));sessionStorage.setItem('miharaiKey',$('key').value);stat('端末設定を保存した。','ok')};
-$('forgetSetup').onclick=()=>{localStorage.removeItem('miharaiEndpoint');sessionStorage.removeItem('miharaiKey');$('endpoint').value='';$('key').value='';stat('端末設定を消去した。')};
-$('locate').onclick=()=>{if(!navigator.geolocation){stat('この端末は位置情報に対応していない。','err');return}stat('位置を取得中…');navigator.geolocation.getCurrentPosition(p=>{coords={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy};$('locText').textContent=`取得済み / 精度 約${Math.round(coords.accuracy)}m`;stat('位置を取得した。公開時に座標をぼかす。','ok')},e=>stat('位置情報を取得できない：'+e.message,'err'),{enableHighAccuracy:true,timeout:15000,maximumAge:0})};
-$('clearLoc').onclick=()=>{coords=null;$('locText').textContent='未取得'};
-function payload(){return{id:$('id').value.trim(),name:$('name').value.trim(),area:$('area').value.trim(),type:$('type').value,status:$('state').value,risk:Number($('risk').value),blur:Number($('blur').value),description:$('description').value.trim(),reason:$('reason').value.trim(),observed:$('observed').value,updated:$('updated').value,lat:coords?.lat,lng:coords?.lng}}
-$('submit').onclick=async()=>{const endpoint=$('endpoint').value.trim().replace(/\/$/,'');const key=$('key').value;if(!endpoint||!key){stat('先に Worker URL と管理鍵を設定してくれ。','err');return}const p=payload();if(!p.name){stat('地点名が空。','err');return}if(!coords){stat('位置が未取得。地域だけ公開する案件なら、Worker側仕様を変える必要がある。','err');return}stat('GitHub台帳へ送信中…');try{const r=await fetch(endpoint+'/records',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+key},body:JSON.stringify(p)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('HTTP '+r.status));stat(`記録した。\n${j.record?.id||''}\ncommit ${j.commit||''}`,'ok');$('id').value=''}catch(e){stat('記録できない：'+e.message,'err')}};
-$('reset').onclick=()=>{['id','name','area','description','reason'].forEach(x=>$(x).value='');$('type').selectedIndex=0;$('state').selectedIndex=0;$('risk').value='1';$('blur').value='1000';$('observed').value=today();$('updated').value=today();coords=null;$('locText').textContent='未取得';stat('入力を空にした。')};
-</script></body></html>
+function token(){return $('token').value.trim()}
+$('token').value=sessionStorage.getItem('miharaiGitHubToken')||'';
+$('saveToken').onclick=()=>{sessionStorage.setItem('miharaiGitHubToken',token());stat('このタブにトークンを保持した。','ok')};
+$('forgetToken').onclick=()=>{sessionStorage.removeItem('miharaiGitHubToken');$('token').value=''};
+function b64EncodeUtf8(s){const bytes=new TextEncoder().encode(s);let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin)}
+function b64DecodeUtf8(s){const bin=atob(s.replace(/\n/g,''));const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes)}
+function nextId(){let max=0;records.forEach(r=>{const m=String(r.id||'').match(/(\d+)/);if(m)max=Math.max(max,Number(m[1]))});return 'MHR-'+String(max+1).padStart(4,'0')}
+function markerHtml(edit=false){return `<div class="spot${edit?' edit':''}"></div>`}
+function renderMarkers(){layer.clearLayers();const bounds=[];records.forEach((r,i)=>{if(!Number.isFinite(Number(r.lat))||!Number.isFinite(Number(r.lng)))return;const icon=L.divIcon({className:'',html:markerHtml(false),iconSize:[15,15],iconAnchor:[7,7]});const m=L.marker([r.lat,r.lng],{icon}).addTo(layer);m.bindTooltip(`${r.id||''} ${r.name||''}`);m.on('click',e=>{L.DomEvent.stopPropagation(e);openEdit(i)});bounds.push([r.lat,r.lng])});$('countLab').textContent=records.length+' RECORDS';if(bounds.length>1&&records.length&&!draftLatLng)map.fitBounds(bounds,{padding:[30,30],maxZoom:13});else if(bounds.length===1&&!draftLatLng)map.setView(bounds[0],13)}
+function placeEditMarker(latlng){if(editMarker)map.removeLayer(editMarker);const icon=L.divIcon({className:'',html:markerHtml(true),iconSize:[15,15],iconAnchor:[7,7]});editMarker=L.marker(latlng,{icon,draggable:true}).addTo(map);editMarker.on('dragend',()=>{draftLatLng=editMarker.getLatLng();updateCoords()})}
+function updateCoords(){if(draftLatLng)$('coordsLab').textContent=`公開位置 ${draftLatLng.lat.toFixed(6)}, ${draftLatLng.lng.toFixed(6)}　※黄色ピンはドラッグ可`}
+function blankForm(){['name','area','description','reason'].forEach(x=>$(x).value='');$('type').selectedIndex=0;$('state').selectedIndex=0;$('risk').value='1';$('observed').value=today();$('updated').value=today()}
+function showForm(){ $('formBox').classList.remove('hidden'); setTimeout(()=>$('formBox').scrollIntoView({behavior:'smooth',block:'start'}),80)}
+function openNew(latlng){selectedIndex=-1;draftLatLng=latlng;blankForm();$('id').value=nextId();$('modeLab').textContent='NEW RECORD';$('deleteRec').disabled=true;placeEditMarker(latlng);updateCoords();stat('位置を決めた。内容を入れて本番へ反映。');showForm()}
+function openEdit(i){selectedIndex=i;const r=records[i];draftLatLng=L.latLng(Number(r.lat),Number(r.lng));$('id').value=r.id||nextId();$('name').value=r.name||'';$('area').value=r.area||'';$('type').value=r.type||'未分類';$('state').value=r.status||'観測中';$('risk').value=String(r.risk||1);$('description').value=r.description||'';$('reason').value=r.reason||'';$('observed').value=r.observed||today();$('updated').value=r.updated||today();$('modeLab').textContent='EDIT RECORD';$('deleteRec').disabled=false;placeEditMarker(draftLatLng);updateCoords();stat('既存記録を編集中。');showForm()}
+map.on('click',e=>openNew(e.latlng));
+$('cancelRec').onclick=()=>{selectedIndex=-1;draftLatLng=null;$('formBox').classList.add('hidden');if(editMarker){map.removeLayer(editMarker);editMarker=null}renderMarkers()};
+async function getRepoData(){const headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};if(token())headers.Authorization='Bearer '+token();const r=await fetch(API+'?ref='+BRANCH,{headers,cache:'no-store'});if(!r.ok)throw new Error('GitHub読込 '+r.status);const j=await r.json();return{sha:j.sha,data:JSON.parse(b64DecodeUtf8(j.content||''))}}
+async function writeRepoData(data,sha,message){if(!token())throw new Error('GitHub token が未設定。');const body={message,content:b64EncodeUtf8(JSON.stringify(data,null,2)+'\n'),sha,branch:BRANCH};const r=await fetch(API,{method:'PUT',headers:{'Accept':'application/vnd.github+json','Authorization':'Bearer '+token(),'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||('GitHub書込 '+r.status));return j.commit?.sha||''}
+function formRecord(){return{id:$('id').value,name:$('name').value.trim(),area:$('area').value.trim(),lat:Number(draftLatLng.lat.toFixed(6)),lng:Number(draftLatLng.lng.toFixed(6)),type:$('type').value,status:$('state').value,risk:Number($('risk').value),description:$('description').value.trim(),reason:$('reason').value.trim(),observed:$('observed').value||today(),updated:$('updated').value||today()}}
+$('saveRec').onclick=async()=>{if(!draftLatLng){stat('地図上の位置が無い。','err');return}if(!$('name').value.trim()){stat('地点名が空。','err');return}stat('GitHubへ記録中…');$('saveRec').disabled=true;try{const latest=await getRepoData();records=Array.isArray(latest.data)?latest.data:[];const id=$('id').value;const idx=records.findIndex(r=>r.id===id);const rec=formRecord();if(idx>=0)records[idx]=rec;else records.push(rec);const commit=await writeRepoData(records,latest.sha,`${idx>=0?'Update':'Add'} miharai record ${id}`);stat(`反映した。\n${id}\ncommit ${commit.slice(0,12)}\n公開地図はGitHub Pages反映後に更新される。`,'ok');selectedIndex=records.findIndex(r=>r.id===id);renderMarkers()}catch(e){stat('反映できない：'+e.message,'err')}finally{$('saveRec').disabled=false}};
+$('deleteRec').onclick=async()=>{const id=$('id').value;if(!id||!confirm(id+' を削除する？'))return;stat('削除中…');try{const latest=await getRepoData();const data=(Array.isArray(latest.data)?latest.data:[]).filter(r=>r.id!==id);const commit=await writeRepoData(data,latest.sha,`Delete miharai record ${id}`);records=data;stat(`削除した。\ncommit ${commit.slice(0,12)}`,'ok');$('formBox').classList.add('hidden');if(editMarker){map.removeLayer(editMarker);editMarker=null}draftLatLng=null;renderMarkers()}catch(e){stat('削除できない：'+e.message,'err')}};
+async function boot(){try{const r=await fetch('./data.json?t='+Date.now(),{cache:'no-store'});records=await r.json();if(!Array.isArray(records))records=[];renderMarkers()}catch(e){console.error(e);records=[];renderMarkers()}}
+boot();
+})();
+</script>
+</body>
+</html>
