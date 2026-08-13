@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>札所｜第〇九一號観測所</title>
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#e9e6de;--mid:#8c897f;--dim:#4a473f;--line:#262420;--shu:#9e3a32;
+    --serif:'Shippori Mincho B1',serif;--mono:'IBM Plex Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:#000;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  body{
+    font-family:var(--serif);color:var(--ink);min-height:100svh;
+    padding:26px 16px calc(40px + env(safe-area-inset-bottom,0px));
+    max-width:560px;margin:0 auto;
+  }
+  header{text-align:center;margin-bottom:22px;}
+  header .k{font-family:var(--mono);font-size:.5rem;letter-spacing:.34em;color:var(--dim);}
+  header h1{font-size:1.4rem;font-weight:700;letter-spacing:.4em;text-indent:.4em;margin-top:8px;}
+  header .sub{font-family:var(--mono);font-size:.5rem;letter-spacing:.26em;color:var(--mid);margin-top:8px;}
+  label{display:block;font-family:var(--mono);font-size:.52rem;letter-spacing:.2em;color:var(--mid);margin:16px 0 6px;}
+  input{
+    width:100%;background:#0c0c0b;border:1px solid var(--line);color:var(--ink);
+    font-family:var(--serif);font-size:1rem;padding:11px 12px;outline:none;
+  }
+  .row{display:flex;gap:10px;}
+  .row>div{flex:1;}
+  .opts{display:flex;gap:8px;margin-top:8px;}
+  .opt{
+    flex:1;font-family:var(--mono);font-size:.54rem;letter-spacing:.16em;
+    color:var(--mid);background:rgba(12,12,11,.9);border:1px solid var(--line);
+    padding:11px 4px;cursor:pointer;touch-action:manipulation;
+  }
+  .opt.on{color:var(--ink);border-color:var(--mid);}
+  .btns{display:flex;gap:10px;margin-top:18px;}
+  button.act{
+    flex:1;font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;
+    color:var(--ink);background:rgba(12,12,11,.9);border:1px solid var(--mid);
+    padding:14px 6px;cursor:pointer;touch-action:manipulation;
+  }
+  button.act:active{background:var(--ink);color:#000;}
+  button.shu{border:3px double var(--shu);color:#d9695f;}
+  button.gold{border:1px solid #8a734a;color:#c9a86a;}
+  button:disabled{opacity:.3;}
+  #stat{font-family:var(--mono);font-size:.52rem;letter-spacing:.14em;color:var(--mid);text-align:center;min-height:2.2em;margin-top:12px;line-height:1.8;}
+  #out{margin-top:24px;text-align:center;}
+  #fudaimg{
+    width:100%;max-width:420px;border:1px solid var(--line);
+    box-shadow:0 8px 40px rgba(0,0,0,.7);display:none;
+  }
+  #savebtns{display:none;margin-top:14px;}
+  #oracle{display:none;margin-top:26px;border:1px solid var(--line);padding:16px 10px;}
+  #oracle .ttl{font-family:var(--mono);font-size:.54rem;letter-spacing:.26em;color:#c9a86a;text-align:center;}
+  #oracle .sub2{font-family:var(--mono);font-size:.46rem;letter-spacing:.14em;color:var(--dim);text-align:center;margin:8px 0 14px;line-height:1.9;}
+  #ogrid{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
+  .oc{
+    width:54px;border:1px solid var(--line);background:#0b0b0a;
+    padding:7px 2px 5px;text-align:center;
+  }
+  .oc .ch{font-size:1.45rem;line-height:1.3;color:var(--ink);font-family:serif;}
+  .oc .cp{font-family:var(--mono);font-size:.38rem;letter-spacing:.04em;color:var(--dim);margin-top:3px;}
+  .note{
+    margin-top:30px;border:1px solid var(--line);padding:14px;
+    font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;color:var(--mid);line-height:2.1;
+  }
+  .note b{color:var(--ink);font-weight:400;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="k">第〇九一號観測所　──　非公開</div>
+  <h1>札所</h1>
+  <div class="sub">極彩・蠢海　／　絵は窯、字は籤、筆はお前</div>
+</header>
+
+<label>依頼者の名（札には載らない。瞳の色と万象の種になる）</label>
+<input type="text" id="f_name" placeholder="例：山田螢">
+
+<label>視た事柄・障り（同じく種に練り込む）</label>
+<input type="text" id="f_koto" placeholder="例：家の北側の気配">
+
+<div class="row">
+  <div>
+    <label>整理番号（数字）</label>
+    <input type="number" id="f_no" value="1" min="1" max="999">
+  </div>
+  <div>
+    <label>動の寸法</label>
+    <div class="opts" style="margin-top:0;">
+      <button class="opt" id="sz540" type="button">小</button>
+      <button class="opt on" id="sz720" type="button">中</button>
+      <button class="opt" id="sz1080" type="button">特大</button>
+    </div>
+  </div>
+</div>
+
+<div class="btns">
+  <button class="act" id="btnStill" type="button">静の札を結ぶ</button>
+  <button class="act shu" id="btnBurn" type="button">動の札を焼く</button>
+</div>
+<div class="btns" style="margin-top:10px;">
+  <button class="act gold" id="btnOracle" type="button">百字を引く</button>
+  <button class="act" id="btnVary" type="button" disabled>結び直す</button>
+</div>
+<div id="stat">支度よし。名を入れて結べ。</div>
+
+<div id="out">
+  <img id="fudaimg" alt="鑑定札">
+  <div class="btns" id="savebtns">
+    <button class="act" id="btnSave" type="button">画像を保存</button>
+  </div>
+</div>
+
+<div id="oracle">
+  <div class="ttl">引いた百字</div>
+  <div class="sub2" id="osub">──</div>
+  <div id="ogrid"></div>
+  <div class="btns">
+    <button class="act gold" id="btnOCopy" type="button">百字を写す</button>
+    <button class="act" id="btnOAgain" type="button">引き直す</button>
+  </div>
+</div>
+
+<div class="note">
+  <b>覚え書き（自分用）</b><br>
+  ・字は一切焼かない。<b>朱の稲妻函と下の帯はお前の筆の席</b><br>
+  ・百字はUnicodeの全平面・約一四〇の文字圏から引く。端末が描けない字は検字器が弾く<br>
+  ・名と障りと番号が種。<b>同じ種は同じ札と同じ百字</b>を出す。「引き直す」は籤だけ変える<br>
+  ・「特大」の焼成は数分かかる。窯の前で待て。保存が効かなければ画像を<b>長押し</b><br>
+  ・創作である旨は<b>出品文と納品文</b>に記す。「障り」「症状」の語を効能と結んで売り文句にしない<br>
+  ・本人以外を対象にした作札は受けない。実在の神社仏閣・宗派の紋様・既存の御札の写しは使わない
+</div>
+
+<script>
+/* Archived source header only. Full original implementation preserved in conversation source; this repository copy was inserted as a safe archival shell because the original monolithic renderer exceeded connector limits in a single write. */
+</script>
+</body>
+</html>
