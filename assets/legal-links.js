@@ -36,6 +36,8 @@
       '#main input,#main textarea,#main select{background:#fbf8f0!important;color:#161514!important;border-color:#cfc6b7!important}',
       '#main img,#main video,#main canvas,#main svg{opacity:1!important}',
       '#main .auto-dark-surface,#main .auto-dark-surface *{color:#f3efe4!important;text-shadow:none!important;opacity:1!important}',
+      '#main .auto-dark-surface h1,#main .auto-dark-surface h2,#main .auto-dark-surface h3,#main .auto-dark-surface h4{color:#f3efe4!important}',
+      '#main .auto-dark-surface p,#main .auto-dark-surface li,#main .auto-dark-surface span,#main .auto-dark-surface strong,#main .auto-dark-surface b{color:#e0d8ca!important}',
       '#main .auto-dark-surface .eyebrow,#main .auto-dark-surface .kicker,#main .auto-dark-surface small,#main .auto-dark-surface .muted,#main .auto-dark-surface [class*="meta"],#main .auto-dark-surface [class*="caption"]{color:#b8afa0!important}',
       '#main .auto-dark-surface a{color:#f3efe4!important}',
       '.site-header{background:rgba(243,239,228,.98)!important;color:#161514!important}',
@@ -57,20 +59,61 @@
     return 0.2126*chan(c.r)+0.7152*chan(c.g)+0.0722*chan(c.b);
   }
 
-  function markDarkSurfaces(){
-    var root=document.getElementById('main');
-    if(!root) return;
+  function markAutomaticDarkSurfaces(root){
     root.querySelectorAll('*').forEach(function(el){
-      el.classList.remove('auto-dark-surface');
       var cs=getComputedStyle(el);
       var bg=parseColor(cs.backgroundColor);
       var hasImage=cs.backgroundImage&&cs.backgroundImage!=='none';
       var darkBg=bg&&bg.a>0.45&&luminance(bg)<0.09;
       if(darkBg||hasImage){
         var rect=el.getBoundingClientRect();
-        if(rect.width>120&&rect.height>80) el.classList.add('auto-dark-surface');
+        if(rect.width>180&&rect.height>120) el.classList.add('auto-dark-surface');
       }
     });
+  }
+
+  function markNamedDarkPanels(root){
+    var labels=[
+      'PRODUCT INFORMATION',
+      'RESEARCH & DEVELOPMENT',
+      'READING / PROCEDURE',
+      'PROVISIONAL TERM / SPECTRUM'
+    ];
+
+    root.querySelectorAll('*').forEach(function(el){
+      if(el.children.length>3) return;
+      var text=(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();
+      if(!text) return;
+      var hit=labels.some(function(label){return text.indexOf(label)>=0;});
+      if(!hit) return;
+
+      var node=el;
+      var fallback=null;
+      while(node&&node!==root){
+        var rect=node.getBoundingClientRect();
+        if(rect.width>260&&rect.height>220){
+          if(!fallback) fallback=node;
+          var cs=getComputedStyle(node);
+          var bg=parseColor(cs.backgroundColor);
+          var hasImage=cs.backgroundImage&&cs.backgroundImage!=='none';
+          var darkBg=bg&&bg.a>0.25&&luminance(bg)<0.16;
+          if(darkBg||hasImage){
+            node.classList.add('auto-dark-surface');
+            return;
+          }
+        }
+        node=node.parentElement;
+      }
+      if(fallback) fallback.classList.add('auto-dark-surface');
+    });
+  }
+
+  function markDarkSurfaces(){
+    var root=document.getElementById('main');
+    if(!root) return;
+    root.querySelectorAll('.auto-dark-surface').forEach(function(el){el.classList.remove('auto-dark-surface');});
+    markAutomaticDarkSurfaces(root);
+    markNamedDarkPanels(root);
   }
 
   function repairBrand(){
