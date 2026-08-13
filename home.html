@@ -10,6 +10,14 @@
 <meta property="og:description" content="呪われてても心は錦。">
 <title>すべての歯が見える</title>
 <link rel="stylesheet" href="assets/home-redesign.css">
+<link rel="stylesheet" href="assets/home-vrm.css">
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/",
+  "@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.3/lib/three-vrm.module.min.js"
+}}
+</script>
 </head>
 <body>
 <header class="site-header">
@@ -35,6 +43,16 @@
       <div class="profile-mark">
         <img src="hitotsu-ore-choji.png" alt="一つ折れ丁字">
         <p>令和元年11月11日 開眼</p>
+        <div class="home-vrm" data-home-vrm>
+          <div class="home-vrm-stage" data-home-vrm-stage>
+            <img class="home-vrm-poster" data-home-vrm-poster src="assets/vrm/subeha-vrm-poster.webp" width="720" height="720" alt="すべての歯が見えるの3Dモデル静止画">
+            <canvas class="home-vrm-canvas" data-home-vrm-canvas aria-label="すべての歯が見えるの3Dモデル" hidden></canvas>
+          </div>
+          <div class="home-vrm-controls">
+            <button class="home-vrm-button" type="button" data-home-vrm-load>3Dモデルを表示</button>
+            <p class="home-vrm-status" data-home-vrm-status role="status" aria-live="polite">静止画を表示中。3Dモデルはまだ読み込んでいません。</p>
+          </div>
+        </div>
       </div>
       <div class="profile-copy">
         <p class="section-label">PROFILE / SUBETE NO HA GA MIERU</p>
@@ -106,5 +124,6 @@
     <div><b>すべての歯が見える</b><p>呪われてても心は錦。</p></div>
   </div>
 </footer>
+<script src="assets/home-vrm.js" defer></script>
 </body>
 </html>
