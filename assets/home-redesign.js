@@ -19,7 +19,7 @@
     const logo=document.querySelector('.site-header .logo');
     if(logo){
       logo.setAttribute('href',assetBase+'/home.html');
-      logo.innerHTML=`<img class="brand-crest" src="${assetBase}/hitotsu-ore-choji.png" alt="一つ折れ丁字"><span><b>すべての歯が見える</b><small>SPECTRUM RESEARCH</small></span>`;
+      logo.innerHTML=`<img class="brand-crest" src="${assetBase}/hitotsu-ore-choji.png" alt="一つ折れ丁字"><span><b>すべての歯が見える</b><small>蛭子研究 / TESSHI THEORY</small></span>`;
     }
 
     const nav=document.querySelector('.global-nav');
@@ -36,9 +36,9 @@
     main.innerHTML=`
       <div class="brand-home">
         <section class="brand-hero">
-          <p class="brand-kicker">ESTABLISHED 2019.11.11 / SPECTRUM RESEARCH</p>
+          <p class="brand-kicker">ESTABLISHED 2019.11.11 / 蛭子研究 / TESSHI THEORY</p>
           <h1>霊能を、<br>技術として<br>組み直す。</h1>
-          <p class="brand-lead">すべての歯が見えるは、霊視・祭祀・呪文・護符・式神などを、観測、仮説、実験、改良の対象として扱っています。安易に安心させません。不安も売りません。分かるところまで説明し、分からないところは未確定のまま記録します。</p>
+          <p class="brand-lead">すべての歯が見えるは、霊視・祭祀・呪文・護符・式神などを、観測、仮説、実験、改良の対象として扱っています。蛭子【テッシ】は、その宇宙理論における最弱の量子です。重力より弱い。安易に安心させません。不安も売りません。分かるところまで説明し、分からないところは未確定のまま記録します。</p>
           <div class="brand-actions">
             <a class="primary" href="${assetBase}/research/">何をしているか</a>
             <a href="${assetBase}/products/">製品を見る</a>
@@ -54,7 +54,7 @@
           <p class="section-label">ENTRANCE / 04</p>
           <h2 id="home-nav-title">入口</h2>
           <div class="nav-grid">
-            <a class="nav-card" href="${assetBase}/research/"><small>01 / RESEARCH</small><strong>研究</strong><span>仮説、検証、失敗、改訂。現在の理論を見る。</span></a>
+            <a class="nav-card" href="${assetBase}/research/"><small>01 / RESEARCH</small><strong>研究</strong><span>蛭子、宇宙理論、仮説、検証、失敗、改訂。現在の理論を見る。</span></a>
             <a class="nav-card" href="${assetBase}/products/"><small>02 / PRODUCTS</small><strong>製品</strong><span>妹字、式神、祭祀具など、実際に作っているもの。</span></a>
             <a class="nav-card" href="${assetBase}/quality/"><small>03 / PRACTICE</small><strong>霊視・霊務</strong><span>できること、できないこと、依頼を断る条件。</span></a>
             <a class="nav-card" href="${assetBase}/creator/"><small>04 / CREATOR</small><strong>制作者</strong><span>すべての歯が見えるについて。</span></a>
