@@ -77,7 +77,7 @@
       'PRODUCT INFORMATION',
       'RESEARCH & DEVELOPMENT',
       'READING / PROCEDURE',
-      'PROVISIONAL TERM / SPECTRUM'
+      'PROVISIONAL TERM / TESSHI'
     ];
 
     root.querySelectorAll('*').forEach(function(el){
