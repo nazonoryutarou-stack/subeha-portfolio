@@ -1,0 +1,54 @@
+name: Repair app metadata only
+
+on:
+  push:
+    branches:
+      - agent/site-rescan-qa
+    paths:
+      - '.github/workflows/repair-app-metadata.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Restore app files from main and add descriptions only
+        shell: python
+        run: |
+          from pathlib import Path
+          import subprocess
+
+          files = {
+            'arcade/app.html': '不氣屋アーケードの一人称Webコンテンツ。妹字屋などの区画を歩いて観察する実験作。',
+            'miharai/admin.html': '未祓いマップの非公開記録端末。GitHubへ観測記録を追加・更新するための管理ページ。',
+            'imoji-lab/app.html': '妹字暗号ラボ 0.8。呪文と読みから可逆的な字形を生成する実験用Webアプリ。',
+          }
+
+          subprocess.run(['git','fetch','origin','main'], check=True)
+          subprocess.run(['git','checkout','origin/main','--',*files.keys()], check=True)
+
+          for name, desc in files.items():
+              p=Path(name)
+              text=p.read_text(encoding='utf-8')
+              if '<meta name="description"' in text:
+                  continue
+              viewport_end = text.find('\n', text.find('<meta name="viewport"'))
+              if viewport_end < 0:
+                  raise RuntimeError(f'viewport marker not found: {name}')
+              insert=f'\n<meta name="description" content="{desc}">'
+              text=text[:viewport_end]+insert+text[viewport_end:]
+              p.write_text(text, encoding='utf-8')
+
+          subprocess.run(['git','config','user.name','github-actions[bot]'], check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'], check=True)
+          subprocess.run(['git','add',*files.keys()], check=True)
+          subprocess.run(['git','rm','.github/workflows/repair-app-metadata.yml'], check=True)
+          diff=subprocess.run(['git','diff','--cached','--quiet'])
+          if diff.returncode != 0:
+              subprocess.run(['git','commit','-m','repair app files and add metadata only'], check=True)
+              subprocess.run(['git','push','origin','HEAD:agent/site-rescan-qa'], check=True)
