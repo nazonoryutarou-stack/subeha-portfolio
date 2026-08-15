@@ -20,7 +20,27 @@
 <div class="controls"><button id="back">後退</button><button id="forward">前進</button><button id="strafeL">左移動</button><button id="strafeR">右移動</button></div>
 <div class="veil" id="veil"><small>観測所・余興 / 改装中</small><h1>不氣屋アーケード</h1><p>妹字屋の外装工事が進んだ。<br>他の区画はまだ壁しかない。</p><button id="enter">入る</button></div>
 <script>
-/* existing inline app logic intentionally retained below */
+'use strict';
+const cv=document.getElementById('c'),cx=cv.getContext('2d'),DPR=Math.min(devicePixelRatio||1,1.5);let W,H,t=0,run=false;
+function size(){W=innerWidth;H=innerHeight;cv.width=Math.floor(W*DPR);cv.height=Math.floor(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';cx.setTransform(DPR,0,0,DPR,0,0)}addEventListener('resize',size);size();
+let z=0,x=0,targetZ=0,targetX=0,inspect=false,keys={};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function project(X,Y,Z){let zz=Z-z;if(zz<.18)zz=.18;let s=Math.min(W,H)*.78/zz;return{x:W*.5+(X-x)*s,y:H*.52-Y*s,s}}
+function line3(a,b,c='#746761',lw=1){let A=project(...a),B=project(...b);cx.strokeStyle=c;cx.lineWidth=lw;cx.beginPath();cx.moveTo(A.x,A.y);cx.lineTo(B.x,B.y);cx.stroke()}
+function quad(points,fill,stroke){let ps=points.map(p=>project(...p));cx.beginPath();cx.moveTo(ps[0].x,ps[0].y);for(let i=1;i<ps.length;i++)cx.lineTo(ps[i].x,ps[i].y);cx.closePath();if(fill){cx.fillStyle=fill;cx.fill()}if(stroke){cx.strokeStyle=stroke;cx.lineWidth=1;cx.stroke()}}
+function box(x1,y1,z1,x2,y2,z2,fill='#171416',stroke='#5c4e49'){let p=[[x1,y1,z1],[x2,y1,z1],[x2,y2,z1],[x1,y2,z1],[x1,y1,z2],[x2,y1,z2],[x2,y2,z2],[x1,y2,z2]];quad([p[0],p[1],p[2],p[3]],fill,stroke);quad([p[4],p[5],p[6],p[7]],fill,stroke);quad([p[0],p[4],p[7],p[3]],fill,stroke);quad([p[1],p[5],p[6],p[2]],fill,stroke);quad([p[3],p[2],p[6],p[7]],fill,stroke)}
+const shops=[{z:3.2,side:-1,name:'妹字屋',text:'読める。意味は、まだ読めない。'},{z:6.7,side:1,name:'次区画',text:'施工前。コンクリート躯体のみ。'},{z:10.3,side:-1,name:'奥区画',text:'用途未定。'},{z:13.9,side:1,name:'終端',text:'この先はまだ作っていない。'}];
+function draw(){cx.fillStyle='#050606';cx.fillRect(0,0,W,H);let g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#161217');g.addColorStop(.46,'#080808');g.addColorStop(1,'#020303');cx.fillStyle=g;cx.fillRect(0,0,W,H);
+quad([[-2,-1,1],[2,-1,1],[2,-1,18],[-2,-1,18]],'#151315','#403632');quad([[-2,2.4,1],[2,2.4,1],[2,2.4,18],[-2,2.4,18]],'#0c0b0c','#332c2a');
+for(let Z=1;Z<18;Z+=1){line3([-2,-1,Z],[2,-1,Z],'#2c2726');if(Z%2===0)line3([-2,2.4,Z],[2,2.4,Z],'#282322')}
+line3([-2,-1,1],[-2,2.4,18],'#4b403c');line3([2,-1,1],[2,2.4,18],'#4b403c');line3([0,-1,1],[0,-1,18],'#38302d');
+shops.forEach((s,i)=>{let sx=s.side<0?-2.02:1.42;box(sx,-1,s.z,sx+.6,1.9,s.z+2.5,i===0?'#21151d':'#121111',i===0?'#80625e':'#443936');if(i===0){let X=s.side<0?-1.98:1.96;quad([[X,.35,s.z+.08],[X,1.55,s.z+.08],[X,1.55,s.z+2.2],[X,.35,s.z+2.2]],'#351827','#9b6e79');let P=project(X,1.05,s.z+.02);cx.save();cx.fillStyle='#e7d6d0';cx.font=`800 ${Math.max(9,P.s*.17)}px serif`;cx.textAlign='center';cx.translate(P.x,P.y);if(s.side<0)cx.rotate(-Math.PI/2);else cx.rotate(Math.PI/2);cx.fillText('妹字',0,0);cx.restore()}});
+let light=project(0,2.28,4.2);let rg=cx.createRadialGradient(light.x,light.y,0,light.x,light.y,Math.max(70,light.s*.8));rg.addColorStop(0,'rgba(230,210,190,.13)');rg.addColorStop(1,'rgba(0,0,0,0)');cx.fillStyle=rg;cx.fillRect(0,0,W,H);
+}
+function tick(){if(run){let sp=.055;if(keys.ArrowUp||keys.w)targetZ+=sp;if(keys.ArrowDown||keys.s)targetZ-=sp;if(keys.ArrowLeft||keys.a)targetX-=sp*.6;if(keys.ArrowRight||keys.d)targetX+=sp*.6;targetZ=clamp(targetZ,0,14.5);targetX=clamp(targetX,-.7,.7);z+=(targetZ-z)*.12;x+=(targetX-x)*.12;t+=.016}draw();requestAnimationFrame(tick)}tick();
+function bindHold(id,key){let b=document.getElementById(id);const on=e=>{e.preventDefault();keys[key]=true;b.classList.add('is-held')},off=()=>{keys[key]=false;b.classList.remove('is-held')};b.addEventListener('pointerdown',on);['pointerup','pointercancel','pointerleave'].forEach(q=>b.addEventListener(q,off))}
+bindHold('forward','ArrowUp');bindHold('back','ArrowDown');bindHold('strafeL','ArrowLeft');bindHold('strafeR','ArrowRight');addEventListener('keydown',e=>keys[e.key]=true);addEventListener('keyup',e=>keys[e.key]=false);
+document.getElementById('enter').onclick=()=>{document.getElementById('veil').classList.add('off');run=true};document.getElementById('reset').onclick=()=>{targetZ=0;targetX=0};document.getElementById('inspect').onclick=()=>{targetZ=2.2;targetX=-.55};
 </script>
 </body>
 </html>
