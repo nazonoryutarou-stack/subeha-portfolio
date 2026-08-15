@@ -30,6 +30,27 @@ small,.meta,.mono,.kicker,.eyebrow,.label,.home-showcase-kicker,.home-shelf-head
   color:var(--mf-ink)!important;
 }
 
+/* A card must stay readable even when older theme CSS tries to make it ghostlike. */
+[data-kind], [data-kind] *{
+  opacity:1!important;
+  visibility:visible!important;
+}
+[data-kind]{
+  color:var(--mf-ink)!important;
+  background:var(--mf-panel)!important;
+}
+[data-kind] h1,[data-kind] h2,[data-kind] h3,[data-kind] strong,[data-kind] b,[data-kind] a{
+  color:var(--mf-ink)!important;
+  text-shadow:none!important;
+}
+[data-kind] p,[data-kind] li,[data-kind] dd,[data-kind] dt,[data-kind] span{
+  color:var(--mf-sub)!important;
+  text-shadow:none!important;
+}
+[data-kind] small,[data-kind] .meta,[data-kind] .mono,[data-kind] .kicker,[data-kind] .eyebrow,[data-kind] .label{
+  color:var(--mf-dim)!important;
+}
+
 input,textarea,select{
   background:#fff!important;
   color:#050505!important;
