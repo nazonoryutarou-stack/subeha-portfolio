@@ -3,7 +3,9 @@ name: Site QA
 on:
   push:
     branches:
+      - main
       - agent/site-rescan-qa
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -37,15 +39,13 @@ jobs:
           class Parser(HTMLParser):
               def __init__(self):
                   super().__init__()
-                  self.links=[]; self.ids=set(); self.images=[]; self.title=False; self.desc=False
+                  self.links=[]; self.ids=set(); self.images=[]; self.desc=False
               def handle_starttag(self, tag, attrs):
                   a=dict(attrs)
                   if 'id' in a: self.ids.add(a['id'])
                   if tag=='a' and 'href' in a: self.links.append(a['href'])
                   if tag=='img': self.images.append(a)
                   if tag=='meta' and a.get('name')=='description' and a.get('content','').strip(): self.desc=True
-              def handle_data(self, data):
-                  if data.strip(): pass
 
           forbidden = [
               re.compile(r'spectrum', re.I),
@@ -91,7 +91,7 @@ jobs:
               for href in parser.links:
                   r=resolve_link(p, href)
                   if not r: continue
-                  if r[0]=='dummy': errors.append(f'{p}: dummy href="#"') ; continue
+                  if r[0]=='dummy': errors.append(f'{p}: dummy href="#"'); continue
                   target, frag=r
                   if not target.exists():
                       errors.append(f'{p}: broken local link {href} -> {target}')
