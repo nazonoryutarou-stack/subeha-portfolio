@@ -1,11 +1,11 @@
 import React from 'react';
 import {Composition} from 'remotion';
-import {TeruteruBotCG2} from './TeruteruBotCG2';
+import {TeruteruBotScenario} from './TeruteruBotScenario';
 
 export const Root: React.FC = () => (
   <Composition
     id="TeruteruBotCG"
-    component={TeruteruBotCG2}
+    component={TeruteruBotScenario}
     durationInFrames={450}
     fps={30}
     width={720}
