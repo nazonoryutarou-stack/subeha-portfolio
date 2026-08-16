@@ -25,10 +25,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install FFmpeg
+      - name: Install FFmpeg and Japanese fonts
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg fonts-noto-cjk
+          fc-cache -f -v >/dev/null
 
       - name: Generate synchronized soundtrack
         run: |
