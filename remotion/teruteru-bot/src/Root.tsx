@@ -1,14 +1,14 @@
 import React from 'react';
 import {Composition} from 'remotion';
-import {TeruteruBotCM} from './TeruteruBotCM';
+import {TeruteruBotCG} from './TeruteruBotCG';
 
 export const Root: React.FC = () => (
   <Composition
-    id="TeruteruBotCM"
-    component={TeruteruBotCM}
+    id="TeruteruBotCG"
+    component={TeruteruBotCG}
     durationInFrames={450}
     fps={30}
-    width={1080}
-    height={1920}
+    width={720}
+    height={1280}
   />
 );
