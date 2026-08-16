@@ -1,0 +1,19 @@
+{
+  "name": "teruteru-bot-remotion",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "render": "remotion render src/index.ts TeruteruBotCM out/teruteru-bot-cm.mp4 --codec=h264"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.506",
+    "@remotion/gif": "^4.0.506",
+    "@remotion/media": "^4.0.506",
+    "remotion": "^4.0.506",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  }
+}
