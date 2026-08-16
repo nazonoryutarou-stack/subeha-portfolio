@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "render": "remotion render src/index.ts TeruteruBotCM out/teruteru-bot-cm.mp4 --codec=h264"
+    "render": "remotion render src/index.ts TeruteruBotCM out/teruteru-bot-cm.mp4 --codec=h264 --concurrency=4 --crf=20"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.506",
