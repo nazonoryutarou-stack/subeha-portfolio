@@ -1,0 +1,38 @@
+name: Render Teruteru Bot CM
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'remotion/teruteru-bot/**'
+      - '.github/workflows/render-teruteru-bot.yml'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: remotion/teruteru-bot
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: remotion/teruteru-bot/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Render MP4 with Remotion
+        run: npm run render
+
+      - name: Upload MP4 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: teruteru-bot-cm
+          path: remotion/teruteru-bot/out/teruteru-bot-cm.mp4
+          retention-days: 14
