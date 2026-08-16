@@ -31,6 +31,6 @@ jobs:
       - name: Upload MP4 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: teruteru-bot-cm
-          path: remotion/teruteru-bot/out/teruteru-bot-cm.mp4
+          name: teruteru-bot-cg
+          path: remotion/teruteru-bot/out/teruteru-bot-cg.mp4
           retention-days: 14
