@@ -1,0 +1,22 @@
+{
+  "name": "vrm-lipsync",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "render": "remotion render VrmLipSync out/vrm-lipsync.mp4 --codec=h264 --crf=20"
+  },
+  "dependencies": {
+    "@pixiv/three-vrm": "^3.4.2",
+    "@remotion/cli": "^4.0.506",
+    "@remotion/media": "^4.0.506",
+    "remotion": "^4.0.506",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.179.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/three": "^0.179.0",
+    "typescript": "^5.8.0"
+  }
+}
