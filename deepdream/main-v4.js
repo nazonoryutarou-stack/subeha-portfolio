@@ -1,55 +1,125 @@
 const $=id=>document.getElementById(id);
-const BUILD='2026-08-19 v7';
+const BUILD='2026-08-19 v8';
 const canvas=$('stage'),ctx=canvas.getContext('2d',{willReadFrequently:true});
-let original=null,current=null,history=[],abort=false,model=null,sequenceFrames=[],compareMode=false,loadedProfile=null,busy=false,dreamNodes=[],useGraphFeatures=false;
-const controls=['strength','steps','octaves','zoom','detail','color','tile','layerDepth','layerSpread','noise','focus','madness','chroma'];
-for(const id of controls){const el=$(id),out=$(id+'Out');if(!el||!out)continue;const sync=()=>out.textContent=el.value;el.addEventListener('input',sync);sync()}
-const presets={
- classic:{strength:1.0,steps:28,octaves:4,zoom:1.026,detail:.78,color:.18,tile:160,layerDepth:.58,layerSpread:2,noise:.05,focus:.72,madness:1.0,chroma:.16},
- eyes:{strength:1.35,steps:36,octaves:5,zoom:1.035,detail:.9,color:.28,tile:128,layerDepth:.76,layerSpread:3,noise:.1,focus:.9,madness:1.35,chroma:.28},
- fur:{strength:1.2,steps:32,octaves:5,zoom:1.022,detail:1,color:.16,tile:128,layerDepth:.42,layerSpread:2,noise:.08,focus:.82,madness:1.2,chroma:.12},
- architecture:{strength:1.25,steps:34,octaves:5,zoom:1.02,detail:.62,color:.12,tile:192,layerDepth:.66,layerSpread:3,noise:.035,focus:.78,madness:1.15,chroma:.08},
- acid:{strength:1.75,steps:44,octaves:6,zoom:1.05,detail:.9,color:.75,tile:112,layerDepth:.8,layerSpread:3,noise:.16,focus:.94,madness:1.7,chroma:.72},
- mild:{strength:.55,steps:16,octaves:3,zoom:1.012,detail:.48,color:.05,tile:224,layerDepth:.52,layerSpread:1,noise:.015,focus:.55,madness:.55,chroma:.03},
- abyss:{strength:2.0,steps:54,octaves:6,zoom:1.058,detail:1,color:.55,tile:96,layerDepth:.88,layerSpread:3,noise:.2,focus:1,madness:2,chroma:.58},
- parasite:{strength:1.6,steps:46,octaves:6,zoom:1.038,detail:1,color:.34,tile:96,layerDepth:.68,layerSpread:3,noise:.14,focus:.98,madness:1.75,chroma:.34}
-};
-document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{const p=presets[b.dataset.preset];if(!p)return;for(const[k,v]of Object.entries(p)){const e=$(k);if(e){e.value=v;e.dispatchEvent(new Event('input'))}}});
+let original=null,current=null,history=[],abort=false,busy=false,model=null;
+
+const DOG_CLASSES=[151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,266,267,268];
+const ANIMAL_ACCENTS=[281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300];
+const STAGES=[
+  {max:176,steps:34,step:1.8,semantic:3.8,feature:.24,blur:11,noise:1.6},
+  {max:272,steps:38,step:1.35,semantic:3.2,feature:.32,blur:7,noise:1.15},
+  {max:384,steps:42,step:1.0,semantic:2.7,feature:.42,blur:5,noise:.75}
+];
+
 function status(s){$('status').textContent=`${s} ｜ ${BUILD}`}
 function cloneImageData(x){return new ImageData(new Uint8ClampedArray(x.data),x.width,x.height)}
 function drawData(data){canvas.width=data.width;canvas.height=data.height;ctx.putImageData(data,0,0);current=cloneImageData(data);$('drop').classList.add('hidden')}
-function pushHistory(){if(current){history.push(cloneImageData(current));if(history.length>12)history.shift()}}
+function pushHistory(){if(current){history.push(cloneImageData(current));if(history.length>8)history.shift()}}
 function withTimeout(p,ms,label){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(label)),ms))])}
-function profileConfig(){const p=$('modelProfile').value;return p==='light'?{version:1,alpha:.25,name:'軽量 MobileNetV1 0.25'}:p==='balanced'?{version:1,alpha:.5,name:'標準 MobileNetV1 0.50'}:{version:2,alpha:.5,name:'高品質 MobileNetV2 0.50'}}
-function disposeModel(){try{model?.model?.dispose()}catch{}model=null;loadedProfile=null;dreamNodes=[];useGraphFeatures=false}
-$('modelProfile').addEventListener('change',()=>{disposeModel();status('モデル変更。次回Dream時に読み込みます')});
-function graphNodeNames(){const g=model?.model?.executor?.graph;let names=[];if(g?.nodes){if(Array.isArray(g.nodes))names=g.nodes.map(n=>n?.name).filter(Boolean);else names=Object.keys(g.nodes)}if(!names.length&&g?.nodeMap){if(g.nodeMap instanceof Map)names=[...g.nodeMap.keys()];else names=Object.keys(g.nodeMap)}return names}
-function discoverDreamNodes(){const names=graphNodeNames();const filtered=names.filter(n=>/(Mobilenet|mobilenet|expanded_conv|Conv2d|depthwise|pointwise)/.test(n)&&/(Relu|relu|Relu6|Conv2d|depthwise|pointwise)/.test(n)&&!/(weights|kernel|bias|read|Assign|Const)/i.test(n));if(!filtered.length)return[];const depth=Math.max(0,Math.min(1,+$('layerDepth').value||.58)),spread=Math.max(1,Math.min(3,+$('layerSpread').value||2)),center=Math.round((filtered.length-1)*depth),offsets=spread===1?[0]:spread===2?[-.14,.14]:[-.22,0,.22],chosen=[];for(const o of offsets){const i=Math.max(0,Math.min(filtered.length-1,Math.round(center+o*filtered.length)));if(!chosen.includes(filtered[i]))chosen.push(filtered[i])}return chosen}
-async function verifyDreamNodes(nodes){if(!nodes.length)return false;const z=tf.zeros([1,224,224,3]);try{const out=model.model.execute(z,nodes),arr=Array.isArray(out)?out:[out];for(const t of arr){await t.data();t.dispose()}return true}catch(e){console.warn('Intermediate nodes unavailable, fallback to embedding',e);return false}finally{z.dispose()}}
-async function ensureModel(){const key=$('modelProfile').value;if(model&&loadedProfile===key)return;disposeModel();const cfg=profileConfig();if(typeof tf==='undefined')throw new Error('TensorFlow.js本体が読み込めていません');if(typeof mobilenet==='undefined')throw new Error('MobileNetライブラリが読み込めていません');status(`TensorFlow初期化中 (${cfg.name})`);await withTimeout(tf.ready(),12000,'TensorFlow初期化が12秒を超えました');if(tf.getBackend()!=='webgl'){try{await withTimeout(tf.setBackend('webgl'),8000,'WebGL初期化失敗');await tf.ready()}catch(e){console.warn(e);await withTimeout(tf.setBackend('cpu'),5000,'CPUバックエンド初期化失敗');await tf.ready()}}status(`モデル取得中 (${cfg.name})`);model=await withTimeout(mobilenet.load({version:cfg.version,alpha:cfg.alpha}),30000,'MobileNet取得が30秒を超えました');status('夢を見る層を探しています…');dreamNodes=discoverDreamNodes();useGraphFeatures=await verifyDreamNodes(dreamNodes);if(!useGraphFeatures){const probe=tf.zeros([64,64,3]);try{const emb=model.infer(probe,true);await emb.data();emb.dispose()}finally{probe.dispose()}}loadedProfile=key;status(useGraphFeatures?`準備完了 / 中間層 ${dreamNodes.length}枚 / ${tf.getBackend()}`:`準備完了 / 埋め込みfallback / ${tf.getBackend()}`)}
+
+async function ensureModel(){
+  if(model)return;
+  if(typeof tf==='undefined'||typeof mobilenet==='undefined')throw new Error('TensorFlow.jsの読込に失敗しました');
+  status('ニューラルネットを起こしています…');
+  await withTimeout(tf.ready(),12000,'TensorFlow初期化が12秒を超えました');
+  if(tf.getBackend()!=='webgl'){
+    try{await withTimeout(tf.setBackend('webgl'),7000,'WebGL初期化失敗');await tf.ready()}catch{await tf.setBackend('cpu');await tf.ready()}
+  }
+  status('ImageNetの記憶を読み込んでいます…');
+  model=await withTimeout(mobilenet.load({version:1,alpha:.5}),30000,'MobileNet取得が30秒を超えました');
+  const z=tf.zeros([96,96,3]);
+  try{const a=model.infer(z,false),b=model.infer(z,true);await Promise.all([a.data(),b.data()]);a.dispose();b.dispose()}finally{z.dispose()}
+  status(`準備完了 / ${tf.getBackend()}`);
+}
+
 function imageDataToTensor(data){return tf.tidy(()=>tf.browser.fromPixels(data).toFloat())}
-function tensorToImageData(t){return tf.tidy(()=>t.clipByValue(0,255).cast('int32'))}
-async function tensorToData(t){const[h,w]=t.shape,vals=await t.data(),out=new Uint8ClampedArray(w*h*4);for(let i=0,j=0;i<vals.length;i+=3,j+=4){out[j]=vals[i];out[j+1]=vals[i+1];out[j+2]=vals[i+2];out[j+3]=255}return new ImageData(out,w,h)}
+async function tensorToData(t){const[h,w]=t.shape,v=await t.clipByValue(0,255).data(),out=new Uint8ClampedArray(w*h*4);for(let i=0,j=0;i<v.length;i+=3,j+=4){out[j]=v[i];out[j+1]=v[i+1];out[j+2]=v[i+2];out[j+3]=255}return new ImageData(out,w,h)}
+function resizeToMax(t,max){return tf.tidy(()=>{const[h,w]=t.shape,r=Math.min(1,max/Math.max(h,w));return r===1?t.clone():tf.image.resizeBilinear(t,[Math.max(2,Math.round(h*r)),Math.max(2,Math.round(w*r))],true)})}
 function roll2d(t,sy,sx){return tf.tidy(()=>{const[h,w,c]=t.shape,y=((sy%h)+h)%h,x=((sx%w)+w)%w;let r=t;if(y)r=tf.concat([r.slice([h-y,0,0],[y,w,c]),r.slice([0,0,0],[h-y,w,c])],0);if(x)r=tf.concat([r.slice([0,w-x,0],[h,x,c]),r.slice([0,0,0],[h,w-x,c])],1);return r})}
-function refreshDreamNodes(){if(!model||!useGraphFeatures)return;const next=discoverDreamNodes();if(next.length)dreamNodes=next}
 function hashSeed(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
-function channelIndices(channels,count,seed){const out=[],used=new Set();let h=hashSeed(seed);count=Math.max(1,Math.min(channels,count));while(out.length<count){h=(Math.imul(h,1664525)+1013904223)>>>0;const i=h%channels;if(!used.has(i)){used.add(i);out.push(i)}}return out}
-function focusedActivationLoss(o,seed,layerNo){if(!o||o.rank<2)return o.square().mean();const channels=o.shape[o.rank-1]||1,focus=+$('focus')?.value||.72,madness=+$('madness')?.value||1,count=Math.max(2,Math.round(12-(focus*9))),idx=channelIndices(channels,count,`${seed}-L${layerNo}`),sel=tf.gather(o,idx,o.rank-1),a=tf.relu(sel),mean=a.mean(),energy=a.square().mean(),rare=a.pow(tf.scalar(3)).mean().div(energy.add(1e-4));return mean.mul(.55).add(energy.mul(.36)).add(rare.mul(.015*madness))}
-function dreamLoss(x,featureSeed){if(useGraphFeatures&&dreamNodes.length){const batched=tf.image.resizeBilinear(x,[224,224],true).div(127.5).sub(1).expandDims(0),out=model.model.execute(batched,dreamNodes),arr=Array.isArray(out)?out:[out];let loss=tf.scalar(0);for(let i=0;i<arr.length;i++)loss=loss.add(focusedActivationLoss(arr[i],featureSeed,i));return loss.div(Math.max(1,arr.length))}const emb=model.infer(x,true),channels=emb.shape[emb.rank-1]||1280,focus=+$('focus')?.value||.72,count=Math.max(4,Math.round(24-focus*18)),idx=channelIndices(channels,count,featureSeed),sel=tf.gather(emb,idx,emb.rank-1);return tf.relu(sel).square().mean()}
-function seededNoise(shape,amount,seed){if(amount<=0)return tf.zeros(shape);return tf.randomNormal(shape,0,amount,'float32',Math.abs(hashSeed(seed)%2147483647))}
-function laplacianNormalize(g){return tf.tidy(()=>{const b1=tf.avgPool(g.expandDims(0),3,1,'same').squeeze([0]),b2=tf.avgPool(g.expandDims(0),9,1,'same').squeeze([0]),hi=g.sub(b1),mid=b1.sub(b2),lo=b2;function n(x){return x.div(x.square().mean().sqrt().add(1e-8))}return n(hi).mul(.95).add(n(mid).mul(.65)).add(n(lo).mul(.25))})}
-async function dreamStep(img,stepSize,detail,noiseAmount,seed){const jitter=Math.max(5,Math.min(36,Math.round((+$('tile').value||160)/7))),sx=Math.floor((Math.random()-.5)*jitter),sy=Math.floor((Math.random()-.5)*jitter),rolled=roll2d(img,sy,sx),featureSeed=seed.split('-S')[0];const grad=tf.tidy(()=>{let g=tf.grad(x=>dreamLoss(x,featureSeed))(rolled);g=laplacianNormalize(g);if(detail>.05){const blur=tf.avgPool(g.expandDims(0),3,1,'same').squeeze([0]);g=g.mul(1-detail*.22).add(g.sub(blur).mul(detail*.9))}return g.div(g.square().mean().sqrt().add(1e-8))});let next=tf.tidy(()=>rolled.add(grad.mul(stepSize)).clipByValue(0,255));grad.dispose();rolled.dispose();if(noiseAmount>0){const n=seededNoise(next.shape,noiseAmount*6,seed),nn=tf.tidy(()=>next.add(n).clipByValue(0,255));next.dispose();n.dispose();next=nn}const restored=roll2d(next,-sy,-sx);next.dispose();return restored}
-function originalDetail(base,h,w,amount){return tf.tidy(()=>{const full=tf.image.resizeBilinear(base,[h,w],true),sh=Math.max(24,Math.round(h/2.2)),sw=Math.max(24,Math.round(w/2.2)),small=tf.image.resizeBilinear(full,[sh,sw],true),up=tf.image.resizeBilinear(small,[h,w],true);return full.sub(up).mul(amount)})}
-function chromaDream(t,amount,phase){if(amount<=.001)return t.clone();return tf.tidy(()=>{const[h,w]=t.shape,px=Math.max(1,Math.round(1+amount*8)),r=t.slice([0,0,0],[h,w,1]),g=t.slice([0,0,1],[h,w,1]),b=t.slice([0,0,2],[h,w,1]),rr=roll2d(r,Math.round(Math.sin(phase)*px),px),bb=roll2d(b,-Math.round(Math.cos(phase)*px),-px),mixed=tf.concat([rr,g,bb],2),mean=mixed.mean(2,true),sat=.95+amount*1.4;return mean.add(mixed.sub(mean).mul(sat)).clipByValue(0,255)})}
-function psychedelicColor(t,a,phase){if(a<=.001)return t.clone();return tf.tidy(()=>{const[h,w]=t.shape,r=t.slice([0,0,0],[h,w,1]),g=t.slice([0,0,1],[h,w,1]),b=t.slice([0,0,2],[h,w,1]),k=Math.min(.8,a*.7),p=(Math.sin(phase)+1)/2,q=(Math.cos(phase*.77)+1)/2,nr=r.mul(1-k).add(g.mul(k*p)).add(b.mul(k*(1-p)*.35)),ng=g.mul(1-k*.65).add(b.mul(k*q*.55)).add(r.mul(k*(1-q)*.22)),nb=b.mul(1-k*.55).add(r.mul(k*(.25+.55*p)));return tf.concat([nr,ng,nb],2).clipByValue(0,255)})}
-function localContrast(t,amount){if(amount<=0)return t.clone();return tf.tidy(()=>{const blur=tf.avgPool(t.expandDims(0),5,1,'same').squeeze([0]);return t.add(t.sub(blur).mul(amount*.16)).clipByValue(0,255)})}
-function zoomTensor(t,z){if(z<=1.0001)return t.clone();return tf.tidy(()=>{const[h,w]=t.shape,nh=Math.max(2,Math.floor(h/z)),nw=Math.max(2,Math.floor(w/z)),y=Math.floor((h-nh)/2),x=Math.floor((w-nw)/2);return tf.image.resizeBilinear(t.slice([y,x,0],[nh,nw,3]),[h,w],true)})}
-async function runDream({record=false}={}){if(!current)return status('先に画像を選んでください');if(busy)return status('処理中です');busy=true;$('run').disabled=true;abort=false;let base=null,x=null;try{await ensureModel();refreshDreamNodes();pushHistory();base=imageDataToTensor(current);const target=+$('size').value,ratio=Math.min(1,target/Math.max(base.shape[0],base.shape[1]));if(ratio<1){const r=tf.image.resizeBilinear(base,[Math.round(base.shape[0]*ratio),Math.round(base.shape[1]*ratio)],true);base.dispose();base=r}const steps=+$('steps').value,oct=+$('octaves').value,str=+$('strength').value,detail=+$('detail').value,color=+$('color').value,zoom=+$('zoom').value,noise=+$('noise').value||0,seed=($('seed')?.value||'subeha'),madness=+$('madness')?.value||1,chroma=+$('chroma')?.value||0;x=tf.image.resizeBilinear(base,[Math.max(96,Math.round(base.shape[0]*Math.pow(1.34,-(oct-1)))),Math.max(96,Math.round(base.shape[1]*Math.pow(1.34,-(oct-1))))],true);for(let o=0;o<oct;o++){if(abort)break;const scale=Math.pow(1.34,o-(oct-1)),nh=Math.max(96,Math.round(base.shape[0]*scale)),nw=Math.max(96,Math.round(base.shape[1]*scale));if(x.shape[0]!==nh||x.shape[1]!==nw){const r=tf.image.resizeBilinear(x,[nh,nw],true);x.dispose();x=r}const det=originalDetail(base,nh,nw,.55+detail*.85);const infused=tf.tidy(()=>x.add(det).clipByValue(0,255));det.dispose();x.dispose();x=infused;const octaveSeed=`${seed}-O${o}-D${$('layerDepth')?.value||.58}`;for(let s=0;s<steps;s++){if(abort)break;const nx=await dreamStep(x,(useGraphFeatures?.62:.85)*str*(.9+madness*.38),detail,noise,`${octaveSeed}-S${s}`);x.dispose();x=nx;if((s+1)%3===0){const lc=localContrast(x,detail*madness);x.dispose();x=lc;const cd=chromaDream(x,chroma,hashSeed(octaveSeed)%31+s*.37);x.dispose();x=cd;const pc=psychedelicColor(x,color,hashSeed(seed)%17+s*.21+o);x.dispose();x=pc;await tf.nextFrame()}status(`夢見中 ${o+1}/${oct} ・ ${s+1}/${steps}${useGraphFeatures?' ・ 選択ニューロン':' ・ fallback'}`)}if(o<oct-1){const z=zoomTensor(x,1+((zoom-1)*(.4+.6*madness)));x.dispose();x=z}}if($('autoZoom').checked||record){const z=zoomTensor(x,zoom);x.dispose();x=z}const rgb=tensorToImageData(x),data=await tensorToData(rgb);rgb.dispose();drawData(data);status(abort?'停止しました':'完了 / 機械は何かを見た');return data}catch(e){console.error(e);if(useGraphFeatures){useGraphFeatures=false;status(`中間層で失敗。fallbackへ切替: ${e.message}`)}else status(`エラー: ${e.message}`)}finally{try{x?.dispose()}catch{}try{base?.dispose()}catch{}busy=false;$('run').disabled=false}}
-$('run').onclick=()=>runDream();$('stop').onclick=()=>{abort=true;status('停止要求')};$('undo').onclick=()=>{const x=history.pop();if(x)drawData(x)};$('reset').onclick=()=>{if(original){pushHistory();drawData(original)}};$('download').onclick=()=>downloadCanvas('deepdream.png');$('fit').onclick=()=>canvas.scrollIntoView({behavior:'smooth',block:'center'});$('split').onclick=()=>{compareMode=!compareMode;renderCompare()};$('compare').oninput=renderCompare;$('random').onclick=()=>{for(const id of['strength','steps','octaves','zoom','detail','color','layerDepth','noise','focus','madness','chroma']){const e=$(id);if(!e)continue;const min=+e.min,max=+e.max,step=+e.step||.01,v=Math.round((min+Math.random()*(max-min))/step)*step;e.value=v;e.dispatchEvent(new Event('input'))}};
-function renderCompare(){if(!compareMode||!original||!current)return current&&ctx.putImageData(current,0,0);const p=+$('compare').value;ctx.putImageData(current,0,0);const tmp=document.createElement('canvas');tmp.width=original.width;tmp.height=original.height;tmp.getContext('2d').putImageData(original,0,0);ctx.save();ctx.beginPath();ctx.rect(0,0,canvas.width*p,canvas.height);ctx.clip();ctx.drawImage(tmp,0,0,canvas.width,canvas.height);ctx.restore();ctx.strokeStyle='white';ctx.beginPath();ctx.moveTo(canvas.width*p,0);ctx.lineTo(canvas.width*p,canvas.height);ctx.stroke()}
+function chooseTargets(seed,count=8){let h=hashSeed(seed),pool=[...DOG_CLASSES,...ANIMAL_ACCENTS],out=[];for(let i=0;i<count;i++){h=(Math.imul(h,1664525)+1013904223)>>>0;out.push(pool[h%pool.length])}return out}
+function semanticLoss(x,seed,semanticWeight,featureWeight){
+  const resized=tf.image.resizeBilinear(x,[224,224],true);
+  const logits=model.infer(resized,false);
+  const emb=model.infer(resized,true);
+  const targets=chooseTargets(seed,10);
+  const chosen=tf.gather(logits,targets,1);
+  const sem=tf.logSumExp(chosen,1).mean();
+  const ch=emb.shape[emb.rank-1]||1024;
+  const idx=targets.slice(0,6).map((n,i)=>(n*37+i*53)%ch);
+  const e=tf.gather(emb,idx,emb.rank-1);
+  const feat=tf.relu(e).square().mean();
+  return sem.mul(semanticWeight).add(feat.mul(featureWeight));
+}
+function multiscaleGrad(g,blur){return tf.tidy(()=>{
+  const b1=tf.avgPool(g.expandDims(0),3,1,'same').squeeze([0]);
+  const b2=tf.avgPool(g.expandDims(0),blur,1,'same').squeeze([0]);
+  const hi=g.sub(b1),mid=b1.sub(b2),lo=b2;
+  const norm=x=>x.div(x.square().mean().sqrt().add(1e-8));
+  return norm(hi).mul(.45).add(norm(mid).mul(.95)).add(norm(lo).mul(.9));
+})}
+function injectOriginalDetail(dream,base,amount=.34){return tf.tidy(()=>{
+  const[h,w]=dream.shape,full=tf.image.resizeBilinear(base,[h,w],true),small=tf.image.resizeBilinear(full,[Math.max(16,Math.round(h/2.4)),Math.max(16,Math.round(w/2.4))],true),up=tf.image.resizeBilinear(small,[h,w],true),detail=full.sub(up);return dream.add(detail.mul(amount)).clipByValue(0,255);
+})}
+function colorDream(t,phase){return tf.tidy(()=>{
+  const[h,w]=t.shape,r=t.slice([0,0,0],[h,w,1]),g=t.slice([0,0,1],[h,w,1]),b=t.slice([0,0,2],[h,w,1]);
+  const px=2+Math.round((Math.sin(phase)+1)*2),rr=roll2d(r,1,px),bb=roll2d(b,-1,-px);
+  const mix=tf.concat([rr,g,bb],2),mean=mix.mean(2,true),sat=1.18;
+  return mean.add(mix.sub(mean).mul(sat)).clipByValue(0,255);
+})}
+
+async function dreamStep(img,stage,seed,stepNo){
+  const jitter=14,sx=Math.floor((Math.random()-.5)*jitter),sy=Math.floor((Math.random()-.5)*jitter),rolled=roll2d(img,sy,sx);
+  const grad=tf.tidy(()=>{
+    let g=tf.grad(x=>semanticLoss(x,seed,stage.semantic,stage.feature))(rolled);
+    g=multiscaleGrad(g,stage.blur);
+    return g.div(g.square().mean().sqrt().add(1e-8));
+  });
+  let next=tf.tidy(()=>rolled.add(grad.mul(stage.step)).clipByValue(0,255));
+  grad.dispose();rolled.dispose();
+  if(stage.noise>0&&stepNo%2===0){const n=tf.randomNormal(next.shape,0,stage.noise);const z=tf.tidy(()=>next.add(n).clipByValue(0,255));next.dispose();n.dispose();next=z}
+  const restored=roll2d(next,-sy,-sx);next.dispose();return restored;
+}
+
+async function runDream(){
+  if(!current)return status('先に画像を選んでください');
+  if(busy)return;
+  busy=true;abort=false;$('run').disabled=true;
+  let base=null,x=null;
+  try{
+    await ensureModel();pushHistory();
+    base=imageDataToTensor(current);
+    const seed=`dream-${Date.now()}`;
+    for(let si=0;si<STAGES.length;si++){
+      if(abort)break;
+      const stage=STAGES[si];
+      const target=resizeToMax(base,stage.max);
+      if(x){const up=tf.image.resizeBilinear(x,[target.shape[0],target.shape[1]],true);x.dispose();x=injectOriginalDetail(up,base,si===0?.16:.38);up.dispose()}else x=target.clone();
+      target.dispose();
+      for(let s=0;s<stage.steps;s++){
+        if(abort)break;
+        const nx=await dreamStep(x,stage,`${seed}-stage${si}`,s);x.dispose();x=nx;
+        if((s+1)%6===0){const c=colorDream(x,(si+1)*(s+1)*.17);x.dispose();x=c;await tf.nextFrame()}
+        status(`夢見中 ${si+1}/3 ・ ${s+1}/${stage.steps}`);
+      }
+    }
+    if(!abort){
+      const final=tf.image.resizeBilinear(x,[base.shape[0],base.shape[1]],true);x.dispose();x=injectOriginalDetail(final,base,.46);final.dispose();
+      const colored=colorDream(x,2.4);x.dispose();x=colored;
+    }
+    const data=await tensorToData(x);drawData(data);status(abort?'停止しました':'完了');
+  }catch(e){console.error(e);status(`エラー: ${e.message}`)}finally{try{x?.dispose()}catch{}try{base?.dispose()}catch{}busy=false;$('run').disabled=false}
+}
+
 async function loadFile(file){try{const bmp=await createImageBitmap(file),max=1400,r=Math.min(1,max/Math.max(bmp.width,bmp.height));canvas.width=Math.round(bmp.width*r);canvas.height=Math.round(bmp.height*r);ctx.drawImage(bmp,0,0,canvas.width,canvas.height);original=ctx.getImageData(0,0,canvas.width,canvas.height);current=cloneImageData(original);history=[];$('drop').classList.add('hidden');status(`${canvas.width}×${canvas.height} 読み込み完了`);bmp.close()}catch(e){status(`画像読込失敗: ${e.message}`)}}
-$('file').onchange=e=>e.target.files[0]&&loadFile(e.target.files[0]);['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));document.addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadFile(f)});
-function downloadCanvas(name){const a=document.createElement('a');a.download=name;a.href=canvas.toDataURL('image/png');a.click()}
-$('sequence').onclick=async()=>{if(!current||busy)return;sequenceFrames=[];const n=Math.min(24,Math.max(2,+$('frames').value));for(let i=0;i<n;i++){if(abort)break;await runDream({record:true});sequenceFrames.push(canvas.toDataURL('image/png'));status(`連続夢 ${i+1}/${n}`)}$('exportZip').disabled=sequenceFrames.length===0;status(`連続夢 完了 ${sequenceFrames.length}枚`)};
-$('exportZip').onclick=()=>sequenceFrames.forEach((url,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=url;a.download=`deepdream-${String(i+1).padStart(3,'0')}.png`;a.click()},i*220));
-let hold;canvas.addEventListener('pointerdown',()=>{hold=setTimeout(()=>{compareMode=!compareMode;renderCompare()},650)});canvas.addEventListener('pointerup',()=>clearTimeout(hold));status('画像を選んでください');
+function downloadCanvas(){const a=document.createElement('a');a.download='deepdream-v8.png';a.href=canvas.toDataURL('image/png');a.click()}
+
+$('file').onchange=e=>e.target.files[0]&&loadFile(e.target.files[0]);
+$('run').onclick=runDream;
+$('stop').onclick=()=>{abort=true;status('停止要求')};
+$('undo').onclick=()=>{const x=history.pop();if(x)drawData(x)};
+$('reset').onclick=()=>{if(original){pushHistory();drawData(original)}};
+$('download').onclick=downloadCanvas;
+['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
+document.addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadFile(f)});
+status('画像を選んでください');
