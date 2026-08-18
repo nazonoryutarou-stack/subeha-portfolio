@@ -13,18 +13,19 @@
     <div class="real-store-head">
       <p class="store-kicker">BUKIYA MAIN SHELF / DIRECT SALE</p>
       <h1>不氣屋 本店</h1>
-      <p>ここに置いてある物は、本当に買えます。決済はStripeが処理し、カード情報をこのサイト側には保存しません。</p>
     </div>
-    <div class="real-store-grid" data-store-grid></div>
-    <div class="store-note">
-      <b>販売について</b>
-      <p>受注生産品は決済確認後に制作します。超常的効果を保証する商品ではありません。変なものとして、ちゃんと作っています。</p>
-    </div>`;
+    <div class="real-store-grid" data-store-grid></div>`;
   main.prepend(section);
 
   const grid = section.querySelector('[data-store-grid]');
+  const products = cfg.products || [];
 
-  for (const product of (cfg.products || [])) {
+  if (!products.length) {
+    grid.innerHTML = '<div class="store-note"><p>商品はまだありません。</p></div>';
+    return;
+  }
+
+  for (const product of products) {
     const article = document.createElement('article');
     article.className = 'store-product store-product-featured';
     article.dataset.productId = product.id;
@@ -51,7 +52,7 @@
       buy.href = product.paymentLink;
       buy.target = '_blank';
       buy.rel = 'noopener noreferrer';
-      buy.textContent = '妹字くん1号を迎える';
+      buy.textContent = '購入する';
       slot.append(buy);
     } else {
       const pending = document.createElement('button');

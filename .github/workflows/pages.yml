@@ -25,16 +25,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build VRM Talker
+        working-directory: tools/vrm-talker
+        run: |
+          npm install
+          npm run build
+
       - name: Prepare static site for project Pages path
         shell: bash
         run: |
           mkdir -p _site
           rsync -a --exclude='.git' --exclude='.github' --exclude='_site' ./ _site/
+
+          # Publish the built browser app at /vrm-talker/.
+          rm -rf _site/vrm-talker
+          mkdir -p _site/vrm-talker
+          cp -a tools/vrm-talker/dist/. _site/vrm-talker/
+
           node <<'NODE'
           const fs = require('fs');
           const path = require('path');
           const root = '_site';
           const base = '/subeha-portfolio';
+          const legalTag = `<script src="${base}/assets/legal-footer.js" defer></script>`;
 
           function walk(dir) {
             for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -42,24 +60,23 @@ jobs:
               if (entry.isDirectory()) walk(file);
               else if (file.endsWith('.html')) {
                 let html = fs.readFileSync(file, 'utf8');
-                html = html.replace(/\b(href|src)="\/(?!\/)/g, `$1="${base}/`);
+
+                // Every deployable HTML gets a minimal legal/contact path.
+                // The script is idempotent and does nothing if legal links already exist.
+                if (!html.includes('assets/legal-footer.js')) {
+                  if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, `${legalTag}\n</body>`);
+                  else html += `\n${legalTag}\n`;
+                }
+
+                // Project Pages needs root-relative links rewritten, except the Vite-built VRM app.
+                if (!file.includes(path.join('vrm-talker', 'index.html'))) {
+                  html = html.replace(/\b(href|src)="\/(?!\/)/g, `$1="${base}/`);
+                }
                 fs.writeFileSync(file, html);
               }
             }
           }
           walk(root);
-
-          const bootstrap = path.join(root, 'assets', 'bootstrap.js');
-          let js = fs.readFileSync(bootstrap, 'utf8');
-          js = js.replace(
-            "const path=location.pathname.endsWith('/')?location.pathname:location.pathname+'/';const page=data.pages[path]||data.pages['/'];",
-            "const base=location.hostname.endsWith('github.io')?'/subeha-portfolio':'';const cleanPath=base&&location.pathname.startsWith(base)?location.pathname.slice(base.length):location.pathname;const path=cleanPath.endsWith('/')?cleanPath:cleanPath+'/';const page=data.pages[path]||data.pages['/'];const rewrite=h=>base?h.replace(/(href|src)=\\\"\\/(?!\\/)/g,(_,a)=>a+'=\\\"'+base+'/'):h;"
-          );
-          js = js.replace(
-            "document.body.innerHTML=header+`<main id=\"main\">${page.main}</main>`+footer;",
-            "document.body.innerHTML=rewrite(header+`<main id=\"main\">${page.main}</main>`+footer);"
-          );
-          fs.writeFileSync(bootstrap, js);
           NODE
           touch _site/.nojekyll
 

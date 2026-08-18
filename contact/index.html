@@ -2,19 +2,54 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="index,follow">
-<title>お問い合わせ・特商法情報の開示請求 | すべての歯が見える</title>
+<meta name="description" content="すべての歯が見えるへのお問い合わせ・特定商取引法情報の開示請求窓口。">
+<title>お問い合わせ・開示請求 | すべての歯が見える</title>
+<link rel="stylesheet" href="../assets/home-redesign.css">
 <style>
-:root{color-scheme:dark;--bg:#160d1c;--panel:#1f1330;--fg:#ece3ef;--muted:#b9aebe;--accent:#ff9fc4;--line:#493650}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif;line-height:1.8}main{max-width:760px;margin:auto;padding:48px 20px 80px}h1{font-family:serif;font-size:clamp(26px,6vw,40px);line-height:1.35;margin:0 0 12px}.lead{color:var(--muted);margin-bottom:28px}.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}.button{display:inline-block;margin-top:16px;padding:13px 18px;border-radius:10px;background:var(--accent);color:#160d1c;text-decoration:none;font-weight:700}.note{color:var(--muted);font-size:.94rem;margin-top:16px}a{color:var(--accent)}.back{display:inline-block;margin-top:30px}</style>
+.legal-page{width:min(820px,calc(100% - 32px));margin:auto;padding:72px 0 96px}.legal-page h1{font-size:clamp(2.6rem,8vw,5.5rem);line-height:1;margin:.15em 0 .35em}.legal-lead{color:var(--muted);line-height:1.95;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif}.legal-box{margin-top:32px;border:1px solid var(--line);padding:clamp(20px,4vw,32px);background:var(--paper);font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;line-height:1.9}.legal-button{display:inline-block;margin-top:10px;padding:12px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--bone);text-decoration:none;font-weight:700}.legal-note{color:var(--muted);font-size:.92rem}.legal-navback{display:flex;gap:16px;flex-wrap:wrap;margin-top:28px}.legal-navback a{color:var(--ink)}
+</style>
 </head>
-<body><main>
-<h1>お問い合わせ・開示請求</h1>
-<p class="lead">商品購入前のお問い合わせ、および特定商取引法に基づく販売事業者の所在地・電話番号の開示請求はこちらから受け付けます。</p>
-<div class="box">
-<p>下のボタンからメールを作成してください。件名は自動入力されます。開示請求の場合は、本文に「特商法情報の開示希望」とご記載ください。</p>
-<a class="button" href="mailto:nazonoryutarou@gmail.com?subject=%E7%89%B9%E5%95%86%E6%B3%95%E6%83%85%E5%A0%B1%E3%81%AE%E9%96%8B%E7%A4%BA%E8%AB%8B%E6%B1%82">開示請求メールを作成</a>
-<p class="note">請求があった場合、申込みの意思決定に先立って確認できるよう、遅滞なく必要情報を返信します。迷惑メール対策等により返信を受信できない場合がありますので、受信設定をご確認ください。</p>
-</div>
-<a class="back" href="/tokusho/">← 特定商取引法に基づく表記へ戻る</a>
-</main></body></html>
+<body>
+<header class="site-header">
+  <a class="logo" href="../home.html" aria-label="すべての歯が見える ホーム">
+    <img class="brand-crest" src="../hitotsu-ore-choji.png" alt="一つ折れ丁字">
+    <span><b>すべての歯が見える</b><small>霊能者・祭祀技師</small></span>
+  </a>
+  <details class="menu-wrap">
+    <summary class="menu-button">MENU</summary>
+    <nav class="global-nav" aria-label="主要メニュー">
+      <a href="../home.html#profile">自己紹介</a>
+      <a href="../consultation/">相談</a>
+      <a href="../products/">商品</a>
+      <a href="../research/">研究</a>
+      <a href="../contents/">コンテンツ</a>
+    </nav>
+  </details>
+</header>
+<main id="main">
+  <section class="legal-page" aria-labelledby="contact-title">
+    <p class="section-label">CONTACT / DISCLOSURE</p>
+    <h1 id="contact-title">お問い合わせ・開示請求</h1>
+    <p class="legal-lead">商品購入前のお問い合わせ、および特定商取引法に基づく販売事業者の所在地・電話番号の開示請求はこちらから受け付けます。</p>
+    <div class="legal-box">
+      <p>下のボタンからメールを作成してください。件名は自動入力されます。開示請求の場合は、本文に「特商法情報の開示希望」とご記載ください。</p>
+      <a class="legal-button" href="mailto:nazonoryutarou@gmail.com?subject=%E7%89%B9%E5%95%86%E6%B3%95%E6%83%85%E5%A0%B1%E3%81%AE%E9%96%8B%E7%A4%BA%E8%AB%8B%E6%B1%82">開示請求メールを作成</a>
+      <p class="legal-note">請求があった場合、申込みの意思決定に先立って確認できるよう、遅滞なく必要情報を返信します。迷惑メール対策等により返信を受信できない場合がありますので、受信設定をご確認ください。</p>
+    </div>
+    <div class="legal-navback"><a href="/tokusho/">← 特定商取引法に基づく表記</a><a href="/home.html">ホームへ戻る</a></div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="footer-brand">
+    <img class="brand-crest" src="../hitotsu-ore-choji.png" alt="一つ折れ丁字">
+    <div><b>すべての歯が見える</b><p>呪われてても心は錦。</p></div>
+  </div>
+  <nav aria-label="法務情報" style="display:flex;flex-wrap:wrap;gap:.75rem 1rem;margin-top:1rem;font-size:.82rem">
+    <a href="/tokusho/">特定商取引法に基づく表記</a>
+    <a href="/contact/">お問い合わせ</a>
+  </nav>
+</footer>
+</body>
+</html>

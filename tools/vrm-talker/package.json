@@ -1,0 +1,17 @@
+{
+  "name": "subeha-vrm-talker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@pixiv/three-vrm": "^3.5.3",
+    "three": "^0.179.1"
+  },
+  "devDependencies": {
+    "vite": "^7.1.3"
+  }
+}
