@@ -41,18 +41,37 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Build browser InceptionV3 model
+      - name: Cache DeepDream Python packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-deepdream-tf215-tfjs422
+
+      - name: Build local classic DeepDream model
         shell: bash
         run: |
           python -m pip install --upgrade pip
           python -m pip install "tensorflow-cpu==2.15.1" "tensorflowjs==4.22.0"
-          mkdir -p deepdream/model/inceptionv3
+          rm -rf deepdream/model/classic
+          mkdir -p deepdream/model/classic
           python <<'PY'
           import tensorflow as tf
           import tensorflowjs as tfjs
-          model = tf.keras.applications.InceptionV3(include_top=False, weights='imagenet')
-          tfjs.converters.save_keras_model(model, 'deepdream/model/inceptionv3')
-          print('saved InceptionV3 TFJS model')
+
+          base = tf.keras.applications.InceptionV3(
+              include_top=False,
+              weights='imagenet'
+          )
+          dream = tf.keras.Model(
+              inputs=base.input,
+              outputs=[
+                  base.get_layer('mixed3').output,
+                  base.get_layer('mixed5').output,
+              ],
+              name='classic_deepdream_mixed3_mixed5'
+          )
+          tfjs.converters.save_keras_model(dream, 'deepdream/model/classic')
+          print('Classic DeepDream model saved:', dream.input_shape, [o.shape for o in dream.outputs])
           PY
 
       - name: Prepare static site for project Pages path
@@ -92,6 +111,12 @@ jobs:
           walk(root);
           NODE
           touch _site/.nojekyll
+
+      - name: Verify DeepDream model exists
+        shell: bash
+        run: |
+          test -f _site/deepdream/model/classic/model.json
+          ls -lh _site/deepdream/model/classic/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
