@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>DeepDream Lab</title>
+<link rel="stylesheet" href="./style.css" />
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+</head>
+<body>
+<main class="app">
+  <section class="stage-wrap">
+    <canvas id="stage" width="1024" height="1024"></canvas>
+    <div id="drop" class="drop">画像を選ぶ / ドロップ</div>
+  </section>
+
+  <section class="panel">
+    <div class="toolbar">
+      <label class="file-btn">画像<input id="file" type="file" accept="image/*" /></label>
+      <button id="run">Dream</button>
+      <button id="stop">停止</button>
+      <button id="undo">戻す</button>
+      <button id="reset">原画</button>
+      <button id="download">PNG保存</button>
+    </div>
+
+    <details open>
+      <summary>夢の設定</summary>
+      <div class="grid">
+        <label>強度 <input id="strength" type="range" min="0.1" max="3" step="0.05" value="1.15"><output id="strengthOut">1.15</output></label>
+        <label>反復 <input id="steps" type="range" min="1" max="80" step="1" value="24"><output id="stepsOut">24</output></label>
+        <label>オクターブ <input id="octaves" type="range" min="1" max="5" step="1" value="3"><output id="octavesOut">3</output></label>
+        <label>ズーム <input id="zoom" type="range" min="1" max="1.12" step="0.002" value="1.028"><output id="zoomOut">1.028</output></label>
+        <label>ディテール <input id="detail" type="range" min="0" max="1" step="0.01" value="0.72"><output id="detailOut">0.72</output></label>
+        <label>色暴走 <input id="color" type="range" min="0" max="1" step="0.01" value="0.28"><output id="colorOut">0.28</output></label>
+        <label>タイル <input id="tile" type="range" min="128" max="512" step="64" value="256"><output id="tileOut">256</output></label>
+        <label>解像度 <select id="size"><option>512</option><option selected>768</option><option>1024</option></select></label>
+      </div>
+    </details>
+
+    <details>
+      <summary>プリセット</summary>
+      <div class="presets">
+        <button data-preset="classic">CLASSIC</button>
+        <button data-preset="eyes">EYES</button>
+        <button data-preset="fur">FUR</button>
+        <button data-preset="architecture">ARCHITECTURE</button>
+        <button data-preset="acid">ACID</button>
+        <button data-preset="mild">MILD</button>
+      </div>
+    </details>
+
+    <details>
+      <summary>連続夢</summary>
+      <div class="grid">
+        <label>フレーム数 <input id="frames" type="number" min="2" max="60" value="12"></label>
+        <label>自動ズーム <input id="autoZoom" type="checkbox" checked></label>
+      </div>
+      <div class="toolbar"><button id="sequence">連続生成</button><button id="exportZip" disabled>フレーム一括保存</button></div>
+    </details>
+
+    <details>
+      <summary>比較・補助</summary>
+      <div class="toolbar">
+        <button id="split">原画比較</button>
+        <button id="fit">全体表示</button>
+        <button id="random">ランダム化</button>
+      </div>
+      <label class="full">比較位置 <input id="compare" type="range" min="0" max="1" step="0.01" value="0.5"></label>
+    </details>
+
+    <p id="status">モデル準備前</p>
+    <p class="note">処理はブラウザ内。重い場合は解像度を下げる。端末が熱を持ったら休ませる。</p>
+  </section>
+</main>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
