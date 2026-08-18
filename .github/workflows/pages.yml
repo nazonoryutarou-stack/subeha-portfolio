@@ -36,13 +36,31 @@ jobs:
           npm install
           npm run build
 
+      - name: Setup Python for DeepDream model
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build browser InceptionV3 model
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "tensorflow-cpu==2.15.1" "tensorflowjs==4.22.0"
+          mkdir -p deepdream/model/inceptionv3
+          python <<'PY'
+          import tensorflow as tf
+          import tensorflowjs as tfjs
+          model = tf.keras.applications.InceptionV3(include_top=False, weights='imagenet')
+          tfjs.converters.save_keras_model(model, 'deepdream/model/inceptionv3')
+          print('saved InceptionV3 TFJS model')
+          PY
+
       - name: Prepare static site for project Pages path
         shell: bash
         run: |
           mkdir -p _site
           rsync -a --exclude='.git' --exclude='.github' --exclude='_site' ./ _site/
 
-          # Publish the built browser app at /vrm-talker/.
           rm -rf _site/vrm-talker
           mkdir -p _site/vrm-talker
           cp -a tools/vrm-talker/dist/. _site/vrm-talker/
@@ -60,15 +78,10 @@ jobs:
               if (entry.isDirectory()) walk(file);
               else if (file.endsWith('.html')) {
                 let html = fs.readFileSync(file, 'utf8');
-
-                // Every deployable HTML gets a minimal legal/contact path.
-                // The script is idempotent and does nothing if legal links already exist.
                 if (!html.includes('assets/legal-footer.js')) {
                   if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, `${legalTag}\n</body>`);
                   else html += `\n${legalTag}\n`;
                 }
-
-                // Project Pages needs root-relative links rewritten, except the Vite-built VRM app.
                 if (!file.includes(path.join('vrm-talker', 'index.html'))) {
                   html = html.replace(/\b(href|src)="\/(?!\/)/g, `$1="${base}/`);
                 }
