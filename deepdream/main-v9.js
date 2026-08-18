@@ -1,33 +1,109 @@
 const $ = id => document.getElementById(id);
-const BUILD = '2026-08-19 v10';
-const MODEL_URLS = [
-  'https://storage.googleapis.com/tfjs-models/savedmodel/inception_v3/model.json',
-  'https://tfhub.dev/google/imagenet/inception_v3/classification/5'
-];
+const BUILD = '2026-08-19 v11';
+const MODEL_URL = './model/inceptionv3/model.json';
 const OCTAVE_SCALE = 1.30;
 const OCTAVE_LEVELS = [-2,-1,0,1,2];
-const STEPS_PER_OCTAVE = 30;
-const STEP_SIZE = 0.012;
-const JITTER = 24;
+const STEPS_PER_OCTAVE = 50;
+const STEP_SIZE = 0.01;
+const JITTER = 20;
+const INTERNAL_MAX = 384;
 const canvas=$('stage'), ctx=canvas.getContext('2d',{willReadFrequently:true});
-let original=null,current=null,history=[],abort=false,busy=false,model=null,dreamNodes=[];
+let original=null,current=null,history=[],abort=false,busy=false,baseModel=null,dreamModel=null;
 const status=t=>$('status').textContent=`${t} ｜ ${BUILD}`;
 const cloneImageData=x=>new ImageData(new Uint8ClampedArray(x.data),x.width,x.height);
 function drawData(d){canvas.width=d.width;canvas.height=d.height;ctx.putImageData(d,0,0);current=cloneImageData(d);$('drop').classList.add('hidden')}
 function pushHistory(){if(!current)return;history.push(cloneImageData(current));if(history.length>8)history.shift()}
 function withTimeout(p,ms,label){return Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error(label)),ms))])}
-function graphNodeNames(){const g=model?.executor?.graph;if(!g)return[];if(g.nodes)return Array.isArray(g.nodes)?g.nodes.map(n=>n?.name).filter(Boolean):Object.keys(g.nodes);if(g.nodeMap)return g.nodeMap instanceof Map?[...g.nodeMap.keys()]:Object.keys(g.nodeMap);return[]}
-function rankNode(n,t){let s=0;if(n.includes(t))s+=20;if(/concat|output/i.test(n))s+=8;if(/Identity|ReadVariable|weights|kernel|bias|Const/i.test(n))s-=20;return s-n.length*.001}
-async function findWorkingNode(token,probe){const names=graphNodeNames().filter(n=>n.includes(token)).sort((a,b)=>rankNode(b,token)-rankNode(a,token));for(const name of names.slice(0,24)){try{const o=model.execute(probe,name),t=Array.isArray(o)?o[0]:o;if(t&&t.rank>=3){await t.data();Array.isArray(o)?o.forEach(x=>x.dispose()):t.dispose();return name}Array.isArray(o)?o.forEach(x=>x.dispose()):o?.dispose?.()}catch(e){}}return null}
-async function discoverDreamNodes(){const probe=tf.zeros([1,299,299,3]);try{const tokens=['Mixed_6a','mixed3','Mixed_6c','mixed5','Mixed_5d','Mixed_6b'];const nodes=[];for(const tok of tokens){const n=await findWorkingNode(tok,probe);if(n&&!nodes.includes(n))nodes.push(n);if(nodes.length===2)break}if(nodes.length<2){const candidates=graphNodeNames().filter(n=>/mixed|inception/i.test(n)&&/concat|output/i.test(n));for(const n of candidates){try{const o=model.execute(probe,n),t=Array.isArray(o)?o[0]:o;if(t&&t.rank>=3){await t.data();Array.isArray(o)?o.forEach(x=>x.dispose()):t.dispose();nodes.push(n);if(nodes.length===2)break}else Array.isArray(o)?o.forEach(x=>x.dispose()):o?.dispose?.()}catch(e){}}}if(nodes.length<2)throw new Error('夢を見る中間層を取得できません');return nodes.slice(0,2)}finally{probe.dispose()}}
-async function loadModelRobust(){let last=null;for(const url of MODEL_URLS){try{status(`InceptionV3取得中… ${url.includes('storage')?'Google Storage':'TF Hub'}`);const opts=url.includes('tfhub.dev')?{fromTFHub:true}:{};const m=await withTimeout(tf.loadGraphModel(url,opts),90000,'モデル取得が90秒を超えました');return m}catch(e){console.warn('model source failed',url,e);last=e}}throw new Error(`モデル取得失敗: ${last?.message||'network error'}`)}
-async function ensureModel(){if(model&&dreamNodes.length===2)return;if(typeof tf==='undefined')throw new Error('TensorFlow.jsの読込に失敗しました');status('TensorFlowを準備しています…');await withTimeout(tf.ready(),15000,'TensorFlow初期化が15秒を超えました');try{await tf.setBackend('webgl');await tf.ready()}catch(e){await tf.setBackend('cpu');await tf.ready()}model=await loadModelRobust();status('DeepDream中間層を探しています…');dreamNodes=await discoverDreamNodes();console.log('DeepDream nodes',dreamNodes);status(`準備完了 / ${tf.getBackend()}`)}
-const imageDataToTensor=d=>tf.tidy(()=>tf.browser.fromPixels(d).toFloat().div(255));
-async function tensorToData(t){const c=tf.tidy(()=>t.clipByValue(0,1).mul(255));const[h,w]=c.shape,v=await c.data();c.dispose();const out=new Uint8ClampedArray(w*h*4);for(let i=0,j=0;i<v.length;i+=3,j+=4){out[j]=v[i];out[j+1]=v[i+1];out[j+2]=v[i+2];out[j+3]=255}return new ImageData(out,w,h)}
+
+async function ensureModel(){
+  if(dreamModel)return;
+  if(typeof tf==='undefined')throw new Error('TensorFlow.jsの読込に失敗しました');
+  status('TensorFlowを準備しています…');
+  await withTimeout(tf.ready(),15000,'TensorFlow初期化が15秒を超えました');
+  try{await tf.setBackend('webgl');await tf.ready()}catch(e){await tf.setBackend('cpu');await tf.ready()}
+  status('InceptionV3を読み込んでいます…');
+  baseModel=await withTimeout(tf.loadLayersModel(MODEL_URL),120000,'InceptionV3取得が120秒を超えました');
+  const mixed3=baseModel.getLayer('mixed3');
+  const mixed5=baseModel.getLayer('mixed5');
+  if(!mixed3||!mixed5)throw new Error('mixed3 / mixed5 が見つかりません');
+  dreamModel=tf.model({inputs:baseModel.inputs,outputs:[mixed3.output,mixed5.output]});
+  const probe=tf.zeros([1,299,299,3]);
+  try{const out=dreamModel.predict(probe);for(const t of out){await t.data();t.dispose()}}finally{probe.dispose()}
+  status(`準備完了 / InceptionV3 mixed3+mixed5 / ${tf.getBackend()}`);
+}
+
+const imageDataTo255=d=>tf.tidy(()=>tf.browser.fromPixels(d).toFloat());
+function preprocess255(t){return tf.tidy(()=>t.div(127.5).sub(1));}
+function deprocess11(t){return tf.tidy(()=>t.add(1).mul(127.5).clipByValue(0,255));}
+async function tensor255ToData(t){const c=tf.tidy(()=>t.clipByValue(0,255));const[h,w]=c.shape,v=await c.data();c.dispose();const out=new Uint8ClampedArray(w*h*4);for(let i=0,j=0;i<v.length;i+=3,j+=4){out[j]=v[i];out[j+1]=v[i+1];out[j+2]=v[i+2];out[j+3]=255}return new ImageData(out,w,h)}
 const resizeTensor=(t,h,w)=>tf.tidy(()=>tf.image.resizeBilinear(t,[Math.max(75,Math.round(h)),Math.max(75,Math.round(w))],true));
 function roll2d(t,sy,sx){return tf.tidy(()=>{const[h,w,c]=t.shape,y=((sy%h)+h)%h,x=((sx%w)+w)%w;let r=t;if(y)r=tf.concat([r.slice([h-y,0,0],[y,w,c]),r.slice([0,0,0],[h-y,w,c])],0);if(x)r=tf.concat([r.slice([0,w-x,0],[h,x,c]),r.slice([0,0,0],[h,w-x,c])],1);return r})}
-function calcLoss(img){const batch=img.expandDims(0),outs=model.execute(batch,dreamNodes),arr=Array.isArray(outs)?outs:[outs];let loss=tf.scalar(0);for(const a of arr)loss=loss.add(a.mean());return loss}
-async function dreamStep(img){const sx=Math.floor(Math.random()*(JITTER*2+1))-JITTER,sy=Math.floor(Math.random()*(JITTER*2+1))-JITTER,shifted=roll2d(img,sy,sx);const grad=tf.tidy(()=>{const g=tf.grad(x=>calcLoss(x))(shifted),{variance}=tf.moments(g);return g.div(variance.sqrt().add(1e-8))});const stepped=tf.tidy(()=>shifted.add(grad.mul(STEP_SIZE)).clipByValue(0,1));grad.dispose();shifted.dispose();const restored=roll2d(stepped,-sy,-sx);stepped.dispose();return restored}
-async function runDream(){if(!current)return status('先に画像を選んでください');if(busy)return;busy=true;abort=false;$('run').disabled=true;let base=null,result=null,detail=null,octaves=[];try{await ensureModel();pushHistory();base=imageDataToTensor(current);const[bh,bw]=base.shape,maxSide=640;if(Math.max(bh,bw)>maxSide){const r=maxSide/Math.max(bh,bw),z=resizeTensor(base,bh*r,bw*r);base.dispose();base=z}octaves=OCTAVE_LEVELS.map(n=>{const s=Math.pow(OCTAVE_SCALE,n);return resizeTensor(base,base.shape[0]*s,base.shape[1]*s)});detail=tf.zerosLike(octaves[0]);for(let oi=0;oi<octaves.length&&!abort;oi++){const ob=octaves[oi],[h,w]=ob.shape;if(oi){const up=resizeTensor(detail,h,w);detail.dispose();detail=up}result?.dispose();result=tf.tidy(()=>ob.add(detail).clipByValue(0,1));for(let s=0;s<STEPS_PER_OCTAVE&&!abort;s++){const next=await dreamStep(result);result.dispose();result=next;status(`夢見中 ${oi+1}/${octaves.length} ・ ${s+1}/${STEPS_PER_OCTAVE}`);if((s+1)%2===0)await tf.nextFrame()}const nd=tf.tidy(()=>result.sub(ob));detail.dispose();detail=nd}if(!result)throw new Error('DeepDream処理を開始できません');const final=resizeTensor(result,original.height,original.width),data=await tensorToData(final);final.dispose();drawData(data);status(abort?'停止しました':'完了')}catch(e){console.error(e);status(`エラー: ${e.message}`)}finally{try{result?.dispose()}catch{}try{detail?.dispose()}catch{}try{base?.dispose()}catch{}for(const t of octaves)try{t.dispose()}catch{}busy=false;$('run').disabled=false}}
+function calcLoss11(img){const batch=img.expandDims(0),outs=dreamModel.apply(batch,{training:false}),arr=Array.isArray(outs)?outs:[outs];let loss=tf.scalar(0);for(const a of arr)loss=loss.add(a.mean());return loss;}
+async function dreamStep11(img){
+  const sx=Math.floor(Math.random()*(JITTER*2+1))-JITTER, sy=Math.floor(Math.random()*(JITTER*2+1))-JITTER;
+  const shifted=roll2d(img,sy,sx);
+  const grad=tf.tidy(()=>{
+    const g=tf.grad(x=>calcLoss11(x))(shifted);
+    const {variance}=tf.moments(g);
+    return g.div(variance.sqrt().add(1e-8));
+  });
+  const stepped=tf.tidy(()=>shifted.add(grad.mul(STEP_SIZE)).clipByValue(-1,1));
+  grad.dispose();shifted.dispose();
+  const restored=roll2d(stepped,-sy,-sx);stepped.dispose();
+  return restored;
+}
+
+async function dreamAtScale(img255){
+  let x=preprocess255(img255);
+  try{
+    for(let s=0;s<STEPS_PER_OCTAVE&&!abort;s++){
+      const next=await dreamStep11(x);x.dispose();x=next;
+      status(`夢見中 ・ ${s+1}/${STEPS_PER_OCTAVE}`);
+      if((s+1)%2===0)await tf.nextFrame();
+    }
+    return deprocess11(x);
+  }finally{x.dispose()}
+}
+
+async function runDream(){
+  if(!current)return status('先に画像を選んでください');
+  if(busy)return;
+  busy=true;abort=false;$('run').disabled=true;
+  let base=null,work=null,dreamed=null;
+  try{
+    await ensureModel();pushHistory();
+    base=imageDataTo255(current);
+    if(Math.max(base.shape[0],base.shape[1])>INTERNAL_MAX){
+      const r=INTERNAL_MAX/Math.max(base.shape[0],base.shape[1]);
+      const z=resizeTensor(base,base.shape[0]*r,base.shape[1]*r);base.dispose();base=z;
+    }
+    work=base.clone();
+    for(let oi=0;oi<OCTAVE_LEVELS.length&&!abort;oi++){
+      const n=OCTAVE_LEVELS[oi],scale=Math.pow(OCTAVE_SCALE,n);
+      const scaled=resizeTensor(work,base.shape[0]*scale,base.shape[1]*scale);
+      work.dispose();work=scaled;
+      status(`Octave ${oi+1}/${OCTAVE_LEVELS.length} を見ています…`);
+      dreamed=await dreamAtScale(work);
+      work.dispose();work=resizeTensor(dreamed,base.shape[0],base.shape[1]);
+      dreamed.dispose();dreamed=null;
+    }
+    if(!work)throw new Error('DeepDream処理を開始できません');
+    const final=resizeTensor(work,original.height,original.width);
+    const data=await tensor255ToData(final);final.dispose();drawData(data);
+    status(abort?'停止しました':'完了');
+  }catch(e){console.error(e);status(`エラー: ${e.message}`)}finally{
+    try{base?.dispose()}catch{}try{work?.dispose()}catch{}try{dreamed?.dispose()}catch{}
+    busy=false;$('run').disabled=false;
+  }
+}
+
 async function loadFile(file){try{const bmp=await createImageBitmap(file),max=1400,r=Math.min(1,max/Math.max(bmp.width,bmp.height));canvas.width=Math.round(bmp.width*r);canvas.height=Math.round(bmp.height*r);ctx.drawImage(bmp,0,0,canvas.width,canvas.height);original=ctx.getImageData(0,0,canvas.width,canvas.height);current=cloneImageData(original);history=[];$('drop').classList.add('hidden');status(`${canvas.width}×${canvas.height} 読み込み完了`);bmp.close()}catch(e){status(`画像読込失敗: ${e.message}`)}}
-$('file').onchange=e=>e.target.files[0]&&loadFile(e.target.files[0]);$('run').onclick=runDream;$('stop').onclick=()=>{abort=true;status('停止要求')};$('undo').onclick=()=>{const x=history.pop();if(x)drawData(x)};$('reset').onclick=()=>{if(original){pushHistory();drawData(original)}};$('download').onclick=()=>{const a=document.createElement('a');a.download='deepdream-inception-v10.png';a.href=canvas.toDataURL('image/png');a.click()};['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));document.addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadFile(f)});status('画像を選んでください');
+$('file').onchange=e=>e.target.files[0]&&loadFile(e.target.files[0]);
+$('run').onclick=runDream;
+$('stop').onclick=()=>{abort=true;status('停止要求')};
+$('undo').onclick=()=>{const x=history.pop();if(x)drawData(x)};
+$('reset').onclick=()=>{if(original){pushHistory();drawData(original)}};
+$('download').onclick=()=>{const a=document.createElement('a');a.download='deepdream-inception-v11.png';a.href=canvas.toDataURL('image/png');a.click()};
+['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
+document.addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadFile(f)});
+status('画像を選んでください');
