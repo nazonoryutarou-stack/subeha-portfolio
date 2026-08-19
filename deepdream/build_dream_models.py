@@ -13,7 +13,6 @@ OUT_ROOT = 'deepdream/model/dreams'
 ASSET_FILE = 'deepdream/model/asset-banks.json'
 CLASS_INDEX_URL = 'https://storage.googleapis.com/download.tensorflow.org/data/imagenet_class_index.json'
 
-# Each asset stays on one visual scale so repeated passes remain semantically coherent.
 ASSET_SPECS = {
     'animals': {
         'label': '動物',
@@ -66,8 +65,15 @@ ASSET_SPECS = {
 Conv2D = tf.keras.layers.Conv2D
 BatchNormalization = tf.keras.layers.BatchNormalization
 
-# include_top=True is used only while deriving semantic channel banks.
+# Keep these two networks separate on purpose:
+# - browser_base: dynamic spatial input, so TensorFlow.js can dream on 96x96 tiles.
+# - classifier: fixed 299x299 ImageNet classifier, used only to derive semantic assets.
+browser_base = tf.keras.applications.InceptionV3(include_top=False, weights='imagenet')
 classifier = tf.keras.applications.InceptionV3(include_top=True, weights='imagenet')
+classifier_features = {
+    name: tf.keras.Model(classifier.input, classifier.get_layer(name).output)
+    for name in LAYERS
+}
 
 
 def predecessor(layer):
@@ -83,8 +89,8 @@ def predecessor(layer):
 
 def build_fused(layer_name):
     source = tf.keras.Model(
-        inputs=classifier.input,
-        outputs=classifier.get_layer(layer_name).output,
+        inputs=browser_base.input,
+        outputs=browser_base.get_layer(layer_name).output,
         name=f'classic_deepdream_{layer_name}_source',
     )
 
@@ -152,7 +158,9 @@ def build_fused(layer_name):
         raise RuntimeError(f'{layer_name} BN fusion mismatch: {max_err}')
 
     channels = int(fused.output_shape[-1])
-    sparse_ids = tf.constant(np.linspace(0, channels - 1, num=min(16, channels), dtype=np.int32))
+    sparse_ids = tf.constant(
+        np.linspace(0, channels - 1, num=min(16, channels), dtype=np.int32)
+    )
     with tf.GradientTape() as tape:
         tape.watch(probe)
         activation = fused(probe, training=False)
@@ -172,7 +180,6 @@ def build_fused(layer_name):
         f'{layer_name}: saved {fused.input_shape} -> {fused.output_shape}; '
         f'BN fused={len(bn_after_conv)}; max_err={max_err}; channels={channels}'
     )
-    return source
 
 
 def load_class_labels():
@@ -194,12 +201,14 @@ def match_class_ids(labels, keywords):
 
 
 def synthesize_group(class_ids, seed):
-    # Small synthetic prototype. It is never shipped; it only asks the classifier
-    # which visual channels support this semantic family.
+    # 299x299 is required by the ImageNet classifier with include_top=True.
+    # The prototype is build-time only and is never shipped to the browser.
     tf.random.set_seed(seed)
-    x = tf.Variable(tf.random.uniform([1, 160, 160, 3], -0.25, 0.25, dtype=tf.float32))
+    x = tf.Variable(
+        tf.random.uniform([1, 299, 299, 3], -0.25, 0.25, dtype=tf.float32)
+    )
     ids = tf.constant(class_ids, dtype=tf.int32)
-    for _ in range(8):
+    for _ in range(7):
         with tf.GradientTape() as tape:
             pred = classifier(x, training=False)
             selected = tf.gather(pred[0], ids)
@@ -211,11 +220,14 @@ def synthesize_group(class_ids, seed):
 
 
 def derive_asset_bank(feature_model, class_ids):
+    # Two independent synthetic prototypes make the bank less dependent on one seed.
     scores = None
     for seed in (23, 71):
         prototype = synthesize_group(class_ids, seed)
         activation = feature_model(prototype, training=False)
-        channel_score = tf.reduce_mean(tf.nn.relu(activation), axis=[0, 1, 2]).numpy()
+        channel_score = tf.reduce_mean(
+            tf.nn.relu(activation), axis=[0, 1, 2]
+        ).numpy()
         scores = channel_score if scores is None else scores + channel_score
     scores /= 2.0
     count = min(28, scores.shape[0])
@@ -228,20 +240,19 @@ if os.path.isdir(OUT_ROOT):
 os.makedirs(OUT_ROOT, exist_ok=True)
 os.makedirs(os.path.dirname(ASSET_FILE), exist_ok=True)
 
-feature_models = {}
 for name in LAYERS:
-    feature_models[name] = build_fused(name)
+    build_fused(name)
 
 labels = load_class_labels()
 asset_banks = {
     'version': 20,
-    'model': 'InceptionV3 ImageNet / BN fused',
+    'model': 'InceptionV3 ImageNet / semantic channel banks / BN-fused browser models',
     'assets': {},
 }
 
 for key, spec in ASSET_SPECS.items():
     class_ids, matched = match_class_ids(labels, spec['keywords'])
-    channels = derive_asset_bank(feature_models[spec['layer']], class_ids)
+    channels = derive_asset_bank(classifier_features[spec['layer']], class_ids)
     asset_banks['assets'][key] = {
         'label': spec['label'],
         'layer': spec['layer'],
@@ -249,7 +260,10 @@ for key, spec in ASSET_SPECS.items():
         'class_count': len(class_ids),
         'matched_labels': matched,
     }
-    print(f"asset {key}: layer={spec['layer']} classes={len(class_ids)} channels={channels}")
+    print(
+        f"asset {key}: layer={spec['layer']} classes={len(class_ids)} "
+        f"channels={channels}"
+    )
 
 with open(ASSET_FILE, 'w', encoding='utf-8') as f:
     json.dump(asset_banks, f, ensure_ascii=False, indent=2)
