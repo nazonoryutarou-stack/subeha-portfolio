@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const BUILD = '2026-08-19 v14';
+const BUILD = '2026-08-19 v15';
 const MODEL_URL = './model/classic/model.json';
 
 // Fixed recipe from supplied DeepDream.ipynb + Google Research dream.ipynb.
@@ -20,6 +20,7 @@ let abort = false;
 let busy = false;
 let dreamModel = null;
 let activeBackend = null;
+let gradientFn = null;
 
 function status(text) {
   $('status').textContent = `${text} ｜ ${BUILD}`;
@@ -53,6 +54,7 @@ function withTimeout(promise, ms, label) {
 function disposeModel() {
   try { dreamModel?.dispose(); } catch {}
   dreamModel = null;
+  gradientFn = null;
 }
 
 async function loadModelFresh(backend) {
@@ -71,9 +73,13 @@ async function loadModelFresh(backend) {
     120000,
     'InceptionV3取得が120秒を超えました'
   );
+
+  // IMPORTANT: this function must NOT be wrapped in tf.tidy while tf.grad is
+  // recording. Gradient backprop needs intermediate tensors created by the model.
+  gradientFn = tf.grad(lossForGradient);
 }
 
-function lossNoTidy(x) {
+function lossForGradient(x) {
   const batch = x.expandDims(0);
   const output = dreamModel.apply(batch, {training: false});
   const acts = Array.isArray(output) ? output : [output];
@@ -84,35 +90,36 @@ function lossNoTidy(x) {
 async function verifyGradientPath() {
   status(`勾配経路を自己診断しています… (${activeBackend})`);
   const probe = tf.randomUniform([96, 96, 3], -1, 1, 'float32', 156);
+  let g = null;
   try {
+    // Forward-only test can safely use tidy because no tape needs intermediates.
     const forward = tf.tidy(() => {
       const y = dreamModel.apply(probe.expandDims(0), {training: false});
       const ys = Array.isArray(y) ? y : [y];
       if (ys.length !== 2) throw new Error(`モデル出力が${ys.length}個です（期待値2）`);
-      return ys.map(t => t.mean());
+      return ys.map((t) => t.mean());
     });
-    await Promise.all(forward.map(t => t.data()));
-    forward.forEach(t => t.dispose());
+    await Promise.all(forward.map((t) => t.data()));
+    forward.forEach((t) => t.dispose());
 
-    const gradFn = tf.grad((x) => lossNoTidy(x));
-    const g = gradFn(probe);
+    // Same exact gradient function used by the real dream loop.
+    g = gradientFn(probe);
     if (!g || !g.shape || g.size === 0) throw new Error('勾配テンソルを生成できません');
     const sample = await g.data();
     if (!sample.length || !Number.isFinite(sample[0])) throw new Error('勾配が不正です');
-    g.dispose();
   } finally {
+    try { g?.dispose(); } catch {}
     probe.dispose();
   }
 }
 
 async function ensureModel() {
-  if (dreamModel) return;
+  if (dreamModel && gradientFn) return;
   if (typeof tf === 'undefined') throw new Error('TensorFlow.jsの読込に失敗しました');
 
   status('TensorFlowを準備しています…');
   await withTimeout(tf.ready(), 15000, 'TensorFlow初期化が15秒を超えました');
 
-  // WebGL is preferred, but only after a real forward+gradient self-test.
   try {
     await loadModelFresh('webgl');
     await verifyGradientPath();
@@ -120,15 +127,14 @@ async function ensureModel() {
     return;
   } catch (webglError) {
     console.warn('DeepDream WebGL self-test failed; retrying on CPU', webglError);
-    status(`WebGL勾配失敗。CPUへ退避中…`);
+    status('WebGL勾配失敗。CPUへ退避中…');
     disposeModel();
     try { tf.disposeVariables(); } catch {}
   }
 
-  // CPU is slower but much less dependent on GPU driver quirks.
   await loadModelFresh('cpu');
   await verifyGradientPath();
-  status(`準備完了 / mixed3 + mixed5 / CPU互換モード`);
+  status('準備完了 / mixed3 + mixed5 / CPU互換モード');
 }
 
 function imageDataToDreamTensor(data) {
@@ -180,20 +186,20 @@ function roll(t, sy, sx) {
   });
 }
 
-function dreamLoss(x) {
-  return tf.tidy(() => lossNoTidy(x));
-}
-
 async function makeStep(img) {
   const ox = Math.floor(Math.random() * (JITTER * 2 + 1)) - JITTER;
   const oy = Math.floor(Math.random() * (JITTER * 2 + 1)) - JITTER;
   const shifted = roll(img, oy, ox);
 
+  let raw = null;
   let grad = null;
   try {
+    // Do NOT put gradientFn() inside tf.tidy. The gradient tape owns the
+    // intermediate activation tensors until backpropagation has completed.
+    raw = gradientFn(shifted);
+    if (!raw) throw new Error('勾配の生成に失敗しました');
+
     grad = tf.tidy(() => {
-      const raw = tf.grad((x) => dreamLoss(x))(shifted);
-      if (!raw) throw new Error('勾配の生成に失敗しました');
       const mean = raw.mean();
       const std = raw.sub(mean).square().mean().sqrt();
       return raw.div(std.add(1e-8));
@@ -204,6 +210,7 @@ async function makeStep(img) {
     stepped.dispose();
     return restored;
   } finally {
+    try { raw?.dispose(); } catch {}
     try { grad?.dispose(); } catch {}
     shifted.dispose();
   }
@@ -263,10 +270,10 @@ async function runDream() {
       const steps = STEPS_PER_OCTAVE[oi] ?? 35;
 
       for (let step = 0; step < steps && !abort; step++) {
+        status(`夢見中 ${oi + 1}/${ordered.length} ・ ${step + 1}/${steps} (${activeBackend})`);
         const next = await makeStep(src);
         src.dispose();
         src = next;
-        status(`夢見中 ${oi + 1}/${ordered.length} ・ ${step + 1}/${steps} (${activeBackend})`);
         if ((step + 1) % 2 === 0) await tf.nextFrame();
       }
 
@@ -323,7 +330,7 @@ $('undo').onclick = () => { const x = history.pop(); if (x) drawData(x); };
 $('reset').onclick = () => { if (original) { pushHistory(); drawData(original); } };
 $('download').onclick = () => {
   const a = document.createElement('a');
-  a.download = 'deepdream-classic-v14.png';
+  a.download = 'deepdream-classic-v15.png';
   a.href = canvas.toDataURL('image/png');
   a.click();
 };
