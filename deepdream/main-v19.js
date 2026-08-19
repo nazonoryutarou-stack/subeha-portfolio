@@ -86,7 +86,16 @@ const newRunStart = `  try {
     chooseDreamProfile();
     await ensureModel();
     chooseDreamChannels();
-    await verifyExactProductionPath();
+    try {
+      await verifyExactProductionPath();
+    } catch (featureError) {
+      if (activeBackend !== 'webgl') throw featureError;
+      setPhase('fallback', \`特徴抽選のWebGL自己診断失敗 / CPUへ移行\`);
+      disposeModel();
+      await loadModelFresh('cpu');
+      chooseDreamChannels();
+      await verifyExactProductionPath();
+    }
     setPhase('ready', \`夢の種 \${dreamProfile.key} / \${dreamChannels.length} channels / \${activeBackend}\`);
     let data;`;
 
