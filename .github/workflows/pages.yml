@@ -45,121 +45,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-deepdream-tf215-tfjs422-fusedbn-v1
+          key: ${{ runner.os }}-deepdream-tf215-tfjs422-fusedbn-v19
 
-      - name: Build local classic DeepDream model
+      - name: Build local multi-layer DeepDream models
         shell: bash
         run: |
           python -m pip install --upgrade pip
           python -m pip install "tensorflow-cpu==2.15.1" "tensorflowjs==4.22.0"
-          rm -rf deepdream/model/classic
-          mkdir -p deepdream/model/classic
-          python <<'PY'
-          import numpy as np
-          import tensorflow as tf
-          import tensorflowjs as tfjs
-
-          base = tf.keras.applications.InceptionV3(
-              include_top=False,
-              weights='imagenet'
-          )
-          source = tf.keras.Model(
-              inputs=base.input,
-              outputs=base.get_layer('mixed5').output,
-              name='classic_deepdream_mixed5_source'
-          )
-
-          Conv2D = tf.keras.layers.Conv2D
-          BatchNormalization = tf.keras.layers.BatchNormalization
-
-          # Keras InceptionV3 repeatedly uses Conv2D -> BatchNormalization(scale=False)
-          # -> ReLU. TensorFlow.js can run the forward pass, but the imported BN path is
-          # the unstable part when differentiating in-browser. Fold every BN into the
-          # preceding convolution so the browser model contains no BatchNormalization.
-          bn_after_conv = {}
-          for layer in source.layers:
-              if isinstance(layer, BatchNormalization):
-                  hist = layer.input._keras_history
-                  prev = getattr(hist, 'layer', None)
-                  if prev is None:
-                      try:
-                          prev = hist[0]
-                      except Exception:
-                          prev = getattr(hist, 'operation', None)
-                  if not isinstance(prev, Conv2D):
-                      raise RuntimeError(f'Unexpected BN predecessor: {layer.name} <- {type(prev)}')
-                  bn_after_conv[prev.name] = layer
-
-          def clone_layer(layer):
-              if isinstance(layer, Conv2D) and layer.name in bn_after_conv:
-                  cfg = layer.get_config()
-                  cfg['use_bias'] = True
-                  return Conv2D.from_config(cfg)
-              if isinstance(layer, BatchNormalization):
-                  # Keep the graph node/name but make it an exact identity with no weights.
-                  return tf.keras.layers.Activation('linear', name=layer.name)
-              return layer.__class__.from_config(layer.get_config())
-
-          fused = tf.keras.models.clone_model(source, clone_function=clone_layer)
-          fused._name = 'classic_deepdream_mixed5_fusedbn'
-
-          for old in source.layers:
-              new = fused.get_layer(old.name)
-              if isinstance(old, Conv2D) and old.name in bn_after_conv:
-                  weights = old.get_weights()
-                  if len(weights) != 1:
-                      raise RuntimeError(f'Expected bias-free conv: {old.name}')
-                  kernel = weights[0]
-                  bn = bn_after_conv[old.name]
-                  vals = bn.get_weights()
-                  i = 0
-                  if bn.scale:
-                      gamma = vals[i]; i += 1
-                  else:
-                      gamma = np.ones(kernel.shape[-1], dtype=kernel.dtype)
-                  if bn.center:
-                      beta = vals[i]; i += 1
-                  else:
-                      beta = np.zeros(kernel.shape[-1], dtype=kernel.dtype)
-                  moving_mean = vals[i]; i += 1
-                  moving_var = vals[i]
-                  scale = gamma / np.sqrt(moving_var + bn.epsilon)
-                  fused_kernel = kernel * scale.reshape((1, 1, 1, -1))
-                  fused_bias = beta - moving_mean * scale
-                  new.set_weights([fused_kernel, fused_bias])
-              elif isinstance(old, BatchNormalization):
-                  pass
-              else:
-                  w = old.get_weights()
-                  if w:
-                      new.set_weights(w)
-
-          probe = tf.random.uniform([1, 96, 96, 3], -1.0, 1.0, dtype=tf.float32, seed=156)
-          src_y = source(probe, training=False)
-          fused_y = fused(probe, training=False)
-          max_err = float(tf.reduce_max(tf.abs(src_y - fused_y)).numpy())
-          if max_err > 2e-4:
-              raise RuntimeError(f'BN fusion mismatch: max abs error {max_err}')
-
-          with tf.GradientTape() as tape:
-              tape.watch(probe)
-              activation = fused(probe, training=False)
-              loss = tf.reduce_mean(activation)
-          grad = tape.gradient(loss, probe)
-          if grad is None:
-              raise RuntimeError('Fused DeepDream gradient is None')
-          if not bool(tf.reduce_all(tf.math.is_finite(grad)).numpy()):
-              raise RuntimeError('Fused DeepDream gradient contains non-finite values')
-
-          if any(isinstance(layer, BatchNormalization) for layer in fused.layers):
-              raise RuntimeError('BatchNormalization survived fusion')
-
-          tfjs.converters.save_keras_model(fused, 'deepdream/model/classic')
-          print('Fused DeepDream model saved:', fused.input_shape, fused.output_shape)
-          print('BN layers removed:', len(bn_after_conv))
-          print('Forward max abs error:', max_err)
-          print('96px gradient smoke test passed:', grad.shape)
-          PY
+          python deepdream/build_dream_models.py
 
       - name: Prepare static site for project Pages path
         shell: bash
@@ -199,16 +92,18 @@ jobs:
           NODE
           touch _site/.nojekyll
 
-      - name: Verify DeepDream model exists
+      - name: Verify DeepDream models exist
         shell: bash
         run: |
-          test -f _site/deepdream/model/classic/model.json
-          ls -lh _site/deepdream/model/classic/
-          grep -q 'classic_deepdream_mixed5_fusedbn' _site/deepdream/model/classic/model.json
-          if grep -q 'BatchNormalization' _site/deepdream/model/classic/model.json; then
-            echo 'BatchNormalization unexpectedly present in browser model'
-            exit 1
-          fi
+          for layer in mixed3 mixed5 mixed7; do
+            test -f "_site/deepdream/model/dreams/${layer}/model.json"
+            grep -q "classic_deepdream_${layer}_fusedbn" "_site/deepdream/model/dreams/${layer}/model.json"
+            if grep -q 'BatchNormalization' "_site/deepdream/model/dreams/${layer}/model.json"; then
+              echo "BatchNormalization unexpectedly present in ${layer} browser model"
+              exit 1
+            fi
+          done
+          du -sh _site/deepdream/model/dreams/*
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
