@@ -45,7 +45,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-deepdream-tf215-tfjs422
+          key: ${{ runner.os }}-deepdream-tf215-tfjs422-v17
 
       - name: Build local classic DeepDream model
         shell: bash
@@ -64,14 +64,25 @@ jobs:
           )
           dream = tf.keras.Model(
               inputs=base.input,
-              outputs=[
-                  base.get_layer('mixed3').output,
-                  base.get_layer('mixed5').output,
-              ],
-              name='classic_deepdream_mixed3_mixed5'
+              outputs=base.get_layer('mixed5').output,
+              name='classic_deepdream_mixed5'
           )
+
+          # Build-time smoke test using the exact tile size used by the browser.
+          probe = tf.random.uniform([1, 96, 96, 3], -1.0, 1.0, dtype=tf.float32, seed=156)
+          with tf.GradientTape() as tape:
+              tape.watch(probe)
+              activation = dream(probe, training=False)
+              loss = tf.reduce_mean(activation)
+          grad = tape.gradient(loss, probe)
+          if grad is None:
+              raise RuntimeError('DeepDream source-model gradient is None')
+          if not bool(tf.reduce_all(tf.math.is_finite(grad)).numpy()):
+              raise RuntimeError('DeepDream source-model gradient contains non-finite values')
+
           tfjs.converters.save_keras_model(dream, 'deepdream/model/classic')
-          print('Classic DeepDream model saved:', dream.input_shape, [o.shape for o in dream.outputs])
+          print('Classic DeepDream mixed5 model saved:', dream.input_shape, dream.output_shape)
+          print('96px gradient smoke test passed:', grad.shape)
           PY
 
       - name: Prepare static site for project Pages path
@@ -117,6 +128,7 @@ jobs:
         run: |
           test -f _site/deepdream/model/classic/model.json
           ls -lh _site/deepdream/model/classic/
+          grep -q 'classic_deepdream_mixed5' _site/deepdream/model/classic/model.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
