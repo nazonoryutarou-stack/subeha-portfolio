@@ -70,6 +70,7 @@ jobs:
           const root = '_site';
           const base = '/subeha-portfolio';
           const legalTag = `<script src="${base}/assets/legal-footer.js" defer></script>`;
+          const diagnosisSkinTag = '<link rel="stylesheet" href="../assets/diagnosis-home-skin.css?v=20260819-home1">';
 
           function walk(dir) {
             for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -77,6 +78,12 @@ jobs:
               if (entry.isDirectory()) walk(file);
               else if (file.endsWith('.html')) {
                 let html = fs.readFileSync(file, 'utf8');
+
+                if (file.endsWith(path.join('diagnosis', 'index.html')) && !html.includes('diagnosis-home-skin.css')) {
+                  if (/<\/head>/i.test(html)) html = html.replace(/<\/head>/i, `${diagnosisSkinTag}\n</head>`);
+                  else html = `${diagnosisSkinTag}\n${html}`;
+                }
+
                 if (!html.includes('assets/legal-footer.js')) {
                   if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, `${legalTag}\n</body>`);
                   else html += `\n${legalTag}\n`;
@@ -91,6 +98,12 @@ jobs:
           walk(root);
           NODE
           touch _site/.nojekyll
+
+      - name: Verify diagnosis home skin
+        shell: bash
+        run: |
+          test -f _site/assets/diagnosis-home-skin.css
+          grep -q 'diagnosis-home-skin.css' _site/diagnosis/index.html
 
       - name: Verify DeepDream models and assets exist
         shell: bash
