@@ -1,11 +1,10 @@
 const $ = (id) => document.getElementById(id);
-const BUILD = '2026-08-19 v15';
+const BUILD = '2026-08-19 v16';
 const MODEL_URL = './model/classic/model.json';
 
-// Fixed recipe from supplied DeepDream.ipynb + Google Research dream.ipynb.
 const OCTAVE_N = 5;
 const OCTAVE_SCALE = 1.30;
-const STEPS_PER_OCTAVE = [50, 50, 40, 35, 30];
+const STEPS_PER_OCTAVE = [40, 40, 35, 30, 25];
 const STEP_SIZE = 0.01;
 const JITTER = 32;
 const WEBGL_MAX = 384;
@@ -21,9 +20,15 @@ let busy = false;
 let dreamModel = null;
 let activeBackend = null;
 let gradientFn = null;
+let phase = 'idle';
 
 function status(text) {
   $('status').textContent = `${text} ｜ ${BUILD}`;
+}
+
+function setPhase(name, text = name) {
+  phase = name;
+  status(`[${name}] ${text}`);
 }
 
 function cloneImageData(x) {
@@ -59,23 +64,20 @@ function disposeModel() {
 
 async function loadModelFresh(backend) {
   disposeModel();
-  status(`${backend} を初期化しています…`);
+  setPhase('backend', `${backend} を初期化しています…`);
   const ok = await tf.setBackend(backend);
   if (!ok) throw new Error(`${backend} バックエンドを有効化できません`);
   await tf.ready();
   activeBackend = tf.getBackend();
 
-  status(`InceptionV3を読み込んでいます… (${activeBackend})`);
+  setPhase('model', `InceptionV3を読み込んでいます… (${activeBackend})`);
   dreamModel = await withTimeout(
     tf.loadLayersModel(MODEL_URL, {
-      onProgress: (p) => status(`InceptionV3取得中 ${Math.round(p * 100)}% (${activeBackend})`),
+      onProgress: (p) => setPhase('model', `InceptionV3取得中 ${Math.round(p * 100)}% (${activeBackend})`),
     }),
     120000,
     'InceptionV3取得が120秒を超えました'
   );
-
-  // IMPORTANT: this function must NOT be wrapped in tf.tidy while tf.grad is
-  // recording. Gradient backprop needs intermediate tensors created by the model.
   gradientFn = tf.grad(lossForGradient);
 }
 
@@ -88,11 +90,10 @@ function lossForGradient(x) {
 }
 
 async function verifyGradientPath() {
-  status(`勾配経路を自己診断しています… (${activeBackend})`);
+  setPhase('selftest', `forward + gradient を確認中… (${activeBackend})`);
   const probe = tf.randomUniform([96, 96, 3], -1, 1, 'float32', 156);
   let g = null;
   try {
-    // Forward-only test can safely use tidy because no tape needs intermediates.
     const forward = tf.tidy(() => {
       const y = dreamModel.apply(probe.expandDims(0), {training: false});
       const ys = Array.isArray(y) ? y : [y];
@@ -102,7 +103,6 @@ async function verifyGradientPath() {
     await Promise.all(forward.map((t) => t.data()));
     forward.forEach((t) => t.dispose());
 
-    // Same exact gradient function used by the real dream loop.
     g = gradientFn(probe);
     if (!g || !g.shape || g.size === 0) throw new Error('勾配テンソルを生成できません');
     const sample = await g.data();
@@ -113,32 +113,38 @@ async function verifyGradientPath() {
   }
 }
 
-async function ensureModel() {
-  if (dreamModel && gradientFn) return;
+async function prepareBackend(preferred = 'webgl') {
   if (typeof tf === 'undefined') throw new Error('TensorFlow.jsの読込に失敗しました');
-
-  status('TensorFlowを準備しています…');
+  setPhase('tf', 'TensorFlowを準備しています…');
   await withTimeout(tf.ready(), 15000, 'TensorFlow初期化が15秒を超えました');
-
-  try {
-    await loadModelFresh('webgl');
-    await verifyGradientPath();
-    status(`準備完了 / mixed3 + mixed5 / ${activeBackend}`);
-    return;
-  } catch (webglError) {
-    console.warn('DeepDream WebGL self-test failed; retrying on CPU', webglError);
-    status('WebGL勾配失敗。CPUへ退避中…');
-    disposeModel();
-    try { tf.disposeVariables(); } catch {}
-  }
-
-  await loadModelFresh('cpu');
+  await loadModelFresh(preferred);
   await verifyGradientPath();
-  status('準備完了 / mixed3 + mixed5 / CPU互換モード');
+  setPhase('ready', `準備完了 / mixed3 + mixed5 / ${activeBackend}`);
 }
 
+async function ensureModel() {
+  if (dreamModel && gradientFn) return;
+  try {
+    await prepareBackend('webgl');
+  } catch (e) {
+    console.warn('WebGL initialization failed; using CPU', e);
+    disposeModel();
+    await prepareBackend('cpu');
+  }
+}
+
+// IMPORTANT: Do not use tf.browser.fromPixels here. Some Android/WebGL paths
+// produce an internal dataId failure with ImageData. Build the tensor manually.
 function imageDataToDreamTensor(data) {
-  return tf.tidy(() => tf.browser.fromPixels(data).toFloat().div(127.5).sub(1));
+  const {width, height} = data;
+  const src = data.data;
+  const rgb = new Float32Array(width * height * 3);
+  for (let i = 0, j = 0; i < src.length; i += 4) {
+    rgb[j++] = src[i] / 127.5 - 1;
+    rgb[j++] = src[i + 1] / 127.5 - 1;
+    rgb[j++] = src[i + 2] / 127.5 - 1;
+  }
+  return tf.tensor3d(rgb, [height, width, 3], 'float32');
 }
 
 async function dreamTensorToImageData(t) {
@@ -190,21 +196,16 @@ async function makeStep(img) {
   const ox = Math.floor(Math.random() * (JITTER * 2 + 1)) - JITTER;
   const oy = Math.floor(Math.random() * (JITTER * 2 + 1)) - JITTER;
   const shifted = roll(img, oy, ox);
-
   let raw = null;
   let grad = null;
   try {
-    // Do NOT put gradientFn() inside tf.tidy. The gradient tape owns the
-    // intermediate activation tensors until backpropagation has completed.
     raw = gradientFn(shifted);
     if (!raw) throw new Error('勾配の生成に失敗しました');
-
     grad = tf.tidy(() => {
       const mean = raw.mean();
       const std = raw.sub(mean).square().mean().sqrt();
       return raw.div(std.add(1e-8));
     });
-
     const stepped = tf.tidy(() => shifted.add(grad.mul(STEP_SIZE)).clipByValue(-1, 1));
     const restored = roll(stepped, -oy, -ox);
     stepped.dispose();
@@ -225,33 +226,28 @@ function buildOctaves(base) {
   return octaves;
 }
 
-async function runDream() {
-  if (!current) return status('先に画像を選んでください');
-  if (busy) return;
-
-  busy = true;
-  abort = false;
-  $('run').disabled = true;
+async function processDreamOnce(sourceImageData) {
   let base = null;
   let detail = null;
   let result = null;
   const octaves = [];
-
   try {
-    await ensureModel();
-    pushHistory();
-    status(`入力画像を準備しています… (${activeBackend})`);
-    base = imageDataToDreamTensor(current);
+    setPhase('input', `実画像をTensorへ変換中… (${activeBackend})`);
+    base = imageDataToDreamTensor(sourceImageData);
+    await base.data();
 
     const internalMax = activeBackend === 'cpu' ? CPU_MAX : WEBGL_MAX;
     const maxSide = Math.max(base.shape[0], base.shape[1]);
     if (maxSide > internalMax) {
+      setPhase('resize', `内部解像度を${internalMax}pxへ縮小中…`);
       const ratio = internalMax / maxSide;
       const smaller = resize(base, base.shape[0] * ratio, base.shape[1] * ratio);
       base.dispose();
       base = smaller;
+      await base.data();
     }
 
+    setPhase('octave', 'オクターブを構築中…');
     octaves.push(...buildOctaves(base));
     const ordered = [...octaves].reverse();
     detail = tf.zerosLike(ordered[0]);
@@ -259,24 +255,20 @@ async function runDream() {
     for (let oi = 0; oi < ordered.length && !abort; oi++) {
       const octaveBase = ordered[oi];
       const [h, w] = octaveBase.shape;
-
       if (oi > 0) {
         const up = resize(detail, h, w);
         detail.dispose();
         detail = up;
       }
-
       let src = tf.tidy(() => octaveBase.add(detail).clipByValue(-1, 1));
-      const steps = STEPS_PER_OCTAVE[oi] ?? 35;
-
+      const steps = STEPS_PER_OCTAVE[oi] ?? 30;
       for (let step = 0; step < steps && !abort; step++) {
-        status(`夢見中 ${oi + 1}/${ordered.length} ・ ${step + 1}/${steps} (${activeBackend})`);
+        setPhase('dream', `${oi + 1}/${ordered.length} ・ ${step + 1}/${steps} (${activeBackend})`);
         const next = await makeStep(src);
         src.dispose();
         src = next;
         if ((step + 1) % 2 === 0) await tf.nextFrame();
       }
-
       detail.dispose();
       detail = tf.tidy(() => src.sub(octaveBase));
       if (result) result.dispose();
@@ -284,21 +276,51 @@ async function runDream() {
     }
 
     if (!result) throw new Error('DeepDream処理を開始できません');
-    status('夢を原寸へ戻しています…');
+    setPhase('output', '夢を原寸へ戻しています…');
     const full = resize(result, original.height, original.width);
     const data = await dreamTensorToImageData(full);
     full.dispose();
-    drawData(data);
-    status(abort ? '停止しました' : `完了 (${activeBackend})`);
-  } catch (e) {
-    console.error(e);
-    const msg = e?.message || String(e);
-    status(`エラー: ${msg}`);
+    return data;
   } finally {
     for (const o of octaves) { try { o.dispose(); } catch {} }
     try { base?.dispose(); } catch {}
     try { detail?.dispose(); } catch {}
     try { result?.dispose(); } catch {}
+  }
+}
+
+async function runDream() {
+  if (!current) return status('先に画像を選んでください');
+  if (busy) return;
+  busy = true;
+  abort = false;
+  $('run').disabled = true;
+  pushHistory();
+  const source = cloneImageData(current);
+
+  try {
+    await ensureModel();
+    let data;
+    try {
+      data = await processDreamOnce(source);
+    } catch (firstError) {
+      const msg = firstError?.message || String(firstError);
+      console.error(`DeepDream failed in phase ${phase} on ${activeBackend}`, firstError);
+      if (activeBackend !== 'webgl' || abort) throw firstError;
+
+      setPhase('fallback', `WebGL本処理失敗 (${msg})。CPUで最初から再実行します…`);
+      disposeModel();
+      await prepareBackend('cpu');
+      data = await processDreamOnce(source);
+    }
+
+    drawData(data);
+    status(abort ? '停止しました' : `完了 (${activeBackend})`);
+  } catch (e) {
+    console.error(e);
+    const msg = e?.message || String(e);
+    status(`エラー [${phase}/${activeBackend || 'unknown'}]: ${msg}`);
+  } finally {
     busy = false;
     $('run').disabled = false;
   }
@@ -330,7 +352,7 @@ $('undo').onclick = () => { const x = history.pop(); if (x) drawData(x); };
 $('reset').onclick = () => { if (original) { pushHistory(); drawData(original); } };
 $('download').onclick = () => {
   const a = document.createElement('a');
-  a.download = 'deepdream-classic-v15.png';
+  a.download = 'deepdream-classic-v16.png';
   a.href = canvas.toDataURL('image/png');
   a.click();
 };
