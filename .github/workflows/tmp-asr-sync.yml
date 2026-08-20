@@ -1,0 +1,46 @@
+name: Temporary ASR Sync
+
+on:
+  push:
+    branches:
+      - tmp/asr-sync
+    paths:
+      - 'tmp/asr/**'
+  workflow_dispatch:
+
+jobs:
+  transcribe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install ffmpeg and Whisper
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install -q openai-whisper
+      - name: Rebuild clip
+        run: |
+          cat tmp/asr/clip.b64.* > /tmp/clip.b64
+          base64 -d /tmp/clip.b64 > /tmp/clip.mp3
+      - name: Transcribe with word timestamps
+        run: |
+          python - <<'PY'
+          import json, whisper
+          model = whisper.load_model('base')
+          result = model.transcribe('/tmp/clip.mp3', language='ja', word_timestamps=True, fp16=False)
+          with open('/tmp/transcript.json','w',encoding='utf-8') as f:
+              json.dump(result,f,ensure_ascii=False,indent=2)
+          print(result.get('text',''))
+          for seg in result.get('segments',[]):
+              print(f"SEG {seg['start']:.2f}-{seg['end']:.2f}: {seg['text']}")
+              for w in seg.get('words',[]):
+                  print(f"WORD {w['start']:.2f}-{w['end']:.2f}: {w['word']}")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: asr-transcript
+          path: /tmp/transcript.json
+          retention-days: 1
