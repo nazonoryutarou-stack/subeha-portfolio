@@ -1,4 +1,6 @@
 node_modules/
 out/
+inputs/
+jobs/current.json
 public/*
 !public/.gitkeep
