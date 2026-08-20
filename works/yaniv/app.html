@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ヤニブ｜第〇九一號観測所</title>
+<meta name="description" content="剣・杯・珠・杖の四印で組んだ自前の札で遊ぶヤニブ。手札を軽くして宣言し、同点以下の者が居れば宣言は破れる。">
+<meta name="theme-color" content="#0a0b09">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ヤニブ｜第〇九一號観測所">
+<meta property="og:description" content="剣・杯・珠・杖の四印で組んだ自前の札。手札を軽くして宣言しろ。">
+<meta property="og:image" content="ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="noindex,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600;700&family=Cormorant+Garamond:ital@1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<div class="grain"></div><div class="vig"></div>
+<div class="fr fr--tl"></div><div class="fr fr--tr"></div><div class="fr fr--bl"></div><div class="fr fr--br"></div>
+
+<header class="hd">
+  <span class="hd__k">第〇九一號観測所</span>
+  <h1 class="hd__t">ヤニブ</h1>
+  <span class="hd__lat">yaniv</span>
+  <span class="hd__sp"></span>
+  <span class="hd__k" id="roundlab"></span>
+  <button class="hd__btn" id="soundBtn" type="button" aria-pressed="true">音 入</button>
+  <button class="hd__btn" id="rulesBtn" type="button">規則</button>
+</header>
+
+<div class="seats">
+  <div class="seat" id="seat1" hidden><div class="seat__nm"></div><div class="seat__row"></div><div class="seat__st"></div></div>
+  <div class="seat" id="seat2" hidden><div class="seat__nm"></div><div class="seat__row"></div><div class="seat__st"></div></div>
+  <div class="seat" id="seat3" hidden><div class="seat__nm"></div><div class="seat__row"></div><div class="seat__st"></div></div>
+</div>
+
+<main class="table">
+  <div class="felt">
+    <div class="felt__throw"><p class="table__lab" id="throwlab">場の札</p><div class="throw" id="throw"></div></div>
+    <div class="deck">
+      <div class="deck__stack" id="deckstack" aria-hidden="true"></div>
+      <button class="card card--down" id="deckcard" type="button" disabled aria-label="山札から引く"><span class="card__in"><span class="fc"></span><span class="bk"><span class="bk__mark">視</span><span class="bk__ring"></span></span></span></button>
+      <div class="deck__cnt" id="deckcnt">山　--</div>
+    </div>
+  </div>
+  <p class="say" id="say" role="status" aria-live="polite"></p>
+  <div class="log" id="log" aria-live="off"></div>
+</main>
+
+<section class="me" aria-label="あなたの手札">
+  <div class="me__row"><span class="me__nm">あなた</span><span class="me__tot" id="total">合計 <b>--</b></span><span class="me__sc" id="mysc">累計 0</span></div>
+  <div class="hand" id="hand"></div>
+  <div class="acts"><button class="btn" id="discardBtn" type="button" disabled>捨てる</button><button class="btn btn--call" id="callBtn" type="button" disabled>ヤニブ</button></div>
+</section>
+
+<div class="strike" id="strike" aria-hidden="true"><span class="strike__bar"></span><span class="strike__w" id="strikeWord"></span></div>
+
+<div class="ov ov--on" id="startOv" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+  <div class="box">
+    <h2 id="startTitle">ヤニブ</h2><p class="box__sub">手札を軽くして、宣言しろ</p>
+    <label id="oppLab">相手の人数</label><div class="seg" id="oppSeg" role="group" aria-labelledby="oppLab"><button type="button" data-v="1" aria-pressed="false">一人</button><button type="button" data-v="2" aria-pressed="true">二人</button><button type="button" data-v="3" aria-pressed="false">三人</button></div>
+    <label id="thLab">宣言の線</label><div class="seg" id="thSeg" role="group" aria-labelledby="thLab"><button type="button" data-v="5" aria-pressed="true">五以下</button><button type="button" data-v="7" aria-pressed="false">七以下</button></div>
+    <button class="go" id="goBtn" type="button">卓に着く</button><button class="lnk" id="rulesBtn2" type="button">遊び方を読む</button>
+    <p class="box__foot">本卓は点数遊びである。賭けるのは、時間だけにしておけ。<br><a href="./">‹‹ 作品の頁へ</a></p><div class="site-footer legal-host"></div>
+  </div>
+</div>
+
+<div class="ov" id="rulesOv" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+  <div class="box rules">
+    <h2 id="rulesTitle">規則</h2><p class="box__sub">YANIV ── 五枚の手札</p>
+    <div class="rules__deck" aria-hidden="true">
+      <div><svg viewBox="0 0 24 24"><path d="M12 1.4 14.15 6.6 14.15 13.9 12 16.1 9.85 13.9 9.85 6.6Z"/><path d="M6.6 15.2h10.8v1.5H6.6z"/><path d="M11.15 16.7h1.7v4.1h-1.7z"/><circle cx="12" cy="21.7" r="1.45"/></svg><span>剣</span></div>
+      <div><svg viewBox="0 0 24 24" class="r"><path d="M5.9 3.2h12.2c0 6.6-2.4 9.9-6.1 10.4C8.3 13.1 5.9 9.8 5.9 3.2Z"/><path d="M11.15 13.9h1.7v4.9h-1.7z"/><path d="M6.9 21.2c0-1.7 2.1-2.4 5.1-2.4s5.1.7 5.1 2.4Z"/></svg><span>杯</span></div>
+      <div><svg viewBox="0 0 24 24" class="r"><path fill-rule="evenodd" d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 6.6a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Z"/></svg><span>珠</span></div>
+      <div><svg viewBox="0 0 24 24"><path d="M11.2 6.4h1.6V22.4h-1.6z"/><path d="M12 .9a3.9 3.9 0 0 1 3.9 3.9c0 1.6-.95 2.9-2.3 3.5l-.6-1.45a2.35 2.35 0 1 0-2 0l-.6 1.45A3.87 3.87 0 0 1 8.1 4.8 3.9 3.9 0 0 1 12 .9Z"/><circle cx="7.5" cy="7.4" r="1.5"/><circle cx="16.5" cy="7.4" r="1.5"/><path d="M7.2 10.6h9.6v1.3H7.2z"/></svg><span>杖</span></div>
+    </div>
+    <p><b>札。</b>剣・杯・珠・杖の四印に、一から十、そして<b>従・巫・主</b>。従巫主はいずれも十点。<b>鬼札は〇点</b>で、二枚入っている。</p>
+    <p><b>目的。</b>手札の合計点を軽くする。一は一点、二〜十は数字の通り。</p>
+    <p><b>手番。</b>まず捨てる──一枚、同じ数字の組（二枚以上）、または同じ印の連番（三枚以上。鬼札は連番の穴埋めに使える）。次に引く──<b>山札</b>か、<b>直前に捨てられた札の両端</b>のどちらか一枚。端の札は縁が朱く縁取られる。</p>
+    <p><b>宣言。</b>自分の手番の頭、捨てる前に手札の合計が線の下なら<b class="bl">「ヤニブ」</b>と宣言できる。全員が手札を開く。</p>
+    <p><b>アサフ。</b>宣言者と<b>同点以下</b>の者が居れば、その者の勝ち。宣言者は手札の点に<b class="bl">三十点の罰</b>を上乗せして背負う。</p>
+    <p><b>勝負。</b>局の勝者は〇点。他の者は手札の点を背負う。累計が<b>丁度五十なら二十五に、丁度百なら五十に折れる</b>。百を超えた者は卓を立つ。最後まで残った一人の勝ち。</p>
+    <p><b>客人。</b>三人の客人はそれぞれ癖が違う。<b>誰が場から何を取ったかは全員に見えている</b>──客人もそれを憶えて、あなたの手を読んでくる。</p>
+    <button class="go" id="rulesClose" type="button">卓に戻る</button>
+  </div>
+</div>
+
+<div class="ov" id="resultOv" role="dialog" aria-modal="true" aria-labelledby="resTitle"><div class="box"><h2 id="resTitle">勝負</h2><p class="box__sub" id="resSub"></p><div class="callline" id="callline"></div><div class="assline" id="assline"></div><div id="resRows"></div><button class="go" id="nextBtn" type="button">次の局へ</button></div></div>
+<div class="ov" id="endOv" role="dialog" aria-modal="true" aria-labelledby="endTitle"><div class="box"><h2 id="endTitle">終局</h2><p class="box__sub" id="endSub"></p><div id="endRows"></div><div id="endUra"></div><div class="tally" id="endTally"></div><button class="go" id="againBtn" type="button">もう一卓</button><button class="lnk" id="shareBtn" type="button">読みを写す</button><p class="box__foot"><a href="./">‹‹ 作品の頁へ</a>　　<a href="/works/">保管庫へ</a></p></div></div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
