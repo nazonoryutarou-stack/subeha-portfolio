@@ -14,19 +14,98 @@ if (!fs.existsSync(jobPath)) {
 
 const job = JSON.parse(fs.readFileSync(jobPath, 'utf8'));
 const sourceAudio = path.resolve(projectRoot, job.sourceAudio ?? '');
-const startMs = Number(job.startMs);
-const endMs = Number(job.endMs);
-
 if (!job.sourceAudio || !fs.existsSync(sourceAudio)) {
   throw new Error(`sourceAudio が見つかりません: ${sourceAudio}`);
 }
+
+const normalize = (text) => String(text ?? '')
+  .normalize('NFKC')
+  .toLowerCase()
+  .replace(/[\s\p{P}\p{S}]/gu, '');
+
+const ensureSourceCaptions = () => {
+  const transcribe = spawnSync(process.execPath, [path.join(projectRoot, 'scripts/transcribe-source.mjs'), `--job=${path.relative(projectRoot, jobPath)}`], {stdio: 'inherit'});
+  if (transcribe.status !== 0) throw new Error('元音声の文字起こし・タイムコード生成に失敗しました。');
+  const captionsPath = path.join(projectRoot, 'inputs', 'source.captions.json');
+  if (!fs.existsSync(captionsPath)) throw new Error('inputs/source.captions.json が生成されませんでした。');
+  const captions = JSON.parse(fs.readFileSync(captionsPath, 'utf8'));
+  if (!Array.isArray(captions) || captions.length === 0) throw new Error('タイムコード付き字幕が空です。');
+  return captions;
+};
+
+const locateQuote = (quote, captions) => {
+  const needle = normalize(quote);
+  if (needle.length < 4) throw new Error('quote / anchor が短すぎます。4文字以上の特徴的な発言を指定してください。');
+
+  let combined = '';
+  const charToCaption = [];
+  captions.forEach((caption, captionIndex) => {
+    const piece = normalize(caption.text);
+    for (let i = 0; i < piece.length; i++) charToCaption.push(captionIndex);
+    combined += piece;
+  });
+
+  let startPos = combined.indexOf(needle);
+  let endPos = startPos >= 0 ? startPos + needle.length - 1 : -1;
+
+  if (startPos < 0) {
+    const chunkLength = Math.min(10, Math.max(6, Math.floor(needle.length / 3)));
+    const firstChunk = needle.slice(0, chunkLength);
+    const lastChunk = needle.slice(-chunkLength);
+    const firstPos = combined.indexOf(firstChunk);
+    const lastPos = combined.indexOf(lastChunk, Math.max(0, firstPos));
+    if (firstPos >= 0 && lastPos >= firstPos) {
+      startPos = firstPos;
+      endPos = lastPos + lastChunk.length - 1;
+    }
+  }
+
+  if (startPos < 0 || endPos < 0 || !charToCaption[startPos] && charToCaption[startPos] !== 0) {
+    throw new Error(`選んだ発言を音声認識結果から見つけられませんでした: ${quote}`);
+  }
+
+  const firstIndex = charToCaption[startPos];
+  const lastIndex = charToCaption[Math.min(endPos, charToCaption.length - 1)];
+  return {
+    firstIndex,
+    lastIndex,
+    startMs: Number(captions[firstIndex].startMs),
+    endMs: Number(captions[lastIndex].endMs),
+  };
+};
+
+let sourceCaptions = null;
+let startMs = Number(job.startMs);
+let endMs = Number(job.endMs);
+const hasExplicitRange = Number.isFinite(startMs) && Number.isFinite(endMs) && startMs >= 0 && endMs > startMs;
+
+if (!hasExplicitRange) {
+  const selectedText = String(job.anchor || job.quote || '').trim();
+  if (!selectedText) {
+    throw new Error('startMs/endMs または quote（推奨: anchor）を指定してください。');
+  }
+  sourceCaptions = ensureSourceCaptions();
+  const match = locateQuote(selectedText, sourceCaptions);
+  const beforeMs = Number.isFinite(Number(job.contextBeforeMs)) ? Number(job.contextBeforeMs) : 1300;
+  const afterMs = Number.isFinite(Number(job.contextAfterMs)) ? Number(job.contextAfterMs) : 1800;
+  const lastCaptionEnd = Number(sourceCaptions[sourceCaptions.length - 1]?.endMs ?? match.endMs + afterMs);
+  startMs = Math.max(0, match.startMs - beforeMs);
+  endMs = Math.min(lastCaptionEnd, match.endMs + afterMs);
+  console.log(`Quote located: ${(match.startMs / 1000).toFixed(2)}s - ${(match.endMs / 1000).toFixed(2)}s`);
+  console.log(`Clip range   : ${(startMs / 1000).toFixed(2)}s - ${(endMs / 1000).toFixed(2)}s`);
+}
+
 if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || startMs < 0 || endMs <= startMs) {
-  throw new Error('startMs / endMs が不正です。');
+  throw new Error('切り抜き範囲を決定できませんでした。');
 }
 
 const durationMs = endMs - startMs;
-if (durationMs < 3000) throw new Error('切り抜きが3秒未満です。開始・終了時刻を確認してください。');
+if (durationMs < 3000) throw new Error('切り抜きが3秒未満です。開始・終了位置を確認してください。');
 if (durationMs > 180000) console.warn('注意: 3分を超える切り抜きです。短尺用途なら長すぎる可能性があります。');
+
+if (!sourceCaptions && (!Array.isArray(job.captions) || job.captions.length === 0)) {
+  sourceCaptions = ensureSourceCaptions();
+}
 
 const publicDir = path.join(projectRoot, 'public');
 fs.mkdirSync(publicDir, {recursive: true});
@@ -43,7 +122,7 @@ const ffmpegArgs = [
 const cut = spawnSync('ffmpeg', ffmpegArgs, {stdio: 'inherit'});
 if (cut.status !== 0) throw new Error('ffmpeg による音声切り出しに失敗しました。');
 
-const rawCaptions = Array.isArray(job.captions) ? job.captions : [];
+const rawCaptions = Array.isArray(job.captions) && job.captions.length > 0 ? job.captions : (sourceCaptions ?? []);
 const captions = rawCaptions
   .map((caption) => {
     const absoluteStart = Number(caption.startMs);
@@ -63,10 +142,11 @@ const captions = rawCaptions
   .filter((caption) => caption && caption.text);
 
 const clip = {
-  version: 1,
+  version: 2,
   title: String(job.title ?? '切り抜き'),
   telop: String(job.telop ?? ''),
   hook: String(job.hook ?? ''),
+  quote: String(job.quote ?? ''),
   sourceLabel: String(job.sourceLabel ?? ''),
   startMs,
   endMs,
