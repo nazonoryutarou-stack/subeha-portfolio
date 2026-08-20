@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
+import type {Caption} from '@remotion/captions';
 import {
   AbsoluteFill,
   cancelRender,
@@ -20,6 +21,7 @@ export type VrmLipSyncProps = {
   modelFile: string;
   audioFile: string;
   envelopeFile: string;
+  clipFile: string;
   background: string;
   showMeter: boolean;
 };
@@ -29,6 +31,18 @@ type EnvelopeFile = {
   fps?: number;
   durationInFrames?: number;
   values: number[];
+};
+
+type ClipFile = {
+  version?: number;
+  title?: string;
+  telop?: string;
+  hook?: string;
+  sourceLabel?: string;
+  startMs?: number;
+  endMs?: number;
+  durationMs?: number;
+  captions?: Caption[];
 };
 
 type SceneState = {
@@ -66,6 +80,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
   modelFile,
   audioFile,
   envelopeFile,
+  clipFile,
   background,
   showMeter,
 }) => {
@@ -75,14 +90,16 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
   const sceneState = useRef<SceneState | null>(null);
   const [modelReady, setModelReady] = useState(false);
   const [envelope, setEnvelope] = useState<number[] | null>(null);
+  const [clip, setClip] = useState<ClipFile | null>(null);
   const [modelHandle] = useState(() => delayRender('VRMモデルを読み込み中'));
   const [envelopeHandle] = useState(() => delayRender('口パク波形を読み込み中'));
+  const [clipHandle] = useState(() => delayRender('切り抜き情報を読み込み中'));
 
   useEffect(() => {
     let cancelled = false;
     fetch(staticFile(envelopeFile))
       .then(async (response) => {
-        if (!response.ok) throw new Error(`public/${envelopeFile} がありません。npm run envelope を実行してください。`);
+        if (!response.ok) throw new Error(`public/${envelopeFile} がありません。npm run prepare を実行してください。`);
         return await response.json() as EnvelopeFile;
       })
       .then((data) => {
@@ -101,6 +118,24 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
       cancelled = true;
     };
   }, [envelopeFile, envelopeHandle, fps]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(staticFile(clipFile))
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`public/${clipFile} がありません。npm run prepare を実行してください。`);
+        return await response.json() as ClipFile;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setClip(data);
+        continueRender(clipHandle);
+      })
+      .catch((error) => cancelRender(error instanceof Error ? error : new Error(String(error))));
+    return () => {
+      cancelled = true;
+    };
+  }, [clipFile, clipHandle]);
 
   useEffect(() => {
     if (!canvas.current || sceneState.current) return;
@@ -213,13 +248,25 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
     s.renderer.render(s.scene, s.camera);
   }, [envelope, fps, frame, level, modelReady]);
 
+  const nowMs = (frame / fps) * 1000;
+  const currentCaption = clip?.captions?.find((caption) => caption.startMs <= nowMs && caption.endMs > nowMs) ?? null;
+  const displayTitle = title || clip?.title || '';
+  const displayTelop = currentCaption?.text || telop || clip?.telop || '';
+  const displayHook = clip?.hook || '';
+  const sourceLabel = clip?.sourceLabel || '';
+
   const meter = Math.round(level * 100);
   const titleOpacity = interpolate(frame, [0, 10, 90, 105], [0, 1, 1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
+  const hookOpacity = interpolate(frame, [0, 8, 72, 90], [0, 1, 1, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
   const padX = Math.round(width * 0.055);
   const isLandscape = width > height;
+  const base = Math.min(width, height);
 
   return (
     <AbsoluteFill style={{background}}>
@@ -232,7 +279,13 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
         </AbsoluteFill>
       )}
 
-      {title ? (
+      {sourceLabel ? (
+        <div style={{position: 'absolute', top: Math.round(height * 0.022), left: padX, color: 'rgba(255,255,255,.58)', fontFamily: 'ui-monospace, monospace', fontSize: Math.max(11, Math.round(base * 0.017)), letterSpacing: '0.12em'}}>
+          {sourceLabel}
+        </div>
+      ) : null}
+
+      {displayTitle ? (
         <div
           style={{
             position: 'absolute',
@@ -242,17 +295,24 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
             opacity: titleOpacity,
             color: 'white',
             fontFamily: 'system-ui, sans-serif',
-            fontWeight: 800,
-            fontSize: Math.round(Math.min(width, height) * 0.042),
-            letterSpacing: '0.04em',
+            fontWeight: 900,
+            fontSize: Math.round(base * 0.042),
+            lineHeight: 1.2,
+            letterSpacing: '0.03em',
             textShadow: '0 2px 18px rgba(0,0,0,.7)',
           }}
         >
-          {title}
+          {displayTitle}
         </div>
       ) : null}
 
-      {telop ? (
+      {displayHook ? (
+        <div style={{position: 'absolute', top: Math.round(height * 0.13), left: padX, right: padX, opacity: hookOpacity, color: 'rgba(255,255,255,.78)', fontFamily: 'system-ui, sans-serif', fontWeight: 700, fontSize: Math.round(base * 0.026), lineHeight: 1.35}}>
+          {displayHook}
+        </div>
+      ) : null}
+
+      {displayTelop ? (
         <div
           style={{
             position: 'absolute',
@@ -261,16 +321,17 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
             bottom: Math.round(height * (isLandscape ? 0.075 : 0.11)),
             color: 'white',
             fontFamily: 'system-ui, sans-serif',
-            fontWeight: 800,
-            fontSize: Math.round(Math.min(width, height) * (isLandscape ? 0.045 : 0.052)),
+            fontWeight: 900,
+            fontSize: Math.round(base * (isLandscape ? 0.045 : 0.052)),
             lineHeight: 1.35,
             textAlign: 'center',
-            WebkitTextStroke: `${Math.max(2, Math.round(Math.min(width, height) * 0.004))}px rgba(0,0,0,.9)`,
+            whiteSpace: 'pre-wrap',
+            WebkitTextStroke: `${Math.max(2, Math.round(base * 0.004))}px rgba(0,0,0,.9)`,
             paintOrder: 'stroke fill',
             textShadow: '0 3px 14px rgba(0,0,0,.8)',
           }}
         >
-          {telop}
+          {displayTelop}
         </div>
       ) : null}
 
@@ -282,7 +343,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
             bottom: Math.round(height * 0.025),
             color: 'rgba(255,255,255,.55)',
             fontFamily: 'ui-monospace, monospace',
-            fontSize: Math.max(11, Math.round(Math.min(width, height) * 0.018)),
+            fontSize: Math.max(11, Math.round(base * 0.018)),
             letterSpacing: 2,
           }}
         >
