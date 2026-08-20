@@ -1,9 +1,12 @@
 {
   "name": "vrm-lipsync",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
-    "render": "remotion render VrmLipSync out/vrm-lipsync.mp4 --codec=h264 --crf=20"
+    "studio": "remotion studio",
+    "envelope": "node scripts/generate-envelope.mjs",
+    "check": "tsc --noEmit",
+    "render": "remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20"
   },
   "dependencies": {
     "@pixiv/three-vrm": "^3.4.2",
