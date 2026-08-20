@@ -1,0 +1,47 @@
+name: Render VRM Motion Test
+
+on:
+  push:
+    branches:
+      - tmp/vrm-motion-test
+    paths:
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/render-vrm-motion-test.yml'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Prepare VRM asset
+        run: |
+          test -f ../../subeha-web-site.vrm
+          cp ../../subeha-web-site.vrm public/Subeha.vrm
+          ls -lh public/Subeha.vrm
+
+      - name: Render motion test
+        run: npx remotion render VrmMotionTest out/vrm-motion-test.mp4 --codec=h264 --crf=20
+
+      - name: Verify output
+        run: |
+          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json out/vrm-motion-test.mp4
+
+      - name: Upload MP4
+        uses: actions/upload-artifact@v4
+        with:
+          name: vrm-motion-test
+          path: remotion/vrm-lipsync/out/vrm-motion-test.mp4
+          retention-days: 7
