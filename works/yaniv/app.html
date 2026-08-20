@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ヤニブ｜第〇九一號観測所</title>
-<meta name="description" content="剣・杯・珠・杖の四印で組んだ自前の札で遊ぶヤニブ。手札を軽くして宣言し、同点以下の者が居れば宣言は破れる。">
+<meta name="description" content="普通のトランプで遊ぶヤニブ。手札を軽くして宣言し、同点以下の者が居れば宣言は破れる。">
 <meta name="theme-color" content="#0a0b09">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ヤニブ｜第〇九一號観測所">
-<meta property="og:description" content="剣・杯・珠・杖の四印で組んだ自前の札。手札を軽くして宣言しろ。">
+<meta property="og:description" content="♠ ♥ ♦ ♣ の普通のトランプで遊ぶヤニブ。手札を軽くして宣言しろ。">
 <meta property="og:image" content="ogp.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="robots" content="noindex,follow">
@@ -16,6 +16,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600;700&family=Cormorant+Garamond:ital@1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./style.css">
+<style>
+.rules__deck--standard div{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-weight:800}
+.rules__deck--standard b{display:block;font-size:2rem;line-height:1}
+.rules__deck--standard .red b{color:#c92b2b}
+</style>
 </head>
 <body>
 
@@ -72,15 +77,15 @@
 <div class="ov" id="rulesOv" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
   <div class="box rules">
     <h2 id="rulesTitle">規則</h2><p class="box__sub">YANIV ── 五枚の手札</p>
-    <div class="rules__deck" aria-hidden="true">
-      <div><svg viewBox="0 0 24 24"><path d="M12 1.4 14.15 6.6 14.15 13.9 12 16.1 9.85 13.9 9.85 6.6Z"/><path d="M6.6 15.2h10.8v1.5H6.6z"/><path d="M11.15 16.7h1.7v4.1h-1.7z"/><circle cx="12" cy="21.7" r="1.45"/></svg><span>剣</span></div>
-      <div><svg viewBox="0 0 24 24" class="r"><path d="M5.9 3.2h12.2c0 6.6-2.4 9.9-6.1 10.4C8.3 13.1 5.9 9.8 5.9 3.2Z"/><path d="M11.15 13.9h1.7v4.9h-1.7z"/><path d="M6.9 21.2c0-1.7 2.1-2.4 5.1-2.4s5.1.7 5.1 2.4Z"/></svg><span>杯</span></div>
-      <div><svg viewBox="0 0 24 24" class="r"><path fill-rule="evenodd" d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 6.6a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Z"/></svg><span>珠</span></div>
-      <div><svg viewBox="0 0 24 24"><path d="M11.2 6.4h1.6V22.4h-1.6z"/><path d="M12 .9a3.9 3.9 0 0 1 3.9 3.9c0 1.6-.95 2.9-2.3 3.5l-.6-1.45a2.35 2.35 0 1 0-2 0l-.6 1.45A3.87 3.87 0 0 1 8.1 4.8 3.9 3.9 0 0 1 12 .9Z"/><circle cx="7.5" cy="7.4" r="1.5"/><circle cx="16.5" cy="7.4" r="1.5"/><path d="M7.2 10.6h9.6v1.3H7.2z"/></svg><span>杖</span></div>
+    <div class="rules__deck rules__deck--standard" aria-hidden="true">
+      <div><b>♠</b><span>スペード</span></div>
+      <div class="red"><b>♥</b><span>ハート</span></div>
+      <div class="red"><b>♦</b><span>ダイヤ</span></div>
+      <div><b>♣</b><span>クラブ</span></div>
     </div>
-    <p><b>札。</b>剣・杯・珠・杖の四印に、一から十、そして<b>従・巫・主</b>。従巫主はいずれも十点。<b>鬼札は〇点</b>で、二枚入っている。</p>
-    <p><b>目的。</b>手札の合計点を軽くする。一は一点、二〜十は数字の通り。</p>
-    <p><b>手番。</b>まず捨てる──一枚、同じ数字の組（二枚以上）、または同じ印の連番（三枚以上。鬼札は連番の穴埋めに使える）。次に引く──<b>山札</b>か、<b>直前に捨てられた札の両端</b>のどちらか一枚。端の札は縁が朱く縁取られる。</p>
+    <p><b>札。</b>スペード・ハート・ダイヤ・クラブの四スートに、<b>A〜K</b>。Aは一点、二〜十は数字の通り、J・Q・Kはいずれも十点。<b>ジョーカーは〇点</b>で、二枚入っている。</p>
+    <p><b>目的。</b>手札の合計点をできるだけ軽くする。</p>
+    <p><b>手番。</b>まず捨てる──一枚、同じ数字・記号の組（二枚以上）、または<b>同じスートの連番</b>（三枚以上。ジョーカーは連番の穴埋めに使える）。次に引く──<b>山札</b>か、<b>直前に捨てられた札の両端</b>のどちらか一枚。端の札は縁が朱く縁取られる。</p>
     <p><b>宣言。</b>自分の手番の頭、捨てる前に手札の合計が線の下なら<b class="bl">「ヤニブ」</b>と宣言できる。全員が手札を開く。</p>
     <p><b>アサフ。</b>宣言者と<b>同点以下</b>の者が居れば、その者の勝ち。宣言者は手札の点に<b class="bl">三十点の罰</b>を上乗せして背負う。</p>
     <p><b>勝負。</b>局の勝者は〇点。他の者は手札の点を背負う。累計が<b>丁度五十なら二十五に、丁度百なら五十に折れる</b>。百を超えた者は卓を立つ。最後まで残った一人の勝ち。</p>
