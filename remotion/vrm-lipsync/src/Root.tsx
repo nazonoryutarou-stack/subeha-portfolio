@@ -3,11 +3,12 @@ import {Composition, staticFile} from 'remotion';
 import {VrmLipSync, type VrmLipSyncProps} from './VrmLipSync';
 
 const defaultProps: VrmLipSyncProps = {
-  title: '切り抜き',
+  title: '',
   telop: '',
   modelFile: 'Subeha.vrm',
   audioFile: 'voice.m4a',
   envelopeFile: 'envelope.json',
+  clipFile: 'clip.json',
   background: '#111318',
   showMeter: false,
 };
@@ -15,7 +16,7 @@ const defaultProps: VrmLipSyncProps = {
 const calculateMetadata = async ({props}: {props: VrmLipSyncProps}) => {
   const response = await fetch(staticFile(props.envelopeFile));
   if (!response.ok) {
-    throw new Error(`public/${props.envelopeFile} がありません。先に npm run envelope を実行してください。`);
+    throw new Error(`public/${props.envelopeFile} がありません。先に npm run prepare を実行してください。`);
   }
   const data = await response.json() as {durationInFrames?: number; values?: number[]};
   const durationInFrames = data.durationInFrames ?? data.values?.length ?? 0;
