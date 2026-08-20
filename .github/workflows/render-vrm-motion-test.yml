@@ -7,6 +7,12 @@ on:
     paths:
       - 'remotion/vrm-lipsync/**'
       - '.github/workflows/render-vrm-motion-test.yml'
+  pull_request:
+    branches:
+      - tmp/vrm-motion-test
+    paths:
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/render-vrm-motion-test.yml'
 
 jobs:
   render:
