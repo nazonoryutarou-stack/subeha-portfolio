@@ -6,7 +6,9 @@
     "studio": "remotion studio",
     "envelope": "node scripts/generate-envelope.mjs",
     "check": "tsc --noEmit",
-    "render": "remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20"
+    "render": "npm run envelope && remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20",
+    "render:square": "npm run envelope && remotion render VrmLipSyncSquare out/kiritori-square.mp4 --codec=h264 --crf=20",
+    "render:landscape": "npm run envelope && remotion render VrmLipSyncLandscape out/kiritori-landscape.mp4 --codec=h264 --crf=20"
   },
   "dependencies": {
     "@pixiv/three-vrm": "^3.4.2",
