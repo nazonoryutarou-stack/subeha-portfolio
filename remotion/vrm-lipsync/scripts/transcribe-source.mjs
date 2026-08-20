@@ -17,10 +17,33 @@ const job = JSON.parse(fs.readFileSync(jobPath, 'utf8'));
 const sourceAudio = path.resolve(root, job.sourceAudio ?? '');
 if (!job.sourceAudio || !fs.existsSync(sourceAudio)) throw new Error(`sourceAudio が見つかりません: ${sourceAudio}`);
 
+const inputsDir = path.join(root, 'inputs');
+const captionsPath = path.join(inputsDir, 'source.captions.json');
+const metaPath = path.join(inputsDir, 'source.captions.meta.json');
+const sourceStat = fs.statSync(sourceAudio);
+const sourceKey = {
+  sourceAudio: path.relative(root, sourceAudio),
+  size: sourceStat.size,
+  mtimeMs: Math.round(sourceStat.mtimeMs),
+};
+
+if (fs.existsSync(captionsPath) && fs.existsSync(metaPath) && !process.argv.includes('--force')) {
+  const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+  if (
+    meta.sourceAudio === sourceKey.sourceAudio &&
+    meta.size === sourceKey.size &&
+    meta.mtimeMs === sourceKey.mtimeMs
+  ) {
+    console.log(`Transcription cache hit: ${captionsPath}`);
+    process.exit(0);
+  }
+}
+
 const cacheDir = path.join(root, '.cache');
 const whisperDir = path.join(cacheDir, 'whisper.cpp');
 const wavPath = path.join(cacheDir, 'source-16k.wav');
 fs.mkdirSync(cacheDir, {recursive: true});
+fs.mkdirSync(inputsDir, {recursive: true});
 
 const wav = spawnSync('ffmpeg', [
   '-hide_banner', '-loglevel', 'error', '-y',
@@ -51,8 +74,7 @@ const whisperCppOutput = await transcribe({
 });
 const {captions} = toCaptions({whisperCppOutput});
 
-const outPath = path.join(root, 'inputs', 'source.captions.json');
-fs.mkdirSync(path.dirname(outPath), {recursive: true});
-fs.writeFileSync(outPath, JSON.stringify(captions, null, 2) + '\n');
+fs.writeFileSync(captionsPath, JSON.stringify(captions, null, 2) + '\n');
+fs.writeFileSync(metaPath, JSON.stringify({...sourceKey, model, whisperCppVersion}, null, 2) + '\n');
 console.log(`Transcribed: ${captions.length} captions`);
-console.log(`Saved: ${outPath}`);
+console.log(`Saved: ${captionsPath}`);
