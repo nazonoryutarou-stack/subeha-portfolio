@@ -1,17 +1,22 @@
 {
   "name": "vrm-lipsync",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "scripts": {
     "studio": "remotion studio",
     "envelope": "node scripts/generate-envelope.mjs",
+    "prepare": "node scripts/prepare-clip.mjs",
     "check": "tsc --noEmit",
-    "render": "npm run envelope && remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20",
-    "render:square": "npm run envelope && remotion render VrmLipSyncSquare out/kiritori-square.mp4 --codec=h264 --crf=20",
-    "render:landscape": "npm run envelope && remotion render VrmLipSyncLandscape out/kiritori-landscape.mp4 --codec=h264 --crf=20"
+    "clip": "npm run prepare && remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20",
+    "clip:square": "npm run prepare && remotion render VrmLipSyncSquare out/kiritori-square.mp4 --codec=h264 --crf=20",
+    "clip:landscape": "npm run prepare && remotion render VrmLipSyncLandscape out/kiritori-landscape.mp4 --codec=h264 --crf=20",
+    "render": "npm run clip",
+    "render:square": "npm run clip:square",
+    "render:landscape": "npm run clip:landscape"
   },
   "dependencies": {
     "@pixiv/three-vrm": "^3.4.2",
+    "@remotion/captions": "^4.0.506",
     "@remotion/cli": "^4.0.506",
     "@remotion/media": "^4.0.506",
     "remotion": "^4.0.506",
