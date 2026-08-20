@@ -1,0 +1,19 @@
+/* Standard playing-card override for Yaniv */
+.fc,.bk{position:absolute;inset:0;border-radius:6px;overflow:hidden;-webkit-backface-visibility:hidden;backface-visibility:hidden;box-shadow:0 2px 9px rgba(0,0,0,.6)}
+.fc{background:#fffdfa!important;border:1px solid #26231f!important;color:#111!important;font-family:Arial,Helvetica,sans-serif}
+.fc--red{color:#c51f1f!important}
+.bk{transform:rotateY(180deg);background:#f5f1e8!important;border:1px solid #26231f!important;color:#801d1d;display:grid;place-items:center}
+.bk__mark,.bk__ring{display:none!important}
+.bk::before,.bk__pattern{content:"";position:absolute;inset:4px;border:2px solid #d7d2c5;border-radius:3px;background:repeating-linear-gradient(45deg,#801d1d 0 3px,#f3eee2 3px 5px,#801d1d 5px 8px);box-shadow:inset 0 0 0 2px #801d1d}
+.fc__rk,.fc__sig{display:none!important}
+.fc__corner{position:absolute;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:.82;font-family:Arial,Helvetica,sans-serif;font-weight:800}
+.fc__corner b{font-size:calc(var(--cw)*.29);letter-spacing:-.06em}
+.fc__corner i{font-style:normal;font-size:calc(var(--cw)*.22);margin-top:2px}
+.fc__corner--tl{top:4px;left:5px}
+.fc__corner--br{right:5px;bottom:4px;transform:rotate(180deg)}
+.fc__pip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:700 calc(var(--cw)*.64)/1 Georgia,"Times New Roman",serif}
+.fc__joker{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-58deg);font:800 calc(var(--cw)*.18)/1 Arial,Helvetica,sans-serif;letter-spacing:.06em}
+.fc__pt{position:absolute!important;right:4px!important;top:4px!important;bottom:auto!important;font-size:calc(var(--cw)*.13)!important;font-weight:700!important;opacity:.28!important}
+.seat__row .fc__corner b{font-size:calc(var(--cw)*.36)}
+.seat__row .fc__corner i{font-size:calc(var(--cw)*.27)}
+.seat__row .fc__pip{font-size:calc(var(--cw)*.72)}
