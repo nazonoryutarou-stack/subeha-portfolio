@@ -1,6 +1,7 @@
 import React from 'react';
 import {Composition, staticFile} from 'remotion';
 import {VrmLipSync, type VrmLipSyncProps} from './VrmLipSync';
+import {VrmMotionTest} from './VrmMotionTest';
 
 const defaultProps: VrmLipSyncProps = {
   title: '',
@@ -28,6 +29,14 @@ const calculateMetadata = async ({props}: {props: VrmLipSyncProps}) => {
 
 export const Root: React.FC = () => (
   <>
+    <Composition
+      id="VrmMotionTest"
+      component={VrmMotionTest}
+      durationInFrames={180}
+      fps={30}
+      width={720}
+      height={1280}
+    />
     <Composition
       id="VrmLipSync"
       component={VrmLipSync}
