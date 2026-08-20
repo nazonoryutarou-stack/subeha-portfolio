@@ -29,6 +29,6 @@
   "devDependencies": {
     "@types/react": "19.0.0",
     "@types/three": "0.179.0",
-    "typescript": "5.8.0"
+    "typescript": "^5.8.0"
   }
 }
