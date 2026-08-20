@@ -2,6 +2,11 @@
    読みやすさを優先し、一般的な ♠ ♥ ♦ ♣ / A〜K / JOKER 表記を使う。
    ------------------------------------------------------------------- */
 
+const standardCardsCSS = document.createElement('link');
+standardCardsCSS.rel = 'stylesheet';
+standardCardsCSS.href = './cards-standard.css';
+document.head.appendChild(standardCardsCSS);
+
 export const SUIT_NAME = ['スペード', 'ハート', 'ダイヤ', 'クラブ'];
 export const SUIT_YOMI = [
   'スペードが濃い。切るべきものを見極めろ。',
