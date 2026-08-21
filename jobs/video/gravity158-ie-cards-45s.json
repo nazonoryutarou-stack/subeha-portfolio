@@ -11,6 +11,7 @@
   "height": 1280,
   "title": "遺影をAIでカード化したら\n師匠に破門された",
   "sourceLabel": "GRAVITY #158 / ORIGINAL AUDIO",
+  "productionVoiceWavSha256": "86e9b3b9904f771761b0c603e88e430543dd83f77da3fbd93815dd885bf38abf",
   "captions": [],
   "captionTimingSource": null,
   "requiresAlignment": true,
@@ -30,6 +31,7 @@
   },
   "notes": [
     "Old derived video was waveform-aligned against 配信158.m4a before fixing this range.",
+    "Production voice.wav must be generated directly from 配信158.m4a with atrim 7640.000000–7685.000000 and match productionVoiceWavSha256.",
     "Do not add captions until timed ASR alignment is confirmed from this exact audio range.",
     "Do not replace source audio with audio extracted from an older rendered video.",
     "The avatar represents the host. Customer/guest speech must never drive mouth visemes.",
