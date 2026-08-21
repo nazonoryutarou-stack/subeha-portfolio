@@ -29,24 +29,15 @@ const applyNaturalPose = (vrm: VRM) => {
   const rightUpperArm = bone('rightUpperArm');
   const leftLowerArm = bone('leftLowerArm');
   const rightLowerArm = bone('rightLowerArm');
-  if (leftShoulder) leftShoulder.rotation.z = 0.05;
-  if (rightShoulder) rightShoulder.rotation.z = -0.05;
-  if (leftUpperArm) {
-    leftUpperArm.rotation.z = Math.PI * 0.39;
-    leftUpperArm.rotation.x = -0.06;
-  }
-  if (rightUpperArm) {
-    rightUpperArm.rotation.z = -Math.PI * 0.39;
-    rightUpperArm.rotation.x = -0.06;
-  }
-  if (leftLowerArm) {
-    leftLowerArm.rotation.y = -0.10;
-    leftLowerArm.rotation.z = -0.05;
-  }
-  if (rightLowerArm) {
-    rightLowerArm.rotation.y = 0.10;
-    rightLowerArm.rotation.z = 0.05;
-  }
+
+  // Match the model's proven web-viewer rest pose. The previous signs were
+  // reversed and actually lifted both arms, which QC exposed immediately.
+  if (leftShoulder) leftShoulder.rotation.set(0.03, 0, -0.20);
+  if (rightShoulder) rightShoulder.rotation.set(0.03, 0, 0.17);
+  if (leftUpperArm) leftUpperArm.rotation.set(0.10, 0.06, -1.05);
+  if (rightUpperArm) rightUpperArm.rotation.set(-0.06, -0.05, 0.95);
+  if (leftLowerArm) leftLowerArm.rotation.set(-0.28, 0.04, -0.12);
+  if (rightLowerArm) rightLowerArm.rotation.set(-0.34, -0.04, 0.10);
 };
 
 const Sampler: React.FC = () => {
@@ -74,7 +65,6 @@ const Sampler: React.FC = () => {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#111318');
 
-    // Portrait crop: face + upper body, with enough headroom for title overlays.
     const camera = new THREE.PerspectiveCamera(27, width / height, 0.01, 100);
     camera.position.set(0, 1.62, 3.85);
     camera.lookAt(0, 1.62, 0);
@@ -137,8 +127,6 @@ const Sampler: React.FC = () => {
     const {vrm} = s;
     const em = vrm.expressionManager;
 
-    // First second is deliberately quiet/closed. Remaining five seconds sample
-    // several vowel shapes. Real-audio assembly chooses the appropriate frames.
     const talking = frame >= fps;
     const phase = Math.floor(Math.max(0, frame - fps) / 2) % 5;
     const pulse = talking ? 0.58 + 0.34 * (0.5 + 0.5 * Math.sin(frame * 0.31)) : 0;
