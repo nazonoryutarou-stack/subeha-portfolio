@@ -5,12 +5,13 @@ import {dirname, resolve} from 'node:path';
 const FPS = 30;
 const SAMPLE_RATE = 48000;
 const SAMPLES_PER_FRAME = Math.round(SAMPLE_RATE / FPS);
-const AUDIO_CANDIDATES = ['voice.m4a', 'voice.mp3', 'voice.wav'];
+// prepare-clip.mjs は同期精度のため voice.wav を生成する。旧AACが残っていてもWAVを優先する。
+const AUDIO_CANDIDATES = ['voice.wav', 'voice.m4a', 'voice.mp3'];
 const publicDir = resolve('public');
 const audioName = AUDIO_CANDIDATES.find((name) => existsSync(resolve(publicDir, name)));
 
 if (!audioName) {
-  console.error('音声が見つかりません。public/voice.m4a（または mp3 / wav）を置いてください。');
+  console.error('音声が見つかりません。public/voice.wav（または m4a / mp3）を置いてください。');
   process.exit(1);
 }
 
@@ -55,7 +56,7 @@ const normalized = rms.map((value) => {
   return Math.max(0, Math.min(1, Math.pow(n, 0.72)));
 });
 
-// 3-frame moving average. 口パクの細かすぎる震えを抑える。
+// 3-frame moving average。口パクの細かすぎる震えを抑える。
 const values = normalized.map((_, i) => {
   const a = normalized[Math.max(0, i - 1)];
   const b = normalized[i];
@@ -67,7 +68,7 @@ const clipped = values.filter((v) => v >= 0.995).length;
 const clippedRatio = values.length ? clipped / values.length : 0;
 const durationSeconds = floats.length / SAMPLE_RATE;
 const payload = {
-  version: 1,
+  version: 2,
   audio: audioName,
   fps: FPS,
   durationSeconds: Number(durationSeconds.toFixed(3)),
