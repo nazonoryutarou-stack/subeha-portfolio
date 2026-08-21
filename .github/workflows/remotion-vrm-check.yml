@@ -6,10 +6,12 @@ on:
       - feature/remotion-workflow-v2
     paths:
       - 'remotion/vrm-lipsync/**'
+      - 'scripts/check-vrm.mjs'
       - '.github/workflows/remotion-vrm-check.yml'
   pull_request:
     paths:
       - 'remotion/vrm-lipsync/**'
+      - 'scripts/check-vrm.mjs'
       - '.github/workflows/remotion-vrm-check.yml'
   workflow_dispatch:
 
@@ -27,6 +29,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check pipeline script syntax
+        working-directory: .
+        run: |
+          node --check scripts/check-vrm.mjs
+          node --check remotion/vrm-lipsync/scripts/ensure-video-vrm.mjs
+          node --check remotion/vrm-lipsync/scripts/import-studio-project.mjs
+          node --check remotion/vrm-lipsync/scripts/generate-envelope.mjs
+          node --check remotion/vrm-lipsync/scripts/prepare-clip.mjs
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: TypeScript check
