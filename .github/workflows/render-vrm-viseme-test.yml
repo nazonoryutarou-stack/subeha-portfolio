@@ -8,6 +8,13 @@ on:
       - 'Subeha.vrm'
       - 'remotion/vrm-lipsync/**'
       - '.github/workflows/render-vrm-viseme-test.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Subeha.vrm'
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/render-vrm-viseme-test.yml'
   workflow_dispatch:
 
 jobs:
