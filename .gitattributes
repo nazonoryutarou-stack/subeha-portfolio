@@ -1,0 +1,4 @@
+# Large broadcast audio is tracked with Git LFS.
+media/audio/*.m4a filter=lfs diff=lfs merge=lfs -text
+media/audio/*.wav filter=lfs diff=lfs merge=lfs -text
+media/audio/*.mp3 filter=lfs diff=lfs merge=lfs -text
