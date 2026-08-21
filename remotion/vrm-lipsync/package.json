@@ -1,6 +1,6 @@
 {
   "name": "vrm-lipsync",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "scripts": {
     "studio": "remotion studio",
@@ -30,6 +30,6 @@
   "devDependencies": {
     "@types/react": "19.0.0",
     "@types/three": "0.179.0",
-    "typescript": "5.8.0"
+    "typescript": "^5.8.0"
   }
 }
