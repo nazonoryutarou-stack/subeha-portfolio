@@ -1,2 +1,2 @@
-import './main-v2.js';
+import './main-studio.js';
 import './studio-panel.js';
