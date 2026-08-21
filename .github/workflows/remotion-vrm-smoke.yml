@@ -1,0 +1,79 @@
+name: Remotion VRM Smoke
+
+on:
+  push:
+    branches:
+      - feature/remotion-workflow-v2
+    paths:
+      - 'remotion/vrm-lipsync/**'
+      - 'subeha-web-site.vrm'
+      - '.github/workflows/remotion-vrm-smoke.yml'
+  pull_request:
+    paths:
+      - 'remotion/vrm-lipsync/**'
+      - 'subeha-web-site.vrm'
+      - '.github/workflows/remotion-vrm-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Prepare synthetic smoke inputs
+        shell: bash
+        run: |
+          mkdir -p public out/smoke-qc
+          cp ../../subeha-web-site.vrm public/Subeha.vrm
+          python - <<'PY'
+          import json, math, wave, struct
+          fps=30
+          frames=90
+          values=[]
+          for i in range(frames):
+              if 15 <= i < 75:
+                  values.append(0.88)
+              else:
+                  values.append(0.0)
+          with open('public/envelope.json','w',encoding='utf-8') as f:
+              json.dump({'version':2,'audio':'voice.wav','fps':fps,'durationSeconds':3,'durationInFrames':frames,'values':values},f)
+          with open('public/clip.json','w',encoding='utf-8') as f:
+              json.dump({'version':3,'title':'VRM SMOKE','hook':'pose + lipsync','sourceLabel':'CI','captions':[{'text':'口パク確認','startMs':500,'endMs':2500}]},f,ensure_ascii=False)
+          rate=48000
+          with wave.open('public/voice.wav','wb') as w:
+              w.setnchannels(1); w.setsampwidth(2); w.setframerate(rate)
+              for n in range(rate*3):
+                  t=n/rate
+                  amp=0.18 if 0.5 <= t < 2.5 else 0.0
+                  sample=int(32767*amp*math.sin(2*math.pi*180*t))
+                  w.writeframesraw(struct.pack('<h',sample))
+          PY
+      - name: TypeScript check
+        run: npm run check
+      - name: Render 3-second smoke video
+        run: npx remotion render VrmLipSync out/smoke.mp4 --codec=h264 --crf=24 --frames=0-89
+      - name: Extract visual QC frames
+        run: |
+          ffmpeg -hide_banner -loglevel error -y -ss 0.17 -i out/smoke.mp4 -frames:v 1 out/smoke-qc/closed.png
+          ffmpeg -hide_banner -loglevel error -y -ss 1.33 -i out/smoke.mp4 -frames:v 1 out/smoke-qc/speaking.png
+          ffmpeg -hide_banner -loglevel error -y -ss 2.80 -i out/smoke.mp4 -frames:v 1 out/smoke-qc/end.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remotion-vrm-smoke
+          path: |
+            remotion/vrm-lipsync/out/smoke.mp4
+            remotion/vrm-lipsync/out/smoke-qc/*.png
+          retention-days: 3

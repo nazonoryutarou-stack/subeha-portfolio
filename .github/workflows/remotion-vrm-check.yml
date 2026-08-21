@@ -1,0 +1,33 @@
+name: Remotion VRM Check
+
+on:
+  push:
+    branches:
+      - feature/remotion-workflow-v2
+    paths:
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/remotion-vrm-check.yml'
+  pull_request:
+    paths:
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/remotion-vrm-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript check
+        run: npm run check
