@@ -14,6 +14,10 @@
   "captions": [],
   "captionTimingSource": null,
   "requiresAlignment": true,
+  "mouthSpeakerPolicy": "host-only",
+  "speakerDiarizationRequired": true,
+  "speakerTurnsFile": "remotion/vrm-lipsync/public/speaker-turns.json",
+  "speakerTurnsStatus": "pending-diarization",
   "qcTimesSec": [0.5, 8.0, 18.0, 30.0, 43.0],
   "qc": {
     "videoDurationSec": 45.0,
@@ -22,11 +26,13 @@
     "videoFrames": 1350,
     "videoCodec": "h264",
     "audioCodec": "aac",
-    "status": "pass"
+    "status": "needs-rerender-speaker-gated"
   },
   "notes": [
     "Old derived video was waveform-aligned against 配信158.m4a before fixing this range.",
     "Do not add captions until timed ASR alignment is confirmed from this exact audio range.",
-    "Do not replace source audio with audio extracted from an older rendered video."
+    "Do not replace source audio with audio extracted from an older rendered video.",
+    "The avatar represents the host. Customer/guest speech must never drive mouth visemes.",
+    "Production render must fail when speaker-turns.json is missing; do not fall back to amplitude-only lip sync."
   ]
 }
