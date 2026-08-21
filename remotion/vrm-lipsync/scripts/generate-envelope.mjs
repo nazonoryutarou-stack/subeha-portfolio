@@ -1,4 +1,5 @@
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 
@@ -18,6 +19,8 @@ if (!audioName) {
 }
 
 const audioPath = resolve(publicDir, audioName);
+const audioBytes = readFileSync(audioPath);
+const audioSha256 = createHash('sha256').update(audioBytes).digest('hex');
 const ffmpeg = spawnSync(
   'ffmpeg',
   ['-v', 'error', '-i', audioPath, '-ac', '1', '-ar', String(SAMPLE_RATE), '-f', 'f32le', 'pipe:1'],
@@ -38,6 +41,8 @@ const bytes = ffmpeg.stdout;
 const usableBytes = bytes.length - (bytes.length % 4);
 const floats = new Float32Array(bytes.buffer, bytes.byteOffset, usableBytes / 4);
 const frameCount = Math.max(1, Math.ceil(floats.length / SAMPLES_PER_FRAME));
+const durationSeconds = floats.length / SAMPLE_RATE;
+const durationMs = durationSeconds * 1000;
 const rms = new Array(frameCount).fill(0);
 
 for (let frame = 0; frame < frameCount; frame++) {
@@ -67,9 +72,21 @@ const buildSpeakerMask = () => {
     return new Array(frameCount).fill(1);
   }
 
-  const payload = JSON.parse(readFileSync(speakerTurnsPath, 'utf8'));
-  const avatarSpeaker = String(payload.avatarSpeaker ?? 'HOST');
-  const turns = Array.isArray(payload.turns) ? payload.turns : [];
+  const speakerPayload = JSON.parse(readFileSync(speakerTurnsPath, 'utf8'));
+  const expectedHash = String(speakerPayload.audioSha256 ?? '').trim().toLowerCase();
+  if (!expectedHash) throw new Error('speaker-turns.json に audioSha256 がありません。話者区間を現在の音声へロックできません。');
+  if (expectedHash !== audioSha256) {
+    throw new Error(`speaker-turns.json の音声SHA-256が一致しません。expected=${expectedHash} actual=${audioSha256}`);
+  }
+
+  const expectedDurationMs = Number(speakerPayload.durationMs);
+  if (!Number.isFinite(expectedDurationMs)) throw new Error('speaker-turns.json に durationMs がありません。');
+  if (Math.abs(expectedDurationMs - durationMs) > 50) {
+    throw new Error(`speaker-turns.json の音声長が一致しません。expected=${expectedDurationMs}ms actual=${durationMs.toFixed(1)}ms`);
+  }
+
+  const avatarSpeaker = String(speakerPayload.avatarSpeaker ?? 'HOST');
+  const turns = Array.isArray(speakerPayload.turns) ? speakerPayload.turns : [];
   if (turns.length === 0) throw new Error('speaker-turns.json の turns が空です。');
 
   const mask = new Array(frameCount).fill(0);
@@ -80,7 +97,7 @@ const buildSpeakerMask = () => {
     if (speaker !== avatarSpeaker) continue;
     const startMs = Number(turn.startMs);
     const endMs = Number(turn.endMs);
-    if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || startMs < 0 || endMs <= startMs) {
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || startMs < 0 || endMs <= startMs || endMs > durationMs + 50) {
       throw new Error(`speaker-turns.json に不正な区間があります: ${JSON.stringify(turn)}`);
     }
     hostTurnCount += 1;
@@ -117,11 +134,11 @@ const values = maskedNormalized.map((_, i) => {
 
 const clipped = values.filter((v) => v >= 0.995).length;
 const clippedRatio = values.length ? clipped / values.length : 0;
-const durationSeconds = floats.length / SAMPLE_RATE;
 const activeSpeakerFrames = speakerMask.filter(Boolean).length;
 const payload = {
-  version: 3,
+  version: 4,
   audio: audioName,
+  audioSha256,
   fps: FPS,
   durationSeconds: Number(durationSeconds.toFixed(3)),
   durationInFrames: frameCount,
@@ -141,6 +158,7 @@ mkdirSync(dirname(outputPath), {recursive: true});
 writeFileSync(outputPath, JSON.stringify(payload));
 
 console.log(`音声: ${audioName}`);
+console.log(`SHA-256: ${audioSha256}`);
 console.log(`長さ: ${durationSeconds.toFixed(2)} 秒 / ${frameCount} frames @ ${FPS}fps`);
 console.log(`本人話者ゲート: ${existsSync(speakerTurnsPath) ? 'ON' : 'OFF'}`);
 console.log(`口パク有効フレーム: ${activeSpeakerFrames}/${frameCount}`);
