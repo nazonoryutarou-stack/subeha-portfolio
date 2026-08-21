@@ -1,5 +1,6 @@
 const OPENAI_BASE = 'https://api.openai.com/v1';
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024;
+const MAX_REFERENCE_BYTES = 2 * 1024 * 1024;
 
 const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
   status,
@@ -53,8 +54,19 @@ const openAI = async (env, path, init) => {
   return payload;
 };
 
-const normalizeSpeaker = (value, map) => {
+const fileToDataUrl = async (file) => {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = '';
+  const block = 0x8000;
+  for (let i = 0; i < bytes.length; i += block) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + block));
+  }
+  return `data:${file.type || 'audio/wav'};base64,${btoa(binary)}`;
+};
+
+const normalizeSpeaker = (value, map, knownNames = new Set()) => {
   const raw = String(value ?? 'speaker').trim() || 'speaker';
+  if (knownNames.has(raw)) return raw;
   if (!map.has(raw)) map.set(raw, `SPEAKER_${String(map.size).padStart(2, '0')}`);
   return map.get(raw);
 };
@@ -79,11 +91,27 @@ const handleTranscribe = async (request, env) => {
   if (!audio.size) return json({error: 'audio file is empty'}, 400);
   if (audio.size > MAX_AUDIO_BYTES) return json({error: 'audio file exceeds the 25MB transcription upload limit'}, 413);
 
+  const knownSpeakerName = String(incoming.get('knownSpeakerName') || '').trim();
+  const knownSpeakerReference = incoming.get('knownSpeakerReference');
+  if ((knownSpeakerName && !(knownSpeakerReference instanceof File)) || (!knownSpeakerName && knownSpeakerReference instanceof File)) {
+    return json({error: 'knownSpeakerName and knownSpeakerReference must be provided together'}, 400);
+  }
+  if (knownSpeakerReference instanceof File && knownSpeakerReference.size > MAX_REFERENCE_BYTES) {
+    return json({error: 'known speaker reference is too large'}, 413);
+  }
+
   const form = new FormData();
   form.append('file', audio, audio.name || 'audio.m4a');
   form.append('model', 'gpt-4o-transcribe-diarize');
   form.append('response_format', 'diarized_json');
   form.append('chunking_strategy', 'auto');
+
+  const knownNames = new Set();
+  if (knownSpeakerName && knownSpeakerReference instanceof File) {
+    knownNames.add(knownSpeakerName);
+    form.append('known_speaker_names[]', knownSpeakerName);
+    form.append('known_speaker_references[]', await fileToDataUrl(knownSpeakerReference));
+  }
 
   const payload = await openAI(env, '/audio/transcriptions', {method: 'POST', body: form});
   const segments = Array.isArray(payload?.segments) ? payload.segments : [];
@@ -97,7 +125,7 @@ const handleTranscribe = async (request, env) => {
       text,
       startMs: Math.max(0, Math.round(start * 1000)),
       endMs: Math.max(1, Math.round(end * 1000)),
-      speaker: normalizeSpeaker(segment.speaker, speakerMap),
+      speaker: normalizeSpeaker(segment.speaker, speakerMap, knownNames),
       confidence: segment.confidence == null ? null : Number(segment.confidence),
     };
   }).filter(Boolean);
@@ -109,7 +137,7 @@ const handleTranscribe = async (request, env) => {
     language: payload?.language || null,
     durationMs,
     speakers: [...new Set(captions.map((caption) => caption.speaker))],
-    avatarSpeaker: null,
+    avatarSpeaker: knownNames.has('HOST') ? 'HOST' : null,
     captions,
     speakerTurns,
   });
@@ -147,16 +175,12 @@ const handleVisualCues = async (request, env) => {
   const payload = await openAI(env, '/responses', {
     method: 'POST',
     headers: {'content-type': 'application/json'},
-    body: JSON.stringify({
-      model: 'gpt-5.6-luna',
-      input: instructions,
-    }),
+    body: JSON.stringify({model: 'gpt-5.6-luna', input: instructions}),
   });
 
   const parsed = parseModelJson(responseText(payload));
   const rawCues = Array.isArray(parsed?.cues) ? parsed.cues : [];
   const cues = [];
-
   for (const raw of rawCues.slice(0, 8)) {
     const startIndex = Math.trunc(Number(raw?.startIndex));
     const endIndex = Math.trunc(Number(raw?.endIndex));
@@ -173,18 +197,12 @@ const handleVisualCues = async (request, env) => {
     if (mode === 'search' && !query) continue;
     if (mode === 'generate' && !prompt) continue;
     cues.push({
-      id: crypto.randomUUID(),
-      startIndex,
-      endIndex,
-      startMs: Math.round(startMs),
-      endMs: Math.round(endMs),
-      mode,
-      query,
-      prompt,
+      id: crypto.randomUUID(), startIndex, endIndex,
+      startMs: Math.round(startMs), endMs: Math.round(endMs),
+      mode, query, prompt,
       reason: String(raw?.reason || '').trim() || null,
     });
   }
-
   return json({model: 'gpt-5.6-luna', cues});
 };
 
@@ -212,11 +230,9 @@ export default {
     try {
       requireOrigin(request, env);
       const url = new URL(request.url);
-
       if (request.method === 'GET' && (url.pathname.endsWith('/api/health') || url.pathname === '/health')) {
-        return json({ok: true, version: 2, openaiConfigured: Boolean(env.OPENAI_API_KEY)}, 200, cors);
+        return json({ok: true, version: 3, openaiConfigured: Boolean(env.OPENAI_API_KEY)}, 200, cors);
       }
-
       if (request.method !== 'POST') return json({error: 'Not found'}, 404, cors);
       let response;
       if (url.pathname.endsWith('/api/transcribe') || url.pathname === '/transcribe') {
