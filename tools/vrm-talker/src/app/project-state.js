@@ -83,6 +83,21 @@ export const addVisualReference = (item) => {
   return item;
 };
 
+export const updateVisualReference = (id, patch) => {
+  const index = project.visualReferences.findIndex((item) => item.id === id);
+  if (index < 0) return null;
+  const next = {...project.visualReferences[index], ...patch};
+  const startMs = Number(next.startMs);
+  const endMs = Number(next.endMs);
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || startMs < 0 || endMs <= startMs) {
+    throw new Error('画像素材の表示区間が不正です。');
+  }
+  const duration = Number(project.source.durationMs || 0);
+  if (duration > 0 && endMs > duration) next.endMs = duration;
+  project.visualReferences[index] = next;
+  return next;
+};
+
 export const removeVisualReference = (id) => {
   const before = project.visualReferences.length;
   project.visualReferences = project.visualReferences.filter((item) => item.id !== id);
