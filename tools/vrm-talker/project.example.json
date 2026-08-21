@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "source": {
+    "name": "example.m4a",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "durationMs": 45000
+  },
+  "clip": {
+    "startMs": 0,
+    "endMs": 45000
+  },
+  "avatar": {
+    "speaker": "HOST",
+    "model": "Subeha.vrm"
+  },
+  "captions": [
+    {
+      "text": "字幕は実タイムコードから生成する",
+      "startMs": 1000,
+      "endMs": 4200,
+      "speaker": "HOST",
+      "confidence": null
+    }
+  ],
+  "speakerTurns": [
+    {
+      "speaker": "HOST",
+      "startMs": 0,
+      "endMs": 5000
+    },
+    {
+      "speaker": "GUEST",
+      "startMs": 5000,
+      "endMs": 7200
+    }
+  ],
+  "visualReferences": [
+    {
+      "id": "ref-001",
+      "kind": "search",
+      "startMs": 10000,
+      "endMs": 16000,
+      "query": "trading card frame reference",
+      "prompt": null,
+      "url": null,
+      "thumbnailUrl": null,
+      "sourceUrl": null,
+      "creator": null,
+      "license": null
+    }
+  ],
+  "layout": {
+    "width": 720,
+    "height": 1280,
+    "captionBottomPx": 290,
+    "showSafeArea": true,
+    "background": null
+  }
+}
