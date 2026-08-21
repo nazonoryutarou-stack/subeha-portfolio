@@ -1,52 +1,47 @@
 {
   "version": 1,
   "source": {
-    "name": "example.m4a",
+    "name": "配信158.m4a",
     "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-    "durationMs": 45000
+    "durationMs": 9000000
   },
-  "clip": {
-    "startMs": 0,
-    "endMs": 45000
-  },
-  "avatar": {
-    "speaker": "HOST",
-    "model": "Subeha.vrm"
-  },
+  "clip": {"startMs": 7640000, "endMs": 7685000},
+  "avatar": {"speaker": "HOST", "model": "Subeha.vrm"},
   "captions": [
-    {
-      "text": "字幕は実タイムコードから生成する",
-      "startMs": 1000,
-      "endMs": 4200,
-      "speaker": "HOST",
-      "confidence": null
-    }
+    {"text": "遺影をAIでカードみたいにしたんですよ", "startMs": 7651000, "endMs": 7654200, "speaker": "HOST", "confidence": 0.96}
   ],
   "speakerTurns": [
+    {"speaker": "HOST", "startMs": 7640000, "endMs": 7660000},
+    {"speaker": "CHUNK_015_SPEAKER_00", "startMs": 7660000, "endMs": 7662400},
+    {"speaker": "HOST", "startMs": 7662400, "endMs": 7685000}
+  ],
+  "visualCues": [
     {
-      "speaker": "HOST",
-      "startMs": 0,
-      "endMs": 5000
-    },
-    {
-      "speaker": "GUEST",
-      "startMs": 5000,
-      "endMs": 7200
+      "id": "cue-1",
+      "startIndex": 0,
+      "endIndex": 0,
+      "startMs": 7651000,
+      "endMs": 7654200,
+      "mode": "search",
+      "query": "古い日本の遺影 写真館",
+      "prompt": null,
+      "reason": "発話内の実在資料を見せると内容が即座に伝わる"
     }
   ],
   "visualReferences": [
     {
-      "id": "ref-001",
+      "id": "image-1",
       "kind": "search",
-      "startMs": 10000,
-      "endMs": 16000,
-      "query": "trading card frame reference",
+      "startMs": 7651000,
+      "endMs": 7654200,
+      "query": "古い日本の遺影 写真館",
       "prompt": null,
-      "url": null,
-      "thumbnailUrl": null,
-      "sourceUrl": null,
+      "url": "https://example.invalid/reference.jpg",
+      "thumbnailUrl": "https://example.invalid/reference-thumb.jpg",
+      "sourceUrl": "https://example.invalid/source",
       "creator": null,
-      "license": null
+      "license": "example-only",
+      "title": "参考画像"
     }
   ],
   "layout": {
