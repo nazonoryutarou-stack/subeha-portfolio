@@ -1,22 +1,36 @@
 # VRM LipSync / production workflow
 
-配信の音声と文字起こしから、AIが面白い区間を選び、同じVRM・同じ画面設計で切り抜き動画を量産するためのRemotionテンプレート。
+配信の実音声と文字起こしから、AIが面白い区間を選び、VRM・字幕・口パクを同じタイムラインでレンダリングするためのRemotionテンプレート。
 
+**制作前に `docs/production-rules.md`（mainの正本）を読むこと。**
 詳しいAI選定基準は `AI_WORKFLOW.md`。
 
-## 最終形
+## 原則
 
-1. 音声と文字起こしをAIへ渡す
-2. AIが面白い区間・開始終了時刻・タイトル・フック・字幕を決める
-3. AIが `jobs/current.json` を作る
-4. `npm run clip`
-5. `out/kiritori.mp4` ができる
+**面白さはAIが決める。時刻は音声から機械的に決める。**
+
+AIが存在しない秒数を推測しない。字幕を勘で配置しない。VRMの口パク・姿勢を確認せず完成扱いしない。
+
+## 現在の処理
+
+1. AIが文字起こしから切り抜く発言を選ぶ
+2. `jobs/current.json` に `quote` / `anchor` / タイトル / 前後余白を書く
+3. `npm run clip`
+4. タイムコードが無ければWhisper.cppで元音声を文字起こし
+5. `anchor` を認識結果から検索し、開始・終了位置を決める
+6. `atrim + asetpts` で実音声を正確に0秒基準へ切り出し、`public/voice.wav` を生成
+7. 元音声基準の字幕を切り抜き内時刻へ変換
+8. 実音声から `public/envelope.json` を生成
+9. 実VRMを直接レンダリングし、自然姿勢・瞬き・頭部モーション・口パクを適用
+10. MP4書き出し後、`out/qc/` に検品フレームを抽出
 
 ## 必要なもの
 
-初回だけ `public/Subeha.vrm` を置く。VRMはGitに入れない。
+- ffmpeg
+- Node.js
+- 元音声を `inputs/` に置く
 
-元音声は `inputs/` に置く。`inputs/` もGitに入れない。
+VRMはリポジトリ直下の `subeha-web-site.vrm` を `npm run prepare` が `public/Subeha.vrm` へ自動コピーする。手作業で別モデルを置く必要はない。
 
 ```text
 remotion/vrm-lipsync/
@@ -25,20 +39,28 @@ remotion/vrm-lipsync/
   jobs/
     current.json
   public/
-    Subeha.vrm
+    Subeha.vrm   # prepare時に自動生成
+    voice.wav    # 精密切り出し
+    clip.json
+    envelope.json
 ```
 
-`jobs/current.json` の雛形は `jobs/current.example.json`。
+生成物・入力音声はGitへ入れない。
 
 ## 初回
 
 ```bash
+cd remotion/vrm-lipsync
 npm install
 cp jobs/current.example.json jobs/current.json
-npm run studio
 ```
 
-ffmpeg が必要。
+Studioで見る場合:
+
+```bash
+npm run prepare
+npm run studio
+```
 
 ## 一発書き出し
 
@@ -46,89 +68,97 @@ ffmpeg が必要。
 npm run clip
 ```
 
-この1コマンドで以下を行う。
+処理順:
 
-1. `jobs/current.json` を読む
-2. 元音声の `startMs`〜`endMs` を正確に切り出す
-3. `public/voice.m4a` を生成
-4. 字幕時刻を切り抜き内の時刻へ変換して `public/clip.json` を生成
-5. 実音声から `public/envelope.json` を生成
-6. Remotionで縦動画を書き出す
-
-出力: `out/kiritori.mp4`
-
-正方形・横も同じjobから出せる。
-
-```bash
-npm run clip:square
-npm run clip:landscape
+```text
+prepare
+  → TypeScript check
+  → Remotion render
+  → QC frame extraction
 ```
 
+出力:
+
+```text
+out/kiritori.mp4
+out/qc/start.png
+out/qc/speech-peak.png
+out/qc/middle.png
+out/qc/end.png
+out/qc/CHECKLIST.txt
+```
+
+**QC画像を実際に見ずに「完成」と言わない。**
+
 ## job.json
+
+通常は秒数を手入力せず、`quote` と `anchor` を使う。
 
 ```json
 {
   "sourceAudio": "inputs/source.m4a",
-  "sourceLabel": "Gravity 第157回",
-  "startMs": 125000,
-  "endMs": 158000,
-  "title": "牡蠣食えば、謎は深まるばかりやな",
-  "hook": "観測したら、分かるとは限らない。",
-  "telop": "",
-  "captions": [
-    {
-      "text": "牡蠣食えば、謎は深まるばかりやな",
-      "startMs": 131200,
-      "endMs": 134800,
-      "timestampMs": 131200,
-      "confidence": null
-    }
-  ]
+  "sourceLabel": "Gravity 第158回",
+  "quote": "AIで遊戯王のカードみたいにしたんですよ。破門になりました。",
+  "anchor": "遊戯王のカードみたいにした",
+  "contextBeforeMs": 12000,
+  "contextAfterMs": 2500,
+  "title": "遺影をAIでカード化したら破門された",
+  "hook": "師匠は遺影を丁寧に残したかった。",
+  "telop": ""
 }
 ```
 
-字幕時刻は**元音声基準**。`prepare-clip.mjs` が自動で切り抜き内時刻へ直す。
+`startMs` / `endMs` は、外部ASR等で確定済みの時刻を使う場合だけ指定する。指定した場合はquote検索より優先する。
 
-## Studio
+## 字幕
 
-```bash
-npm run prepare
-npm run studio
-```
+Whisperのタイムコードを基準にする。元音声基準の字幕は `prepare-clip.mjs` が切り抜き内の0秒基準へ変換する。
 
-Studioでは以下のCompositionを確認できる。
+ASRに明白な誤認識がある場合は、**文言だけ補正し、時刻は実測値を維持する**。
 
-- `VrmLipSync` : 720x1280 縦
-- `VrmLipSyncSquare` : 900x900 正方形
-- `VrmLipSyncLandscape` : 1280x720 横
+例: 第158回では「家」ではなく「遺影」。
 
-尺は音声から生成された `envelope.json` で自動決定する。
+要点をまとめた文章を画面へ出す場合、それは逐語字幕ではなく「演出テロップ」と明記する。
 
-## 表示されるもの
+## VRM
 
-- `sourceLabel` : 元配信名
-- `title` : 冒頭タイトル
-- `hook` : 冒頭の補助コピー
-- `captions` : 音声時刻に追従する字幕
-- VRM : 実音声のRMS波形に追従して口パク
+`src/VrmLipSyncV2.tsx` が現在のレンダラー。
 
-Propsの `title` / `telop` をStudioから直接指定した場合はjobの文言より優先する。
+- Tポーズの標準姿勢から腕を下ろして自然体へ補正
+- 実音声RMSから口パク
+- 小さい声にも反応するゲート
+- 瞬き
+- 頭・首・胸の微動
+- Remotionのフレームキャプチャ前にcanvasを更新するため `useLayoutEffect` を使用
 
-## 安全策
+旧 `src/VrmLipSync.tsx` は比較用に残っているが、Compositionからは使用しない。
 
-- VRM読み込み完了まで `delayRender()` で停止
-- 波形JSON読み込み完了まで停止
-- clip JSON読み込み完了まで停止
-- VRM 0.xだけ `rotateVRM0()` を適用
-- envelopeのfpsとCompositionのfpsが違えばエラー
-- 元音声、job、波形が壊れていればレンダー前に停止
-- `npm run clip` は必ず音声切り出しと波形生成をやり直す
+## Composition
 
-## まだ残っている最後の自動化
+- `VrmLipSync` : 720x1280
+- `VrmLipSyncSquare` : 900x900
+- `VrmLipSyncLandscape` : 1280x720
 
-文字起こしに時刻がない場合の**音声自動アラインメント**。
+尺は `envelope.json` から自動決定する。
 
-AIが音声を直接解析できる環境では、AIが元音声からタイムコードを決めてjobを書けばよい。
-そうでない環境ではWhisper等でタイムコード付き文字起こしを作る工程を追加する。
+## QC
 
-時刻を推測で捏造して切り抜くことはしない。
+`npm run clip` の最後に4枚を抽出する。
+
+確認事項:
+
+- `start.png`: Tポーズではないか、腕・姿勢が自然か
+- `speech-peak.png`: 喋っている時に口が開いているか
+- `middle.png`: 字幕・画面が破綻していないか
+- `end.png`: オチまで入っているか、終端字幕がズレていないか
+
+フレーム抽出は自動だが、**合否判定は目視が必要**。
+
+## まだ未完成の部分
+
+- ASRの単語内タイミングまで完全に保証する自動補正
+- QC画像の自動画像判定（Tポーズ、口開閉、字幕位置の機械判定）
+- 実素材を使ったCIレンダリング。現在のGitHub ActionsはTypeScriptチェックまで
+- `feature/remotion-workflow-v2` のmainへの統合
+
+ここを未完成のまま完成品扱いしない。
