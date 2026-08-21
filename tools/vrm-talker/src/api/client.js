@@ -34,6 +34,11 @@ const parseJson = async (response) => {
   return data;
 };
 
+export const checkApiHealth = async () => {
+  const response = await fetch(`${getApiBase()}/health`, {method: 'GET', cache: 'no-store'});
+  return await parseJson(response);
+};
+
 export const transcribeAudio = async (file) => {
   const form = new FormData();
   form.append('audio', file, file.name);
