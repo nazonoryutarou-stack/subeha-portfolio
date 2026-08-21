@@ -1,0 +1,52 @@
+name: Deploy VRM Studio API
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'workers/vrm-studio-api/**'
+      - '.github/workflows/deploy-vrm-studio-api.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify required secrets exist
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 1; }
+          test -n "$OPENAI_API_KEY" || { echo 'Missing OPENAI_API_KEY'; exit 1; }
+
+      - name: Install Worker dependencies
+        working-directory: workers/vrm-studio-api
+        run: npm install
+
+      - name: Check Worker syntax
+        working-directory: workers/vrm-studio-api
+        run: npm run check
+
+      - name: Deploy Worker
+        working-directory: workers/vrm-studio-api
+        run: npx wrangler deploy
+
+      - name: Sync OpenAI API secret
+        working-directory: workers/vrm-studio-api
+        shell: bash
+        run: printf '%s' "$OPENAI_API_KEY" | npx wrangler secret put OPENAI_API_KEY
