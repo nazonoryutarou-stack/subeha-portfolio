@@ -1,0 +1,8 @@
+{
+  "assets": [
+    {"id": "scene-caffeine", "query": "coffee cup steam dark cinematic", "fallbackKind": "caffeine"},
+    {"id": "scene-tobacco", "query": "cigarette smoke dark background", "fallbackKind": "tobacco"},
+    {"id": "scene-pressure", "query": "blood pressure gauge close up", "fallbackKind": "pressure"},
+    {"id": "scene-survive", "query": "heart monitor pulse line dark", "fallbackKind": "survive"}
+  ]
+}

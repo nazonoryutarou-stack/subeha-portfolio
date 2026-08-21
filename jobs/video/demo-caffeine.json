@@ -1,0 +1,24 @@
+{
+  "id": "gravity154-caffeine-tobacco-demo",
+  "sourceLabel": "GRAVITY ARCHIVE / CONFIRMED CUT",
+  "title": "カフェインとタバコがね、",
+  "hook": "配信者本人の雑談を、実音声＋確定タイムコードで短尺化",
+  "disclaimer": "※配信者本人の発言。医療上の助言ではありません。",
+  "audio": "public/audio/broadcast_test_caffeine.m4a",
+  "durationMs": 8500,
+  "captionTimingSource": "Whisper実測＋承認済み手動補正（2026-08-20）",
+  "captions": [
+    {"startMs": 720, "endMs": 1480, "text": "カフェイン"},
+    {"startMs": 1480, "endMs": 2630, "text": "とタバコがね、"},
+    {"startMs": 2630, "endMs": 4380, "text": "非常に効きますのでね。"},
+    {"startMs": 4380, "endMs": 6020, "text": "血圧を下げて下げて、"},
+    {"startMs": 6020, "endMs": 8350, "text": "生きていこうかなと\n思っておりますけども。"}
+  ],
+  "scenes": [
+    {"startMs": 0, "endMs": 2300, "kind": "caffeine"},
+    {"startMs": 2300, "endMs": 4400, "kind": "tobacco"},
+    {"startMs": 4400, "endMs": 6100, "kind": "pressure"},
+    {"startMs": 6100, "endMs": 8500, "kind": "survive"}
+  ],
+  "qcTimesSec": [0.8, 3.2, 5.2, 7.6]
+}
