@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://subeha.example/schemas/vrm-studio-project-v1.json",
+  "title": "VRM Studio Project",
+  "type": "object",
+  "required": ["version", "source", "clip", "avatar", "captions", "speakerTurns", "visualReferences", "layout"],
+  "properties": {
+    "version": {"const": 1},
+    "source": {
+      "type": "object",
+      "required": ["name", "sha256", "durationMs"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+        "durationMs": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "clip": {
+      "type": "object",
+      "required": ["startMs", "endMs"],
+      "properties": {
+        "startMs": {"type": "number", "minimum": 0},
+        "endMs": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "avatar": {
+      "type": "object",
+      "required": ["speaker", "model"],
+      "properties": {
+        "speaker": {"type": "string", "minLength": 1},
+        "model": {"type": "string", "minLength": 1}
+      }
+    },
+    "captions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "startMs", "endMs"],
+        "properties": {
+          "text": {"type": "string"},
+          "startMs": {"type": "number", "minimum": 0},
+          "endMs": {"type": "number", "exclusiveMinimum": 0},
+          "speaker": {"type": ["string", "null"]},
+          "confidence": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "speakerTurns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["speaker", "startMs", "endMs"],
+        "properties": {
+          "speaker": {"type": "string", "minLength": 1},
+          "startMs": {"type": "number", "minimum": 0},
+          "endMs": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    },
+    "visualReferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "startMs", "endMs"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["search", "generated", "upload"]},
+          "startMs": {"type": "number", "minimum": 0},
+          "endMs": {"type": "number", "exclusiveMinimum": 0},
+          "query": {"type": ["string", "null"]},
+          "prompt": {"type": ["string", "null"]},
+          "url": {"type": ["string", "null"]},
+          "thumbnailUrl": {"type": ["string", "null"]},
+          "sourceUrl": {"type": ["string", "null"]},
+          "creator": {"type": ["string", "null"]},
+          "license": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "required": ["width", "height", "captionBottomPx"],
+      "properties": {
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1},
+        "captionBottomPx": {"type": "integer", "minimum": 0},
+        "showSafeArea": {"type": "boolean"},
+        "background": {"type": ["string", "null"]}
+      }
+    }
+  },
+  "additionalProperties": true
+}
