@@ -1,0 +1,40 @@
+{
+  "id": "gravity158-ie-cards-45s",
+  "source": "GRAVITY 第158回 / 配信158.m4a",
+  "sourceStartSec": 7640.0,
+  "sourceEndSec": 7685.0,
+  "sourceStartTimecode": "02:07:20.000",
+  "sourceEndTimecode": "02:08:05.000",
+  "durationMs": 45000,
+  "fps": 30,
+  "width": 720,
+  "height": 1280,
+  "title": "遺影をAIでカード化したら\n師匠に破門された",
+  "sourceLabel": "GRAVITY #158 / ORIGINAL AUDIO",
+  "productionVoiceWavSha256": "86e9b3b9904f771761b0c603e88e430543dd83f77da3fbd93815dd885bf38abf",
+  "captions": [],
+  "captionTimingSource": null,
+  "requiresAlignment": true,
+  "mouthSpeakerPolicy": "host-only",
+  "speakerDiarizationRequired": true,
+  "speakerTurnsFile": "remotion/vrm-lipsync/public/speaker-turns.json",
+  "speakerTurnsStatus": "pending-diarization",
+  "qcTimesSec": [0.5, 8.0, 18.0, 30.0, 43.0],
+  "qc": {
+    "videoDurationSec": 45.0,
+    "audioDurationSec": 44.977007,
+    "avDriftSec": 0.022993,
+    "videoFrames": 1350,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "status": "needs-rerender-speaker-gated"
+  },
+  "notes": [
+    "Old derived video was waveform-aligned against 配信158.m4a before fixing this range.",
+    "Production voice.wav must be generated directly from 配信158.m4a with atrim 7640.000000–7685.000000 and match productionVoiceWavSha256.",
+    "Do not add captions until timed ASR alignment is confirmed from this exact audio range.",
+    "Do not replace source audio with audio extracted from an older rendered video.",
+    "The avatar represents the host. Customer/guest speech must never drive mouth visemes.",
+    "Production render must fail when speaker-turns.json is missing; do not fall back to amplitude-only lip sync."
+  ]
+}
