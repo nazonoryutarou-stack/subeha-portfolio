@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "avatarSpeaker": "HOST",
+  "turns": [
+    {
+      "speaker": "HOST",
+      "startMs": 0,
+      "endMs": 4200
+    },
+    {
+      "speaker": "GUEST",
+      "startMs": 4200,
+      "endMs": 5600
+    },
+    {
+      "speaker": "HOST",
+      "startMs": 5600,
+      "endMs": 12000
+    }
+  ]
+}
