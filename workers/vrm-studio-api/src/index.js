@@ -6,12 +6,18 @@ const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(d
   headers: {'content-type': 'application/json; charset=utf-8', ...headers},
 });
 
+const isLocalOrigin = (origin) => /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
 const allowedOrigin = (request, env) => {
   const origin = request.headers.get('origin') || '';
-  const configured = String(env.ALLOWED_ORIGIN || '').trim();
-  if (configured) return origin === configured ? origin : null;
-  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return origin;
-  if (/^https:\/\/[^/]+\.github\.io$/.test(origin)) return origin;
+  if (isLocalOrigin(origin)) return origin;
+
+  const configured = String(env.ALLOWED_ORIGIN || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (configured.includes(origin)) return origin;
+  if (!configured.length && /^https:\/\/[^/]+\.github\.io$/.test(origin)) return origin;
   return null;
 };
 
