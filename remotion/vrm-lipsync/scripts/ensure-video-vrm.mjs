@@ -17,7 +17,7 @@ const candidates = [
 if (!fs.existsSync(target)) {
   const source = candidates.find((candidate) => fs.existsSync(candidate));
   if (!source) {
-    console.error('動画用 Subeba.vrm / Subeha.vrm が見つかりません。');
+    console.error('動画用 Subeha.vrm が見つかりません。');
     console.error('口モーフの無い subeha-web-site.vrm へはフォールバックしません。');
     console.error('VIDEO_VRM_PATH を指定するか、remotion/vrm-lipsync/inputs/Subeha.vrm を配置してください。');
     process.exit(1);
