@@ -8,6 +8,11 @@ on:
       - 'Subeha.vrm'
       - 'tools/video-pipeline/inspect_vrm.py'
       - '.github/workflows/inspect-vrm-qc.yml'
+  pull_request:
+    paths:
+      - 'Subeha.vrm'
+      - 'tools/video-pipeline/inspect_vrm.py'
+      - '.github/workflows/inspect-vrm-qc.yml'
   workflow_dispatch:
 
 jobs:
