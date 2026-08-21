@@ -1,4 +1,4 @@
-import {apiBaseIsConfigured, getApiBase, setApiBase} from './api/client.js';
+import {apiBaseIsConfigured, checkApiHealth, getApiBase, setApiBase} from './api/client.js';
 
 const panel = document.getElementById('panel');
 const status = document.getElementById('status');
@@ -11,14 +11,16 @@ if (panel) {
     <input id="studioApiBase" type="url" inputmode="url" placeholder="https://YOUR-WORKER.workers.dev/api">
     <div class="studio-actions">
       <button id="studioApiSave" type="button">API URLを保存</button>
-      <button id="studioApiReset" type="button">既定に戻す</button>
+      <button id="studioApiTest" type="button">接続テスト</button>
     </div>
+    <button id="studioApiReset" type="button">既定に戻す</button>
     <div id="studioApiState" class="studio-meta"></div>
   `;
   panel.insertBefore(section, panel.firstChild);
 
   const input = document.getElementById('studioApiBase');
   const save = document.getElementById('studioApiSave');
+  const test = document.getElementById('studioApiTest');
   const reset = document.getElementById('studioApiReset');
   const state = document.getElementById('studioApiState');
 
@@ -44,6 +46,24 @@ if (panel) {
       refresh();
     } catch {
       if (status) status.textContent = 'API URLが不正です。例: https://xxxx.workers.dev/api';
+    }
+  });
+
+  test?.addEventListener('click', async () => {
+    test.disabled = true;
+    if (status) status.textContent = `API接続確認中: ${getApiBase()}`;
+    try {
+      const health = await checkApiHealth();
+      if (health?.ok !== true) throw new Error('health response is not ok');
+      state.textContent = `接続OK / OpenAI secret: ${health.openaiConfigured ? '設定済み' : '未設定'} / API v${health.version || 1}`;
+      if (status) status.textContent = health.openaiConfigured
+        ? 'VRM Studio APIへ接続できました。字幕解析・画像生成を利用できます。'
+        : 'Workerには接続できましたが、OPENAI_API_KEY が未設定です。';
+    } catch (error) {
+      console.error(error);
+      if (status) status.textContent = `API接続失敗: ${error instanceof Error ? error.message : String(error)}`;
+    } finally {
+      test.disabled = false;
     }
   });
 
