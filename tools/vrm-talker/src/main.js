@@ -6,3 +6,4 @@ import './speaker-reference.js';
 import './transcription-progress.js';
 import './visual-director.js';
 import './visual-overlay.js';
+import './auto-pipeline.js';
