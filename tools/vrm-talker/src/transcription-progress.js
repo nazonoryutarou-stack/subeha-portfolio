@@ -1,0 +1,31 @@
+const status = document.getElementById('status');
+
+const fmt = (seconds) => {
+  if (!Number.isFinite(Number(seconds))) return '';
+  const total = Math.max(0, Number(seconds));
+  const minutes = Math.floor(total / 60);
+  const rest = Math.round(total - minutes * 60);
+  return `${minutes}:${String(rest).padStart(2, '0')}`;
+};
+
+window.addEventListener('vrm-studio-transcription-progress', (event) => {
+  if (!status) return;
+  const detail = event.detail || {};
+  const count = Number(detail.count || 0);
+  const index = Number(detail.index || 0);
+  const range = Number.isFinite(Number(detail.startSeconds)) && Number.isFinite(Number(detail.endSeconds))
+    ? ` ${fmt(detail.startSeconds)}–${fmt(detail.endSeconds)}`
+    : '';
+
+  if (detail.phase === 'prepare') {
+    status.textContent = '長尺音声を解析用チャンクへ準備中…';
+  } else if (detail.phase === 'encode') {
+    status.textContent = `長尺音声をWAV変換中 ${index + 1}/${count}${range}`;
+  } else if (detail.phase === 'upload') {
+    status.textContent = `字幕＋話者解析中 ${index + 1}/${Math.max(1, count)}${range}`;
+  } else if (detail.phase === 'chunk-done') {
+    status.textContent = `話者解析完了 ${index}/${count}。次の区間へ…`;
+  } else if (detail.phase === 'done') {
+    status.textContent = count > 1 ? `全 ${count} チャンクの字幕・話者解析を結合しました。` : '字幕・話者解析を完了しました。';
+  }
+});
