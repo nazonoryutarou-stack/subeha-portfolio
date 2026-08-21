@@ -8,6 +8,11 @@ on:
       - 'remotion/vrm-lipsync/src/sampler-index.tsx'
       - '.github/workflows/render-vrm-avatar-sampler.yml'
       - 'subeha-web-site.vrm'
+  pull_request:
+    paths:
+      - 'remotion/vrm-lipsync/src/sampler-index.tsx'
+      - '.github/workflows/render-vrm-avatar-sampler.yml'
+      - 'subeha-web-site.vrm'
   workflow_dispatch:
 
 permissions:
