@@ -41,7 +41,7 @@ export const setSourceFile = async (file, durationMs = 0) => {
 export const setAnalysis = ({captions = [], speakerTurns = [], durationMs} = {}) => {
   project.captions = Array.isArray(captions) ? captions : [];
   project.speakerTurns = Array.isArray(speakerTurns) ? speakerTurns : [];
-  project.avatar.speaker = null;
+  project.avatar.speaker = project.speakerTurns.some((turn) => turn?.speaker === 'HOST') ? 'HOST' : null;
   project.visualCues = [];
   project.visualReferences = [];
   if (Number.isFinite(Number(durationMs)) && Number(durationMs) > 0) {
