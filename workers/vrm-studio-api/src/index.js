@@ -25,7 +25,7 @@ const corsHeaders = (request, env) => {
   const origin = allowedOrigin(request, env);
   return {
     ...(origin ? {'access-control-allow-origin': origin} : {}),
-    'access-control-allow-methods': 'POST,OPTIONS',
+    'access-control-allow-methods': 'GET,POST,OPTIONS',
     'access-control-allow-headers': 'content-type',
     'access-control-max-age': '86400',
     'vary': 'Origin',
@@ -149,6 +149,15 @@ export default {
     try {
       requireOrigin(request, env);
       const url = new URL(request.url);
+
+      if (request.method === 'GET' && (url.pathname.endsWith('/api/health') || url.pathname === '/health')) {
+        return json({
+          ok: true,
+          version: 1,
+          openaiConfigured: Boolean(env.OPENAI_API_KEY),
+        }, 200, cors);
+      }
+
       if (request.method !== 'POST') return json({error: 'Not found'}, 404, cors);
       let response;
       if (url.pathname.endsWith('/api/transcribe') || url.pathname === '/transcribe') {
