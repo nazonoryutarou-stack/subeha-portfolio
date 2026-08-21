@@ -1,0 +1,32 @@
+name: VRM Studio API Config Check
+
+on:
+  pull_request:
+    paths:
+      - 'workers/vrm-studio-api/**'
+      - '.github/workflows/deploy-vrm-studio-api.yml'
+      - '.github/workflows/vrm-studio-api-config-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  secrets-ready:
+    runs-on: ubuntu-latest
+    env:
+      HAS_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+      HAS_CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+      HAS_OPENAI: ${{ secrets.OPENAI_API_KEY != '' }}
+    steps:
+      - name: Report deployment readiness without exposing secrets
+        shell: bash
+        run: |
+          echo "CLOUDFLARE_API_TOKEN configured: $HAS_CF_TOKEN"
+          echo "CLOUDFLARE_ACCOUNT_ID configured: $HAS_CF_ACCOUNT"
+          echo "OPENAI_API_KEY configured: $HAS_OPENAI"
+          if [ "$HAS_CF_TOKEN" != "true" ] || [ "$HAS_CF_ACCOUNT" != "true" ] || [ "$HAS_OPENAI" != "true" ]; then
+            echo 'VRM Studio API deployment is blocked until the missing repository secrets are configured.'
+            exit 1
+          fi
+          echo 'VRM Studio API deployment secrets are configured.'
