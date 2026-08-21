@@ -2,7 +2,7 @@
 
 配信の実音声と文字起こしから、AIが面白い区間を選び、VRM・字幕・口パクを同じタイムラインでレンダリングするためのRemotionテンプレート。
 
-**制作前に `docs/production-rules.md`（mainの正本）を読むこと。**
+**制作前に main の `docs/production-rules.md` と `docs/remotion-status.md` を読むこと。**
 詳しいAI選定基準は `AI_WORKFLOW.md`。
 
 ## 原則
@@ -30,7 +30,7 @@ AIが存在しない秒数を推測しない。字幕を勘で配置しない。
 - Node.js
 - 元音声を `inputs/` に置く
 
-VRMはリポジトリ直下の `subeha-web-site.vrm` を `npm run prepare` が `public/Subeha.vrm` へ自動コピーする。手作業で別モデルを置く必要はない。
+VRMはリポジトリ直下の `subeha-web-site.vrm` を `npm run prepare:clip` が `public/Subeha.vrm` へ自動コピーする。手作業で別モデルを置く必要はない。
 
 ```text
 remotion/vrm-lipsync/
@@ -39,7 +39,7 @@ remotion/vrm-lipsync/
   jobs/
     current.json
   public/
-    Subeha.vrm   # prepare時に自動生成
+    Subeha.vrm   # prepare:clip時に自動生成
     voice.wav    # 精密切り出し
     clip.json
     envelope.json
@@ -55,10 +55,12 @@ npm install
 cp jobs/current.example.json jobs/current.json
 ```
 
+`prepare` というnpm標準ライフサイクル名は使わない。以前これを使っていたため、`npm install` のたびに素材準備が勝手に走り、`jobs/current.json` が無い環境でインストール自体が失敗していた。現在は `prepare:clip` に分離済み。
+
 Studioで見る場合:
 
 ```bash
-npm run prepare
+npm run prepare:clip
 npm run studio
 ```
 
@@ -71,7 +73,7 @@ npm run clip
 処理順:
 
 ```text
-prepare
+prepare:clip
   → TypeScript check
   → Remotion render
   → QC frame extraction
@@ -141,9 +143,14 @@ ASRに明白な誤認識がある場合は、**文言だけ補正し、時刻は
 
 尺は `envelope.json` から自動決定する。
 
-## QC
+## CI / QC
 
-`npm run clip` の最後に4枚を抽出する。
+GitHub Actions:
+
+- `Remotion VRM Check`: npm install + TypeScript check
+- `Remotion VRM Smoke`: 実VRMと合成3秒音声を使う短いレンダリング試験。動画とQC画像をartifactに保存する
+
+ローカルの `npm run clip` でも最後に4枚を抽出する。
 
 確認事項:
 
@@ -158,7 +165,7 @@ ASRに明白な誤認識がある場合は、**文言だけ補正し、時刻は
 
 - ASRの単語内タイミングまで完全に保証する自動補正
 - QC画像の自動画像判定（Tポーズ、口開閉、字幕位置の機械判定）
-- 実素材を使ったCIレンダリング。現在のGitHub ActionsはTypeScriptチェックまで
+- 第158回の実音声を使った最終レンダーと目視QC
 - `feature/remotion-workflow-v2` のmainへの統合
 
 ここを未完成のまま完成品扱いしない。
