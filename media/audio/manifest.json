@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-22T00:58:00+09:00",
+  "storage": {
+    "git": "Git LFS",
+    "path": "media/audio",
+    "note": "Original broadcast audio. Do not transcode or rename without updating sha256 and duration."
+  },
+  "files": [
+    {"episode":150,"file":"配信150.m4a","bytes":71123963,"durationSec":8298.389,"sha256":"d8d835a6c6ee238cd117486400a7792506242c1373b97bbfd033ec3db128ea89"},
+    {"episode":151,"file":"配信151.m4a","bytes":119980965,"durationSec":13895.829,"sha256":"e7876d0feb85f4b1e652f9d86bc3af44c446aeca356338f4b24c1f880ac86282"},
+    {"episode":152,"file":"配信152.m4a","bytes":48356416,"durationSec":5650.325,"sha256":"14f15835206ef185cadcde5eb5257c9cf8cfb0b372cd2f4f770c236ebd85e385"},
+    {"episode":153,"file":"配信153.m4a","bytes":139858426,"durationSec":16342.08,"sha256":"2e1e07d71a1e6a1e0142d3c6c316aad521c06c41f1f072ff76c26f109553a6d7"},
+    {"episode":154,"file":"配信154.m4a","bytes":118378646,"durationSec":13830.635,"sha256":"0a374e3635001efa778c286ea357f19ee70237e217020259a4a0b87fb506af0a"},
+    {"episode":155,"file":"配信155.m4a","bytes":78622121,"durationSec":9079.104,"sha256":"3745a4eafab9ec3bd0d167aefa482412352cb0368ad236d48f48f135d7aff5fd"},
+    {"episode":156,"file":"配信156.m4a","bytes":72049181,"durationSec":8267.669,"sha256":"a664f5866c6729f7888a102bad0cadf6688988d4bfab5622e22e3f6c2f9d1f78"},
+    {"episode":157,"file":"配信157.m4a","bytes":94266078,"durationSec":10931.861,"sha256":"95334b6101f02574ea1e3f5259029924bc91c3fc044c1a90e3d189362a764d7d"},
+    {"episode":158,"file":"配信158.m4a","bytes":76052536,"durationSec":8895.263,"sha256":"cc17d3d8579edf4f619ba15eb9e97e0a660cf399c186d275dcb40c2933c5ad83"}
+  ]
+}
