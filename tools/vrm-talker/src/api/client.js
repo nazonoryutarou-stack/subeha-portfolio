@@ -1,4 +1,23 @@
-const apiBase = () => String(window.VRM_STUDIO_API_BASE || '/api').replace(/\/$/, '');
+const STORAGE_KEY = 'vrm-studio-api-base';
+
+const normalizeBase = (value) => String(value || '').trim().replace(/\/$/, '');
+
+export const getApiBase = () => {
+  const saved = normalizeBase(localStorage.getItem(STORAGE_KEY));
+  if (saved) return saved;
+  const injected = normalizeBase(window.VRM_STUDIO_API_BASE);
+  if (injected) return injected;
+  return '/api';
+};
+
+export const setApiBase = (value) => {
+  const normalized = normalizeBase(value);
+  if (!normalized || normalized === '/api') localStorage.removeItem(STORAGE_KEY);
+  else localStorage.setItem(STORAGE_KEY, normalized);
+  return getApiBase();
+};
+
+export const apiBaseIsConfigured = () => getApiBase() !== '/api';
 
 const parseJson = async (response) => {
   const text = await response.text();
@@ -18,7 +37,7 @@ const parseJson = async (response) => {
 export const transcribeAudio = async (file) => {
   const form = new FormData();
   form.append('audio', file, file.name);
-  const response = await fetch(`${apiBase()}/transcribe`, {
+  const response = await fetch(`${getApiBase()}/transcribe`, {
     method: 'POST',
     body: form,
   });
@@ -26,7 +45,7 @@ export const transcribeAudio = async (file) => {
 };
 
 export const generateReferenceImage = async ({prompt, size = '1024x1024'}) => {
-  const response = await fetch(`${apiBase()}/images/generate`, {
+  const response = await fetch(`${getApiBase()}/images/generate`, {
     method: 'POST',
     headers: {'content-type': 'application/json'},
     body: JSON.stringify({prompt, size}),
