@@ -1,6 +1,6 @@
 {
   "name": "vrm-lipsync",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "scripts": {
     "studio": "remotion studio",
@@ -8,9 +8,10 @@
     "envelope": "node scripts/generate-envelope.mjs",
     "prepare": "node scripts/prepare-clip.mjs",
     "check": "tsc --noEmit",
-    "clip": "npm run prepare && remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20",
-    "clip:square": "npm run prepare && remotion render VrmLipSyncSquare out/kiritori-square.mp4 --codec=h264 --crf=20",
-    "clip:landscape": "npm run prepare && remotion render VrmLipSyncLandscape out/kiritori-landscape.mp4 --codec=h264 --crf=20",
+    "qc": "node scripts/extract-qc-frames.mjs",
+    "clip": "npm run prepare && npm run check && remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20 && npm run qc",
+    "clip:square": "npm run prepare && npm run check && remotion render VrmLipSyncSquare out/kiritori-square.mp4 --codec=h264 --crf=20 && node scripts/extract-qc-frames.mjs --input=out/kiritori-square.mp4",
+    "clip:landscape": "npm run prepare && npm run check && remotion render VrmLipSyncLandscape out/kiritori-landscape.mp4 --codec=h264 --crf=20 && node scripts/extract-qc-frames.mjs --input=out/kiritori-landscape.mp4",
     "render": "npm run clip",
     "render:square": "npm run clip:square",
     "render:landscape": "npm run clip:landscape"
