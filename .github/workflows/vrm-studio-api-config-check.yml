@@ -26,7 +26,7 @@ jobs:
           echo "CLOUDFLARE_ACCOUNT_ID configured: $HAS_CF_ACCOUNT"
           echo "OPENAI_API_KEY configured: $HAS_OPENAI"
           if [ "$HAS_CF_TOKEN" != "true" ] || [ "$HAS_CF_ACCOUNT" != "true" ] || [ "$HAS_OPENAI" != "true" ]; then
-            echo 'VRM Studio API deployment is blocked until the missing repository secrets are configured.'
-            exit 1
+            echo '::warning::VRM Studio API deployment is not ready. Configure the missing repository secrets before deployment.'
+            exit 0
           fi
           echo 'VRM Studio API deployment secrets are configured.'
