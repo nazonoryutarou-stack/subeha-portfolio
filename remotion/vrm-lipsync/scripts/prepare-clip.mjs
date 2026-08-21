@@ -60,7 +60,7 @@ const locateQuote = (quote, captions) => {
     }
   }
 
-  if (startPos < 0 || endPos < 0 || !charToCaption[startPos] && charToCaption[startPos] !== 0) {
+  if (startPos < 0 || endPos < 0 || (!charToCaption[startPos] && charToCaption[startPos] !== 0)) {
     throw new Error(`選んだ発言を音声認識結果から見つけられませんでした: ${quote}`);
   }
 
@@ -101,7 +101,7 @@ if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || startMs < 0 || endMs
 
 const durationMs = endMs - startMs;
 if (durationMs < 3000) throw new Error('切り抜きが3秒未満です。開始・終了位置を確認してください。');
-if (durationMs > 180000) console.warn('注意: 3分を超える切り抜きです。短尺用途なら長すぎる可能性があります。');
+if (durationMs > 90000) console.warn('注意: 90秒を超える切り抜きです。短尺用途なら長すぎる可能性があります。');
 
 if (!sourceCaptions && (!Array.isArray(job.captions) || job.captions.length === 0)) {
   sourceCaptions = ensureSourceCaptions();
@@ -109,18 +109,39 @@ if (!sourceCaptions && (!Array.isArray(job.captions) || job.captions.length === 
 
 const publicDir = path.join(projectRoot, 'public');
 fs.mkdirSync(publicDir, {recursive: true});
-const outAudio = path.join(publicDir, 'voice.m4a');
 
+// リポジトリ直下にある実VRMを、Remotionのpublicへ自動配置する。
+// 手作業でSubeha.vrmを置き忘れて別モデルや静止画へ逃げないための安全策。
+const modelTarget = path.join(publicDir, 'Subeha.vrm');
+if (!fs.existsSync(modelTarget)) {
+  const modelCandidates = [
+    path.resolve(projectRoot, '../../subeha-web-site.vrm'),
+    path.resolve(projectRoot, '../../assets/vrm/subeha-web-site.vrm'),
+  ];
+  const modelSource = modelCandidates.find((candidate) => fs.existsSync(candidate));
+  if (!modelSource) {
+    throw new Error('Subeha.vrm がありません。リポジトリ直下の subeha-web-site.vrm も見つかりません。');
+  }
+  fs.copyFileSync(modelSource, modelTarget);
+  console.log(`VRM copied: ${path.relative(projectRoot, modelSource)} -> public/Subeha.vrm`);
+}
+
+// 中間AACのencoder delayや二重seekで字幕と音声をずらさない。
+// 入力を一度読み、atrim + asetptsで0秒基準のPCM WAVを生成する。
+const outAudio = path.join(publicDir, 'voice.wav');
+const startSec = (startMs / 1000).toFixed(6);
+const endSec = (endMs / 1000).toFixed(6);
 const ffmpegArgs = [
   '-hide_banner', '-loglevel', 'error', '-y',
-  '-ss', (startMs / 1000).toFixed(3),
-  '-to', (endMs / 1000).toFixed(3),
   '-i', sourceAudio,
-  '-vn', '-c:a', 'aac', '-b:a', '192k',
+  '-vn',
+  '-af', `atrim=start=${startSec}:end=${endSec},asetpts=PTS-STARTPTS`,
+  '-ac', '1', '-ar', '48000',
+  '-c:a', 'pcm_s16le',
   outAudio,
 ];
 const cut = spawnSync('ffmpeg', ffmpegArgs, {stdio: 'inherit'});
-if (cut.status !== 0) throw new Error('ffmpeg による音声切り出しに失敗しました。');
+if (cut.status !== 0) throw new Error('ffmpeg による精密音声切り出しに失敗しました。');
 
 const rawCaptions = Array.isArray(job.captions) && job.captions.length > 0 ? job.captions : (sourceCaptions ?? []);
 const captions = rawCaptions
@@ -141,8 +162,12 @@ const captions = rawCaptions
   })
   .filter((caption) => caption && caption.text);
 
+if (captions.length === 0) {
+  throw new Error('切り抜き範囲に字幕がありません。時刻か文字起こしを確認してください。');
+}
+
 const clip = {
-  version: 2,
+  version: 3,
   title: String(job.title ?? '切り抜き'),
   telop: String(job.telop ?? ''),
   hook: String(job.hook ?? ''),
@@ -161,5 +186,6 @@ if (envelope.status !== 0) throw new Error('口パク波形の生成に失敗し
 
 console.log(`Prepared: ${(durationMs / 1000).toFixed(2)} sec / captions ${captions.length}`);
 console.log(`Title: ${clip.title}`);
-console.log(`Audio: public/voice.m4a`);
-console.log(`Data : public/clip.json`);
+console.log('Audio: public/voice.wav');
+console.log('Model: public/Subeha.vrm');
+console.log('Data : public/clip.json');
