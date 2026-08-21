@@ -1,5 +1,7 @@
 {
   "version": 1,
+  "audioSha256": "REPLACE_WITH_SHA256_OF_PUBLIC_VOICE_WAV",
+  "durationMs": 12000,
   "avatarSpeaker": "HOST",
   "turns": [
     {
