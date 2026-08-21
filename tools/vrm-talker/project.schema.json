@@ -28,7 +28,7 @@
       "type": "object",
       "required": ["speaker", "model"],
       "properties": {
-        "speaker": {"type": "string", "minLength": 1},
+        "speaker": {"type": ["string", "null"]},
         "model": {"type": "string", "minLength": 1}
       }
     },
