@@ -49,6 +49,15 @@ export const transcribeAudio = async (file) => {
   return await parseJson(response);
 };
 
+export const suggestVisualCues = async (captions) => {
+  const response = await fetch(`${getApiBase()}/visual-cues`, {
+    method: 'POST',
+    headers: {'content-type': 'application/json'},
+    body: JSON.stringify({captions}),
+  });
+  return await parseJson(response);
+};
+
 export const generateReferenceImage = async ({prompt, size = '1024x1024'}) => {
   const response = await fetch(`${getApiBase()}/images/generate`, {
     method: 'POST',
