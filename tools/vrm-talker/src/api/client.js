@@ -1,4 +1,4 @@
-import {splitAudioForTranscription} from '../audio-chunker.js';
+import {extractWavRange, planAudioTranscriptionChunks} from '../audio-chunker.js';
 import {getKnownSpeakerReference} from '../known-speaker-store.js';
 
 const STORAGE_KEY = 'vrm-studio-api-base';
@@ -53,10 +53,7 @@ const postTranscription = async (file, known, detail = null) => {
   const form = new FormData();
   form.append('audio', file, file.name);
   appendKnownSpeaker(form, known);
-  const response = await fetch(`${getApiBase()}/transcribe`, {
-    method: 'POST',
-    body: form,
-  });
+  const response = await fetch(`${getApiBase()}/transcribe`, {method: 'POST', body: form});
   return await parseJson(response);
 };
 
@@ -99,21 +96,30 @@ export const transcribeAudio = async (file) => {
   }
 
   progress({phase: 'prepare', index: 0, count: 0});
-  const split = await splitAudioForTranscription(file, {
-    onProgress: (detail) => progress(detail),
-  });
-
+  const plan = await planAudioTranscriptionChunks(file);
   const captions = [];
   const models = new Set();
   let language = null;
 
-  for (const chunk of split.chunks) {
-    const payload = await postTranscription(chunk.file, known, {
+  for (const chunk of plan.chunks) {
+    progress({
+      phase: 'encode',
       index: chunk.index,
       count: chunk.count,
-      startSeconds: chunk.startMs / 1000,
-      endSeconds: chunk.endMs / 1000,
+      startSeconds: chunk.startSeconds,
+      endSeconds: chunk.endSeconds,
     });
+
+    // 1区間だけWAV化して送信し、レスポンス取得後は次のループで参照を捨てる。
+    // 全WAVを同時保持しないことで長尺配信のピークメモリを抑える。
+    const wav = await extractWavRange(file, chunk.startSeconds, chunk.endSeconds);
+    const payload = await postTranscription(wav, known, {
+      index: chunk.index,
+      count: chunk.count,
+      startSeconds: chunk.startSeconds,
+      endSeconds: chunk.endSeconds,
+    });
+
     if (payload?.model) models.add(payload.model);
     if (!language && payload?.language) language = payload.language;
 
@@ -135,18 +141,18 @@ export const transcribeAudio = async (file) => {
   captions.sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs);
   const speakerTurns = mergeTurns(captions);
   const speakers = [...new Set(captions.map((caption) => caption.speaker))];
-  progress({phase: 'done', index: split.chunks.length, count: split.chunks.length});
+  progress({phase: 'done', index: plan.chunks.length, count: plan.chunks.length});
 
   return {
     model: [...models].join('+') || 'gpt-4o-transcribe-diarize',
     language,
-    durationMs: split.durationMs,
+    durationMs: plan.durationMs,
     speakers,
     avatarSpeaker: speakers.includes('HOST') ? 'HOST' : null,
     captions,
     speakerTurns,
     chunked: true,
-    chunkCount: split.chunks.length,
+    chunkCount: plan.chunks.length,
   };
 };
 
