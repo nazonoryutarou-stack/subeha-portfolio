@@ -6,7 +6,7 @@ const defaultProps: VrmLipSyncProps = {
   title: '',
   telop: '',
   modelFile: 'Subeha.vrm',
-  audioFile: 'voice.m4a',
+  audioFile: 'voice.wav',
   envelopeFile: 'envelope.json',
   clipFile: 'clip.json',
   background: '#111318',
