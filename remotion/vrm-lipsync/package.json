@@ -1,6 +1,6 @@
 {
   "name": "vrm-lipsync",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "private": true,
   "scripts": {
     "studio": "remotion studio",
@@ -9,9 +9,9 @@
     "prepare:clip": "node scripts/prepare-clip.mjs",
     "check": "tsc --noEmit",
     "qc": "node scripts/extract-qc-frames.mjs",
-    "clip": "npm run prepare:clip && npm run check && remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20 && npm run qc",
-    "clip:square": "npm run prepare:clip && npm run check && remotion render VrmLipSyncSquare out/kiritori-square.mp4 --codec=h264 --crf=20 && node scripts/extract-qc-frames.mjs --input=out/kiritori-square.mp4",
-    "clip:landscape": "npm run prepare:clip && npm run check && remotion render VrmLipSyncLandscape out/kiritori-landscape.mp4 --codec=h264 --crf=20 && node scripts/extract-qc-frames.mjs --input=out/kiritori-landscape.mp4",
+    "clip": "REQUIRE_SPEAKER_TURNS=1 npm run prepare:clip && npm run check && remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20 && npm run qc",
+    "clip:square": "REQUIRE_SPEAKER_TURNS=1 npm run prepare:clip && npm run check && remotion render VrmLipSyncSquare out/kiritori-square.mp4 --codec=h264 --crf=20 && node scripts/extract-qc-frames.mjs --input=out/kiritori-square.mp4",
+    "clip:landscape": "REQUIRE_SPEAKER_TURNS=1 npm run prepare:clip && npm run check && remotion render VrmLipSyncLandscape out/kiritori-landscape.mp4 --codec=h264 --crf=20 && node scripts/extract-qc-frames.mjs --input=out/kiritori-landscape.mp4",
     "render": "npm run clip",
     "render:square": "npm run clip:square",
     "render:landscape": "npm run clip:landscape"
