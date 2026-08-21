@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {AbsoluteFill, staticFile, useCurrentFrame} from 'remotion';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -34,8 +34,6 @@ export const VrmVisemeTest:React.FC = () => {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x111318);
     const camera = new THREE.PerspectiveCamera(24, W/H, 0.01, 100);
-    camera.position.set(0, 1.48, 3.0);
-    camera.lookAt(0, 1.43, 0);
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x23252b, 2.4));
     const key = new THREE.DirectionalLight(0xffffff, 3.2);
@@ -84,7 +82,27 @@ export const VrmVisemeTest:React.FC = () => {
       setRot('leftLowerArm', -0.28, 0.04, -0.12);
       setRot('rightLowerArm', -0.34, -0.04, 0.10);
 
-      state.current = {renderer, scene, camera, vrm};
+      // Do not assume the avatar's world-space Y origin. Frame the QC shot from
+      // the actual humanoid head/chest positions so the mouth is always visible.
+      vrm.update(0);
+      vrm.scene.updateMatrixWorld(true);
+      const head = bone('head');
+      const chest = bone('chest') ?? bone('upperChest');
+      const headWorld = new THREE.Vector3();
+      const chestWorld = new THREE.Vector3();
+      if (head) head.getWorldPosition(headWorld);
+      if (chest) chest.getWorldPosition(chestWorld);
+
+      const target = head
+        ? headWorld.clone().lerp(chest ? chestWorld : headWorld.clone().add(new THREE.Vector3(0, -0.32, 0)), 0.34)
+        : c2.clone();
+      camera.position.set(target.x, target.y, target.z + 2.15);
+      camera.lookAt(target);
+      camera.updateProjectionMatrix();
+
+      const baseHeadRotation = head?.rotation.clone() ?? null;
+      state.current = {renderer, scene, camera, vrm, baseHeadRotation};
+      renderer.render(scene, camera);
       setReady(true);
     });
 
@@ -94,9 +112,11 @@ export const VrmVisemeTest:React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
+  // Render before Remotion captures the frame so each QC still reflects the
+  // current viseme rather than the previous frame's mouth shape.
+  useLayoutEffect(() => {
     const s = state.current;
-    if (!s?.vrm) return;
+    if (!s?.vrm || !ready) return;
     const vrm:VRM = s.vrm;
     const em = vrm.expressionManager;
     for (const name of ['aa','ih','ou','ee','oh']) em?.setValue(name, 0);
@@ -105,7 +125,8 @@ export const VrmVisemeTest:React.FC = () => {
     em?.setValue('blink', frame % 137 === 2 ? 1 : 0);
 
     const head = vrm.humanoid?.getNormalizedBoneNode('head');
-    if (head) {
+    if (head && s.baseHeadRotation) {
+      head.rotation.copy(s.baseHeadRotation);
       head.rotation.y += Math.sin(frame * 0.035) * 0.002;
       head.rotation.x += Math.sin(frame * 0.055) * 0.001;
     }
