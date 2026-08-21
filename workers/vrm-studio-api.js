@@ -145,7 +145,6 @@ const handleGenerateImage = async (request, env) => {
       prompt,
       size,
       quality,
-      output_format: 'png',
     }),
   });
 
