@@ -1,0 +1,46 @@
+name: Render VRM Avatar Sampler
+
+on:
+  push:
+    branches:
+      - tmp/vrm-caffeine-render
+    paths:
+      - 'remotion/vrm-lipsync/src/sampler-index.tsx'
+      - '.github/workflows/render-vrm-avatar-sampler.yml'
+      - 'subeha-web-site.vrm'
+  pull_request:
+    paths:
+      - 'remotion/vrm-lipsync/src/sampler-index.tsx'
+      - '.github/workflows/render-vrm-avatar-sampler.yml'
+      - 'subeha-web-site.vrm'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Copy real VRM
+        run: |
+          mkdir -p public out
+          cp ../../subeha-web-site.vrm public/Subeha.vrm
+      - name: TypeScript check
+        run: npm run check
+      - name: Render sampler
+        run: npx remotion render src/sampler-index.tsx VrmAvatarSampler out/vrm-avatar-sampler.mp4 --codec=h264 --crf=20 --concurrency=2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vrm-avatar-sampler
+          path: remotion/vrm-lipsync/out/vrm-avatar-sampler.mp4
+          retention-days: 3
