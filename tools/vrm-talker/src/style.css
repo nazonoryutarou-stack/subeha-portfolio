@@ -39,6 +39,8 @@ canvas {
   text-align: center; padding: 40px; color: #ffffffb8; pointer-events: none;
 }
 #dropHint strong { display: block; color: #fff; font-size: 20px; margin-bottom: 9px; }
+/* 字幕はCanvasへ焼き込む。studio-panelのDOM字幕は検索位置確認用で、重ねて表示しない。 */
+.studio-caption-preview { display: none !important; }
 
 #panel {
   background: #151519ef; backdrop-filter: blur(18px);
