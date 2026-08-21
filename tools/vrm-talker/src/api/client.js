@@ -1,4 +1,8 @@
+import {splitAudioForTranscription} from '../audio-chunker.js';
+import {getKnownSpeakerReference} from '../known-speaker-store.js';
+
 const STORAGE_KEY = 'vrm-studio-api-base';
+const MAX_DIRECT_AUDIO_BYTES = 24 * 1024 * 1024;
 
 const normalizeBase = (value) => String(value || '').trim().replace(/\/$/, '');
 
@@ -34,19 +38,116 @@ const parseJson = async (response) => {
   return data;
 };
 
+const progress = (detail) => {
+  window.dispatchEvent(new CustomEvent('vrm-studio-transcription-progress', {detail}));
+};
+
+const appendKnownSpeaker = (form, known) => {
+  if (!known?.file) return;
+  form.append('knownSpeakerName', known.name || 'HOST');
+  form.append('knownSpeakerReference', known.file, known.file.name || 'host-reference.wav');
+};
+
+const postTranscription = async (file, known, detail = null) => {
+  if (detail) progress({...detail, phase: 'upload'});
+  const form = new FormData();
+  form.append('audio', file, file.name);
+  appendKnownSpeaker(form, known);
+  const response = await fetch(`${getApiBase()}/transcribe`, {
+    method: 'POST',
+    body: form,
+  });
+  return await parseJson(response);
+};
+
+const mergeTurns = (captions) => {
+  const turns = [];
+  for (const caption of captions) {
+    const previous = turns[turns.length - 1];
+    if (previous && previous.speaker === caption.speaker && caption.startMs - previous.endMs <= 250) {
+      previous.endMs = Math.max(previous.endMs, caption.endMs);
+      continue;
+    }
+    turns.push({speaker: caption.speaker, startMs: caption.startMs, endMs: caption.endMs});
+  }
+  return turns;
+};
+
+const namespaceSpeaker = (speaker, chunkIndex) => {
+  const value = String(speaker || '').trim() || 'SPEAKER';
+  if (value === 'HOST') return 'HOST';
+  return `CHUNK_${String(chunkIndex).padStart(3, '0')}_${value}`;
+};
+
 export const checkApiHealth = async () => {
   const response = await fetch(`${getApiBase()}/health`, {method: 'GET', cache: 'no-store'});
   return await parseJson(response);
 };
 
 export const transcribeAudio = async (file) => {
-  const form = new FormData();
-  form.append('audio', file, file.name);
-  const response = await fetch(`${getApiBase()}/transcribe`, {
-    method: 'POST',
-    body: form,
+  const known = await getKnownSpeakerReference().catch(() => null);
+
+  if (file.size <= MAX_DIRECT_AUDIO_BYTES) {
+    progress({phase: 'upload', index: 0, count: 1, startSeconds: 0, endSeconds: null});
+    const payload = await postTranscription(file, known);
+    progress({phase: 'done', index: 1, count: 1});
+    return payload;
+  }
+
+  if (!known?.file) {
+    throw new Error('25MBを超える長尺音声は、先に2〜10秒のHOST声サンプルを登録してください。');
+  }
+
+  progress({phase: 'prepare', index: 0, count: 0});
+  const split = await splitAudioForTranscription(file, {
+    onProgress: (detail) => progress(detail),
   });
-  return await parseJson(response);
+
+  const captions = [];
+  const models = new Set();
+  let language = null;
+
+  for (const chunk of split.chunks) {
+    const payload = await postTranscription(chunk.file, known, {
+      index: chunk.index,
+      count: chunk.count,
+      startSeconds: chunk.startMs / 1000,
+      endSeconds: chunk.endMs / 1000,
+    });
+    if (payload?.model) models.add(payload.model);
+    if (!language && payload?.language) language = payload.language;
+
+    for (const caption of payload?.captions || []) {
+      const startMs = Number(caption.startMs);
+      const endMs = Number(caption.endMs);
+      if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) continue;
+      captions.push({
+        ...caption,
+        startMs: Math.round(startMs + chunk.startMs),
+        endMs: Math.round(endMs + chunk.startMs),
+        speaker: namespaceSpeaker(caption.speaker, chunk.index),
+        sourceChunk: chunk.index,
+      });
+    }
+    progress({phase: 'chunk-done', index: chunk.index + 1, count: chunk.count});
+  }
+
+  captions.sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs);
+  const speakerTurns = mergeTurns(captions);
+  const speakers = [...new Set(captions.map((caption) => caption.speaker))];
+  progress({phase: 'done', index: split.chunks.length, count: split.chunks.length});
+
+  return {
+    model: [...models].join('+') || 'gpt-4o-transcribe-diarize',
+    language,
+    durationMs: split.durationMs,
+    speakers,
+    avatarSpeaker: speakers.includes('HOST') ? 'HOST' : null,
+    captions,
+    speakerTurns,
+    chunked: true,
+    chunkCount: split.chunks.length,
+  };
 };
 
 export const suggestVisualCues = async (captions) => {
