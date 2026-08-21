@@ -5,6 +5,7 @@ const emptyProject = () => ({
   avatar: {speaker: null, model: 'Subeha.vrm'},
   captions: [],
   speakerTurns: [],
+  visualCues: [],
   visualReferences: [],
   layout: {width: 720, height: 1280, captionBottomPx: 290, showSafeArea: true, background: null},
 });
@@ -31,6 +32,7 @@ export const setSourceFile = async (file, durationMs = 0) => {
   project.avatar.speaker = null;
   project.captions = [];
   project.speakerTurns = [];
+  project.visualCues = [];
   project.visualReferences = [];
   project.clip = {startMs: 0, endMs: durationMs > 0 ? durationMs : 0};
   return project.source;
@@ -40,6 +42,8 @@ export const setAnalysis = ({captions = [], speakerTurns = [], durationMs} = {})
   project.captions = Array.isArray(captions) ? captions : [];
   project.speakerTurns = Array.isArray(speakerTurns) ? speakerTurns : [];
   project.avatar.speaker = null;
+  project.visualCues = [];
+  project.visualReferences = [];
   if (Number.isFinite(Number(durationMs)) && Number(durationMs) > 0) {
     project.source.durationMs = Number(durationMs);
     if (project.clip.endMs <= 0) project.clip.endMs = Number(durationMs);
@@ -77,6 +81,18 @@ export const isAvatarSpeaking = (timeMs) => {
 export const addVisualReference = (item) => {
   project.visualReferences.push(item);
   return item;
+};
+
+export const removeVisualReference = (id) => {
+  const before = project.visualReferences.length;
+  project.visualReferences = project.visualReferences.filter((item) => item.id !== id);
+  return project.visualReferences.length < before;
+};
+
+export const visualReferenceAt = (timeMs) => {
+  const now = Number(timeMs);
+  if (!Number.isFinite(now)) return null;
+  return project.visualReferences.find((item) => Number(item.startMs) <= now && Number(item.endMs) > now) || null;
 };
 
 export const downloadProject = (filename = 'vrm-studio-project.json') => {
