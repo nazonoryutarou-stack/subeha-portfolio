@@ -2,9 +2,11 @@ import {transcribeAudio, generateReferenceImage} from './api/client.js';
 import {searchReferenceImages} from './references/search.js';
 import {
   addVisualReference,
+  availableSpeakers,
   downloadProject,
   getProject,
   setAnalysis,
+  setAvatarSpeaker,
   setSourceFile,
 } from './app/project-state.js';
 
@@ -19,7 +21,7 @@ if (panel && stage && audioInput) {
   style.textContent = `
     .studio-tools{display:grid;gap:8px;border-top:1px solid #ffffff18;padding-top:8px}
     .studio-tools h2{font:700 11px ui-monospace,monospace;letter-spacing:.14em;color:#ffffff8a;margin:0}
-    .studio-tools input{width:100%;min-height:40px;border:1px solid #ffffff22;border-radius:10px;background:#1c1c22;color:#fff;padding:0 10px}
+    .studio-tools input,.studio-tools select{box-sizing:border-box;width:100%;min-height:40px;border:1px solid #ffffff22;border-radius:10px;background:#1c1c22;color:#fff;padding:0 10px}
     .studio-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
     .studio-meta{font:11px ui-monospace,monospace;color:#ffffff80;line-height:1.45}
     .studio-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-height:240px;overflow:auto}
@@ -28,6 +30,7 @@ if (panel && stage && audioInput) {
     .studio-card small{display:block;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ffffff99}
     .studio-caption-preview{position:absolute;z-index:8;left:6%;right:6%;bottom:22%;text-align:center;color:#fff;font:800 clamp(20px,5vw,48px)/1.25 system-ui,sans-serif;text-shadow:0 2px 5px #000,0 0 2px #000;pointer-events:none;white-space:pre-wrap}
     .studio-chip{display:inline-block;border:1px solid #ffffff22;border-radius:999px;padding:3px 7px;margin-right:4px;font-size:10px;color:#ffffffa0}
+    .studio-warning{font-size:11px;color:#ffc57a;line-height:1.4}
   `;
   document.head.appendChild(style);
 
@@ -44,6 +47,10 @@ if (panel && stage && audioInput) {
       <button id="studioSave" type="button">project.json保存</button>
     </div>
     <div id="studioMeta" class="studio-meta">音声を選ぶとプロジェクトを作成します。</div>
+    <select id="studioAvatarSpeaker" disabled>
+      <option value="">解析後、本人の話者を選択</option>
+    </select>
+    <div id="studioSpeakerWarning" class="studio-warning">本人を選ぶまでは、話者ゲート付き口パクを完成扱いしません。</div>
     <input id="studioSearchQuery" type="text" placeholder="参考画像を検索 例: 昭和の遺影 写真館">
     <div class="studio-actions">
       <button id="studioSearch" type="button">参考画像検索</button>
@@ -61,6 +68,8 @@ if (panel && stage && audioInput) {
   const searchButton = document.getElementById('studioSearch');
   const useCaptionButton = document.getElementById('studioUseCaption');
   const generateButton = document.getElementById('studioGenerate');
+  const speakerSelect = document.getElementById('studioAvatarSpeaker');
+  const speakerWarning = document.getElementById('studioSpeakerWarning');
   const searchInput = document.getElementById('studioSearchQuery');
   const promptInput = document.getElementById('studioGeneratePrompt');
   const meta = document.getElementById('studioMeta');
@@ -85,17 +94,40 @@ if (panel && stage && audioInput) {
     }, {once: true});
   });
 
+  const refreshSpeakerSelect = () => {
+    const speakers = availableSpeakers();
+    const selected = getProject().avatar.speaker || '';
+    speakerSelect.textContent = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = speakers.length ? '本人の話者を選択' : '話者解析が必要です';
+    speakerSelect.appendChild(placeholder);
+    for (const speaker of speakers) {
+      const option = document.createElement('option');
+      option.value = speaker;
+      option.textContent = speaker;
+      option.selected = speaker === selected;
+      speakerSelect.appendChild(option);
+    }
+    speakerSelect.disabled = speakers.length === 0;
+    speakerWarning.textContent = selected
+      ? `アバター話者: ${selected}。この話者の区間だけ口パク対象にします。`
+      : '本人を選ぶまでは、話者ゲート付き口パクを完成扱いしません。';
+  };
+
   const refreshMeta = () => {
     const project = getProject();
     const host = project.avatar.speaker;
-    const hostTurns = project.speakerTurns.filter((turn) => turn.speaker === host).length;
-    const guestTurns = project.speakerTurns.length - hostTurns;
+    const hostTurns = host ? project.speakerTurns.filter((turn) => turn.speaker === host).length : 0;
+    const guestTurns = host ? project.speakerTurns.length - hostTurns : project.speakerTurns.length;
     meta.innerHTML = [
       `<span class="studio-chip">字幕 ${project.captions.length}</span>`,
-      `<span class="studio-chip">HOST ${hostTurns}</span>`,
+      `<span class="studio-chip">本人 ${host || '未指定'}</span>`,
+      `<span class="studio-chip">HOST区間 ${hostTurns}</span>`,
       `<span class="studio-chip">OTHER ${guestTurns}</span>`,
       `<span class="studio-chip">画像 ${project.visualReferences.length}</span>`,
     ].join('');
+    refreshSpeakerSelect();
   };
 
   const currentMs = () => {
@@ -144,7 +176,7 @@ if (panel && stage && audioInput) {
         durationMs: payload?.durationMs || payload?.duration_ms,
       });
       refreshMeta();
-      setStatus(`解析完了：字幕 ${getProject().captions.length} / 話者区間 ${getProject().speakerTurns.length}`);
+      setStatus(`解析完了：字幕 ${getProject().captions.length} / 話者区間 ${getProject().speakerTurns.length}。本人の話者を選択してください。`);
     } catch (error) {
       console.error(error);
       setStatus(`字幕API: ${error instanceof Error ? error.message : String(error)}`);
@@ -153,8 +185,23 @@ if (panel && stage && audioInput) {
     }
   });
 
+  speakerSelect?.addEventListener('change', () => {
+    try {
+      setAvatarSpeaker(speakerSelect.value);
+      refreshMeta();
+      setStatus(speakerSelect.value ? `本人話者を ${speakerSelect.value} に設定しました。` : '本人話者の指定を解除しました。');
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : String(error));
+    }
+  });
+
   saveButton?.addEventListener('click', () => {
-    const base = getProject().source.name.replace(/\.[^.]+$/, '') || 'project';
+    const project = getProject();
+    if (project.speakerTurns.length > 0 && !project.avatar.speaker) {
+      setStatus('本人話者が未指定です。先に本人を選んでください。');
+      return;
+    }
+    const base = project.source.name.replace(/\.[^.]+$/, '') || 'project';
     downloadProject(`${base}-vrm-project.json`);
     setStatus('project.json を保存しました。');
   });
