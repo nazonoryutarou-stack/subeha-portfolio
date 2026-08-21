@@ -1,0 +1,54 @@
+name: Render VRM Viseme Test
+
+on:
+  push:
+    branches:
+      - fix/vtuber-qc-v2
+    paths:
+      - 'Subeha.vrm'
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/render-vrm-viseme-test.yml'
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: remotion/vrm-lipsync/package.json
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Prepare VRM
+        run: |
+          mkdir -p public out qc
+          cp ../../Subeha.vrm public/Subeha.vrm
+
+      - name: Render viseme test
+        run: npx remotion render src/viseme-index.ts VrmVisemeTest out/vrm-viseme-test.mp4 --codec=h264 --crf=18
+
+      - name: Extract QC frames
+        run: |
+          ffmpeg -y -ss 0.5 -i out/vrm-viseme-test.mp4 -frames:v 1 qc/neutral.png
+          ffmpeg -y -ss 1.5 -i out/vrm-viseme-test.mp4 -frames:v 1 qc/aa.png
+          ffmpeg -y -ss 2.5 -i out/vrm-viseme-test.mp4 -frames:v 1 qc/ih.png
+          ffmpeg -y -ss 3.5 -i out/vrm-viseme-test.mp4 -frames:v 1 qc/ou.png
+          ffmpeg -y -ss 4.5 -i out/vrm-viseme-test.mp4 -frames:v 1 qc/ee.png
+          ffmpeg -y -ss 5.5 -i out/vrm-viseme-test.mp4 -frames:v 1 qc/oh.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vrm-viseme-test
+          path: |
+            remotion/vrm-lipsync/out/vrm-viseme-test.mp4
+            remotion/vrm-lipsync/qc/*.png
+          retention-days: 3
