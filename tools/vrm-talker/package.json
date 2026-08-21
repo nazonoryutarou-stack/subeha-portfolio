@@ -1,6 +1,6 @@
 {
   "name": "subeha-vrm-talker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@pixiv/three-vrm": "^3.5.3",
+    "mediabunny": "1.55.1",
     "three": "^0.179.1"
   },
   "devDependencies": {
