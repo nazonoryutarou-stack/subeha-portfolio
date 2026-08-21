@@ -1,6 +1,6 @@
 import React from 'react';
 import {Composition, staticFile} from 'remotion';
-import {VrmLipSync, type VrmLipSyncProps} from './VrmLipSync';
+import {VrmLipSync, type VrmLipSyncProps} from './VrmLipSyncV2';
 
 const defaultProps: VrmLipSyncProps = {
   title: '',
