@@ -3,7 +3,7 @@
   "$id": "https://subeha.example/schemas/vrm-studio-project-v1.json",
   "title": "VRM Studio Project",
   "type": "object",
-  "required": ["version", "source", "clip", "avatar", "captions", "speakerTurns", "visualReferences", "layout"],
+  "required": ["version", "source", "clip", "avatar", "captions", "speakerTurns", "visualCues", "visualReferences", "layout"],
   "properties": {
     "version": {"const": 1},
     "source": {
@@ -42,7 +42,8 @@
           "startMs": {"type": "number", "minimum": 0},
           "endMs": {"type": "number", "exclusiveMinimum": 0},
           "speaker": {"type": ["string", "null"]},
-          "confidence": {"type": ["number", "null"]}
+          "confidence": {"type": ["number", "null"]},
+          "sourceChunk": {"type": ["integer", "null"], "minimum": 0}
         }
       }
     },
@@ -55,6 +56,24 @@
           "speaker": {"type": "string", "minLength": 1},
           "startMs": {"type": "number", "minimum": 0},
           "endMs": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    },
+    "visualCues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "startIndex", "endIndex", "startMs", "endMs", "mode"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "startIndex": {"type": "integer", "minimum": 0},
+          "endIndex": {"type": "integer", "minimum": 0},
+          "startMs": {"type": "number", "minimum": 0},
+          "endMs": {"type": "number", "exclusiveMinimum": 0},
+          "mode": {"enum": ["search", "generate"]},
+          "query": {"type": ["string", "null"]},
+          "prompt": {"type": ["string", "null"]},
+          "reason": {"type": ["string", "null"]}
         }
       }
     },
@@ -74,7 +93,8 @@
           "thumbnailUrl": {"type": ["string", "null"]},
           "sourceUrl": {"type": ["string", "null"]},
           "creator": {"type": ["string", "null"]},
-          "license": {"type": ["string", "null"]}
+          "license": {"type": ["string", "null"]},
+          "title": {"type": ["string", "null"]}
         }
       }
     },
