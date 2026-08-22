@@ -1,5 +1,6 @@
 import {sha256Blob} from '../sha256.js';
 import {validateProjectSnapshot} from './project-validation.js';
+import {createTimelineVisualReference} from './visual-reference.js';
 
 const emptyProject = () => ({
   version: 1,
@@ -153,9 +154,16 @@ export const isAvatarSpeaking = (timeMs) => {
 };
 
 export const addVisualReference = (item) => {
-  project.visualReferences.push(item);
+  const next = createTimelineVisualReference({
+    item,
+    startMs: item?.startMs,
+    endMs: item?.endMs,
+    query: item?.query ?? null,
+    prompt: item?.prompt ?? null,
+  });
+  project.visualReferences.push(next);
   emitProjectChanged('visual-add');
-  return item;
+  return next;
 };
 
 export const updateVisualReference = (id, patch) => {
