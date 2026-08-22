@@ -90,19 +90,24 @@ export const checkApiHealth = async () => {
 export const transcribeAudio = async (file) => {
   const known = await getKnownSpeakerReference().catch(() => null);
 
-  if (file.size <= MAX_DIRECT_AUDIO_BYTES) {
-    progress({phase: 'upload', index: 0, count: 1, startSeconds: 0, endSeconds: null});
+  // 容量だけでは長尺判定しない。高圧縮M4Aは長時間でも25MB未満になり得る。
+  // まず時間ベースで約8分チャンク計画を作り、容量超過時は短尺でも16kHz WAVへ縮小して送る。
+  progress({phase: 'prepare', index: 0, count: 0});
+  const plan = await planAudioTranscriptionChunks(file);
+  const temporalChunking = plan.chunks.length > 1;
+  const needsTranscode = file.size > MAX_DIRECT_AUDIO_BYTES;
+
+  if (!temporalChunking && !needsTranscode) {
+    progress({phase: 'upload', index: 0, count: 1, startSeconds: 0, endSeconds: plan.durationMs / 1000});
     const payload = await postTranscription(file, known);
     progress({phase: 'done', index: 1, count: 1});
     return payload;
   }
 
-  if (!known?.file) {
-    throw new Error('25MBを超える長尺音声は、先に2〜10秒のHOST声サンプルを登録してください。');
+  if (temporalChunking && !known?.file) {
+    throw new Error('8分を超える長尺音声は、チャンク間でHOSTを固定するため先に2〜10秒のHOST声サンプルを登録してください。');
   }
 
-  progress({phase: 'prepare', index: 0, count: 0});
-  const plan = await planAudioTranscriptionChunks(file);
   const captions = [];
   const models = new Set();
   let language = null;
@@ -135,7 +140,7 @@ export const transcribeAudio = async (file) => {
         ...caption,
         startMs: Math.round(startMs + chunk.startMs),
         endMs: Math.round(endMs + chunk.startMs),
-        speaker: namespaceSpeaker(caption.speaker, chunk.index),
+        speaker: temporalChunking ? namespaceSpeaker(caption.speaker, chunk.index) : String(caption.speaker || 'SPEAKER_00'),
         sourceChunk: chunk.index,
       });
     }
@@ -155,7 +160,8 @@ export const transcribeAudio = async (file) => {
     avatarSpeaker: speakers.includes('HOST') ? 'HOST' : null,
     captions,
     speakerTurns,
-    chunked: true,
+    chunked: temporalChunking,
+    transcoded: true,
     chunkCount: plan.chunks.length,
   };
 };
