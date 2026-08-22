@@ -39,6 +39,7 @@ jobs:
           node --check remotion/vrm-lipsync/scripts/materialize-visuals.mjs
           node --check remotion/vrm-lipsync/scripts/prepare-studio.mjs
           node --check remotion/vrm-lipsync/scripts/render-studio.mjs
+          node --check remotion/vrm-lipsync/scripts/validate-render.mjs
           node --check remotion/vrm-lipsync/scripts/generate-envelope.mjs
           node --check remotion/vrm-lipsync/scripts/prepare-clip.mjs
       - name: Test Studio project validator
@@ -98,13 +99,13 @@ jobs:
         run: |
           mkdir -p jobs/.generated
           cat > jobs/.generated/vertical.json <<'JSON'
-          {"layout":{"width":720,"height":1280}}
+          {"source":{"durationMs":1000},"clip":{"startMs":0,"endMs":1000},"layout":{"width":720,"height":1280}}
           JSON
           cat > jobs/.generated/square.json <<'JSON'
-          {"layout":{"width":900,"height":900}}
+          {"source":{"durationMs":1000},"clip":{"startMs":0,"endMs":1000},"layout":{"width":900,"height":900}}
           JSON
           cat > jobs/.generated/landscape.json <<'JSON'
-          {"layout":{"width":1280,"height":720}}
+          {"source":{"durationMs":1000},"clip":{"startMs":0,"endMs":1000},"layout":{"width":1280,"height":720}}
           JSON
           npm run render:studio -- --project=jobs/.generated/vertical.json --audio=dummy.m4a --plan-only | grep -q '"composition":"VrmLipSync"'
           npm run render:studio -- --project=jobs/.generated/square.json --audio=dummy.m4a --plan-only | grep -q '"composition":"VrmLipSyncSquare"'
