@@ -13,16 +13,60 @@ const emptyProject = () => ({
 });
 
 let project = emptyProject();
+let awaitingSourceVerification = false;
+
+const emitProjectChanged = (reason) => {
+  window.dispatchEvent(new CustomEvent('vrm-studio-project-changed', {detail: {reason}}));
+};
+
+const validSha256 = (value) => /^[a-fA-F0-9]{64}$/.test(String(value || ''));
+
+const normalizeLoadedProject = (snapshot) => {
+  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) throw new Error('project.json がオブジェクトではありません。');
+  if (Number(snapshot.version) !== 1) throw new Error(`未対応のproject.json version: ${snapshot.version}`);
+  if (!snapshot.source || !validSha256(snapshot.source.sha256)) throw new Error('project.json に有効な元音声SHA-256がありません。');
+  if (!Number.isFinite(Number(snapshot.source.durationMs)) || Number(snapshot.source.durationMs) <= 0) throw new Error('project.json の元音声長が不正です。');
+  if (!snapshot.clip || !Number.isFinite(Number(snapshot.clip.startMs)) || !Number.isFinite(Number(snapshot.clip.endMs))) throw new Error('project.json のclip範囲が不正です。');
+  if (Number(snapshot.clip.startMs) < 0 || Number(snapshot.clip.endMs) <= Number(snapshot.clip.startMs)) throw new Error('project.json のclip範囲が不正です。');
+  if (!Array.isArray(snapshot.captions) || !Array.isArray(snapshot.speakerTurns) || !Array.isArray(snapshot.visualReferences)) {
+    throw new Error('project.json の字幕・話者・画像タイムライン形式が不正です。');
+  }
+
+  const base = emptyProject();
+  return {
+    ...base,
+    ...structuredClone(snapshot),
+    source: {...base.source, ...structuredClone(snapshot.source)},
+    clip: {...base.clip, ...structuredClone(snapshot.clip)},
+    avatar: {...base.avatar, ...(snapshot.avatar ? structuredClone(snapshot.avatar) : {})},
+    captions: structuredClone(snapshot.captions),
+    speakerTurns: structuredClone(snapshot.speakerTurns),
+    visualCues: Array.isArray(snapshot.visualCues) ? structuredClone(snapshot.visualCues) : [],
+    visualReferences: structuredClone(snapshot.visualReferences),
+    layout: {...base.layout, ...(snapshot.layout ? structuredClone(snapshot.layout) : {})},
+  };
+};
 
 export const getProject = () => project;
+export const isSourceVerificationPending = () => awaitingSourceVerification;
 
 export const resetProject = () => {
   project = emptyProject();
+  awaitingSourceVerification = false;
+  emitProjectChanged('reset');
+  return project;
+};
+
+export const loadProjectSnapshot = (snapshot) => {
+  project = normalizeLoadedProject(snapshot);
+  awaitingSourceVerification = true;
+  emitProjectChanged('loaded-awaiting-source');
   return project;
 };
 
 export const patchProject = (patch) => {
   project = {...project, ...patch};
+  emitProjectChanged('patch');
   return project;
 };
 
@@ -34,6 +78,29 @@ export const setSourceFile = async (file, durationMs = 0) => {
       }));
     },
   });
+
+  if (awaitingSourceVerification) {
+    const expected = String(project.source.sha256 || '').toLowerCase();
+    if (sha256.toLowerCase() !== expected) {
+      window.dispatchEvent(new CustomEvent('vrm-studio-source-rejected', {
+        detail: {expected, actual: sha256, selectedName: file.name},
+      }));
+      throw new Error(`選択した音声がproject.jsonの元音声と一致しません。expected=${expected.slice(0, 12)}… actual=${sha256.slice(0, 12)}…`);
+    }
+    project.source = {
+      ...project.source,
+      name: file.name,
+      durationMs: Number(durationMs) > 0 ? Number(durationMs) : Number(project.source.durationMs),
+      sha256,
+    };
+    awaitingSourceVerification = false;
+    window.dispatchEvent(new CustomEvent('vrm-studio-source-progress', {
+      detail: {phase: 'hash-done', loaded: file.size, total: file.size},
+    }));
+    emitProjectChanged('source-verified');
+    return project.source;
+  }
+
   project.source = {name: file.name, sha256, durationMs};
   project.avatar.speaker = null;
   project.captions = [];
@@ -44,6 +111,7 @@ export const setSourceFile = async (file, durationMs = 0) => {
   window.dispatchEvent(new CustomEvent('vrm-studio-source-progress', {
     detail: {phase: 'hash-done', loaded: file.size, total: file.size},
   }));
+  emitProjectChanged('new-source');
   return project.source;
 };
 
@@ -57,6 +125,7 @@ export const setAnalysis = ({captions = [], speakerTurns = [], durationMs} = {})
     project.source.durationMs = Number(durationMs);
     if (project.clip.endMs <= 0) project.clip.endMs = Number(durationMs);
   }
+  emitProjectChanged('analysis');
   return project;
 };
 
@@ -66,11 +135,13 @@ export const setAvatarSpeaker = (speaker) => {
   const value = String(speaker || '').trim();
   if (!value) {
     project.avatar.speaker = null;
+    emitProjectChanged('avatar-speaker');
     return null;
   }
   const speakers = availableSpeakers();
   if (speakers.length && !speakers.includes(value)) throw new Error(`Unknown speaker: ${value}`);
   project.avatar.speaker = value;
+  emitProjectChanged('avatar-speaker');
   return value;
 };
 
@@ -83,12 +154,13 @@ export const speakerAt = (timeMs) => {
 
 export const isAvatarSpeaking = (timeMs) => {
   const avatarSpeaker = project.avatar.speaker;
-  if (!avatarSpeaker) return false;
+  if (!avatarSpeaker || awaitingSourceVerification) return false;
   return speakerAt(timeMs) === avatarSpeaker;
 };
 
 export const addVisualReference = (item) => {
   project.visualReferences.push(item);
+  emitProjectChanged('visual-add');
   return item;
 };
 
@@ -104,16 +176,20 @@ export const updateVisualReference = (id, patch) => {
   const duration = Number(project.source.durationMs || 0);
   if (duration > 0 && endMs > duration) next.endMs = duration;
   project.visualReferences[index] = next;
+  emitProjectChanged('visual-update');
   return next;
 };
 
 export const removeVisualReference = (id) => {
   const before = project.visualReferences.length;
   project.visualReferences = project.visualReferences.filter((item) => item.id !== id);
-  return project.visualReferences.length < before;
+  const removed = project.visualReferences.length < before;
+  if (removed) emitProjectChanged('visual-remove');
+  return removed;
 };
 
 export const visualReferenceAt = (timeMs) => {
+  if (awaitingSourceVerification) return null;
   const now = Number(timeMs);
   if (!Number.isFinite(now)) return null;
   return project.visualReferences.find((item) => Number(item.startMs) <= now && Number(item.endMs) > now) || null;
