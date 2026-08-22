@@ -37,6 +37,9 @@ jobs:
       - name: Test long-audio chunk planning
         working-directory: tools/vrm-talker
         run: npm run test:chunks
+      - name: Test browser VRM production preflight
+        working-directory: tools/vrm-talker
+        run: npm run test:vrm
       - name: Build VRM Studio with injected API base
         working-directory: tools/vrm-talker
         env:
