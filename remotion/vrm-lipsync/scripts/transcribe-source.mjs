@@ -55,6 +55,7 @@ if (wav.status !== 0) throw new Error('Whisper用16kHz WAVの生成に失敗し�
 
 const whisperCppVersion = process.env.WHISPER_CPP_VERSION || '1.5.5';
 const model = process.env.WHISPER_MODEL || 'small';
+const language = process.env.WHISPER_LANGUAGE || 'ja';
 
 await installWhisperCpp({
   to: whisperDir,
@@ -71,10 +72,11 @@ const whisperCppOutput = await transcribe({
   whisperCppVersion,
   inputPath: wavPath,
   tokenLevelTimestamps: true,
+  language,
 });
 const {captions} = toCaptions({whisperCppOutput});
 
 fs.writeFileSync(captionsPath, JSON.stringify(captions, null, 2) + '\n');
-fs.writeFileSync(metaPath, JSON.stringify({...sourceKey, model, whisperCppVersion}, null, 2) + '\n');
-console.log(`Transcribed: ${captions.length} captions`);
+fs.writeFileSync(metaPath, JSON.stringify({...sourceKey, model, whisperCppVersion, language}, null, 2) + '\n');
+console.log(`Transcribed: ${captions.length} captions (${language})`);
 console.log(`Saved: ${captionsPath}`);
