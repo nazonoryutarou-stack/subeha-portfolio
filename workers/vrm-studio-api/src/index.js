@@ -5,6 +5,31 @@ const VISUAL_DIRECTOR_MODEL = 'gpt-5.4-mini';
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024;
 const MAX_REFERENCE_BYTES = 2 * 1024 * 1024;
 
+const VISUAL_CUE_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['cues'],
+  properties: {
+    cues: {
+      type: 'array',
+      maxItems: 8,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['startIndex', 'endIndex', 'mode', 'query', 'prompt', 'reason'],
+        properties: {
+          startIndex: {type: 'integer', minimum: 0},
+          endIndex: {type: 'integer', minimum: 0},
+          mode: {type: 'string', enum: ['search', 'generate']},
+          query: {type: ['string', 'null']},
+          prompt: {type: ['string', 'null']},
+          reason: {type: ['string', 'null']},
+        },
+      },
+    },
+  },
+};
+
 const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
   status,
   headers: {'content-type': 'application/json; charset=utf-8', ...headers},
@@ -154,11 +179,6 @@ const responseText = (payload) => {
   return '';
 };
 
-const parseModelJson = (text) => {
-  const cleaned = String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
-  return JSON.parse(cleaned);
-};
-
 const handleVisualCues = async (request, env) => {
   const body = await request.json().catch(() => ({}));
   const captions = Array.isArray(body?.captions) ? body.captions : [];
@@ -171,15 +191,28 @@ const handleVisualCues = async (request, env) => {
     speaker: caption?.speaker || null,
   })).filter((item) => item.text);
 
-  const instructions = `あなたは短尺動画の映像編集者です。字幕列を読み、視覚補助を入れる価値が高い箇所だけ選んでください。\n\n重要ルール:\n- 時刻や秒数を生成してはいけません。startIndex/endIndexだけ返してください。\n- 実在する人物、場所、物、歴史資料、作品資料などは mode=search。\n- 実在資料では表現できない抽象概念、比喩、架空物、演出的イメージは mode=generate。\n- 単なる相槌や説明不要な発話には何も出さない。\n- 検索語は検索エンジン向けに簡潔に。生成promptは具体的な画面素材の指示にする。\n- 最大8件。重複する隣接区間はまとめる。\n\n次のJSONだけを返してください。\n{"cues":[{"startIndex":0,"endIndex":1,"mode":"search","query":"...","prompt":null,"reason":"..."}]}\n\n字幕:\n${JSON.stringify(indexed)}`;
+  const instructions = `あなたは短尺動画の映像編集者です。字幕列を読み、視覚補助を入れる価値が高い箇所だけ選んでください。\n\n重要ルール:\n- 時刻や秒数を生成してはいけません。startIndex/endIndexだけ選んでください。\n- 実在する人物、場所、物、歴史資料、作品資料などは mode=search。\n- 実在資料では表現できない抽象概念、比喩、架空物、演出的イメージは mode=generate。\n- 単なる相槌や説明不要な発話には何も出さない。\n- 検索語は検索エンジン向けに簡潔に。生成promptは具体的な画面素材の指示にする。\n- 最大8件。重複する隣接区間はまとめる。\n- searchではqueryを埋めpromptはnull、generateではpromptを埋めqueryはnull。\n\n字幕:\n${JSON.stringify(indexed)}`;
 
   const payload = await openAI(env, '/responses', {
     method: 'POST',
     headers: {'content-type': 'application/json'},
-    body: JSON.stringify({model: VISUAL_DIRECTOR_MODEL, input: instructions}),
+    body: JSON.stringify({
+      model: VISUAL_DIRECTOR_MODEL,
+      input: instructions,
+      text: {
+        format: {
+          type: 'json_schema',
+          name: 'visual_cues',
+          strict: true,
+          schema: VISUAL_CUE_SCHEMA,
+        },
+      },
+    }),
   });
 
-  const parsed = parseModelJson(responseText(payload));
+  const text = responseText(payload);
+  if (!text) throw new Error('Visual Director returned no structured output');
+  const parsed = JSON.parse(text);
   const rawCues = Array.isArray(parsed?.cues) ? parsed.cues : [];
   const cues = [];
   for (const raw of rawCues.slice(0, 8)) {
@@ -234,12 +267,13 @@ export default {
       if (request.method === 'GET' && (url.pathname.endsWith('/api/health') || url.pathname === '/health')) {
         return json({
           ok: true,
-          version: 5,
+          version: 6,
           openaiConfigured: Boolean(env.OPENAI_API_KEY),
           openverseImport: true,
           transcriptionModel: 'gpt-4o-transcribe-diarize',
           visualDirectorModel: VISUAL_DIRECTOR_MODEL,
           imageModel: 'gpt-image-2',
+          structuredVisualCues: true,
         }, 200, cors);
       }
       if (request.method !== 'POST') return json({error: 'Not found'}, 404, cors);
