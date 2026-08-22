@@ -76,7 +76,7 @@ const runNode = (script, args = [], env = {}) => {
   if (result.status !== 0) throw new Error(`${script} failed (${result.status})`);
 };
 
-runNode('ensure-video-vrm.mjs');
+// prepare-clip 自身が動画用VRMを必ず検品するため、ここでは二重検品しない。
 // 同じ原音から最終 voice.wav / clip.json を作る。この時点のenvelopeは本番扱いしない。
 runNode('prepare-clip.mjs', [`--job=${path.relative(projectRoot, tempJobPath)}`], {REQUIRE_SPEAKER_TURNS: '0'});
 
