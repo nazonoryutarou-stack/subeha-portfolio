@@ -4,6 +4,7 @@ const stage = document.getElementById('stage');
 const sourceCanvas = document.getElementById('c');
 const seek = document.getElementById('seek');
 const play = document.getElementById('play');
+const recordButton = document.getElementById('record');
 const status = document.getElementById('status');
 
 const imageCache = new Map();
@@ -182,6 +183,22 @@ if (stage && sourceCanvas) {
       composite.height = sourceCanvas.height;
       const ctx = composite.getContext('2d', {alpha: false});
       let running = true;
+      let stream = null;
+      let recordingStarted = false;
+      let cleaned = false;
+      let startupTimer = null;
+      let observer = null;
+
+      const cleanup = () => {
+        if (cleaned) return;
+        cleaned = true;
+        running = false;
+        if (startupTimer) clearTimeout(startupTimer);
+        observer?.disconnect();
+        for (const track of stream?.getVideoTracks?.() || []) {
+          if (track.readyState !== 'ended') track.stop();
+        }
+      };
 
       const syncSize = () => {
         if (composite.width !== sourceCanvas.width || composite.height !== sourceCanvas.height) {
@@ -217,10 +234,29 @@ if (stage && sourceCanvas) {
       };
       requestAnimationFrame(draw);
 
-      const stream = composite.captureStream(fps);
+      stream = composite.captureStream(fps);
       for (const track of stream.getVideoTracks()) {
-        track.addEventListener('ended', () => { running = false; }, {once: true});
+        track.addEventListener('ended', cleanup, {once: true});
       }
+
+      if (recordButton && typeof MutationObserver !== 'undefined') {
+        const inspectRecordingState = () => {
+          const recording = recordButton.classList.contains('recording');
+          if (recording) {
+            recordingStarted = true;
+            return;
+          }
+          if (recordingStarted) cleanup();
+        };
+        observer = new MutationObserver(inspectRecordingState);
+        observer.observe(recordButton, {attributes: true, attributeFilter: ['class']});
+        inspectRecordingState();
+        startupTimer = setTimeout(() => {
+          if (!recordingStarted) cleanup();
+        }, 10_000);
+      }
+
+      Object.defineProperty(stream, '__vrmStudioCleanup', {value: cleanup, configurable: true});
       return stream;
     };
   }
