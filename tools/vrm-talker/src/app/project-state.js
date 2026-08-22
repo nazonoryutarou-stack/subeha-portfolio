@@ -22,6 +22,24 @@ const emitProjectChanged = (reason) => {
   window.dispatchEvent(new CustomEvent('vrm-studio-project-changed', {detail: {reason}}));
 };
 
+const normalizeLoadedVisualReferences = (items) => {
+  const refs = structuredClone(items);
+  const counts = new Map();
+  for (const ref of refs) {
+    const id = String(ref?.id || '').trim();
+    if (id) counts.set(id, (counts.get(id) || 0) + 1);
+  }
+  return refs.map((ref) => {
+    const next = {...ref};
+    const id = String(next.id || '').trim();
+    if (!id || (counts.get(id) || 0) > 1) {
+      next.assetId = next.assetId || id || null;
+      next.id = crypto.randomUUID();
+    }
+    return next;
+  });
+};
+
 const normalizeLoadedProject = (snapshot) => {
   validateProjectSnapshot(snapshot);
 
@@ -36,7 +54,7 @@ const normalizeLoadedProject = (snapshot) => {
     captions: structuredClone(snapshot.captions),
     speakerTurns: structuredClone(snapshot.speakerTurns),
     visualCues: Array.isArray(snapshot.visualCues) ? structuredClone(snapshot.visualCues) : [],
-    visualReferences: structuredClone(snapshot.visualReferences),
+    visualReferences: normalizeLoadedVisualReferences(snapshot.visualReferences),
     layout: {...base.layout, ...(snapshot.layout ? structuredClone(snapshot.layout) : {})},
   };
 };
