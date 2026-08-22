@@ -1,6 +1,6 @@
 {
   "name": "subeha-vrm-talker",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,6 @@
     "test:vrm": "node scripts/test-vrm-preflight.mjs"
   },
   "dependencies": {
-    "@huggingface/transformers": "3.8.1",
     "@pixiv/three-vrm": "^3.5.3",
     "mediabunny": "1.55.1",
     "three": "^0.179.1"
