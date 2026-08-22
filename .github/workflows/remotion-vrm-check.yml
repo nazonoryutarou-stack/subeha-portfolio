@@ -95,6 +95,28 @@ jobs:
           console.log(`Materialized background fixture: ${clip.backgroundFile}`);
           NODE
           rm -rf public/visuals public/clip.json
+      - name: Reject remote visuals by default
+        run: |
+          mkdir -p public
+          cat > public/clip.json <<'JSON'
+          {
+            "visualReferences": [
+              {
+                "id": "remote-visual",
+                "kind": "search",
+                "startMs": 0,
+                "endMs": 1000,
+                "url": "https://example.com/image.jpg"
+              }
+            ]
+          }
+          JSON
+          if node scripts/materialize-visuals.mjs; then
+            echo 'ERROR: remote visual URL was fetched without explicit opt-in'
+            exit 1
+          fi
+          echo 'PASS: remote visual URL is blocked by default'
+          rm -rf public/visuals public/clip.json
       - name: Test studio composition planning
         run: |
           mkdir -p jobs/.generated
