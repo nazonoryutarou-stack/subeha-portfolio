@@ -7,6 +7,7 @@ const publicDir = path.join(projectRoot, 'public');
 const clipPath = path.join(publicDir, 'clip.json');
 const visualsDir = path.join(publicDir, 'visuals');
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
+const ALLOW_REMOTE_VISUALS = process.env.ALLOW_REMOTE_VISUALS === '1';
 
 if (!fs.existsSync(clipPath)) {
   console.error('public/clip.json がありません。先にStudio projectをimportしてください。');
@@ -46,13 +47,28 @@ const parseDataUrl = (value) => {
   return {bytes, mime: match[1]};
 };
 
+const isPrivateHost = (hostname) => {
+  const host = String(hostname || '').toLowerCase().replace(/^\[|\]$/g, '');
+  if (!host) return true;
+  if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local')) return true;
+  if (host === '::1' || host.startsWith('fc') || host.startsWith('fd') || host.startsWith('fe80:')) return true;
+  if (/^(0|10|127)\./.test(host)) return true;
+  if (/^169\.254\./.test(host)) return true;
+  if (/^192\.168\./.test(host)) return true;
+  const match172 = /^172\.(\d{1,3})\./.exec(host);
+  if (match172 && Number(match172[1]) >= 16 && Number(match172[1]) <= 31) return true;
+  const match100 = /^100\.(\d{1,3})\./.exec(host);
+  if (match100 && Number(match100[1]) >= 64 && Number(match100[1]) <= 127) return true;
+  return false;
+};
+
 const assertSafeRemoteUrl = (raw) => {
+  if (!ALLOW_REMOTE_VISUALS) {
+    throw new Error('本番レンダーではremote画像URLを取得しません。Studioで画像をdata URLへ固定してください。開発時だけ ALLOW_REMOTE_VISUALS=1 で明示許可できます。');
+  }
   const url = new URL(raw);
   if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error(`未対応URL scheme: ${url.protocol}`);
-  const host = url.hostname.toLowerCase();
-  if (host === 'localhost' || host === '0.0.0.0' || host === '::1' || /^127\./.test(host)) {
-    throw new Error('ローカルアドレスは画像取得元にできません。');
-  }
+  if (isPrivateHost(url.hostname)) throw new Error('ローカル/プライベートアドレスは画像取得元にできません。');
   return url;
 };
 
