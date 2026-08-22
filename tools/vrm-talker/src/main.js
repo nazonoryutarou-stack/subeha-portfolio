@@ -7,4 +7,5 @@ import './transcription-progress.js';
 import './visual-director.js';
 import './visual-overlay.js';
 import './timeline-editor.js';
+import './project-loader.js';
 import './auto-pipeline.js';
