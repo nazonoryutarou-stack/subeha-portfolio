@@ -153,14 +153,32 @@ export const isAvatarSpeaking = (timeMs) => {
   return speakerAt(timeMs) === avatarSpeaker;
 };
 
+const clampVisualRangeToSource = (item) => {
+  const next = {...item};
+  const duration = Number(project.source.durationMs || 0);
+  const startMs = Number(next.startMs);
+  let endMs = Number(next.endMs);
+  if (duration > 0) {
+    if (startMs >= duration) throw new Error('画像素材の開始時刻が元音声長を超えています。');
+    endMs = Math.min(endMs, duration);
+  }
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || startMs < 0 || endMs <= startMs) {
+    throw new Error('画像素材の表示区間が不正です。');
+  }
+  next.startMs = startMs;
+  next.endMs = endMs;
+  return next;
+};
+
 export const addVisualReference = (item) => {
-  const next = createTimelineVisualReference({
+  const placement = createTimelineVisualReference({
     item,
     startMs: item?.startMs,
     endMs: item?.endMs,
     query: item?.query ?? null,
     prompt: item?.prompt ?? null,
   });
+  const next = clampVisualRangeToSource(placement);
   project.visualReferences.push(next);
   emitProjectChanged('visual-add');
   return next;
@@ -169,14 +187,7 @@ export const addVisualReference = (item) => {
 export const updateVisualReference = (id, patch) => {
   const index = project.visualReferences.findIndex((item) => item.id === id);
   if (index < 0) return null;
-  const next = {...project.visualReferences[index], ...patch};
-  const startMs = Number(next.startMs);
-  const endMs = Number(next.endMs);
-  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || startMs < 0 || endMs <= startMs) {
-    throw new Error('画像素材の表示区間が不正です。');
-  }
-  const duration = Number(project.source.durationMs || 0);
-  if (duration > 0 && endMs > duration) next.endMs = duration;
+  const next = clampVisualRangeToSource({...project.visualReferences[index], ...patch});
   project.visualReferences[index] = next;
   emitProjectChanged('visual-update');
   return next;
