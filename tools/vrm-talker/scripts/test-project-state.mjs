@@ -18,9 +18,11 @@ globalThis.window = {
 };
 
 const {
+  addVisualReference,
   getProject,
   isSourceVerificationPending,
   loadProjectSnapshot,
+  removeVisualReference,
   setSourceFile,
 } = await import('../src/app/project-state.js');
 
@@ -92,4 +94,22 @@ assert.equal(getProject().visualReferences.length, 1, 'matching source must pres
 assert.equal(getProject().avatar.speaker, 'HOST', 'matching source must preserve avatar speaker');
 assert.equal(getProject().text.title, '保存タイトル', 'matching source must preserve editor text');
 
-console.log('Project validation/reopen/source verification tests passed');
+const sharedAsset = {
+  id: 'openverse-asset-123',
+  kind: 'search',
+  provider: 'openverse',
+  url: 'data:image/png;base64,AA==',
+  thumbnailUrl: 'data:image/png;base64,AA==',
+  creator: 'fixture creator',
+  license: 'cc0',
+};
+const firstPlacement = addVisualReference({...sharedAsset, startMs: 3000, endMs: 4000});
+const secondPlacement = addVisualReference({...sharedAsset, startMs: 5000, endMs: 6000});
+assert.notEqual(firstPlacement.id, secondPlacement.id, 'same asset must receive unique timeline placement IDs');
+assert.equal(firstPlacement.assetId, 'openverse-asset-123');
+assert.equal(secondPlacement.assetId, 'openverse-asset-123');
+assert.equal(getProject().visualReferences.length, 3);
+assert.equal(removeVisualReference(firstPlacement.id), true);
+assert.equal(getProject().visualReferences.some((item) => item.id === secondPlacement.id), true, 'removing one placement must preserve another placement of the same asset');
+
+console.log('Project validation/reopen/source verification/visual placement tests passed');
