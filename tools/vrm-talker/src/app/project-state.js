@@ -5,6 +5,7 @@ const emptyProject = () => ({
   source: {name: '', sha256: '', durationMs: 0},
   clip: {startMs: 0, endMs: 0},
   avatar: {speaker: null, model: 'Subeha.vrm'},
+  text: {title: '', telop: ''},
   captions: [],
   speakerTurns: [],
   visualCues: [],
@@ -39,6 +40,7 @@ const normalizeLoadedProject = (snapshot) => {
     source: {...base.source, ...structuredClone(snapshot.source)},
     clip: {...base.clip, ...structuredClone(snapshot.clip)},
     avatar: {...base.avatar, ...(snapshot.avatar ? structuredClone(snapshot.avatar) : {})},
+    text: {...base.text, ...(snapshot.text ? structuredClone(snapshot.text) : {})},
     captions: structuredClone(snapshot.captions),
     speakerTurns: structuredClone(snapshot.speakerTurns),
     visualCues: Array.isArray(snapshot.visualCues) ? structuredClone(snapshot.visualCues) : [],
@@ -103,6 +105,7 @@ export const setSourceFile = async (file, durationMs = 0) => {
 
   project.source = {name: file.name, sha256, durationMs};
   project.avatar.speaker = null;
+  project.text = {title: '', telop: ''};
   project.captions = [];
   project.speakerTurns = [];
   project.visualCues = [];
