@@ -1,6 +1,7 @@
 import {handleImportOpenverseImage} from './openverse.js';
 
 const OPENAI_BASE = 'https://api.openai.com/v1';
+const VISUAL_DIRECTOR_MODEL = 'gpt-5.4-mini';
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024;
 const MAX_REFERENCE_BYTES = 2 * 1024 * 1024;
 
@@ -60,9 +61,7 @@ const fileToDataUrl = async (file) => {
   const bytes = new Uint8Array(await file.arrayBuffer());
   let binary = '';
   const block = 0x8000;
-  for (let i = 0; i < bytes.length; i += block) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + block));
-  }
+  for (let i = 0; i < bytes.length; i += block) binary += String.fromCharCode(...bytes.subarray(i, i + block));
   return `data:${file.type || 'audio/wav'};base64,${btoa(binary)}`;
 };
 
@@ -177,7 +176,7 @@ const handleVisualCues = async (request, env) => {
   const payload = await openAI(env, '/responses', {
     method: 'POST',
     headers: {'content-type': 'application/json'},
-    body: JSON.stringify({model: 'gpt-5.6-luna', input: instructions}),
+    body: JSON.stringify({model: VISUAL_DIRECTOR_MODEL, input: instructions}),
   });
 
   const parsed = parseModelJson(responseText(payload));
@@ -205,7 +204,7 @@ const handleVisualCues = async (request, env) => {
       reason: String(raw?.reason || '').trim() || null,
     });
   }
-  return json({model: 'gpt-5.6-luna', cues});
+  return json({model: VISUAL_DIRECTOR_MODEL, cues});
 };
 
 const handleGenerateImage = async (request, env) => {
@@ -233,7 +232,15 @@ export default {
       requireOrigin(request, env);
       const url = new URL(request.url);
       if (request.method === 'GET' && (url.pathname.endsWith('/api/health') || url.pathname === '/health')) {
-        return json({ok: true, version: 4, openaiConfigured: Boolean(env.OPENAI_API_KEY), openverseImport: true}, 200, cors);
+        return json({
+          ok: true,
+          version: 5,
+          openaiConfigured: Boolean(env.OPENAI_API_KEY),
+          openverseImport: true,
+          transcriptionModel: 'gpt-4o-transcribe-diarize',
+          visualDirectorModel: VISUAL_DIRECTOR_MODEL,
+          imageModel: 'gpt-image-2',
+        }, 200, cors);
       }
       if (request.method !== 'POST') return json({error: 'Not found'}, 404, cors);
       let response;
