@@ -26,6 +26,9 @@ jobs:
       - name: Install VRM Studio dependencies
         working-directory: tools/vrm-talker
         run: npm install
+      - name: Test streaming SHA-256
+        working-directory: tools/vrm-talker
+        run: npm run test:sha
       - name: Build VRM Studio
         working-directory: tools/vrm-talker
         run: npm run build
