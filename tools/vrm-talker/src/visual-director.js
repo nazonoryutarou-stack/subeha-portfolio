@@ -1,4 +1,9 @@
-import {suggestVisualCues, generateReferenceImage} from './api/client.js';
+import {
+  apiBaseIsConfigured,
+  suggestVisualCues,
+  generateReferenceImage,
+  importOpenverseImage,
+} from './api/client.js';
 import {searchReferenceImages} from './references/search.js';
 import {addVisualReference, getProject, patchProject} from './app/project-state.js';
 
@@ -25,6 +30,7 @@ const makeReference = (cue, item) => ({
   prompt: cue.prompt || null,
   url: item.url || item.imageUrl || null,
   thumbnailUrl: item.thumbnailUrl || item.url || item.imageUrl || null,
+  originalUrl: item.originalUrl || null,
   sourceUrl: item.sourceUrl || null,
   creator: item.creator || null,
   license: item.license || null,
@@ -85,12 +91,37 @@ if (panel) {
         const label = document.createElement('small');
         label.textContent = item.title || item.creator || '採用';
         choice.append(image, label);
-        choice.addEventListener('click', () => {
-          const ref = makeReference(cue, {...item, kind: 'search'});
-          addVisualReference(ref);
+        choice.addEventListener('click', async () => {
           choice.disabled = true;
-          label.textContent = '採用済み';
-          setStatus(`${fmt(cue.startMs)} の参考画像をタイムラインへ追加しました。`);
+          label.textContent = '固定中…';
+          let selected = {...item, kind: 'search'};
+          let imported = false;
+          if (apiBaseIsConfigured() && item.id) {
+            try {
+              const payload = await importOpenverseImage(item.id);
+              if (payload?.dataUrl) {
+                selected = {
+                  ...selected,
+                  url: payload.dataUrl,
+                  thumbnailUrl: payload.dataUrl,
+                  originalUrl: payload.originalUrl || item.url || null,
+                  sourceUrl: payload.sourceUrl || item.sourceUrl || null,
+                  creator: payload.creator || item.creator || null,
+                  license: payload.license || item.license || null,
+                  title: payload.title || item.title || null,
+                };
+                imported = true;
+              }
+            } catch (error) {
+              console.warn('Openverse image import failed; using remote image', error);
+            }
+          }
+          const ref = makeReference(cue, selected);
+          addVisualReference(ref);
+          label.textContent = imported ? '採用済み・録画用固定済み' : '採用済み';
+          setStatus(imported
+            ? `${fmt(cue.startMs)} の参考画像を録画可能な形でタイムラインへ固定しました。`
+            : `${fmt(cue.startMs)} の参考画像をタイムラインへ追加しました。録画時はCORS可否を確認します。`);
           window.dispatchEvent(new CustomEvent('vrm-studio-project-changed'));
         });
         container.appendChild(choice);
