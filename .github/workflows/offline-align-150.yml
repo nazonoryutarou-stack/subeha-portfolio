@@ -1,0 +1,40 @@
+name: Offline Align Gravity 150
+
+on:
+  push:
+    branches: [work/alignment-150]
+    paths:
+      - 'jobs/alignment/**'
+      - 'remotion/vrm-lipsync/jobs/alignment.json'
+      - '.github/workflows/offline-align-150.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Install Remotion dependencies
+        working-directory: remotion/vrm-lipsync
+        run: npm install
+      - name: Run free local Whisper alignment
+        working-directory: remotion/vrm-lipsync
+        env:
+          WHISPER_MODEL: tiny
+        run: npm run transcribe -- --job=jobs/alignment.json --force
+      - name: Upload timed transcript
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity150-alignment-15m-30m
+          path: |
+            remotion/vrm-lipsync/inputs/source.captions.json
+            remotion/vrm-lipsync/inputs/source.captions.meta.json
+          if-no-files-found: error
