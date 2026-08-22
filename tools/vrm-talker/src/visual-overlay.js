@@ -17,6 +17,8 @@ const setStatus = (message) => {
   if (status) status.textContent = message;
 };
 
+const creditFor = (ref) => [ref?.creator, ref?.license].filter(Boolean).join(' / ');
+
 const currentTimeMs = () => {
   const duration = Number(getProject().source.durationMs || 0);
   if (!duration || !seek) return 0;
@@ -72,6 +74,31 @@ const drawCover = (ctx, image, x, y, width, height) => {
   ctx.drawImage(image, sx, sy, sw, sh, x, y, width, height);
 };
 
+const drawCredit = (ctx, ref, x, y, width, height) => {
+  const credit = creditFor(ref);
+  if (!credit) return;
+  const fontSize = Math.max(9, Math.round(Math.min(width, height) * 0.052));
+  const padX = Math.max(5, Math.round(fontSize * 0.55));
+  const padY = Math.max(3, Math.round(fontSize * 0.3));
+  ctx.save();
+  ctx.font = `600 ${fontSize}px ui-monospace,monospace`;
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'right';
+  const maxTextWidth = Math.max(1, width - padX * 2);
+  let label = credit;
+  while (label.length > 3 && ctx.measureText(label).width > maxTextWidth) label = `${label.slice(0, -2)}…`;
+  const textWidth = Math.min(maxTextWidth, ctx.measureText(label).width);
+  const boxWidth = textWidth + padX * 2;
+  const boxHeight = fontSize + padY * 2;
+  const boxX = x + width - boxWidth;
+  const boxY = y + height - boxHeight;
+  ctx.fillStyle = 'rgba(0,0,0,.68)';
+  ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+  ctx.fillStyle = 'rgba(255,255,255,.88)';
+  ctx.fillText(label, x + width - padX, y + height - padY);
+  ctx.restore();
+};
+
 if (stage && sourceCanvas) {
   const preview = document.createElement('div');
   preview.id = 'visualReferencePreview';
@@ -88,7 +115,22 @@ if (stage && sourceCanvas) {
   const previewImage = document.createElement('img');
   previewImage.alt = '';
   Object.assign(previewImage.style, {width: '100%', height: '100%', objectFit: 'cover', display: 'block'});
-  preview.appendChild(previewImage);
+  const previewCredit = document.createElement('div');
+  Object.assign(previewCredit.style, {
+    position: 'absolute',
+    right: '0',
+    bottom: '0',
+    maxWidth: '100%',
+    padding: '3px 6px',
+    background: 'rgba(0,0,0,.68)',
+    color: 'rgba(255,255,255,.88)',
+    font: '600 9px ui-monospace,monospace',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: 'none',
+  });
+  preview.append(previewImage, previewCredit);
   stage.appendChild(preview);
 
   const positionPreview = () => {
@@ -120,6 +162,9 @@ if (stage && sourceCanvas) {
       activeId = ref.id;
       previewImage.src = src;
       previewImage.alt = ref.title || ref.query || ref.prompt || 'visual reference';
+      const credit = creditFor(ref);
+      previewCredit.textContent = credit;
+      previewCredit.style.display = credit ? 'block' : 'none';
     }
     preview.style.display = 'block';
     positionPreview();
@@ -162,6 +207,7 @@ if (stage && sourceCanvas) {
             ctx.shadowBlur = Math.max(8, composite.width * 0.018);
             drawCover(ctx, record.image, x, y, w, h);
             ctx.restore();
+            drawCredit(ctx, ref, x, y, w, h);
           } else if (record?.ready && !record.safeForCanvas && warnedUnsafeId !== ref.id) {
             warnedUnsafeId = ref.id;
             setStatus('この検索画像は配信元CORS制限のためプレビューのみ。録画へ焼くには安全な取得経路が必要です。');
