@@ -1,5 +1,7 @@
 const OPENVERSE_API = 'https://api.openverse.org/v1/images';
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+const MAX_IMAGE_REDIRECTS = 5;
+const IMAGE_FETCH_TIMEOUT_MS = 15_000;
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), {
   status,
@@ -18,22 +20,105 @@ const toBase64 = (bytes) => {
   return btoa(binary);
 };
 
-const fetchImageBytes = async (rawUrl) => {
-  const url = new URL(rawUrl);
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error(`unsupported image URL scheme: ${url.protocol}`);
-  const response = await fetch(url, {
-    redirect: 'follow',
-    headers: {'accept': 'image/avif,image/webp,image/png,image/jpeg,image/gif,image/*;q=0.8'},
-  });
-  if (!response.ok) throw new Error(`image fetch HTTP ${response.status}`);
-  const declared = Number(response.headers.get('content-length') || 0);
-  if (declared > MAX_IMAGE_BYTES) throw new Error('image exceeds import size limit');
-  const mime = imageMimeAllowed(response.headers.get('content-type'));
-  if (!mime) throw new Error(`unsupported image type: ${response.headers.get('content-type') || 'unknown'}`);
-  const bytes = new Uint8Array(await response.arrayBuffer());
-  if (!bytes.length) throw new Error('image response is empty');
-  if (bytes.byteLength > MAX_IMAGE_BYTES) throw new Error('image exceeds import size limit');
-  return {bytes, mime};
+const privateIpv4 = (host) => {
+  const parts = String(host || '').split('.');
+  if (parts.length !== 4 || parts.some((part) => !/^\d{1,3}$/.test(part) || Number(part) > 255)) return false;
+  const [a, b] = parts.map(Number);
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true;
+  if (a >= 224) return true;
+  return false;
+};
+
+export const isPrivateImageHost = (hostname) => {
+  const host = String(hostname || '').trim().toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+  if (!host) return true;
+  if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local')) return true;
+  if (privateIpv4(host)) return true;
+  if (host === '::' || host === '::1') return true;
+  if (/^(fc|fd|fe8|fe9|fea|feb)/.test(host)) return true;
+  if (host.startsWith('::ffff:')) {
+    const mapped = host.slice('::ffff:'.length);
+    if (privateIpv4(mapped)) return true;
+  }
+  return false;
+};
+
+export const validateImageImportUrl = (rawUrl, baseUrl = undefined) => {
+  const url = baseUrl ? new URL(rawUrl, baseUrl) : new URL(rawUrl);
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new Error(`unsupported image URL scheme: ${url.protocol}`);
+  }
+  if (url.username || url.password) throw new Error('image URL credentials are not allowed');
+  if (isPrivateImageHost(url.hostname)) throw new Error('private/local image host is not allowed');
+  return url;
+};
+
+const readLimitedBody = async (response, maxBytes = MAX_IMAGE_BYTES) => {
+  if (!response.body) throw new Error('image response has no body');
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      if (!value?.byteLength) continue;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel('image exceeds import size limit').catch(() => {});
+        throw new Error('image exceeds import size limit');
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock?.();
+  }
+  if (!total) throw new Error('image response is empty');
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+};
+
+export const fetchImageBytes = async (rawUrl, fetchImpl = fetch) => {
+  let url = validateImageImportUrl(rawUrl);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), IMAGE_FETCH_TIMEOUT_MS);
+  try {
+    for (let redirectCount = 0; redirectCount <= MAX_IMAGE_REDIRECTS; redirectCount++) {
+      const response = await fetchImpl(url, {
+        redirect: 'manual',
+        signal: controller.signal,
+        headers: {'accept': 'image/avif,image/webp,image/png,image/jpeg,image/gif,image/*;q=0.8'},
+      });
+
+      if ([301, 302, 303, 307, 308].includes(response.status)) {
+        if (redirectCount >= MAX_IMAGE_REDIRECTS) throw new Error('too many image redirects');
+        const location = response.headers.get('location');
+        if (!location) throw new Error('image redirect has no location');
+        url = validateImageImportUrl(location, url);
+        continue;
+      }
+
+      if (!response.ok) throw new Error(`image fetch HTTP ${response.status}`);
+      const declared = Number(response.headers.get('content-length') || 0);
+      if (declared > MAX_IMAGE_BYTES) throw new Error('image exceeds import size limit');
+      const mime = imageMimeAllowed(response.headers.get('content-type'));
+      if (!mime) throw new Error(`unsupported image type: ${response.headers.get('content-type') || 'unknown'}`);
+      const bytes = await readLimitedBody(response);
+      return {bytes, mime, finalUrl: url.href};
+    }
+    throw new Error('too many image redirects');
+  } finally {
+    clearTimeout(timer);
+  }
 };
 
 export const handleImportOpenverseImage = async (request) => {
@@ -74,5 +159,6 @@ export const handleImportOpenverseImage = async (request) => {
     sourceUrl: metadata?.foreign_landing_url || null,
     originalUrl: metadata?.url || null,
     thumbnailUrl: metadata?.thumbnail || null,
+    importedFromUrl: imported.finalUrl,
   });
 };
