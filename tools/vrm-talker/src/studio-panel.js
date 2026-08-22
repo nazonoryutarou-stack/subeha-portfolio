@@ -1,4 +1,9 @@
-import {transcribeAudio, generateReferenceImage} from './api/client.js';
+import {
+  apiBaseIsConfigured,
+  generateReferenceImage,
+  importOpenverseImage,
+  transcribeAudio,
+} from './api/client.js';
 import {searchReferenceImages} from './references/search.js';
 import {
   addVisualReference,
@@ -11,12 +16,11 @@ import {
 } from './app/project-state.js';
 
 const panel = document.getElementById('panel');
-const stage = document.getElementById('stage');
 const audioInput = document.getElementById('audioFile');
 const seek = document.getElementById('seek');
 const status = document.getElementById('status');
 
-if (panel && stage && audioInput) {
+if (panel && audioInput) {
   const style = document.createElement('style');
   style.textContent = `
     .studio-tools{display:grid;gap:8px;border-top:1px solid #ffffff18;padding-top:8px}
@@ -28,15 +32,10 @@ if (panel && stage && audioInput) {
     .studio-card{border:1px solid #ffffff1d;background:#202026;border-radius:8px;padding:4px;cursor:pointer;color:#fff;text-align:left}
     .studio-card img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:5px;background:#111}
     .studio-card small{display:block;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ffffff99}
-    .studio-caption-preview{position:absolute;z-index:8;left:6%;right:6%;bottom:22%;text-align:center;color:#fff;font:800 clamp(20px,5vw,48px)/1.25 system-ui,sans-serif;text-shadow:0 2px 5px #000,0 0 2px #000;pointer-events:none;white-space:pre-wrap}
     .studio-chip{display:inline-block;border:1px solid #ffffff22;border-radius:999px;padding:3px 7px;margin-right:4px;font-size:10px;color:#ffffffa0}
     .studio-warning{font-size:11px;color:#ffc57a;line-height:1.4}
   `;
   document.head.appendChild(style);
-
-  const captionPreview = document.createElement('div');
-  captionPreview.className = 'studio-caption-preview';
-  stage.appendChild(captionPreview);
 
   const section = document.createElement('section');
   section.className = 'studio-tools';
@@ -142,11 +141,6 @@ if (panel && stage && audioInput) {
     return getProject().captions.find((caption) => Number(caption.startMs) <= now && Number(caption.endMs) > now) || null;
   };
 
-  setInterval(() => {
-    const caption = currentCaption();
-    captionPreview.textContent = caption?.text || '';
-  }, 80);
-
   audioInput.addEventListener('change', async () => {
     const file = audioInput.files?.[0];
     if (!file) return;
@@ -212,6 +206,17 @@ if (panel && stage && audioInput) {
       setStatus('現在位置に字幕がありません。');
       return;
     }
+    const project = getProject();
+    if (project.speakerTurns.length) {
+      if (!project.avatar.speaker) {
+        setStatus('本人話者を指定してから現在字幕を検索語へ使ってください。');
+        return;
+      }
+      if (caption.speaker !== project.avatar.speaker) {
+        setStatus('現在字幕は本人以外の発話なので、検索語へ自動コピーしません。');
+        return;
+      }
+    }
     searchInput.value = caption.text;
   });
 
@@ -228,15 +233,42 @@ if (panel && stage && audioInput) {
       const label = document.createElement('small');
       label.textContent = item.title || item.creator || item.kind;
       button.append(image, label);
-      button.addEventListener('click', () => {
+      button.addEventListener('click', async () => {
+        button.disabled = true;
         const now = Math.round(currentMs());
+        let selected = item;
+        if (item.kind === 'search' && item.id && apiBaseIsConfigured()) {
+          label.textContent = '録画用に固定中…';
+          try {
+            const payload = await importOpenverseImage(item.id);
+            if (payload?.dataUrl) {
+              selected = {
+                ...item,
+                url: payload.dataUrl,
+                thumbnailUrl: payload.dataUrl,
+                originalUrl: payload.originalUrl || item.url || null,
+                sourceUrl: payload.sourceUrl || item.sourceUrl || null,
+                creator: payload.creator || item.creator || null,
+                license: payload.license || item.license || null,
+                title: payload.title || item.title || null,
+              };
+            }
+          } catch (error) {
+            console.error(error);
+            button.disabled = false;
+            label.textContent = item.title || item.creator || item.kind;
+            setStatus(`参考画像を録画用に固定できませんでした: ${error instanceof Error ? error.message : String(error)}`);
+            return;
+          }
+        }
         addVisualReference({
-          ...item,
+          ...selected,
           startMs: now,
-          endMs: now + 5000,
+          endMs: Math.min(Number(getProject().source.durationMs || now + 5000), now + 5000),
           query: searchInput.value.trim() || null,
         });
         refreshMeta();
+        label.textContent = '採用済み';
         setStatus('参考画像をprojectへ追加しました。');
       });
       results.appendChild(button);
@@ -278,7 +310,7 @@ if (panel && stage && audioInput) {
         url,
         thumbnailUrl: url,
         sourceUrl: null,
-        creator: 'generated',
+        creator: 'OpenAI',
         license: null,
         prompt,
       };
@@ -289,6 +321,12 @@ if (panel && stage && audioInput) {
       setStatus(`画像生成API: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       generateButton.disabled = false;
+    }
+  });
+
+  window.addEventListener('vrm-studio-project-changed', (event) => {
+    if (['analysis', 'avatar-speaker', 'visual-add', 'visual-remove', 'loaded-awaiting-source', 'source-verified', 'new-source', 'reset'].includes(event.detail?.reason)) {
+      refreshMeta();
     }
   });
 
