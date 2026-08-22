@@ -8,6 +8,19 @@ const fmt = (seconds) => {
   return `${minutes}:${String(rest).padStart(2, '0')}`;
 };
 
+window.addEventListener('vrm-studio-source-progress', (event) => {
+  if (!status) return;
+  const detail = event.detail || {};
+  const loaded = Number(detail.loaded || 0);
+  const total = Number(detail.total || 0);
+  if (detail.phase === 'hash' && total > 0) {
+    const percent = Math.max(0, Math.min(100, Math.round(loaded / total * 100)));
+    status.textContent = `元音声を確認中（SHA-256） ${percent}%`;
+  } else if (detail.phase === 'hash-done') {
+    status.textContent = '元音声のSHA-256確認完了。';
+  }
+});
+
 window.addEventListener('vrm-studio-transcription-progress', (event) => {
   if (!status) return;
   const detail = event.detail || {};
