@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/remotion-workflow-v2
+      - feature/vrm-studio-webapp
     paths:
       - 'remotion/vrm-lipsync/**'
       - 'scripts/check-vrm.mjs'
@@ -29,6 +30,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
       - name: Check pipeline script syntax
         working-directory: .
         run: |
@@ -36,6 +41,8 @@ jobs:
           node --check remotion/vrm-lipsync/scripts/ensure-video-vrm.mjs
           node --check remotion/vrm-lipsync/scripts/studio-project-validation.mjs
           node --check remotion/vrm-lipsync/scripts/import-studio-project.mjs
+          node --check remotion/vrm-lipsync/scripts/import-assistant-plan.mjs
+          node --check remotion/vrm-lipsync/scripts/render-assistant.mjs
           node --check remotion/vrm-lipsync/scripts/materialize-visuals.mjs
           node --check remotion/vrm-lipsync/scripts/prepare-studio.mjs
           node --check remotion/vrm-lipsync/scripts/render-studio.mjs
@@ -64,6 +71,52 @@ jobs:
           assert.throws(() => validateStudioProject({...valid, layout: {width: 800, height: 800}}), /未対応の出力サイズ/);
           console.log('Studio project validator fixtures passed');
           NODE
+      - name: Test ChatGPT assistant edit-plan bridge
+        run: |
+          mkdir -p jobs/.generated
+          python3 - <<'PY'
+          import math, struct, wave
+          with wave.open('jobs/.generated/assistant-fixture.wav', 'wb') as w:
+              w.setnchannels(1)
+              w.setsampwidth(2)
+              w.setframerate(16000)
+              frames = bytearray()
+              for i in range(3 * 16000):
+                  sample = int(math.sin(i / 13.0) * 2500)
+                  frames += struct.pack('<h', sample)
+              w.writeframes(frames)
+          PY
+          cat > jobs/.generated/assistant-plan.json <<'JSON'
+          {
+            "version": 1,
+            "sourceLabel": "assistant-fixture.wav",
+            "selection": {"reason":"CI fixture","hook":"HOST/GUEST/UNKNOWN gate","summary":"bridge test"},
+            "clip": {"startMs":0,"endMs":3000},
+            "layout": {"width":720,"height":1280,"captionBottomPx":290},
+            "text": {"title":"Assistant fixture","telop":""},
+            "captions": [
+              {"startMs":0,"endMs":800,"speaker":"HOST","text":"host one","speakerConfidence":0.99},
+              {"startMs":800,"endMs":1600,"speaker":"GUEST","text":"guest","speakerConfidence":0.95},
+              {"startMs":1600,"endMs":2200,"speaker":"UNKNOWN","text":"unclear","speakerConfidence":0.4},
+              {"startMs":2200,"endMs":3000,"speaker":"HOST","text":"host two","speakerConfidence":0.98}
+            ],
+            "visualReferences": [],
+            "motion": {"profile":"normal","notes":"CI"}
+          }
+          JSON
+          npm run import:assistant -- --plan=jobs/.generated/assistant-plan.json --audio=jobs/.generated/assistant-fixture.wav --output-project=jobs/.generated/assistant-project.json
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const p = JSON.parse(fs.readFileSync('jobs/.generated/assistant-project.json', 'utf8'));
+          if (p.avatar?.speaker !== 'HOST') throw new Error('avatar speaker is not HOST');
+          if (!p.speakerTurns.some(x => x.speaker === 'HOST')) throw new Error('HOST turn missing');
+          if (!p.speakerTurns.some(x => x.speaker === 'GUEST')) throw new Error('GUEST turn missing');
+          if (!p.speakerTurns.some(x => x.speaker === 'UNKNOWN')) throw new Error('UNKNOWN turn missing');
+          if (p.source?.sha256?.length !== 64) throw new Error('source SHA missing');
+          console.log('Assistant plan bridge fixture passed');
+          NODE
+          npm run render:assistant -- --plan=jobs/.generated/assistant-plan.json --audio=jobs/.generated/assistant-fixture.wav --output=out/assistant-fixture.mp4 --plan-only | grep -q '"composition":"VrmLipSync"'
+          rm -rf jobs/.generated
       - name: Test visual and background materialization
         run: |
           mkdir -p public
