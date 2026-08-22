@@ -46,6 +46,7 @@ if (panel) {
     if (!list) return;
     const refs = getProject().visualReferences;
     list.textContent = '';
+    list.dataset.count = String(refs.length);
     if (!refs.length) {
       const empty = document.createElement('div');
       empty.className = 'small';
@@ -98,12 +99,12 @@ if (panel) {
       apply.textContent = '時刻を反映';
       apply.addEventListener('click', () => {
         try {
-          updateVisualReference(ref.id, {
+          const updated = updateVisualReference(ref.id, {
             startMs: Math.round(Number(start.value) * 1000),
             endMs: Math.round(Number(end.value) * 1000),
           });
-          setStatus(`画像区間を ${start.value}s–${end.value}s に更新しました。`);
-          window.dispatchEvent(new CustomEvent('vrm-studio-project-changed'));
+          if (!updated) throw new Error('画像素材が見つかりません。');
+          setStatus(`画像区間を ${sec(updated.startMs)}s–${sec(updated.endMs)}s に更新しました。`);
           render();
         } catch (error) {
           setStatus(error instanceof Error ? error.message : String(error));
@@ -113,9 +114,8 @@ if (panel) {
       remove.type = 'button';
       remove.textContent = '削除';
       remove.addEventListener('click', () => {
-        removeVisualReference(ref.id);
-        window.dispatchEvent(new CustomEvent('vrm-studio-project-changed'));
-        setStatus('画像素材をタイムラインから削除しました。');
+        const removed = removeVisualReference(ref.id);
+        setStatus(removed ? '画像素材をタイムラインから削除しました。' : '画像素材が見つかりませんでした。');
         render();
       });
       actions.append(apply, remove);
@@ -127,10 +127,7 @@ if (panel) {
   window.addEventListener('vrm-studio-project-changed', render);
   setInterval(() => {
     const count = getProject().visualReferences.length;
-    if (Number(list.dataset.count || -1) !== count) {
-      list.dataset.count = String(count);
-      render();
-    }
+    if (Number(list.dataset.count || -1) !== count) render();
   }, 400);
   render();
 }
