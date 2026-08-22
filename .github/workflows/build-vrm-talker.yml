@@ -22,9 +22,11 @@ jobs:
         with:
           node-version: '22'
       - name: Check Worker syntax
-        run: |
-          node --check workers/vrm-studio-api/src/index.js
-          node --check workers/vrm-studio-api/src/openverse.js
+        working-directory: workers/vrm-studio-api
+        run: npm run check
+      - name: Test Worker image import safety
+        working-directory: workers/vrm-studio-api
+        run: npm test
       - name: Install VRM Studio dependencies
         working-directory: tools/vrm-talker
         run: npm install
