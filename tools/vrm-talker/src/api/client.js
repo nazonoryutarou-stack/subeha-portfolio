@@ -1,6 +1,3 @@
-import {transcribeAudioLocally} from '../local-analysis.js';
-import {generateLocalReferenceImage, suggestLocalVisualCues} from '../local-visual-director.js';
-
 const STORAGE_KEY = 'vrm-studio-api-base';
 
 const normalizeBase = (value) => String(value || '').trim().replace(/\/$/, '');
@@ -40,28 +37,14 @@ const parseJson = async (response) => {
 };
 
 export const checkApiHealth = async () => {
-  if (!apiBaseIsConfigured()) return {ok: true, freeOnly: true, openverseImport: false, localOnly: true};
+  if (!apiBaseIsConfigured()) return {ok: true, freeOnly: true, openverseImport: false, optional: true};
   const response = await fetch(`${getApiBase()}/health`, {method: 'GET', cache: 'no-store'});
   return await parseJson(response);
 };
 
-// 正規経路は完全無料のブラウザ内推論。音声は外部APIへ送らない。
-export const transcribeAudio = async (file, options = {}) => transcribeAudioLocally(file, options);
-
-// 画像挿入候補も端末内ルールで決定する。時刻はcaptionの実タイムコードのみを使う。
-export const suggestVisualCues = async (captions) => {
-  window.dispatchEvent(new CustomEvent('vrm-studio-visual-progress', {detail: {phase: 'local-start', index: 0, count: 1}}));
-  const payload = suggestLocalVisualCues(captions);
-  window.dispatchEvent(new CustomEvent('vrm-studio-visual-progress', {detail: {phase: 'done', index: 1, count: 1}}));
-  return payload;
-};
-
-// 抽象・架空素材の必須経路はローカルCanvas生成。課金APIは使わない。
-export const generateReferenceImage = async ({prompt, size = '1024x1024'}) => generateLocalReferenceImage({prompt, size});
-
-// Cloudflare Free Workerは任意のOpenverse固定化プロキシだけを担当する。
+// 正規動画制作ではChatGPTがedit-planを作る。Workerは任意のOpenverse固定化だけに使う。
 export const importOpenverseImage = async (id) => {
-  if (!apiBaseIsConfigured()) throw new Error('Openverse画像の録画用固定化には無料Workerの接続が必要です。検索・プレビュー・ローカル解析はWorkerなしで使えます。');
+  if (!apiBaseIsConfigured()) throw new Error('Openverse画像の録画用固定化には任意の無料Worker接続が必要です。');
   const response = await fetch(`${getApiBase()}/images/import-openverse`, {
     method: 'POST',
     headers: {'content-type': 'application/json'},
