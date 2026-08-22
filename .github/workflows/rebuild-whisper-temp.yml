@@ -1,0 +1,37 @@
+name: Rebuild Whisper Temp Clip
+
+on:
+  push:
+    branches:
+      - work/whisper-151
+    paths:
+      - 'tmp/whisper151/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/whisper-151
+          fetch-depth: 0
+      - name: Rebuild OGG from base64 parts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat tmp/whisper151/parts/*.b64 > tmp/whisper151/clip.b64
+          base64 -d tmp/whisper151/clip.b64 > tmp/whisper151/clip.ogg
+          test -s tmp/whisper151/clip.ogg
+          rm tmp/whisper151/clip.b64
+      - name: Commit rebuilt clip
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tmp/whisper151/clip.ogg
+          git commit -m 'Rebuild temporary Whisper clip' || exit 0
+          git push origin HEAD:work/whisper-151
