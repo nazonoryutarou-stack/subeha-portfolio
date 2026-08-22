@@ -117,14 +117,15 @@ if (panel) {
       text.setAttribute('aria-label', `字幕 ${index + 1}`);
       text.addEventListener('change', () => {
         const value = text.value.trim();
+        const latest = getProject().captions[index];
         if (!value) {
-          text.value = caption.text || '';
+          text.value = latest?.text || caption.text || '';
           setStatus('字幕本文を空にはできません。削除ではなく本文を訂正してください。');
           return;
         }
-        if (value === caption.text) return;
+        if (value === latest?.text) return;
         const nextCaptions = getProject().captions.map((item, i) => i === index ? {...item, text: value} : item);
-        patchProject({captions: nextCaptions, visualCues: []});
+        patchProject({captions: nextCaptions, visualCues: []}, 'caption-edit');
         setStatus(`字幕 ${index + 1} を訂正しました。時刻・話者は維持し、未採用のAI画像候補を無効化しました。`);
       });
 
