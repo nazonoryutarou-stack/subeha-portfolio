@@ -25,7 +25,7 @@ if (panel && audioInput) {
     <h2>AUTO PIPELINE</h2>
     <label class="check"><input id="autoAnalyze" type="checkbox" checked> 音声選択後に字幕＋話者解析まで自動実行</label>
     <label class="check"><input id="autoVisual" type="checkbox" checked> 解析後に画像挿入候補まで自動選定</label>
-    <div class="small">画像生成は課金を伴うため自動実行しません。生成候補は確認後に実行します。</div>
+    <div class="small">画像生成は課金を伴うため自動実行しません。話者情報がある場合、本人話者が確定するまで画像選定も止めます。</div>
   `;
   panel.insertBefore(section, panel.firstChild);
 
@@ -81,12 +81,13 @@ if (panel && audioInput) {
       }
 
       if (project.speakerTurns.length && !project.avatar.speaker) {
-        setStatus('字幕解析完了。本人話者を選択すると口パクゲートが有効になります。画像候補は続けて選定します。');
+        setStatus('字幕＋話者解析は完了しました。本人話者が未確定なので、口パクと画像選定を停止しています。本人話者を選択してください。');
+        return;
       }
 
       if (!autoVisual?.checked) return;
       const visual = await waitFor(() => document.getElementById('visualSuggest'));
-      setStatus('自動パイプライン: 発話内容から画像挿入候補を選定します。');
+      setStatus('自動パイプライン: 本人発話だけを基準に画像挿入候補を選定します。');
       visual.click();
       await waitFor(() => visual.disabled === true, {timeoutMs: 3000});
       await waitFor(() => visual.disabled === false, {timeoutMs: 5 * 60 * 1000, intervalMs: 250});
