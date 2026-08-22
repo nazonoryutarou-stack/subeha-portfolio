@@ -1,0 +1,68 @@
+name: Whisper Alignment
+
+on:
+  push:
+    branches:
+      - work/whisper-align-151
+    paths:
+      - 'tmp/whisper/source.m4a'
+      - 'tmp/whisper/job.json'
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: work/whisper-align-151
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: remotion/vrm-lipsync/package-lock.json
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Remotion dependencies
+        working-directory: remotion/vrm-lipsync
+        run: npm ci
+
+      - name: Transcribe source clip with local whisper.cpp
+        working-directory: remotion/vrm-lipsync
+        env:
+          WHISPER_MODEL: small
+        run: node scripts/transcribe-source.mjs --job=../../tmp/whisper/job.json --force
+
+      - name: Save alignment result
+        shell: bash
+        run: |
+          mkdir -p tmp/whisper/output
+          cp remotion/vrm-lipsync/inputs/source.captions.json tmp/whisper/output/captions.json
+          cp remotion/vrm-lipsync/inputs/source.captions.meta.json tmp/whisper/output/meta.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'tmp/whisper/output/captions.json';
+          const captions = JSON.parse(fs.readFileSync(p, 'utf8'));
+          console.log(`captions=${captions.length}`);
+          for (const c of captions.slice(0, 12)) console.log(JSON.stringify(c));
+          NODE
+
+      - name: Commit alignment result
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tmp/whisper/output/captions.json tmp/whisper/output/meta.json
+          if git diff --cached --quiet; then
+            echo 'No alignment changes.'
+          else
+            git commit -m 'Add Whisper alignment result for 151 search clip'
+            git push origin HEAD:work/whisper-align-151
+          fi
