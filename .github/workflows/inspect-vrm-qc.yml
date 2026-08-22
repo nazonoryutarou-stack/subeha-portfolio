@@ -1,0 +1,31 @@
+name: Inspect VRM QC
+
+on:
+  push:
+    branches:
+      - fix/vtuber-qc-v2
+    paths:
+      - 'Subeha.vrm'
+      - 'tools/video-pipeline/inspect_vrm.py'
+      - '.github/workflows/inspect-vrm-qc.yml'
+  pull_request:
+    paths:
+      - 'Subeha.vrm'
+      - 'tools/video-pipeline/inspect_vrm.py'
+      - '.github/workflows/inspect-vrm-qc.yml'
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect Subeha.vrm expressions
+        run: |
+          python tools/video-pipeline/inspect_vrm.py Subeha.vrm
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vrm-inspection
+          path: vrm-inspection.json
+          retention-days: 3
