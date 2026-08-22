@@ -58,9 +58,9 @@ export const loadProjectSnapshot = (snapshot) => {
   return project;
 };
 
-export const patchProject = (patch) => {
+export const patchProject = (patch, reason = 'patch') => {
   project = {...project, ...patch};
-  emitProjectChanged('patch');
+  emitProjectChanged(reason);
   return project;
 };
 
