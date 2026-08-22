@@ -58,7 +58,7 @@ jobs:
           with open('public/envelope.json','w',encoding='utf-8') as f:
               json.dump({'version':2,'audio':'voice.wav','fps':fps,'durationSeconds':3,'durationInFrames':frames,'values':values},f)
           with open('public/clip.json','w',encoding='utf-8') as f:
-              json.dump({'version':3,'title':'STRUCTURAL SMOKE','hook':'NO MOUTH QC','sourceLabel':'CI','captions':[{'text':'構造レンダー確認','startMs':500,'endMs':2500}]},f,ensure_ascii=False)
+              json.dump({'version':3,'title':'STRUCTURAL SMOKE','hook':'NO MOUTH QC','sourceLabel':'CI','layout':{'width':720,'height':1280,'captionBottomPx':290},'captions':[{'text':'構造レンダー確認','startMs':500,'endMs':2500}]},f,ensure_ascii=False)
           rate=48000
           with wave.open('public/voice.wav','wb') as w:
               w.setnchannels(1); w.setsampwidth(2); w.setframerate(rate)
@@ -72,6 +72,8 @@ jobs:
         run: npm run check
       - name: Render 3-second structural video
         run: npx remotion render VrmLipSync out/smoke.mp4 --codec=h264 --crf=24 --frames=0-89
+      - name: Validate structural video
+        run: node scripts/validate-render.mjs --input=out/smoke.mp4 --width=720 --height=1280 --min-duration=2.8 --max-duration=3.2 --max-av-drift=0.15
       - name: Extract structural QC frames
         run: |
           ffmpeg -hide_banner -loglevel error -y -ss 0.17 -i out/smoke.mp4 -frames:v 1 out/smoke-qc/start.png
