@@ -15,8 +15,9 @@ if (!fs.existsSync(clipPath)) {
 
 const clip = JSON.parse(fs.readFileSync(clipPath, 'utf8'));
 const refs = Array.isArray(clip.visualReferences) ? clip.visualReferences : [];
-if (!refs.length) {
-  console.log('Visual references: 0 / materialize skip');
+const backgroundDataUrl = String(clip.backgroundDataUrl || '').trim();
+if (!refs.length && !backgroundDataUrl) {
+  console.log('Visual references/background: 0 / materialize skip');
   process.exit(0);
 }
 
@@ -40,7 +41,7 @@ const parseDataUrl = (value) => {
   const match = /^data:(image\/(?:png|jpeg|jpg|webp|gif));base64,([a-zA-Z0-9+/=\s]+)$/.exec(String(value || ''));
   if (!match) return null;
   const bytes = Buffer.from(match[2].replace(/\s/g, ''), 'base64');
-  if (!bytes.length) throw new Error('生成画像data URLが空です。');
+  if (!bytes.length) throw new Error('画像data URLが空です。');
   if (bytes.length > MAX_IMAGE_BYTES) throw new Error(`画像が大きすぎます: ${(bytes.length / 1048576).toFixed(1)}MB`);
   return {bytes, mime: match[1]};
 };
@@ -82,12 +83,7 @@ const fetchImage = async (raw) => {
   }
 };
 
-const materializeOne = async (ref, index) => {
-  const candidates = [ref.url, ref.thumbnailUrl]
-    .map((value) => String(value || '').trim())
-    .filter((value, i, all) => value && all.indexOf(value) === i);
-  if (!candidates.length) throw new Error(`画像 #${index + 1} にURL/dataがありません。`);
-
+const materializeCandidates = async (candidates, stem) => {
   let lastError = null;
   for (const candidate of candidates) {
     try {
@@ -96,24 +92,44 @@ const materializeOne = async (ref, index) => {
       const ext = extForMime(data.mime);
       if (!ext) throw new Error(`未対応画像形式: ${data.mime}`);
       const fingerprint = createHash('sha256').update(data.bytes).digest('hex').slice(0, 12);
-      const filename = `${String(index + 1).padStart(2, '0')}-${safeStem(ref.id || ref.kind)}-${fingerprint}.${ext}`;
+      const filename = `${safeStem(stem)}-${fingerprint}.${ext}`;
       fs.writeFileSync(path.join(visualsDir, filename), data.bytes);
       return `visuals/${filename}`;
     } catch (error) {
       lastError = error;
     }
   }
-  throw new Error(`画像 #${index + 1} を固定化できません: ${lastError instanceof Error ? lastError.message : String(lastError)}`);
+  throw lastError instanceof Error ? lastError : new Error(String(lastError || '画像を固定化できませんでした。'));
 };
 
 const updated = [];
 for (let index = 0; index < refs.length; index++) {
   const ref = refs[index];
-  const renderFile = await materializeOne(ref, index);
-  updated.push({...ref, renderFile});
-  console.log(`Visual ${index + 1}/${refs.length}: ${renderFile}`);
+  const candidates = [ref.url, ref.thumbnailUrl]
+    .map((value) => String(value || '').trim())
+    .filter((value, i, all) => value && all.indexOf(value) === i);
+  if (!candidates.length) throw new Error(`画像 #${index + 1} にURL/dataがありません。`);
+  try {
+    const renderFile = await materializeCandidates(candidates, `${String(index + 1).padStart(2, '0')}-${ref.id || ref.kind}`);
+    updated.push({...ref, renderFile});
+    console.log(`Visual ${index + 1}/${refs.length}: ${renderFile}`);
+  } catch (error) {
+    throw new Error(`画像 #${index + 1} を固定化できません: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
-
 clip.visualReferences = updated;
+
+if (backgroundDataUrl) {
+  try {
+    clip.backgroundFile = await materializeCandidates([backgroundDataUrl], 'background');
+    console.log(`Background: ${clip.backgroundFile}`);
+  } catch (error) {
+    throw new Error(`背景画像を固定化できません: ${error instanceof Error ? error.message : String(error)}`);
+  }
+} else {
+  clip.backgroundFile = null;
+}
+delete clip.backgroundDataUrl;
+
 fs.writeFileSync(clipPath, JSON.stringify(clip, null, 2) + '\n');
 console.log(`Visual references materialized: ${updated.length}`);
