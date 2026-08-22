@@ -1,0 +1,77 @@
+name: Whisper Alignment
+
+on:
+  pull_request:
+    branches:
+      - feature/vrm-studio-webapp
+    paths:
+      - 'tmp/whisper/base64v2/**'
+      - 'remotion/vrm-lipsync/scripts/transcribe-source.mjs'
+      - '.github/workflows/whisper-align.yml'
+  push:
+    branches:
+      - work/whisper-align-151
+    paths:
+      - 'tmp/whisper/base64v2/**'
+      - 'remotion/vrm-lipsync/scripts/transcribe-source.mjs'
+      - '.github/workflows/whisper-align.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Reconstruct and verify temporary source clip
+        shell: bash
+        run: |
+          cat tmp/whisper/base64v2/part-*.txt | tr -d '\n\r' | base64 -d > tmp/whisper/source-v2.ogg
+          ACTUAL_SIZE=$(stat -c%s tmp/whisper/source-v2.ogg)
+          echo "size=$ACTUAL_SIZE"
+          test "$ACTUAL_SIZE" = "49203"
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper/source-v2.ogg
+
+      - name: Prepare alignment job
+        shell: bash
+        run: |
+          cat > tmp/whisper/job.json <<'JSON'
+          {
+            "sourceAudio": "../../tmp/whisper/source-v2.ogg"
+          }
+          JSON
+
+      - name: Install Remotion dependencies
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+
+      - name: Transcribe source clip with local whisper.cpp
+        working-directory: remotion/vrm-lipsync
+        env:
+          WHISPER_MODEL: small
+          WHISPER_LANGUAGE: ja
+        run: node scripts/transcribe-source.mjs --job=../../tmp/whisper/job.json --force
+
+      - name: Collect alignment result
+        shell: bash
+        run: |
+          mkdir -p tmp/whisper/output-v2
+          cp remotion/vrm-lipsync/inputs/source.captions.json tmp/whisper/output-v2/captions.json
+          cp remotion/vrm-lipsync/inputs/source.captions.meta.json tmp/whisper/output-v2/meta.json
+          cat tmp/whisper/output-v2/captions.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-align-151-v2
+          path: tmp/whisper/output-v2/
+          retention-days: 1
