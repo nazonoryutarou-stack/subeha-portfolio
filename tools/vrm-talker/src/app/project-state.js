@@ -1,3 +1,5 @@
+import {sha256Blob} from '../sha256.js';
+
 const emptyProject = () => ({
   version: 1,
   source: {name: '', sha256: '', durationMs: 0},
@@ -25,9 +27,13 @@ export const patchProject = (patch) => {
 };
 
 export const setSourceFile = async (file, durationMs = 0) => {
-  const bytes = await file.arrayBuffer();
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
-  const sha256 = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  const sha256 = await sha256Blob(file, {
+    onProgress: ({loaded, total}) => {
+      window.dispatchEvent(new CustomEvent('vrm-studio-source-progress', {
+        detail: {phase: 'hash', loaded, total},
+      }));
+    },
+  });
   project.source = {name: file.name, sha256, durationMs};
   project.avatar.speaker = null;
   project.captions = [];
@@ -35,6 +41,9 @@ export const setSourceFile = async (file, durationMs = 0) => {
   project.visualCues = [];
   project.visualReferences = [];
   project.clip = {startMs: 0, endMs: durationMs > 0 ? durationMs : 0};
+  window.dispatchEvent(new CustomEvent('vrm-studio-source-progress', {
+    detail: {phase: 'hash-done', loaded: file.size, total: file.size},
+  }));
   return project.source;
 };
 
