@@ -84,6 +84,15 @@ const namespaceSpeaker = (speaker, chunkIndex) => {
   return `CHUNK_${String(chunkIndex).padStart(3, '0')}_${value}`;
 };
 
+const captionBelongsToChunkCore = (startMs, endMs, chunk) => {
+  const midpoint = (Number(startMs) + Number(endMs)) / 2;
+  const coreStart = Number(chunk.coreStartMs ?? chunk.startMs ?? 0);
+  const coreEnd = Number(chunk.coreEndMs ?? chunk.endMs ?? 0);
+  if (!Number.isFinite(midpoint) || !Number.isFinite(coreStart) || !Number.isFinite(coreEnd)) return false;
+  if (midpoint < coreStart) return false;
+  return chunk.index === chunk.count - 1 ? midpoint <= coreEnd : midpoint < coreEnd;
+};
+
 export const checkApiHealth = async () => {
   const response = await fetch(`${getApiBase()}/health`, {method: 'GET', cache: 'no-store'});
   return await parseJson(response);
@@ -93,7 +102,7 @@ export const transcribeAudio = async (file) => {
   const known = await getKnownSpeakerReference().catch(() => null);
 
   // 容量だけでは長尺判定しない。高圧縮M4Aは長時間でも25MB未満になり得る。
-  // まず時間ベースで約8分チャンク計画を作り、容量超過時は短尺でも16kHz WAVへ縮小して送る。
+  // 約8分のcoreごとに分け、境界は前後2秒ほど重ねてASRへ文脈を渡す。
   progress({phase: 'prepare', index: 0, count: 0});
   const plan = await planAudioTranscriptionChunks(file);
   const temporalChunking = plan.chunks.length > 1;
@@ -135,13 +144,16 @@ export const transcribeAudio = async (file) => {
     if (!language && payload?.language) language = payload.language;
 
     for (const caption of payload?.captions || []) {
-      const startMs = Number(caption.startMs);
-      const endMs = Number(caption.endMs);
-      if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) continue;
+      const localStartMs = Number(caption.startMs);
+      const localEndMs = Number(caption.endMs);
+      if (!Number.isFinite(localStartMs) || !Number.isFinite(localEndMs) || localEndMs <= localStartMs) continue;
+      const startMs = Math.round(localStartMs + chunk.startMs);
+      const endMs = Math.round(localEndMs + chunk.startMs);
+      if (temporalChunking && !captionBelongsToChunkCore(startMs, endMs, chunk)) continue;
       captions.push({
         ...caption,
-        startMs: Math.round(startMs + chunk.startMs),
-        endMs: Math.round(endMs + chunk.startMs),
+        startMs,
+        endMs,
         speaker: temporalChunking ? namespaceSpeaker(caption.speaker, chunk.index) : String(caption.speaker || 'SPEAKER_00'),
         sourceChunk: chunk.index,
       });
@@ -165,6 +177,7 @@ export const transcribeAudio = async (file) => {
     chunked: temporalChunking,
     transcoded: true,
     chunkCount: plan.chunks.length,
+    chunkOverlapSeconds: plan.overlapSeconds || 0,
   };
 };
 
