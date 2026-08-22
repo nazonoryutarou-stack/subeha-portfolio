@@ -39,6 +39,32 @@ jobs:
           node --check remotion/vrm-lipsync/scripts/prepare-studio.mjs
           node --check remotion/vrm-lipsync/scripts/generate-envelope.mjs
           node --check remotion/vrm-lipsync/scripts/prepare-clip.mjs
+      - name: Test visual materialization
+        run: |
+          mkdir -p public
+          cat > public/clip.json <<'JSON'
+          {
+            "visualReferences": [
+              {
+                "id": "ci-visual",
+                "kind": "generated",
+                "startMs": 0,
+                "endMs": 1000,
+                "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZVZsAAAAASUVORK5CYII="
+              }
+            ]
+          }
+          JSON
+          node scripts/materialize-visuals.mjs
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const clip = JSON.parse(fs.readFileSync('public/clip.json', 'utf8'));
+          const renderFile = clip.visualReferences?.[0]?.renderFile;
+          if (!renderFile) throw new Error('renderFile was not written');
+          if (!fs.existsSync(`public/${renderFile}`)) throw new Error(`materialized file missing: ${renderFile}`);
+          console.log(`Materialized visual fixture: ${renderFile}`);
+          NODE
+          rm -rf public/visuals public/clip.json
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: TypeScript check
