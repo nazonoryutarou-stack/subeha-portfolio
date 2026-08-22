@@ -50,7 +50,6 @@ type SceneState = {
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 
 const mouthWeights = (frame: number, level: number) => {
-  // 小さい声でも口が見えるように旧版より感度を上げる。
   const gate = clamp01((level - 0.025) / 0.48);
   if (gate < 0.02) return {aa: 0, ih: 0, ou: 0, ee: 0, oh: 0};
   const phase = Math.floor(frame / 2) % 5;
@@ -73,7 +72,6 @@ const blinkWeight = (frame: number) => {
 };
 
 const applyNaturalPose = (vrm: VRM) => {
-  // VRMの標準姿勢はTポーズ。映像用には肩から腕を下ろした自然体にする。
   const leftShoulder = vrm.humanoid?.getNormalizedBoneNode('leftShoulder');
   const rightShoulder = vrm.humanoid?.getNormalizedBoneNode('rightShoulder');
   const leftUpperArm = vrm.humanoid?.getNormalizedBoneNode('leftUpperArm');
@@ -170,7 +168,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
     renderer.toneMappingExposure = 1.05;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(background);
+    scene.background = background === 'transparent' ? null : new THREE.Color(background);
 
     const camera = new THREE.PerspectiveCamera(27, width / height, 0.01, 100);
     camera.position.set(0, 1.5, 3.0);
@@ -233,7 +231,6 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
 
   const level = envelope?.[Math.min(frame, Math.max(0, envelope.length - 1))] ?? 0;
 
-  // Remotionがフレームをキャプチャする前にcanvasを更新するため、useEffectではなくuseLayoutEffect。
   useLayoutEffect(() => {
     const s = sceneState.current;
     if (!s?.vrm || !envelope || !modelReady) return;
@@ -285,7 +282,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
   });
 
   return (
-    <AbsoluteFill style={{background}}>
+    <AbsoluteFill style={{background: background === 'transparent' ? 'transparent' : background}}>
       <Audio src={staticFile(audioFile)} volume={1} />
       <canvas ref={canvas} width={width} height={height} style={{width: '100%', height: '100%', display: 'block'}} />
 
