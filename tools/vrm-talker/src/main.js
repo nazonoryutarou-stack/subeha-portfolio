@@ -2,6 +2,7 @@ import './main-studio.js';
 import './studio-panel.js';
 import './api-settings.js';
 import './vrm-cache.js';
+import './vrm-production-guard.js';
 import './speaker-reference.js';
 import './transcription-progress.js';
 import './caption-editor.js';
