@@ -7,6 +7,10 @@
   },
   "clip": {"startMs": 7640000, "endMs": 7685000},
   "avatar": {"speaker": "HOST", "model": "Subeha.vrm"},
+  "text": {
+    "title": "遺影をAIでカード化したら",
+    "telop": ""
+  },
   "captions": [
     {"text": "遺影をAIでカードみたいにしたんですよ", "startMs": 7651000, "endMs": 7654200, "speaker": "HOST", "confidence": 0.96}
   ],
@@ -30,16 +34,19 @@
   ],
   "visualReferences": [
     {
-      "id": "image-1",
+      "id": "placement-1",
+      "assetId": "openverse-example-image",
       "kind": "search",
+      "provider": "openverse",
       "startMs": 7651000,
       "endMs": 7654200,
       "query": "古い日本の遺影 写真館",
       "prompt": null,
-      "url": "https://example.invalid/reference.jpg",
-      "thumbnailUrl": "https://example.invalid/reference-thumb.jpg",
+      "url": "data:image/jpeg;base64,EXAMPLE_ONLY",
+      "thumbnailUrl": "data:image/jpeg;base64,EXAMPLE_ONLY",
+      "originalUrl": "https://example.invalid/reference.jpg",
       "sourceUrl": "https://example.invalid/source",
-      "creator": null,
+      "creator": "example creator",
       "license": "example-only",
       "title": "参考画像"
     }
