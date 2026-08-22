@@ -1,4 +1,5 @@
 import {sha256Blob} from '../sha256.js';
+import {validateProjectSnapshot} from './project-validation.js';
 
 const emptyProject = () => ({
   version: 1,
@@ -20,18 +21,8 @@ const emitProjectChanged = (reason) => {
   window.dispatchEvent(new CustomEvent('vrm-studio-project-changed', {detail: {reason}}));
 };
 
-const validSha256 = (value) => /^[a-fA-F0-9]{64}$/.test(String(value || ''));
-
 const normalizeLoadedProject = (snapshot) => {
-  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) throw new Error('project.json がオブジェクトではありません。');
-  if (Number(snapshot.version) !== 1) throw new Error(`未対応のproject.json version: ${snapshot.version}`);
-  if (!snapshot.source || !validSha256(snapshot.source.sha256)) throw new Error('project.json に有効な元音声SHA-256がありません。');
-  if (!Number.isFinite(Number(snapshot.source.durationMs)) || Number(snapshot.source.durationMs) <= 0) throw new Error('project.json の元音声長が不正です。');
-  if (!snapshot.clip || !Number.isFinite(Number(snapshot.clip.startMs)) || !Number.isFinite(Number(snapshot.clip.endMs))) throw new Error('project.json のclip範囲が不正です。');
-  if (Number(snapshot.clip.startMs) < 0 || Number(snapshot.clip.endMs) <= Number(snapshot.clip.startMs)) throw new Error('project.json のclip範囲が不正です。');
-  if (!Array.isArray(snapshot.captions) || !Array.isArray(snapshot.speakerTurns) || !Array.isArray(snapshot.visualReferences)) {
-    throw new Error('project.json の字幕・話者・画像タイムライン形式が不正です。');
-  }
+  validateProjectSnapshot(snapshot);
 
   const base = emptyProject();
   return {
