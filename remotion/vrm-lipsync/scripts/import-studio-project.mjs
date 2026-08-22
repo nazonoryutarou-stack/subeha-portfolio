@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
+import {validateStudioProject} from './studio-project-validation.mjs';
 
 const projectRoot = process.cwd();
 const valueArg = (name) => {
@@ -30,26 +31,16 @@ if (!fs.existsSync(studioProjectPath)) throw new Error(`project.json があり�
 if (!fs.existsSync(sourceAudioPath)) throw new Error(`元音声がありません: ${sourceAudioPath}`);
 
 const studio = JSON.parse(fs.readFileSync(studioProjectPath, 'utf8'));
-if (!studio?.source?.sha256 || !Array.isArray(studio.captions)) throw new Error('VRM Studio project.json の形式が不正です。');
-if (!Array.isArray(studio.speakerTurns) || studio.speakerTurns.length === 0) throw new Error('project.json に speakerTurns がありません。先に話者解析してください。');
-if (!studio?.avatar?.speaker) throw new Error('project.json で本人話者が未指定です。');
+const {durationMs: sourceDurationMs, width, height, avatarSpeaker} = validateStudioProject(studio);
 
 const sourceHash = await hashFile(sourceAudioPath);
 if (sourceHash.toLowerCase() !== String(studio.source.sha256).toLowerCase()) {
   throw new Error(`project.json と元音声のSHA-256が一致しません。expected=${studio.source.sha256} actual=${sourceHash}`);
 }
 
-const startMs = Math.max(0, Number(studio.clip?.startMs || 0));
-const sourceDurationMs = Number(studio.source?.durationMs || 0);
-const endMs = Number(studio.clip?.endMs || sourceDurationMs);
-if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) throw new Error('project.json の clip 範囲が不正です。');
-
-const width = Number(studio.layout?.width || 720);
-const height = Number(studio.layout?.height || 1280);
-const allowedLayouts = new Set(['720x1280', '900x900', '1280x720']);
-if (!allowedLayouts.has(`${width}x${height}`)) {
-  throw new Error(`未対応の出力サイズです: ${width}x${height}`);
-}
+const startMs = Number(studio.clip.startMs);
+const endMs = Number(studio.clip.endMs);
+if (endMs > sourceDurationMs) throw new Error('project.json のclip範囲が元音声長を超えています。');
 
 const tempJobDir = path.join(projectRoot, 'jobs', '.generated');
 fs.mkdirSync(tempJobDir, {recursive: true});
@@ -94,26 +85,25 @@ if (!Number.isFinite(voiceDurationMs) || voiceDurationMs <= 0) throw new Error('
 const relativeTurns = studio.speakerTurns.map((turn) => {
   const absoluteStart = Number(turn.startMs);
   const absoluteEnd = Number(turn.endMs);
-  if (!Number.isFinite(absoluteStart) || !Number.isFinite(absoluteEnd)) return null;
   const clippedStart = Math.max(startMs, absoluteStart);
   const clippedEnd = Math.min(endMs, absoluteEnd);
   if (clippedEnd <= clippedStart) return null;
   return {
-    speaker: String(turn.speaker || ''),
+    speaker: String(turn.speaker),
     startMs: Math.max(0, Math.round(clippedStart - startMs)),
     endMs: Math.min(voiceDurationMs, Math.round(clippedEnd - startMs)),
   };
 }).filter(Boolean);
 
-if (!relativeTurns.some((turn) => turn.speaker === studio.avatar.speaker)) {
-  throw new Error(`切り抜き範囲に本人話者 ${studio.avatar.speaker} の区間がありません。`);
+if (!relativeTurns.some((turn) => turn.speaker === avatarSpeaker)) {
+  throw new Error(`切り抜き範囲に本人話者 ${avatarSpeaker} の区間がありません。`);
 }
 
 const speakerPayload = {
   version: 1,
   audioSha256: voiceHash,
   durationMs: voiceDurationMs,
-  avatarSpeaker: studio.avatar.speaker,
+  avatarSpeaker,
   turns: relativeTurns,
 };
 fs.writeFileSync(path.join(projectRoot, 'public', 'speaker-turns.json'), JSON.stringify(speakerPayload, null, 2) + '\n');
@@ -123,10 +113,9 @@ runNode('generate-envelope.mjs', [], {REQUIRE_SPEAKER_TURNS: '1'});
 
 const clipPath = path.join(projectRoot, 'public', 'clip.json');
 const clip = JSON.parse(fs.readFileSync(clipPath, 'utf8'));
-clip.visualReferences = (studio.visualReferences || []).map((item) => {
+clip.visualReferences = studio.visualReferences.map((item) => {
   const absoluteStart = Number(item.startMs);
   const absoluteEnd = Number(item.endMs);
-  if (!Number.isFinite(absoluteStart) || !Number.isFinite(absoluteEnd)) return null;
   const clippedStart = Math.max(startMs, absoluteStart);
   const clippedEnd = Math.min(endMs, absoluteEnd);
   if (clippedEnd <= clippedStart) return null;
@@ -137,7 +126,7 @@ clip.visualReferences = (studio.visualReferences || []).map((item) => {
   };
 }).filter(Boolean);
 clip.studioSourceSha256 = studio.source.sha256;
-clip.avatarSpeaker = studio.avatar.speaker;
+clip.avatarSpeaker = avatarSpeaker;
 clip.layout = {
   width,
   height,
@@ -151,6 +140,6 @@ console.log(`Studio project imported: ${path.basename(studioProjectPath)}`);
 console.log(`Source SHA-256: ${sourceHash}`);
 console.log(`Final WAV SHA-256: ${voiceHash}`);
 console.log(`Clip: ${startMs}ms - ${endMs}ms / ${width}x${height}`);
-console.log(`Speaker turns: ${relativeTurns.length} / avatar=${studio.avatar.speaker}`);
+console.log(`Speaker turns: ${relativeTurns.length} / avatar=${avatarSpeaker}`);
 console.log(`Visual references: ${clip.visualReferences.length}`);
 console.log(`Background: ${clip.backgroundDataUrl ? 'embedded' : 'default'}`);
