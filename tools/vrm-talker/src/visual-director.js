@@ -37,6 +37,36 @@ const makeReference = (cue, item) => ({
   title: item.title || null,
 });
 
+const privacySafeCaptions = (project) => {
+  const captions = Array.isArray(project.captions) ? project.captions : [];
+  const hasSpeakerLabels = captions.some((caption) => String(caption?.speaker || '').trim());
+  if (!hasSpeakerLabels) return {captions, avatarSpeaker: null};
+
+  const avatarSpeaker = String(project.avatar?.speaker || '').trim();
+  if (!avatarSpeaker) {
+    throw new Error('話者情報があります。画像候補を作る前に、配信者本人の話者を指定してください。');
+  }
+
+  return {
+    avatarSpeaker,
+    captions: captions.map((caption) => (
+      String(caption?.speaker || '').trim() === avatarSpeaker
+        ? caption
+        : {...caption, text: '[非本人発話]'}
+    )),
+  };
+};
+
+const keepAvatarAnchoredCues = (project, cues, avatarSpeaker) => {
+  if (!avatarSpeaker) return cues;
+  return cues.filter((cue) => {
+    const start = project.captions?.[Number(cue.startIndex)];
+    const end = project.captions?.[Number(cue.endIndex)];
+    return String(start?.speaker || '').trim() === avatarSpeaker
+      && String(end?.speaker || '').trim() === avatarSpeaker;
+  });
+};
+
 if (panel) {
   const section = document.createElement('section');
   section.className = 'studio-tools visual-director';
@@ -46,7 +76,7 @@ if (panel) {
       <button id="visualSuggest" type="button">AIで画像挿入候補</button>
       <button id="visualClear" type="button">候補を消す</button>
     </div>
-    <div class="small">AIは字幕番号だけ選び、表示時刻は実タイムコードから確定します。検索候補は自動取得、画像生成は明示操作です。</div>
+    <div class="small">AIは字幕番号だけ選び、表示時刻は実タイムコードから確定します。話者情報がある場合、本人以外の発話本文はAIへ渡さず、画像候補も本人発話にだけ紐づけます。</div>
     <div id="visualCueList" class="visual-cue-list"></div>
   `;
   panel.insertBefore(section, status || null);
@@ -203,14 +233,25 @@ if (panel) {
       setStatus('先に「字幕＋話者解析」を実行してください。');
       return;
     }
-    button.disabled = true;
-    setStatus('字幕の意味を解析して画像挿入候補を選定中…');
+
+    let safe;
     try {
-      const payload = await suggestVisualCues(project.captions);
-      const cues = Array.isArray(payload?.cues) ? payload.cues : [];
+      safe = privacySafeCaptions(project);
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : String(error));
+      return;
+    }
+
+    button.disabled = true;
+    setStatus('本人発話だけを基準に、画像挿入候補を選定中…');
+    try {
+      const payload = await suggestVisualCues(safe.captions);
+      const rawCues = Array.isArray(payload?.cues) ? payload.cues : [];
+      const cues = keepAvatarAnchoredCues(project, rawCues, safe.avatarSpeaker);
       patchProject({visualCues: cues});
       await renderCues(cues);
-      setStatus(`画像挿入候補 ${cues.length} 件。検索素材は候補取得済みです。`);
+      const removed = rawCues.length - cues.length;
+      setStatus(`画像挿入候補 ${cues.length} 件。${removed > 0 ? `非本人発話に紐づく ${removed} 件は除外。` : ''}検索素材は候補取得済みです。`);
     } catch (error) {
       console.error(error);
       setStatus(`Visual Director: ${error instanceof Error ? error.message : String(error)}`);
