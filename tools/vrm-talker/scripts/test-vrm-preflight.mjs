@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {inspectVideoVrmFile} from '../src/vrm-preflight.js';
 
 const makeGlb = (preset) => {
@@ -43,5 +46,15 @@ await assert.rejects(
   () => inspectVideoVrmFile(new Blob([new Uint8Array([1, 2, 3])])),
   /ヘッダが短すぎます/,
 );
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const webVrmPath = path.resolve(here, '../../../subeha-web-site.vrm');
+if (fs.existsSync(webVrmPath)) {
+  const bytes = fs.readFileSync(webVrmPath);
+  const actualWebVrm = await inspectVideoVrmFile(new Blob([bytes], {type: 'model/gltf-binary'}));
+  assert.equal(actualWebVrm.ok, false, 'actual lightweight web VRM must not pass production video preflight');
+  assert.equal(actualWebVrm.missing.length, 5, 'actual lightweight web VRM should lack all five production visemes');
+  console.log(`Actual lightweight VRM correctly rejected: ${actualWebVrm.missing.join('/')}`);
+}
 
 console.log('Browser VRM preflight fixtures passed');
