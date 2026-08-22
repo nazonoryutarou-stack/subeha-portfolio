@@ -9,6 +9,7 @@ import {
 } from 'mediabunny';
 
 export const DEFAULT_TRANSCRIPTION_CHUNK_SECONDS = 8 * 60;
+export const DEFAULT_TRANSCRIPTION_OVERLAP_SECONDS = 2;
 
 const makeInput = (file) => new Input({
   formats: ALL_FORMATS,
@@ -64,19 +65,22 @@ export const extractWavRange = async (file, startSeconds, endSeconds) => {
   }
 };
 
-// 長尺音声ではWAVを全チャンク分メモリへ溜めない。
-// ここでは区間表だけ作り、実WAV化は呼び出し側が1区間ずつ行う。
-export const planAudioTranscriptionChunks = async (file, {
+export const buildTranscriptionChunkPlan = (durationSeconds, {
   chunkSeconds = DEFAULT_TRANSCRIPTION_CHUNK_SECONDS,
+  overlapSeconds = DEFAULT_TRANSCRIPTION_OVERLAP_SECONDS,
 } = {}) => {
-  const duration = await getMediaDuration(file);
-  if (!Number.isFinite(duration) || duration <= 0) throw new Error('音声の長さを取得できません。');
+  const duration = Number(durationSeconds);
+  if (!Number.isFinite(duration) || duration <= 0) throw new Error('音声の長さが不正です。');
 
   const size = Math.max(60, Math.min(10 * 60, Number(chunkSeconds) || DEFAULT_TRANSCRIPTION_CHUNK_SECONDS));
+  const overlap = Math.max(0, Math.min(10, Number(overlapSeconds) || 0));
   const count = Math.ceil(duration / size);
+
   const chunks = Array.from({length: count}, (_, index) => {
-    const startSeconds = index * size;
-    const endSeconds = Math.min(duration, startSeconds + size);
+    const coreStartSeconds = index * size;
+    const coreEndSeconds = Math.min(duration, coreStartSeconds + size);
+    const startSeconds = Math.max(0, coreStartSeconds - (index > 0 ? overlap : 0));
+    const endSeconds = Math.min(duration, coreEndSeconds + (index < count - 1 ? overlap : 0));
     return {
       index,
       count,
@@ -84,8 +88,20 @@ export const planAudioTranscriptionChunks = async (file, {
       endSeconds,
       startMs: Math.round(startSeconds * 1000),
       endMs: Math.round(endSeconds * 1000),
+      coreStartSeconds,
+      coreEndSeconds,
+      coreStartMs: Math.round(coreStartSeconds * 1000),
+      coreEndMs: Math.round(coreEndSeconds * 1000),
     };
   });
 
-  return {durationMs: Math.round(duration * 1000), chunks};
+  return {durationMs: Math.round(duration * 1000), chunks, chunkSeconds: size, overlapSeconds: overlap};
+};
+
+// 長尺音声ではWAVを全チャンク分メモリへ溜めない。
+// 区間表だけ先に作り、実WAV化は呼び出し側が1区間ずつ行う。
+// 境界の発話を切断しないよう前後に短いoverlapを持たせ、採用範囲(core)は重複させない。
+export const planAudioTranscriptionChunks = async (file, options = {}) => {
+  const duration = await getMediaDuration(file);
+  return buildTranscriptionChunkPlan(duration, options);
 };
