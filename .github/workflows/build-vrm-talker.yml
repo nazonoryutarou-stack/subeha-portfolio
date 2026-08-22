@@ -34,9 +34,14 @@ jobs:
       - name: Test project reopen/source lock
         working-directory: tools/vrm-talker
         run: npm run test:project
-      - name: Build VRM Studio
+      - name: Build VRM Studio with injected API base
         working-directory: tools/vrm-talker
+        env:
+          VITE_VRM_STUDIO_API_BASE: https://example.invalid/api
         run: npm run build
+      - name: Verify API base reached the Vite bundle
+        working-directory: tools/vrm-talker
+        run: grep -R -q 'https://example.invalid/api' dist
       - name: Upload static app
         uses: actions/upload-artifact@v4
         with:
