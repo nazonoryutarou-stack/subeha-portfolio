@@ -20,6 +20,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      WORKER_NAME: subeha-vrm-studio-api
     steps:
       - uses: actions/checkout@v6
 
@@ -50,3 +51,31 @@ jobs:
         working-directory: workers/vrm-studio-api
         shell: bash
         run: printf '%s' "$OPENAI_API_KEY" | npx wrangler secret put OPENAI_API_KEY
+
+      - name: Resolve workers.dev URL and verify deployment
+        shell: bash
+        run: |
+          account_endpoint="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain"
+          worker_endpoint="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${WORKER_NAME}/subdomain"
+
+          account_json="$(curl -fsS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "$account_endpoint")"
+          worker_json="$(curl -fsS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "$worker_endpoint")"
+
+          subdomain="$(printf '%s' "$account_json" | node -e "let s='';process.stdin.on('data',c=>s+=c).on('end',()=>{const j=JSON.parse(s);if(j?.success&&j?.result?.subdomain)process.stdout.write(String(j.result.subdomain));})")"
+          enabled="$(printf '%s' "$worker_json" | node -e "let s='';process.stdin.on('data',c=>s+=c).on('end',()=>{const j=JSON.parse(s);process.stdout.write(j?.success&&j?.result?.enabled===true?'true':'false');})")"
+
+          test -n "$subdomain" || { echo 'Cloudflare account workers.dev subdomain could not be resolved'; exit 1; }
+          test "$enabled" = 'true' || { echo "Worker ${WORKER_NAME} is not enabled on workers.dev"; exit 1; }
+
+          api_base="https://${WORKER_NAME}.${subdomain}.workers.dev/api"
+          health="$(curl -fsS "${api_base}/health")"
+          printf '%s' "$health" | node -e "let s='';process.stdin.on('data',c=>s+=c).on('end',()=>{const j=JSON.parse(s);if(j?.ok!==true)throw new Error('health.ok is not true');if(j?.openaiConfigured!==true)throw new Error('OPENAI_API_KEY is not visible to Worker');console.log('Worker health verified: API v'+(j.version||1));})"
+
+          echo "VRM_STUDIO_API_BASE=${api_base}" >> "$GITHUB_ENV"
+          {
+            echo '### VRM Studio API deployed'
+            echo
+            echo "- API base: \`${api_base}\`"
+            echo '- Worker health: OK'
+            echo '- OpenAI secret: configured'
+          } >> "$GITHUB_STEP_SUMMARY"
