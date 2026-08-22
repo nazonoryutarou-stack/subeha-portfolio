@@ -72,6 +72,18 @@ assert.throws(
   'visual without image source must be rejected',
 );
 
+const duplicateIdSnapshot = structuredClone(snapshot);
+duplicateIdSnapshot.visualReferences = [
+  {id: 'legacy-image-id', kind: 'search', startMs: 1500, endMs: 2500, url: 'data:image/png;base64,AA=='},
+  {id: 'legacy-image-id', kind: 'search', startMs: 3500, endMs: 4500, url: 'data:image/png;base64,AA=='},
+];
+loadProjectSnapshot(duplicateIdSnapshot);
+const migrated = getProject().visualReferences;
+assert.equal(migrated.length, 2);
+assert.notEqual(migrated[0].id, migrated[1].id, 'duplicate legacy placement IDs must be migrated');
+assert.equal(migrated[0].assetId, 'legacy-image-id');
+assert.equal(migrated[1].assetId, 'legacy-image-id');
+
 loadProjectSnapshot(snapshot);
 assert.equal(isSourceVerificationPending(), true, 'loaded project must require source verification');
 assert.equal(getProject().captions[0].text, '保存字幕');
