@@ -87,6 +87,27 @@ const readLimitedBody = async (response, maxBytes = MAX_IMAGE_BYTES) => {
   return bytes;
 };
 
+const ascii = (bytes, start, end) => String.fromCharCode(...bytes.subarray(start, end));
+
+export const imageSignatureMatches = (bytes, mime) => {
+  if (!(bytes instanceof Uint8Array)) return false;
+  const type = String(mime || '').toLowerCase();
+  if (type === 'image/png') {
+    const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+    return bytes.length >= 8 && signature.every((value, index) => bytes[index] === value);
+  }
+  if (type === 'image/jpeg' || type === 'image/jpg') {
+    return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  }
+  if (type === 'image/gif') {
+    return bytes.length >= 6 && ['GIF87a', 'GIF89a'].includes(ascii(bytes, 0, 6));
+  }
+  if (type === 'image/webp') {
+    return bytes.length >= 12 && ascii(bytes, 0, 4) === 'RIFF' && ascii(bytes, 8, 12) === 'WEBP';
+  }
+  return false;
+};
+
 export const fetchImageBytes = async (rawUrl, fetchImpl = fetch) => {
   let url = validateImageImportUrl(rawUrl);
   const controller = new AbortController();
@@ -113,6 +134,7 @@ export const fetchImageBytes = async (rawUrl, fetchImpl = fetch) => {
       const mime = imageMimeAllowed(response.headers.get('content-type'));
       if (!mime) throw new Error(`unsupported image type: ${response.headers.get('content-type') || 'unknown'}`);
       const bytes = await readLimitedBody(response);
+      if (!imageSignatureMatches(bytes, mime)) throw new Error(`image signature does not match ${mime}`);
       return {bytes, mime, finalUrl: url.href};
     }
     throw new Error('too many image redirects');
