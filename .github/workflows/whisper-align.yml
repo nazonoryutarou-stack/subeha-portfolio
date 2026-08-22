@@ -39,7 +39,7 @@ jobs:
           cat tmp/whisper/base64v2/part-*.txt | tr -d '\n\r' | base64 -d > tmp/whisper/source-v2.ogg
           ACTUAL_SIZE=$(stat -c%s tmp/whisper/source-v2.ogg)
           echo "size=$ACTUAL_SIZE"
-          test "$ACTUAL_SIZE" = "59742"
+          test "$ACTUAL_SIZE" = "49203"
           ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper/source-v2.ogg
 
       - name: Prepare alignment job
