@@ -1,6 +1,6 @@
 {
   "name": "vrm-lipsync",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "private": true,
   "scripts": {
     "studio": "remotion studio",
@@ -9,6 +9,7 @@
     "check:vrm": "node scripts/ensure-video-vrm.mjs",
     "prepare:clip": "npm run check:vrm && node scripts/prepare-clip.mjs",
     "prepare:studio": "node scripts/prepare-studio.mjs",
+    "render:studio": "node scripts/render-studio.mjs",
     "check": "tsc --noEmit",
     "qc": "node scripts/extract-qc-frames.mjs",
     "clip": "REQUIRE_SPEAKER_TURNS=1 npm run prepare:clip && npm run check && remotion render VrmLipSync out/kiritori.mp4 --codec=h264 --crf=20 && npm run qc",
