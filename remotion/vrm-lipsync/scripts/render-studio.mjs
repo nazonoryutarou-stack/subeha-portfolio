@@ -23,6 +23,10 @@ if (!fs.existsSync(studioProjectPath)) throw new Error(`project.json があり�
 const studio = JSON.parse(fs.readFileSync(studioProjectPath, 'utf8'));
 const width = Number(studio.layout?.width || 720);
 const height = Number(studio.layout?.height || 1280);
+const startMs = Number(studio.clip?.startMs || 0);
+const endMs = Number(studio.clip?.endMs || studio.source?.durationMs || 0);
+const expectedDurationSeconds = (endMs - startMs) / 1000;
+if (!Number.isFinite(expectedDurationSeconds) || expectedDurationSeconds <= 0) throw new Error('project.json のclip尺が不正です。');
 
 const compositionBySize = new Map([
   ['720x1280', 'VrmLipSync'],
@@ -39,6 +43,7 @@ if (planOnly) {
     composition,
     width,
     height,
+    expectedDurationSeconds,
     project: studioProjectPath,
     audio: path.resolve(projectRoot, audioArg),
     output: outputPath,
@@ -71,13 +76,26 @@ run('npx', [
   '--codec=h264',
   '--crf=20',
 ]);
+
+const tolerance = 0.5;
+run(process.execPath, [
+  path.join(projectRoot, 'scripts', 'validate-render.mjs'),
+  `--input=${outputPath}`,
+  `--width=${width}`,
+  `--height=${height}`,
+  `--min-duration=${Math.max(0, expectedDurationSeconds - tolerance)}`,
+  `--max-duration=${expectedDurationSeconds + tolerance}`,
+  '--max-av-drift=0.15',
+]);
+
 run(process.execPath, [
   path.join(projectRoot, 'scripts', 'extract-qc-frames.mjs'),
   `--input=${outputPath}`,
 ]);
 
 console.log('');
-console.log('Studio render complete');
+console.log('Studio render structurally valid');
 console.log(`Composition: ${composition} (${width}x${height})`);
+console.log(`Expected duration: ${expectedDurationSeconds.toFixed(3)}s`);
 console.log(`Output: ${outputPath}`);
 console.log('QC frames extracted. 実人物話者・字幕・画像タイミングは目視QCしてください。');
