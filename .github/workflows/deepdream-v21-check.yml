@@ -1,0 +1,73 @@
+name: DeepDream v21 Check
+
+on:
+  pull_request:
+    paths:
+      - 'deepdream/**'
+      - 'docs/deepdream-v21.md'
+      - '.github/workflows/deepdream-v21-check.yml'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deepdream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run v21 runtime regression test
+        run: node deepdream/test-v21.mjs
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Python packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-deepdream-v21-tf215-tfjs422
+
+      - name: Build real DeepDream browser models
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "tensorflow-cpu==2.15.1" "tensorflowjs==4.22.0"
+          python deepdream/build_dream_models.py
+
+      - name: Verify generated v21 assets
+        shell: bash
+        run: |
+          for layer in mixed3 mixed5 mixed7; do
+            test -f "deepdream/model/dreams/${layer}/model.json"
+            grep -q "classic_deepdream_${layer}_fusedbn" "deepdream/model/dreams/${layer}/model.json"
+            if grep -q 'BatchNormalization' "deepdream/model/dreams/${layer}/model.json"; then
+              echo "BatchNormalization unexpectedly present in ${layer} browser model"
+              exit 1
+            fi
+          done
+          python - <<'PY'
+          import json
+          p = 'deepdream/model/asset-banks.json'
+          data = json.load(open(p, encoding='utf-8'))
+          if data.get('version') != 21:
+              raise SystemExit(f"asset bank version mismatch: {data.get('version')}")
+          expected = {'animals', 'insects', 'marine', 'human', 'plants'}
+          got = set(data.get('assets', {}))
+          if got != expected:
+              raise SystemExit(f'asset set mismatch: {got}')
+          for key, item in data['assets'].items():
+              if item['layer'] not in {'mixed3', 'mixed5', 'mixed7'}:
+                  raise SystemExit(f'bad layer for {key}')
+              if len(item['channels']) < 8:
+                  raise SystemExit(f'not enough channels for {key}')
+          print('v21 asset banks verified:', ', '.join(sorted(got)))
+          PY
