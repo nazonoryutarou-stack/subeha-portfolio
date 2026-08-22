@@ -1,4 +1,3 @@
-import {apiBaseIsConfigured, checkApiHealth} from './api/client.js';
 import {getProject, isSourceVerificationPending} from './app/project-state.js';
 
 const panel = document.getElementById('panel');
@@ -22,10 +21,10 @@ if (panel && audioInput) {
   const section = document.createElement('section');
   section.className = 'studio-tools';
   section.innerHTML = `
-    <h2>AUTO PIPELINE</h2>
+    <h2>AUTO PIPELINE / FREE LOCAL</h2>
     <label class="check"><input id="autoAnalyze" type="checkbox" checked> 音声選択後に字幕＋話者解析まで自動実行</label>
-    <label class="check"><input id="autoVisual" type="checkbox" checked> 解析後に画像挿入候補まで自動選定</label>
-    <div class="small">画像生成は課金を伴うため自動実行しません。話者情報がある場合、本人話者が確定するまで画像選定も止めます。</div>
+    <label class="check"><input id="autoVisual" type="checkbox" checked> 解析後に画像挿入候補までローカル選定</label>
+    <div class="small">解析は端末内で実行し、音声・字幕を有料AI APIへ送りません。初回だけWhisper等のモデルをダウンロードします。Androidでは安定性優先でWASMを使います。</div>
   `;
   panel.insertBefore(section, panel.firstChild);
 
@@ -47,8 +46,6 @@ if (panel && audioInput) {
       );
       if (ownRun !== runId) return;
 
-      // 保存済みプロジェクトの復元では既存字幕・画像を壊さない。
-      // 正しい元音声とのSHA一致だけ確認して、そのまま編集再開する。
       if (restoringProject) {
         const project = getProject();
         setStatus(`プロジェクト復元完了：字幕 ${project.captions.length} / 画像 ${project.visualReferences.length} / 本人 ${project.avatar.speaker || '未指定'}`);
@@ -56,27 +53,17 @@ if (panel && audioInput) {
       }
 
       if (!autoAnalyze?.checked) return;
-      if (!apiBaseIsConfigured()) {
-        setStatus('音声を読み込みました。自動AI解析には先にWorker API URLを設定してください。');
-        return;
-      }
-
-      const health = await checkApiHealth();
-      if (!health?.ok) throw new Error('Worker health check failed');
-      if (!health?.openaiConfigured) throw new Error('WorkerにOPENAI_API_KEYが設定されていません。');
-      if (ownRun !== runId) return;
-
       const analyze = await waitFor(() => document.getElementById('studioAnalyze'));
-      setStatus('自動パイプライン: 字幕＋話者解析を開始します。');
+      setStatus('自動パイプライン: 完全無料のローカル字幕＋話者解析を開始します。初回はモデル読込に時間がかかります。');
       analyze.click();
 
       await waitFor(() => analyze.disabled === true, {timeoutMs: 3000});
-      await waitFor(() => analyze.disabled === false, {timeoutMs: 30 * 60 * 1000, intervalMs: 300});
+      await waitFor(() => analyze.disabled === false, {timeoutMs: 60 * 60 * 1000, intervalMs: 500});
       if (ownRun !== runId) return;
 
       const project = getProject();
       if (!project.captions.length) {
-        setStatus('自動パイプライン: 字幕解析が完了しなかったため画像選定へ進みません。');
+        setStatus('自動パイプライン: ローカル字幕解析が完了しなかったため画像選定へ進みません。');
         return;
       }
 
@@ -87,12 +74,12 @@ if (panel && audioInput) {
 
       if (!autoVisual?.checked) return;
       const visual = await waitFor(() => document.getElementById('visualSuggest'));
-      setStatus('自動パイプライン: 本人発話だけを基準に画像挿入候補を選定します。');
+      setStatus('自動パイプライン: 本人発話だけを基準に画像挿入候補を端末内で選定します。');
       visual.click();
       await waitFor(() => visual.disabled === true, {timeoutMs: 3000});
       await waitFor(() => visual.disabled === false, {timeoutMs: 5 * 60 * 1000, intervalMs: 250});
       if (ownRun !== runId) return;
-      setStatus(`自動パイプライン完了：字幕 ${getProject().captions.length} / 画像候補 ${getProject().visualCues.length}`);
+      setStatus(`自動パイプライン完了：字幕 ${getProject().captions.length} / 画像候補 ${getProject().visualCues.length} / API課金 0円`);
     } catch (error) {
       console.error(error);
       if (ownRun === runId) setStatus(`自動パイプライン停止：${error instanceof Error ? error.message : String(error)}`);
