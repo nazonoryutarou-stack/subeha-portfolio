@@ -1,3 +1,5 @@
+import {handleImportOpenverseImage} from './openverse.js';
+
 const OPENAI_BASE = 'https://api.openai.com/v1';
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024;
 const MAX_REFERENCE_BYTES = 2 * 1024 * 1024;
@@ -231,7 +233,7 @@ export default {
       requireOrigin(request, env);
       const url = new URL(request.url);
       if (request.method === 'GET' && (url.pathname.endsWith('/api/health') || url.pathname === '/health')) {
-        return json({ok: true, version: 3, openaiConfigured: Boolean(env.OPENAI_API_KEY)}, 200, cors);
+        return json({ok: true, version: 4, openaiConfigured: Boolean(env.OPENAI_API_KEY), openverseImport: true}, 200, cors);
       }
       if (request.method !== 'POST') return json({error: 'Not found'}, 404, cors);
       let response;
@@ -239,6 +241,8 @@ export default {
         response = await handleTranscribe(request, env);
       } else if (url.pathname.endsWith('/api/visual-cues') || url.pathname === '/visual-cues') {
         response = await handleVisualCues(request, env);
+      } else if (url.pathname.endsWith('/api/images/import-openverse') || url.pathname === '/images/import-openverse') {
+        response = await handleImportOpenverseImage(request);
       } else if (url.pathname.endsWith('/api/images/generate') || url.pathname === '/images/generate') {
         response = await handleGenerateImage(request, env);
       } else {
