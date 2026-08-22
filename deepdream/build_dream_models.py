@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflowjs as tfjs
 
-TILE = 96
+SMOKE_TILES = (192, 256)
 LAYERS = ('mixed3', 'mixed5', 'mixed7')
 OUT_ROOT = 'deepdream/model/dreams'
 ASSET_FILE = 'deepdream/model/asset-banks.json'
@@ -66,7 +66,7 @@ Conv2D = tf.keras.layers.Conv2D
 BatchNormalization = tf.keras.layers.BatchNormalization
 
 # Keep these two networks separate on purpose:
-# - browser_base: dynamic spatial input, so TensorFlow.js can dream on 96x96 tiles.
+# - browser_base: dynamic spatial input, so TensorFlow.js can dream on v21 192/256px tiles.
 # - classifier: fixed 299x299 ImageNet classifier, used only to derive semantic assets.
 browser_base = tf.keras.applications.InceptionV3(include_top=False, weights='imagenet')
 classifier = tf.keras.applications.InceptionV3(include_top=True, weights='imagenet')
@@ -150,25 +150,28 @@ def build_fused(layer_name):
             if weights:
                 new.set_weights(weights)
 
-    probe = tf.random.uniform([1, TILE, TILE, 3], -1.0, 1.0, dtype=tf.float32, seed=156)
-    src_y = source(probe, training=False)
-    fused_y = fused(probe, training=False)
-    max_err = float(tf.reduce_max(tf.abs(src_y - fused_y)).numpy())
-    if max_err > 2e-4:
-        raise RuntimeError(f'{layer_name} BN fusion mismatch: {max_err}')
-
     channels = int(fused.output_shape[-1])
     sparse_ids = tf.constant(
         np.linspace(0, channels - 1, num=min(16, channels), dtype=np.int32)
     )
-    with tf.GradientTape() as tape:
-        tape.watch(probe)
-        activation = fused(probe, training=False)
-        sparse = tf.gather(activation, sparse_ids, axis=-1)
-        loss = tf.reduce_mean(sparse)
-    grad = tape.gradient(loss, probe)
-    if grad is None or not bool(tf.reduce_all(tf.math.is_finite(grad)).numpy()):
-        raise RuntimeError(f'{layer_name} sparse gradient invalid')
+    max_err = 0.0
+    for tile in SMOKE_TILES:
+        probe = tf.random.uniform([1, tile, tile, 3], -1.0, 1.0, dtype=tf.float32, seed=156)
+        src_y = source(probe, training=False)
+        fused_y = fused(probe, training=False)
+        tile_err = float(tf.reduce_max(tf.abs(src_y - fused_y)).numpy())
+        max_err = max(max_err, tile_err)
+        if tile_err > 2e-4:
+            raise RuntimeError(f'{layer_name} BN fusion mismatch at {tile}px: {tile_err}')
+
+        with tf.GradientTape() as tape:
+            tape.watch(probe)
+            activation = fused(probe, training=False)
+            sparse = tf.gather(activation, sparse_ids, axis=-1)
+            loss = tf.reduce_mean(sparse)
+        grad = tape.gradient(loss, probe)
+        if grad is None or not bool(tf.reduce_all(tf.math.is_finite(grad)).numpy()):
+            raise RuntimeError(f'{layer_name} sparse gradient invalid at {tile}px')
 
     if any(isinstance(layer, BatchNormalization) for layer in fused.layers):
         raise RuntimeError(f'{layer_name}: BatchNormalization survived fusion')
@@ -245,7 +248,7 @@ for name in LAYERS:
 
 labels = load_class_labels()
 asset_banks = {
-    'version': 20,
+    'version': 21,
     'model': 'InceptionV3 ImageNet / semantic channel banks / BN-fused browser models',
     'assets': {},
 }

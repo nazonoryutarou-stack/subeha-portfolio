@@ -45,7 +45,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-deepdream-tf215-tfjs422-assets-v20
+          key: ${{ runner.os }}-deepdream-tf215-tfjs422-assets-v21
 
       - name: Build semantic DeepDream models and assets
         shell: bash
@@ -53,6 +53,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install "tensorflow-cpu==2.15.1" "tensorflowjs==4.22.0"
           python deepdream/build_dream_models.py
+
+      - name: Test DeepDream v21 runtime contract
+        shell: bash
+        run: node deepdream/test-v21.mjs
 
       - name: Prepare static site for project Pages path
         shell: bash
@@ -121,6 +125,8 @@ jobs:
           import json
           p = '_site/deepdream/model/asset-banks.json'
           data = json.load(open(p, encoding='utf-8'))
+          if data.get('version') != 21:
+              raise SystemExit(f"asset bank version mismatch: {data.get('version')}")
           expected = {'animals', 'insects', 'marine', 'human', 'plants'}
           got = set(data.get('assets', {}))
           if got != expected:
