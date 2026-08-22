@@ -5,8 +5,7 @@ on:
     branches:
       - work/whisper-align-151
     paths:
-      - 'tmp/whisper/source.m4a'
-      - 'tmp/whisper/job.json'
+      - 'tmp/whisper/READY'
 
 permissions:
   contents: write
@@ -26,6 +25,17 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: remotion/vrm-lipsync/package-lock.json
+
+      - name: Reconstruct temporary source clip
+        shell: bash
+        run: |
+          cat tmp/whisper/base64/*.txt | tr -d '\n\r' | base64 -d > tmp/whisper/source.ogg
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper/source.ogg
+          cat > tmp/whisper/job.json <<'JSON'
+          {
+            "sourceAudio": "../../tmp/whisper/source.ogg"
+          }
+          JSON
 
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
@@ -51,7 +61,7 @@ jobs:
           const p = 'tmp/whisper/output/captions.json';
           const captions = JSON.parse(fs.readFileSync(p, 'utf8'));
           console.log(`captions=${captions.length}`);
-          for (const c of captions.slice(0, 12)) console.log(JSON.stringify(c));
+          for (const c of captions.slice(0, 20)) console.log(JSON.stringify(c));
           NODE
 
       - name: Commit alignment result
