@@ -43,6 +43,10 @@ jobs:
         working-directory: workers/vrm-studio-api
         run: npm run check
 
+      - name: Test Worker image import safety
+        working-directory: workers/vrm-studio-api
+        run: npm test
+
       - name: Deploy Worker
         working-directory: workers/vrm-studio-api
         run: npx wrangler deploy
