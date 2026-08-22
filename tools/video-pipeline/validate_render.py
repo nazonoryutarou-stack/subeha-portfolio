@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Reject structurally broken final renders.
 
-Checks orientation, stream presence, A/V duration drift, and expected duration.
-This catches files whose container duration looks correct while the video stream
-silently ends early.
+Checks stream presence, exact dimensions/orientation, A/V duration drift, and expected duration.
+This catches files whose container duration looks correct while the video stream silently ends early.
 """
 
 from __future__ import annotations
@@ -20,11 +19,18 @@ from pathlib import Path
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("file", type=Path)
-    parser.add_argument("--orientation", choices=("portrait", "landscape", "any"), default="portrait")
+    parser.add_argument("--orientation", choices=("portrait", "landscape", "square", "any"), default="any")
+    parser.add_argument("--width", type=int)
+    parser.add_argument("--height", type=int)
     parser.add_argument("--max-av-drift", type=float, default=0.25)
     parser.add_argument("--min-duration", type=float, default=0.0)
     parser.add_argument("--max-duration", type=float, default=90.0)
-    return parser.parse_args()
+    args = parser.parse_args()
+    if (args.width is None) != (args.height is None):
+        parser.error("--width and --height must be provided together")
+    if args.width is not None and (args.width <= 0 or args.height <= 0):
+        parser.error("--width and --height must be positive")
+    return args
 
 
 def finite_float(value: object) -> float | None:
@@ -71,10 +77,15 @@ def main() -> int:
     width, height = int(video.get("width") or 0), int(video.get("height") or 0)
     if width <= 0 or height <= 0:
         raise SystemExit(f"FAIL: invalid dimensions {width}x{height}")
+
+    if args.width is not None and (width != args.width or height != args.height):
+        raise SystemExit(f"FAIL: expected {args.width}x{args.height}, got {width}x{height}")
     if args.orientation == "portrait" and width >= height:
         raise SystemExit(f"FAIL: expected portrait video, got {width}x{height}")
     if args.orientation == "landscape" and width <= height:
         raise SystemExit(f"FAIL: expected landscape video, got {width}x{height}")
+    if args.orientation == "square" and width != height:
+        raise SystemExit(f"FAIL: expected square video, got {width}x{height}")
 
     format_duration = finite_float((data.get("format") or {}).get("duration"))
     video_duration = finite_float(video.get("duration")) or format_duration

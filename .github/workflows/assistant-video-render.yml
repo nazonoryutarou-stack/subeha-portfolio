@@ -1,0 +1,91 @@
+name: Assistant VRM Video Render
+
+on:
+  push:
+    branches:
+      - feature/vrm-studio-webapp
+    paths:
+      - 'jobs/assistant/current/**'
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/assistant-video-render.yml'
+  workflow_dispatch:
+    inputs:
+      job_dir:
+        description: 'edit-plan.json と source.m4a を置いたjob directory'
+        required: true
+        default: 'jobs/assistant/current'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Resolve job
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            job='${{ inputs.job_dir }}'
+          else
+            job='jobs/assistant/current'
+          fi
+          case "$job" in
+            jobs/assistant/*) ;;
+            *) echo 'job_dir must stay under jobs/assistant/' >&2; exit 1 ;;
+          esac
+          test -f "$job/edit-plan.json" || { echo "Missing $job/edit-plan.json" >&2; exit 1; }
+          test -f "$job/source.m4a" || test -f "$job/source.wav" || { echo "Missing $job/source.m4a or source.wav" >&2; exit 1; }
+          if [ -f "$job/source.m4a" ]; then audio="$job/source.m4a"; else audio="$job/source.wav"; fi
+          echo "ASSISTANT_JOB=$job" >> "$GITHUB_ENV"
+          echo "ASSISTANT_AUDIO=$audio" >> "$GITHUB_ENV"
+
+      - name: Require production video VRM
+        shell: bash
+        run: |
+          if [ -f Subeha.vrm ]; then
+            echo 'VIDEO_VRM_PATH=../../Subeha.vrm' >> "$GITHUB_ENV"
+          elif [ -f remotion/vrm-lipsync/inputs/Subeha.vrm ]; then
+            echo 'VIDEO_VRM_PATH=inputs/Subeha.vrm' >> "$GITHUB_ENV"
+          else
+            echo 'Production Subeha.vrm is not checked into this ref.' >&2
+            echo 'The lightweight subeha-web-site.vrm is intentionally not accepted because it lacks aa/ih/ou/ee/oh mouth morphs.' >&2
+            exit 1
+          fi
+
+      - name: Install Remotion dependencies
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+
+      - name: Render assistant plan
+        working-directory: remotion/vrm-lipsync
+        shell: bash
+        run: |
+          npm run render:assistant -- \
+            --plan="../../${ASSISTANT_JOB}/edit-plan.json" \
+            --audio="../../${ASSISTANT_AUDIO}" \
+            --output=out/assistant-current.mp4
+
+      - name: Upload final video and QC
+        uses: actions/upload-artifact@v4
+        with:
+          name: assistant-vrm-video
+          path: |
+            remotion/vrm-lipsync/out/assistant-current.mp4
+            remotion/vrm-lipsync/out/qc-frames/**
+            remotion/vrm-lipsync/jobs/.generated/assistant-project.json
+            ${{ env.ASSISTANT_JOB }}/edit-plan.json
+          retention-days: 14

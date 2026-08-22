@@ -38,6 +38,11 @@ type ClipFile = {
   hook?: string;
   sourceLabel?: string;
   captions?: Caption[];
+  layout?: {
+    width?: number;
+    height?: number;
+    captionBottomPx?: number;
+  };
 };
 
 type SceneState = {
@@ -48,9 +53,9 @@ type SceneState = {
 };
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
+const overlayFontFamily = '"Noto Sans JP","Yu Gothic",system-ui,sans-serif';
 
 const mouthWeights = (frame: number, level: number) => {
-  // 小さい声でも口が見えるように旧版より感度を上げる。
   const gate = clamp01((level - 0.025) / 0.48);
   if (gate < 0.02) return {aa: 0, ih: 0, ou: 0, ee: 0, oh: 0};
   const phase = Math.floor(frame / 2) % 5;
@@ -73,7 +78,6 @@ const blinkWeight = (frame: number) => {
 };
 
 const applyNaturalPose = (vrm: VRM) => {
-  // VRMの標準姿勢はTポーズ。映像用には肩から腕を下ろした自然体にする。
   const leftShoulder = vrm.humanoid?.getNormalizedBoneNode('leftShoulder');
   const rightShoulder = vrm.humanoid?.getNormalizedBoneNode('rightShoulder');
   const leftUpperArm = vrm.humanoid?.getNormalizedBoneNode('leftUpperArm');
@@ -170,7 +174,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
     renderer.toneMappingExposure = 1.05;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(background);
+    scene.background = background === 'transparent' ? null : new THREE.Color(background);
 
     const camera = new THREE.PerspectiveCamera(27, width / height, 0.01, 100);
     camera.position.set(0, 1.5, 3.0);
@@ -233,7 +237,6 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
 
   const level = envelope?.[Math.min(frame, Math.max(0, envelope.length - 1))] ?? 0;
 
-  // Remotionがフレームをキャプチャする前にcanvasを更新するため、useEffectではなくuseLayoutEffect。
   useLayoutEffect(() => {
     const s = sceneState.current;
     if (!s?.vrm || !envelope || !modelReady) return;
@@ -276,21 +279,26 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
   const displayHook = clip?.hook || '';
   const sourceLabel = clip?.sourceLabel || '';
   const base = Math.min(width, height);
-  const padX = Math.round(width * 0.055);
-  const isLandscape = width > height;
+  const padX = Math.round(base * 0.048);
   const meter = Math.round(level * 100);
+  const titleFontSize = Math.round(Math.min(width * 0.038, height * 0.046));
+  const captionFontSize = Math.round(Math.min(width * 0.062, height * 0.075));
+  const configuredCaptionBottom = Number(clip?.layout?.captionBottomPx);
+  const captionBottomPx = Number.isFinite(configuredCaptionBottom) && configuredCaptionBottom > 0
+    ? configuredCaptionBottom
+    : (height > width ? Math.round(height * 0.2265) : Math.round(height * 0.07));
   const titleOpacity = interpolate(frame, [0, 10, 90, 105], [0, 1, 1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
 
   return (
-    <AbsoluteFill style={{background}}>
+    <AbsoluteFill style={{background: background === 'transparent' ? 'transparent' : background}}>
       <Audio src={staticFile(audioFile)} volume={1} />
       <canvas ref={canvas} width={width} height={height} style={{width: '100%', height: '100%', display: 'block'}} />
 
       {!modelReady ? (
-        <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', color: '#ddd', fontFamily: 'sans-serif'}}>
+        <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', color: '#ddd', fontFamily: overlayFontFamily}}>
           VRM LOADING
         </AbsoluteFill>
       ) : null}
@@ -302,19 +310,58 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
       ) : null}
 
       {displayTitle ? (
-        <div style={{position: 'absolute', top: Math.round(height * 0.055), left: padX, right: padX, opacity: titleOpacity, color: 'white', fontFamily: 'system-ui, sans-serif', fontWeight: 900, fontSize: Math.round(base * 0.042), lineHeight: 1.2, letterSpacing: '0.03em', textShadow: '0 2px 18px rgba(0,0,0,.7)'}}>
+        <div
+          style={{
+            position: 'absolute',
+            top: padX,
+            left: padX,
+            maxWidth: width - padX * 2,
+            opacity: titleOpacity,
+            color: 'white',
+            background: 'rgba(0,0,0,.5)',
+            padding: `${Math.round(titleFontSize * 0.18)}px ${Math.round(titleFontSize * 0.4)}px`,
+            fontFamily: overlayFontFamily,
+            fontWeight: 700,
+            fontSize: titleFontSize,
+            lineHeight: 1.2,
+            textShadow: '0 2px 18px rgba(0,0,0,.7)',
+          }}
+        >
           {displayTitle}
         </div>
       ) : null}
 
       {displayHook ? (
-        <div style={{position: 'absolute', top: Math.round(height * 0.13), left: padX, right: padX, color: 'rgba(255,255,255,.78)', fontFamily: 'system-ui, sans-serif', fontWeight: 700, fontSize: Math.round(base * 0.026), lineHeight: 1.35}}>
+        <div style={{position: 'absolute', top: Math.round(height * 0.13), left: padX, right: padX, color: 'rgba(255,255,255,.78)', fontFamily: overlayFontFamily, fontWeight: 700, fontSize: Math.round(base * 0.026), lineHeight: 1.35}}>
           {displayHook}
         </div>
       ) : null}
 
       {displayTelop ? (
-        <div style={{position: 'absolute', left: padX, right: padX, bottom: Math.round(height * (isLandscape ? 0.075 : 0.11)), color: 'white', fontFamily: 'system-ui, sans-serif', fontWeight: 900, fontSize: Math.round(base * (isLandscape ? 0.045 : 0.052)), lineHeight: 1.35, textAlign: 'center', whiteSpace: 'pre-wrap', WebkitTextStroke: `${Math.max(2, Math.round(base * 0.004))}px rgba(0,0,0,.9)`, paintOrder: 'stroke fill', textShadow: '0 3px 14px rgba(0,0,0,.8)'}}>
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: captionBottomPx,
+            padding: `${Math.round(captionFontSize * 0.4)}px ${Math.round(width * 0.07)}px`,
+            background: 'linear-gradient(to bottom, rgba(6,6,8,0), rgba(6,6,8,.72) 35%, rgba(6,6,8,.72))',
+            color: 'white',
+            fontFamily: overlayFontFamily,
+            fontWeight: 800,
+            fontSize: captionFontSize,
+            lineHeight: 1.34,
+            textAlign: 'center',
+            whiteSpace: 'pre-wrap',
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: height > width ? 3 : 2,
+            WebkitTextStroke: `${Math.max(2, Math.round(captionFontSize * 0.13))}px rgba(0,0,0,.9)`,
+            paintOrder: 'stroke fill',
+            textShadow: '0 3px 14px rgba(0,0,0,.8)',
+          }}
+        >
           {displayTelop}
         </div>
       ) : null}
