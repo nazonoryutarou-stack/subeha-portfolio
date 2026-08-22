@@ -34,12 +34,35 @@ jobs:
         run: |
           node --check scripts/check-vrm.mjs
           node --check remotion/vrm-lipsync/scripts/ensure-video-vrm.mjs
+          node --check remotion/vrm-lipsync/scripts/studio-project-validation.mjs
           node --check remotion/vrm-lipsync/scripts/import-studio-project.mjs
           node --check remotion/vrm-lipsync/scripts/materialize-visuals.mjs
           node --check remotion/vrm-lipsync/scripts/prepare-studio.mjs
           node --check remotion/vrm-lipsync/scripts/render-studio.mjs
           node --check remotion/vrm-lipsync/scripts/generate-envelope.mjs
           node --check remotion/vrm-lipsync/scripts/prepare-clip.mjs
+      - name: Test Studio project validator
+        run: |
+          node --input-type=module - <<'NODE'
+          import assert from 'node:assert/strict';
+          import {validateStudioProject} from './scripts/studio-project-validation.mjs';
+          const sha = 'a'.repeat(64);
+          const valid = {
+            version: 1,
+            source: {sha256: sha, durationMs: 10000},
+            clip: {startMs: 1000, endMs: 9000},
+            avatar: {speaker: 'HOST'},
+            captions: [{text: 'hello', startMs: 1200, endMs: 2000, speaker: 'HOST'}],
+            speakerTurns: [{speaker: 'HOST', startMs: 1000, endMs: 3000}],
+            visualReferences: [{id: 'v', startMs: 1500, endMs: 2500, url: 'data:image/png;base64,AA=='}],
+            layout: {width: 720, height: 1280},
+          };
+          assert.deepEqual(validateStudioProject(valid), {durationMs: 10000, width: 720, height: 1280, avatarSpeaker: 'HOST'});
+          assert.throws(() => validateStudioProject({...valid, clip: {startMs: 1000, endMs: 11000}}), /元音声長/);
+          assert.throws(() => validateStudioProject({...valid, avatar: {speaker: 'GUEST'}}), /speakerTurnsに存在しません/);
+          assert.throws(() => validateStudioProject({...valid, layout: {width: 800, height: 800}}), /未対応の出力サイズ/);
+          console.log('Studio project validator fixtures passed');
+          NODE
       - name: Test visual and background materialization
         run: |
           mkdir -p public
