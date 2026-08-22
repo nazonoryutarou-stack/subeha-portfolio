@@ -31,9 +31,12 @@ jobs:
       - name: Test streaming SHA-256
         working-directory: tools/vrm-talker
         run: npm run test:sha
-      - name: Test project reopen/source lock
+      - name: Test project validation and source lock
         working-directory: tools/vrm-talker
         run: npm run test:project
+      - name: Test long-audio chunk planning
+        working-directory: tools/vrm-talker
+        run: npm run test:chunks
       - name: Build VRM Studio with injected API base
         working-directory: tools/vrm-talker
         env:
