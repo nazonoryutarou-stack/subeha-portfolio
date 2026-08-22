@@ -1,3 +1,5 @@
+import {inspectVideoVrmFile} from './vrm-preflight.js';
+
 const DB_NAME = 'subeha-vrm-studio';
 const STORE = 'assets';
 const KEY = 'avatar-vrm';
@@ -93,6 +95,10 @@ if (input && panel) {
     if (!file) return;
     rememberButton.disabled = true;
     try {
+      const preflight = await inspectVideoVrmFile(file);
+      if (!preflight.ok) {
+        throw new Error(`動画用口形が不足しています: ${preflight.missing.join('/')}`);
+      }
       await storeFile(file);
       if (status) status.textContent = `VRMをこのブラウザに記憶しました：${file.name}`;
     } catch (error) {
@@ -113,12 +119,20 @@ if (input && panel) {
     }
   });
 
-  loadFile().then((file) => {
+  loadFile().then(async (file) => {
     if (!file) return;
-    if (assignFile(input, file) && status) {
-      status.textContent = `記憶済みVRMを自動ロードしました：${file.name}`;
+    const preflight = await inspectVideoVrmFile(file);
+    if (!preflight.ok) {
+      await forget();
+      if (status) status.textContent = `記憶済みVRMは動画用口形が不足していたため削除しました：${preflight.missing.join('/')}`;
+      return;
     }
-  }).catch((error) => {
+    if (assignFile(input, file) && status) {
+      status.textContent = `記憶済み動画用VRMを自動ロードしました：${file.name}`;
+    }
+  }).catch(async (error) => {
     console.warn('Cached VRM load failed', error);
+    try { await forget(); } catch {}
+    if (status) status.textContent = `記憶済みVRMを検査できなかったため削除しました：${error instanceof Error ? error.message : String(error)}`;
   });
 }
