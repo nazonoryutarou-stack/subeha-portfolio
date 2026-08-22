@@ -1,7 +1,0 @@
-node_modules/
-out/
-.cache/
-inputs/
-jobs/current.json
-public/*
-!public/.gitkeep
