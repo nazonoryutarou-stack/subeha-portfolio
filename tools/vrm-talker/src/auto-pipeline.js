@@ -1,5 +1,5 @@
 import {apiBaseIsConfigured, checkApiHealth} from './api/client.js';
-import {getProject} from './app/project-state.js';
+import {getProject, isSourceVerificationPending} from './app/project-state.js';
 
 const panel = document.getElementById('panel');
 const audioInput = document.getElementById('audioFile');
@@ -35,10 +35,27 @@ if (panel && audioInput) {
 
   audioInput.addEventListener('change', async () => {
     const file = audioInput.files?.[0];
-    if (!file || !autoAnalyze?.checked) return;
+    if (!file) return;
     const ownRun = ++runId;
+    const restoringProject = isSourceVerificationPending();
 
     try {
+      setStatus(restoringProject ? '保存済みproject.jsonと元音声を照合中…' : '音声をプロジェクトへ登録中…');
+      await waitFor(
+        () => !isSourceVerificationPending() && getProject().source.sha256 && getProject().source.name === file.name,
+        {timeoutMs: 180000},
+      );
+      if (ownRun !== runId) return;
+
+      // 保存済みプロジェクトの復元では既存字幕・画像を壊さない。
+      // 正しい元音声とのSHA一致だけ確認して、そのまま編集再開する。
+      if (restoringProject) {
+        const project = getProject();
+        setStatus(`プロジェクト復元完了：字幕 ${project.captions.length} / 画像 ${project.visualReferences.length} / 本人 ${project.avatar.speaker || '未指定'}`);
+        return;
+      }
+
+      if (!autoAnalyze?.checked) return;
       if (!apiBaseIsConfigured()) {
         setStatus('音声を読み込みました。自動AI解析には先にWorker API URLを設定してください。');
         return;
@@ -47,10 +64,6 @@ if (panel && audioInput) {
       const health = await checkApiHealth();
       if (!health?.ok) throw new Error('Worker health check failed');
       if (!health?.openaiConfigured) throw new Error('WorkerにOPENAI_API_KEYが設定されていません。');
-      if (ownRun !== runId) return;
-
-      setStatus('音声をプロジェクトへ登録中…');
-      await waitFor(() => getProject().source.sha256 && getProject().source.name === file.name, {timeoutMs: 180000});
       if (ownRun !== runId) return;
 
       const analyze = await waitFor(() => document.getElementById('studioAnalyze'));
