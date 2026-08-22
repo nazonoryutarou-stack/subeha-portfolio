@@ -165,6 +165,15 @@ export const suggestVisualCues = async (captions) => {
   return await parseJson(response);
 };
 
+export const importOpenverseImage = async (id) => {
+  const response = await fetch(`${getApiBase()}/images/import-openverse`, {
+    method: 'POST',
+    headers: {'content-type': 'application/json'},
+    body: JSON.stringify({id}),
+  });
+  return await parseJson(response);
+};
+
 export const generateReferenceImage = async ({prompt, size = '1024x1024'}) => {
   const response = await fetch(`${getApiBase()}/images/generate`, {
     method: 'POST',
