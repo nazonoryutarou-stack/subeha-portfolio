@@ -31,6 +31,7 @@ const snapshot = {
   source: {name: 'original.m4a', sha256: expectedSha, durationMs: 12345},
   clip: {startMs: 1000, endMs: 9000},
   avatar: {speaker: 'HOST', model: 'Subeha.vrm'},
+  text: {title: '保存タイトル', telop: ''},
   captions: [{text: '保存字幕', startMs: 1200, endMs: 2200, speaker: 'HOST'}],
   speakerTurns: [{speaker: 'HOST', startMs: 1000, endMs: 3000}],
   visualCues: [],
@@ -40,6 +41,33 @@ const snapshot = {
   }],
   layout: {width: 720, height: 1280, captionBottomPx: 290, showSafeArea: true, background: null},
 };
+
+const invalid = (patch) => structuredClone({...snapshot, ...patch});
+assert.throws(
+  () => loadProjectSnapshot(invalid({clip: {startMs: 1000, endMs: 13000}})),
+  /元音声長/,
+  'clip outside source duration must be rejected',
+);
+assert.throws(
+  () => loadProjectSnapshot(invalid({layout: {...snapshot.layout, width: 800, height: 800}})),
+  /未対応の出力サイズ/,
+  'unsupported render layout must be rejected',
+);
+assert.throws(
+  () => loadProjectSnapshot(invalid({avatar: {...snapshot.avatar, speaker: 'MISSING'}})),
+  /speakerTurnsに存在しません/,
+  'avatar speaker must exist in speaker turns',
+);
+assert.throws(
+  () => loadProjectSnapshot(invalid({captions: [{text: 'bad', startMs: 12000, endMs: 13000, speaker: 'HOST'}]})),
+  /元音声長/,
+  'caption outside source duration must be rejected',
+);
+assert.throws(
+  () => loadProjectSnapshot(invalid({visualReferences: [{id: 'bad', startMs: 1000, endMs: 2000}]})),
+  /画像データまたはURL/,
+  'visual without image source must be rejected',
+);
 
 loadProjectSnapshot(snapshot);
 assert.equal(isSourceVerificationPending(), true, 'loaded project must require source verification');
@@ -62,5 +90,6 @@ assert.equal(getProject().source.name, 'renamed-source.m4a', 'same bytes may be 
 assert.equal(getProject().captions[0].text, '保存字幕', 'matching source must preserve captions');
 assert.equal(getProject().visualReferences.length, 1, 'matching source must preserve visuals');
 assert.equal(getProject().avatar.speaker, 'HOST', 'matching source must preserve avatar speaker');
+assert.equal(getProject().text.title, '保存タイトル', 'matching source must preserve editor text');
 
-console.log('Project reopen/source verification tests passed');
+console.log('Project validation/reopen/source verification tests passed');
