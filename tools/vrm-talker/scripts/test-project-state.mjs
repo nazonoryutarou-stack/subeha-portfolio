@@ -24,6 +24,7 @@ const {
   loadProjectSnapshot,
   removeVisualReference,
   setSourceFile,
+  updateVisualReference,
 } = await import('../src/app/project-state.js');
 
 const sourceBytes = new TextEncoder().encode('exact-source-audio-fixture');
@@ -111,5 +112,19 @@ assert.equal(secondPlacement.assetId, 'openverse-asset-123');
 assert.equal(getProject().visualReferences.length, 3);
 assert.equal(removeVisualReference(firstPlacement.id), true);
 assert.equal(getProject().visualReferences.some((item) => item.id === secondPlacement.id), true, 'removing one placement must preserve another placement of the same asset');
+
+const clamped = updateVisualReference(secondPlacement.id, {startMs: 12000, endMs: 13000});
+assert.equal(clamped.endMs, 12345, 'visual end must clamp to source duration');
+assert.equal(clamped.startMs, 12000);
+assert.throws(
+  () => updateVisualReference(secondPlacement.id, {startMs: 12345, endMs: 13000}),
+  /開始時刻が元音声長/,
+  'visual starting at or after source end must be rejected after clamping',
+);
+assert.throws(
+  () => addVisualReference({...sharedAsset, startMs: 12345, endMs: 13000}),
+  /開始時刻が元音声長/,
+  'new visual starting at or after source end must be rejected',
+);
 
 console.log('Project validation/reopen/source verification/visual placement tests passed');
