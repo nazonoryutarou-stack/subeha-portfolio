@@ -37,13 +37,15 @@ jobs:
           node --check remotion/vrm-lipsync/scripts/import-studio-project.mjs
           node --check remotion/vrm-lipsync/scripts/materialize-visuals.mjs
           node --check remotion/vrm-lipsync/scripts/prepare-studio.mjs
+          node --check remotion/vrm-lipsync/scripts/render-studio.mjs
           node --check remotion/vrm-lipsync/scripts/generate-envelope.mjs
           node --check remotion/vrm-lipsync/scripts/prepare-clip.mjs
-      - name: Test visual materialization
+      - name: Test visual and background materialization
         run: |
           mkdir -p public
           cat > public/clip.json <<'JSON'
           {
+            "backgroundDataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZVZsAAAAASUVORK5CYII=",
             "visualReferences": [
               {
                 "id": "ci-visual",
@@ -62,9 +64,29 @@ jobs:
           const renderFile = clip.visualReferences?.[0]?.renderFile;
           if (!renderFile) throw new Error('renderFile was not written');
           if (!fs.existsSync(`public/${renderFile}`)) throw new Error(`materialized file missing: ${renderFile}`);
+          if (!clip.backgroundFile) throw new Error('backgroundFile was not written');
+          if (!fs.existsSync(`public/${clip.backgroundFile}`)) throw new Error(`background file missing: ${clip.backgroundFile}`);
+          if ('backgroundDataUrl' in clip) throw new Error('backgroundDataUrl should be removed after materialization');
           console.log(`Materialized visual fixture: ${renderFile}`);
+          console.log(`Materialized background fixture: ${clip.backgroundFile}`);
           NODE
           rm -rf public/visuals public/clip.json
+      - name: Test studio composition planning
+        run: |
+          mkdir -p jobs/.generated
+          cat > jobs/.generated/vertical.json <<'JSON'
+          {"layout":{"width":720,"height":1280}}
+          JSON
+          cat > jobs/.generated/square.json <<'JSON'
+          {"layout":{"width":900,"height":900}}
+          JSON
+          cat > jobs/.generated/landscape.json <<'JSON'
+          {"layout":{"width":1280,"height":720}}
+          JSON
+          npm run render:studio -- --project=jobs/.generated/vertical.json --audio=dummy.m4a --plan-only | grep -q '"composition":"VrmLipSync"'
+          npm run render:studio -- --project=jobs/.generated/square.json --audio=dummy.m4a --plan-only | grep -q '"composition":"VrmLipSyncSquare"'
+          npm run render:studio -- --project=jobs/.generated/landscape.json --audio=dummy.m4a --plan-only | grep -q '"composition":"VrmLipSyncLandscape"'
+          rm -rf jobs/.generated
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: TypeScript check
