@@ -26,6 +26,8 @@
 2. 長尺配信では、本人だけが話している2〜10秒をHOST声サンプルとして登録する。
 3. Worker未自動設定の開発環境ではCloudflare Worker URLをAPI設定へ登録する。
 
+ブラウザ側でもVRMのGLB JSON chunkを事前検査し、`aa / ih / ou / ee / oh` が揃わないモデルは**録画とIndexedDBへの記憶を禁止**する。過去に記憶された不適格VRMも起動時に検査して削除する。
+
 本番PagesではCloudflare設定が存在すれば、Pages build時にworkers.dev URLを取得し、Viteへ `VITE_VRM_STUDIO_API_BASE` として自動注入する。
 
 ## 長尺配信
@@ -161,6 +163,7 @@ npm install
 npm run test:sha
 npm run test:project
 npm run test:chunks
+npm run test:vrm
 npm run build
 npm run dev
 ```
