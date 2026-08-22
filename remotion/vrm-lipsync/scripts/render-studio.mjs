@@ -12,8 +12,9 @@ const valueArg = (name) => {
 const projectArg = valueArg('project');
 const audioArg = valueArg('audio');
 const outputArg = valueArg('output');
+const planOnly = process.argv.includes('--plan-only');
 if (!projectArg || !audioArg) {
-  console.error('使い方: npm run render:studio -- --project=/path/project.json --audio=/path/source.m4a [--output=out/studio.mp4]');
+  console.error('使い方: npm run render:studio -- --project=/path/project.json --audio=/path/source.m4a [--output=out/studio.mp4] [--plan-only]');
   process.exit(2);
 }
 
@@ -32,6 +33,19 @@ const composition = compositionBySize.get(`${width}x${height}`);
 if (!composition) throw new Error(`未対応の出力サイズです: ${width}x${height}`);
 
 const outputPath = path.resolve(projectRoot, outputArg || 'out/studio.mp4');
+if (planOnly) {
+  console.log(JSON.stringify({
+    ok: true,
+    composition,
+    width,
+    height,
+    project: studioProjectPath,
+    audio: path.resolve(projectRoot, audioArg),
+    output: outputPath,
+  }));
+  process.exit(0);
+}
+
 fs.mkdirSync(path.dirname(outputPath), {recursive: true});
 
 const run = (command, args, {env = {}} = {}) => {
@@ -52,6 +66,7 @@ run(process.execPath, [
 
 run('npm', ['run', 'check']);
 run('npx', [
+  '--no-install',
   'remotion', 'render', composition, outputPath,
   '--codec=h264',
   '--crf=20',
