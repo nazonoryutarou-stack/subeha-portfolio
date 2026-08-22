@@ -26,12 +26,14 @@ type VisualReference = {
 
 type ClipWithVisuals = {
   visualReferences?: VisualReference[];
+  backgroundFile?: string | null;
 };
 
 export const VrmLipSyncStudio: React.FC<VrmLipSyncProps> = (props) => {
   const frame = useCurrentFrame();
   const {fps, width, height} = useVideoConfig();
   const [visuals, setVisuals] = useState<VisualReference[]>([]);
+  const [backgroundFile, setBackgroundFile] = useState<string | null>(null);
   const [visualsHandle] = useState(() => delayRender('画像タイムラインを読み込み中'));
 
   useEffect(() => {
@@ -51,11 +53,13 @@ export const VrmLipSyncStudio: React.FC<VrmLipSyncProps> = (props) => {
             })
           : [];
         setVisuals(next);
+        setBackgroundFile(typeof clip.backgroundFile === 'string' && clip.backgroundFile ? clip.backgroundFile : null);
         continueRender(visualsHandle);
       })
       .catch(() => {
         if (cancelled) return;
         setVisuals([]);
+        setBackgroundFile(null);
         continueRender(visualsHandle);
       });
     return () => {
@@ -89,8 +93,14 @@ export const VrmLipSyncStudio: React.FC<VrmLipSyncProps> = (props) => {
   }
 
   return (
-    <AbsoluteFill>
-      <VrmLipSync {...props} />
+    <AbsoluteFill style={{background: props.background}}>
+      {backgroundFile ? (
+        <Img
+          src={staticFile(backgroundFile)}
+          style={{position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover'}}
+        />
+      ) : null}
+      <VrmLipSync {...props} background={backgroundFile ? 'transparent' : props.background} />
       {current?.renderFile ? (
         <div
           style={{
