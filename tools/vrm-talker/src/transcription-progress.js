@@ -42,3 +42,15 @@ window.addEventListener('vrm-studio-transcription-progress', (event) => {
     status.textContent = count > 1 ? `全 ${count} チャンクの字幕・話者解析を結合しました。` : '字幕・話者解析を完了しました。';
   }
 });
+
+window.addEventListener('vrm-studio-visual-progress', (event) => {
+  if (!status) return;
+  const detail = event.detail || {};
+  const count = Math.max(1, Number(detail.count || 1));
+  const index = Number(detail.index || 0);
+  if (detail.phase === 'batch') {
+    status.textContent = `発話内容を映像分析中 ${index + 1}/${count}`;
+  } else if (detail.phase === 'done') {
+    status.textContent = count > 1 ? `全 ${count} 区間の映像候補分析を結合しました。` : '映像候補分析を完了しました。';
+  }
+});
