@@ -35,6 +35,8 @@ jobs:
           node --check scripts/check-vrm.mjs
           node --check remotion/vrm-lipsync/scripts/ensure-video-vrm.mjs
           node --check remotion/vrm-lipsync/scripts/import-studio-project.mjs
+          node --check remotion/vrm-lipsync/scripts/materialize-visuals.mjs
+          node --check remotion/vrm-lipsync/scripts/prepare-studio.mjs
           node --check remotion/vrm-lipsync/scripts/generate-envelope.mjs
           node --check remotion/vrm-lipsync/scripts/prepare-clip.mjs
       - name: Install dependencies
