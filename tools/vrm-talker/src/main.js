@@ -6,6 +6,7 @@ import './speaker-reference.js';
 import './transcription-progress.js';
 import './caption-editor.js';
 import './visual-director.js';
+import './visual-cue-sync.js';
 import './visual-overlay.js';
 import './timeline-editor.js';
 import './project-loader.js';
