@@ -3,6 +3,8 @@ import {getKnownSpeakerReference} from '../known-speaker-store.js';
 
 const STORAGE_KEY = 'vrm-studio-api-base';
 const MAX_DIRECT_AUDIO_BYTES = 24 * 1024 * 1024;
+const VISUAL_BATCH_SIZE = 240;
+const VISUAL_BATCH_OVERLAP = 20;
 
 const normalizeBase = (value) => String(value || '').trim().replace(/\/$/, '');
 
@@ -40,6 +42,10 @@ const parseJson = async (response) => {
 
 const progress = (detail) => {
   window.dispatchEvent(new CustomEvent('vrm-studio-transcription-progress', {detail}));
+};
+
+const visualProgress = (detail) => {
+  window.dispatchEvent(new CustomEvent('vrm-studio-visual-progress', {detail}));
 };
 
 const appendKnownSpeaker = (form, known) => {
@@ -110,8 +116,6 @@ export const transcribeAudio = async (file) => {
       endSeconds: chunk.endSeconds,
     });
 
-    // 1区間だけWAV化して送信し、レスポンス取得後は次のループで参照を捨てる。
-    // 全WAVを同時保持しないことで長尺配信のピークメモリを抑える。
     const wav = await extractWavRange(file, chunk.startSeconds, chunk.endSeconds);
     const payload = await postTranscription(wav, known, {
       index: chunk.index,
@@ -156,13 +160,89 @@ export const transcribeAudio = async (file) => {
   };
 };
 
-export const suggestVisualCues = async (captions) => {
+const postVisualBatch = async (captions) => {
   const response = await fetch(`${getApiBase()}/visual-cues`, {
     method: 'POST',
     headers: {'content-type': 'application/json'},
     body: JSON.stringify({captions}),
   });
   return await parseJson(response);
+};
+
+const cueKey = (cue) => [
+  cue.mode,
+  String(cue.query || '').trim().toLowerCase(),
+  String(cue.prompt || '').trim().toLowerCase(),
+].join('|');
+
+const overlapRatio = (a, b) => {
+  const start = Math.max(Number(a.startMs), Number(b.startMs));
+  const end = Math.min(Number(a.endMs), Number(b.endMs));
+  if (end <= start) return 0;
+  const overlap = end - start;
+  const shortest = Math.max(1, Math.min(Number(a.endMs) - Number(a.startMs), Number(b.endMs) - Number(b.startMs)));
+  return overlap / shortest;
+};
+
+const dedupeVisualCues = (cues) => {
+  const out = [];
+  for (const cue of [...cues].sort((a, b) => Number(a.startMs) - Number(b.startMs))) {
+    const duplicate = out.find((item) => cueKey(item) === cueKey(cue) && overlapRatio(item, cue) >= 0.45);
+    if (duplicate) {
+      duplicate.startMs = Math.min(Number(duplicate.startMs), Number(cue.startMs));
+      duplicate.endMs = Math.max(Number(duplicate.endMs), Number(cue.endMs));
+      duplicate.startIndex = Math.min(Number(duplicate.startIndex), Number(cue.startIndex));
+      duplicate.endIndex = Math.max(Number(duplicate.endIndex), Number(cue.endIndex));
+      continue;
+    }
+    out.push({...cue});
+  }
+  return out;
+};
+
+export const suggestVisualCues = async (captions) => {
+  const all = Array.isArray(captions) ? captions : [];
+  if (!all.length) return {model: null, cues: []};
+
+  if (all.length <= 600) {
+    visualProgress({phase: 'batch', index: 0, count: 1});
+    const payload = await postVisualBatch(all);
+    visualProgress({phase: 'done', index: 1, count: 1});
+    return payload;
+  }
+
+  const stride = VISUAL_BATCH_SIZE - VISUAL_BATCH_OVERLAP;
+  const batches = [];
+  for (let offset = 0; offset < all.length; offset += stride) {
+    const slice = all.slice(offset, offset + VISUAL_BATCH_SIZE);
+    if (!slice.length) break;
+    batches.push({offset, captions: slice});
+    if (offset + VISUAL_BATCH_SIZE >= all.length) break;
+  }
+
+  const cues = [];
+  const models = new Set();
+  for (let index = 0; index < batches.length; index++) {
+    const batch = batches[index];
+    visualProgress({phase: 'batch', index, count: batches.length, offset: batch.offset});
+    const payload = await postVisualBatch(batch.captions);
+    if (payload?.model) models.add(payload.model);
+    for (const cue of payload?.cues || []) {
+      cues.push({
+        ...cue,
+        startIndex: Number(cue.startIndex) + batch.offset,
+        endIndex: Number(cue.endIndex) + batch.offset,
+      });
+    }
+  }
+  const merged = dedupeVisualCues(cues);
+  visualProgress({phase: 'done', index: batches.length, count: batches.length});
+  return {
+    model: [...models].join('+') || null,
+    cues: merged,
+    batched: true,
+    batchCount: batches.length,
+  };
 };
 
 export const importOpenverseImage = async (id) => {
