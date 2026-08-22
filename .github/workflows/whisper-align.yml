@@ -5,7 +5,7 @@ on:
     branches:
       - work/whisper-align-151
     paths:
-      - 'tmp/whisper/READY'
+      - 'tmp/whisper/source.ogg'
 
 permissions:
   contents: write
@@ -26,19 +26,20 @@ jobs:
           cache: npm
           cache-dependency-path: remotion/vrm-lipsync/package-lock.json
 
-      - name: Reconstruct temporary source clip
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Verify temporary source clip
+        run: ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper/source.ogg
+
+      - name: Prepare alignment job
         shell: bash
         run: |
-          cat tmp/whisper/base64/*.txt | tr -d '\n\r' | base64 -d > tmp/whisper/source.ogg
-          ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper/source.ogg
           cat > tmp/whisper/job.json <<'JSON'
           {
             "sourceAudio": "../../tmp/whisper/source.ogg"
           }
           JSON
-
-      - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Install Remotion dependencies
         working-directory: remotion/vrm-lipsync
@@ -56,13 +57,6 @@ jobs:
           mkdir -p tmp/whisper/output
           cp remotion/vrm-lipsync/inputs/source.captions.json tmp/whisper/output/captions.json
           cp remotion/vrm-lipsync/inputs/source.captions.meta.json tmp/whisper/output/meta.json
-          node - <<'NODE'
-          const fs = require('fs');
-          const p = 'tmp/whisper/output/captions.json';
-          const captions = JSON.parse(fs.readFileSync(p, 'utf8'));
-          console.log(`captions=${captions.length}`);
-          for (const c of captions.slice(0, 20)) console.log(JSON.stringify(c));
-          NODE
 
       - name: Commit alignment result
         shell: bash
