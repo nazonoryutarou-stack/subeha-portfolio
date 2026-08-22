@@ -10,6 +10,13 @@ const valueArg = (name) => {
   return arg ? arg.slice(prefix.length) : null;
 };
 
+const hashFile = async (filePath) => {
+  const hash = createHash('sha256');
+  const stream = fs.createReadStream(filePath);
+  for await (const chunk of stream) hash.update(chunk);
+  return hash.digest('hex');
+};
+
 const projectArg = valueArg('project');
 const audioArg = valueArg('audio');
 if (!projectArg || !audioArg) {
@@ -27,7 +34,7 @@ if (!studio?.source?.sha256 || !Array.isArray(studio.captions)) throw new Error(
 if (!Array.isArray(studio.speakerTurns) || studio.speakerTurns.length === 0) throw new Error('project.json に speakerTurns がありません。先に話者解析してください。');
 if (!studio?.avatar?.speaker) throw new Error('project.json で本人話者が未指定です。');
 
-const sourceHash = createHash('sha256').update(fs.readFileSync(sourceAudioPath)).digest('hex');
+const sourceHash = await hashFile(sourceAudioPath);
 if (sourceHash.toLowerCase() !== String(studio.source.sha256).toLowerCase()) {
   throw new Error(`project.json と元音声のSHA-256が一致しません。expected=${studio.source.sha256} actual=${sourceHash}`);
 }
@@ -37,6 +44,13 @@ const sourceDurationMs = Number(studio.source?.durationMs || 0);
 const endMs = Number(studio.clip?.endMs || sourceDurationMs);
 if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) throw new Error('project.json の clip 範囲が不正です。');
 
+const width = Number(studio.layout?.width || 720);
+const height = Number(studio.layout?.height || 1280);
+const allowedLayouts = new Set(['720x1280', '900x900', '1280x720']);
+if (!allowedLayouts.has(`${width}x${height}`)) {
+  throw new Error(`未対応の出力サイズです: ${width}x${height}`);
+}
+
 const tempJobDir = path.join(projectRoot, 'jobs', '.generated');
 fs.mkdirSync(tempJobDir, {recursive: true});
 const tempJobPath = path.join(tempJobDir, 'studio-current.json');
@@ -45,8 +59,8 @@ const job = {
   sourceLabel: studio.source?.name || path.basename(sourceAudioPath),
   startMs,
   endMs,
-  title: String(studio.title || studio.source?.name || 'VRM Studio'),
-  telop: String(studio.telop || ''),
+  title: String(studio.text?.title || studio.title || studio.source?.name || 'VRM Studio'),
+  telop: String(studio.text?.telop || studio.telop || ''),
   hook: String(studio.hook || ''),
   captions: studio.captions,
 };
@@ -63,13 +77,12 @@ const runNode = (script, args = [], env = {}) => {
 };
 
 runNode('ensure-video-vrm.mjs');
-// まず同じ原音から最終 voice.wav / clip.json を作る。ここでは一時的なenvelopeは本番扱いしない。
+// 同じ原音から最終 voice.wav / clip.json を作る。この時点のenvelopeは本番扱いしない。
 runNode('prepare-clip.mjs', [`--job=${path.relative(projectRoot, tempJobPath)}`], {REQUIRE_SPEAKER_TURNS: '0'});
 
 const voicePath = path.join(projectRoot, 'public', 'voice.wav');
 if (!fs.existsSync(voicePath)) throw new Error('prepare-clip 後に public/voice.wav がありません。');
-const voiceBytes = fs.readFileSync(voicePath);
-const voiceHash = createHash('sha256').update(voiceBytes).digest('hex');
+const voiceHash = await hashFile(voicePath);
 
 const ffprobe = spawnSync('ffprobe', [
   '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', voicePath,
@@ -125,9 +138,19 @@ clip.visualReferences = (studio.visualReferences || []).map((item) => {
 }).filter(Boolean);
 clip.studioSourceSha256 = studio.source.sha256;
 clip.avatarSpeaker = studio.avatar.speaker;
+clip.layout = {
+  width,
+  height,
+  captionBottomPx: Number(studio.layout?.captionBottomPx || 290),
+};
+const background = String(studio.layout?.background || '').trim();
+clip.backgroundDataUrl = background.startsWith('data:image/') ? background : null;
 fs.writeFileSync(clipPath, JSON.stringify(clip, null, 2) + '\n');
 
 console.log(`Studio project imported: ${path.basename(studioProjectPath)}`);
+console.log(`Source SHA-256: ${sourceHash}`);
 console.log(`Final WAV SHA-256: ${voiceHash}`);
+console.log(`Clip: ${startMs}ms - ${endMs}ms / ${width}x${height}`);
 console.log(`Speaker turns: ${relativeTurns.length} / avatar=${studio.avatar.speaker}`);
 console.log(`Visual references: ${clip.visualReferences.length}`);
+console.log(`Background: ${clip.backgroundDataUrl ? 'embedded' : 'default'}`);
