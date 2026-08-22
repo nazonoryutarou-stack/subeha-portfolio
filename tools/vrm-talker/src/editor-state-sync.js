@@ -44,10 +44,21 @@ const patchText = () => {
 title?.addEventListener('input', patchText);
 telop?.addEventListener('input', patchText);
 
+const captionBottomForSize = (width, height) => (
+  height > width ? Math.round(height * 0.2265) : Math.round(height * 0.07)
+);
+
 const patchSize = (width, height) => {
   if (applying) return;
   const project = getProject();
-  patchProject({layout: {...project.layout, width, height}});
+  patchProject({
+    layout: {
+      ...project.layout,
+      width,
+      height,
+      captionBottomPx: captionBottomForSize(width, height),
+    },
+  });
 };
 sizeV?.addEventListener('click', () => patchSize(720, 1280));
 sizeS?.addEventListener('click', () => patchSize(900, 900));
