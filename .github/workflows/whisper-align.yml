@@ -26,8 +26,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: remotion/vrm-lipsync/package-lock.json
 
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
@@ -46,7 +44,7 @@ jobs:
 
       - name: Install Remotion dependencies
         working-directory: remotion/vrm-lipsync
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Transcribe source clip with local whisper.cpp
         working-directory: remotion/vrm-lipsync
