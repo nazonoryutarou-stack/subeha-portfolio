@@ -121,12 +121,17 @@
       "type": "object",
       "required": ["width", "height", "captionBottomPx"],
       "properties": {
-        "width": {"type": "integer", "enum": [720, 900, 1280]},
-        "height": {"type": "integer", "enum": [720, 900, 1280]},
+        "width": {"type": "integer"},
+        "height": {"type": "integer"},
         "captionBottomPx": {"type": "integer", "minimum": 0},
         "showSafeArea": {"type": "boolean"},
         "background": {"type": ["string", "null"]}
       },
+      "oneOf": [
+        {"properties": {"width": {"const": 720}, "height": {"const": 1280}}},
+        {"properties": {"width": {"const": 900}, "height": {"const": 900}}},
+        {"properties": {"width": {"const": 1280}, "height": {"const": 720}}}
+      ],
       "additionalProperties": true
     }
   },
