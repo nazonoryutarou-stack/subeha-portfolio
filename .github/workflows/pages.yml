@@ -30,6 +30,34 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Resolve VRM Studio API base when Cloudflare is configured
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo 'VITE_VRM_STUDIO_API_BASE=' >> "$GITHUB_ENV"
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo '::notice::Cloudflare secrets are not configured; VRM Studio will keep the manual API URL fallback.'
+            exit 0
+          fi
+
+          endpoint="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain"
+          if ! response="$(curl -fsS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "$endpoint")"; then
+            echo '::warning::Could not resolve the Cloudflare workers.dev account subdomain. VRM Studio will keep the manual API URL fallback.'
+            exit 0
+          fi
+
+          subdomain="$(printf '%s' "$response" | node -e "let s='';process.stdin.on('data',c=>s+=c).on('end',()=>{const j=JSON.parse(s);if(j?.success&&j?.result?.subdomain)process.stdout.write(String(j.result.subdomain));})")"
+          if [ -z "$subdomain" ]; then
+            echo '::warning::Cloudflare returned no workers.dev subdomain. VRM Studio will keep the manual API URL fallback.'
+            exit 0
+          fi
+
+          api_base="https://subeha-vrm-studio-api.${subdomain}.workers.dev/api"
+          echo "VITE_VRM_STUDIO_API_BASE=${api_base}" >> "$GITHUB_ENV"
+          echo "VRM Studio API auto-configured: ${api_base}"
+
       - name: Build VRM Talker
         working-directory: tools/vrm-talker
         run: |
