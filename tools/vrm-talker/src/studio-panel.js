@@ -1,8 +1,6 @@
 import {
   apiBaseIsConfigured,
-  generateReferenceImage,
   importOpenverseImage,
-  transcribeAudio,
 } from './api/client.js';
 import {searchReferenceImages} from './references/search.js';
 import {
@@ -10,7 +8,6 @@ import {
   availableSpeakers,
   downloadProject,
   getProject,
-  setAnalysis,
   setAvatarSpeaker,
   setSourceFile,
 } from './app/project-state.js';
@@ -40,37 +37,30 @@ if (panel && audioInput) {
   const section = document.createElement('section');
   section.className = 'studio-tools';
   section.innerHTML = `
-    <h2>STUDIO AI</h2>
-    <div class="studio-actions">
-      <button id="studioAnalyze" type="button">字幕＋話者解析</button>
-      <button id="studioSave" type="button">project.json保存</button>
-    </div>
-    <div id="studioMeta" class="studio-meta">音声を選ぶとプロジェクトを作成します。</div>
+    <h2>STUDIO REVIEW</h2>
+    <div class="small">字幕・話者・切り抜き判断はChatGPTのedit-planを正本にします。ここでは確認・微調整だけ行います。</div>
+    <button id="studioSave" type="button">project.json保存</button>
+    <div id="studioMeta" class="studio-meta">project.jsonを開くか、音声を選択してください。</div>
     <select id="studioAvatarSpeaker" disabled>
-      <option value="">解析後、本人の話者を選択</option>
+      <option value="">edit-planに話者情報がありません</option>
     </select>
-    <div id="studioSpeakerWarning" class="studio-warning">本人を選ぶまでは、話者ゲート付き口パクを完成扱いしません。</div>
+    <div id="studioSpeakerWarning" class="studio-warning">HOST以外はVRM発話モーションを止めます。</div>
     <input id="studioSearchQuery" type="text" placeholder="参考画像を検索 例: 昭和の遺影 写真館">
     <div class="studio-actions">
       <button id="studioSearch" type="button">参考画像検索</button>
       <button id="studioUseCaption" type="button">現在字幕を検索語へ</button>
     </div>
-    <input id="studioGeneratePrompt" type="text" placeholder="生成画像プロンプト">
-    <button id="studioGenerate" type="button">参考画像を生成</button>
     <div id="studioResults" class="studio-results"></div>
   `;
 
   panel.insertBefore(section, status || null);
 
-  const analyzeButton = document.getElementById('studioAnalyze');
   const saveButton = document.getElementById('studioSave');
   const searchButton = document.getElementById('studioSearch');
   const useCaptionButton = document.getElementById('studioUseCaption');
-  const generateButton = document.getElementById('studioGenerate');
   const speakerSelect = document.getElementById('studioAvatarSpeaker');
   const speakerWarning = document.getElementById('studioSpeakerWarning');
   const searchInput = document.getElementById('studioSearchQuery');
-  const promptInput = document.getElementById('studioGeneratePrompt');
   const meta = document.getElementById('studioMeta');
   const results = document.getElementById('studioResults');
 
@@ -99,7 +89,7 @@ if (panel && audioInput) {
     speakerSelect.textContent = '';
     const placeholder = document.createElement('option');
     placeholder.value = '';
-    placeholder.textContent = speakers.length ? '本人の話者を選択' : '話者解析が必要です';
+    placeholder.textContent = speakers.length ? 'アバター話者を確認' : 'edit-planに話者情報がありません';
     speakerSelect.appendChild(placeholder);
     for (const speaker of speakers) {
       const option = document.createElement('option');
@@ -110,20 +100,22 @@ if (panel && audioInput) {
     }
     speakerSelect.disabled = speakers.length === 0;
     speakerWarning.textContent = selected
-      ? `アバター話者: ${selected}。この話者の区間だけ口パク対象にします。`
-      : '本人を選ぶまでは、話者ゲート付き口パクを完成扱いしません。';
+      ? `アバター話者: ${selected}。この話者の区間だけ口・発話連動頭/胸モーションを有効化します。`
+      : 'アバター話者が未指定です。完成レンダーではHOSTを使ってください。';
   };
 
   const refreshMeta = () => {
     const project = getProject();
     const host = project.avatar.speaker;
     const hostTurns = host ? project.speakerTurns.filter((turn) => turn.speaker === host).length : 0;
-    const guestTurns = host ? project.speakerTurns.length - hostTurns : project.speakerTurns.length;
+    const guestTurns = project.speakerTurns.filter((turn) => turn.speaker === 'GUEST').length;
+    const unknownTurns = project.speakerTurns.filter((turn) => turn.speaker === 'UNKNOWN').length;
     meta.innerHTML = [
       `<span class="studio-chip">字幕 ${project.captions.length}</span>`,
-      `<span class="studio-chip">本人 ${host || '未指定'}</span>`,
-      `<span class="studio-chip">HOST区間 ${hostTurns}</span>`,
-      `<span class="studio-chip">OTHER ${guestTurns}</span>`,
+      `<span class="studio-chip">アバター ${host || '未指定'}</span>`,
+      `<span class="studio-chip">HOST ${hostTurns}</span>`,
+      `<span class="studio-chip">GUEST ${guestTurns}</span>`,
+      `<span class="studio-chip">UNKNOWN ${unknownTurns}</span>`,
       `<span class="studio-chip">画像 ${project.visualReferences.length}</span>`,
     ].join('');
     refreshSpeakerSelect();
@@ -154,36 +146,11 @@ if (panel && audioInput) {
     }
   });
 
-  analyzeButton?.addEventListener('click', async () => {
-    const file = audioInput.files?.[0];
-    if (!file) {
-      setStatus('先に音声を選んでください。');
-      return;
-    }
-    analyzeButton.disabled = true;
-    setStatus('字幕と話者を解析中…');
-    try {
-      const payload = await transcribeAudio(file);
-      setAnalysis({
-        captions: payload?.captions || [],
-        speakerTurns: payload?.speakerTurns || payload?.speaker_turns || [],
-        durationMs: payload?.durationMs || payload?.duration_ms,
-      });
-      refreshMeta();
-      setStatus(`解析完了：字幕 ${getProject().captions.length} / 話者区間 ${getProject().speakerTurns.length}。本人の話者を選択してください。`);
-    } catch (error) {
-      console.error(error);
-      setStatus(`字幕API: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
-      analyzeButton.disabled = false;
-    }
-  });
-
   speakerSelect?.addEventListener('change', () => {
     try {
       setAvatarSpeaker(speakerSelect.value);
       refreshMeta();
-      setStatus(speakerSelect.value ? `本人話者を ${speakerSelect.value} に設定しました。` : '本人話者の指定を解除しました。');
+      setStatus(speakerSelect.value ? `アバター話者を ${speakerSelect.value} に設定しました。` : 'アバター話者の指定を解除しました。');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : String(error));
     }
@@ -192,7 +159,7 @@ if (panel && audioInput) {
   saveButton?.addEventListener('click', () => {
     const project = getProject();
     if (project.speakerTurns.length > 0 && !project.avatar.speaker) {
-      setStatus('本人話者が未指定です。先に本人を選んでください。');
+      setStatus('アバター話者が未指定です。完成用ならHOSTを指定してください。');
       return;
     }
     const base = project.source.name.replace(/\.[^.]+$/, '') || 'project';
@@ -206,16 +173,9 @@ if (panel && audioInput) {
       setStatus('現在位置に字幕がありません。');
       return;
     }
-    const project = getProject();
-    if (project.speakerTurns.length) {
-      if (!project.avatar.speaker) {
-        setStatus('本人話者を指定してから現在字幕を検索語へ使ってください。');
-        return;
-      }
-      if (caption.speaker !== project.avatar.speaker) {
-        setStatus('現在字幕は本人以外の発話なので、検索語へ自動コピーしません。');
-        return;
-      }
+    if (caption.speaker && caption.speaker !== 'HOST') {
+      setStatus('現在字幕はHOST以外なので、検索語へ自動コピーしません。');
+      return;
     }
     searchInput.value = caption.text;
   });
@@ -237,6 +197,7 @@ if (panel && audioInput) {
         button.disabled = true;
         const now = Math.round(currentMs());
         let selected = item;
+        let fixed = false;
         if (item.kind === 'search' && item.id && apiBaseIsConfigured()) {
           label.textContent = '録画用に固定中…';
           try {
@@ -252,13 +213,10 @@ if (panel && audioInput) {
                 license: payload.license || item.license || null,
                 title: payload.title || item.title || null,
               };
+              fixed = true;
             }
           } catch (error) {
-            console.error(error);
-            button.disabled = false;
-            label.textContent = item.title || item.creator || item.kind;
-            setStatus(`参考画像を録画用に固定できませんでした: ${error instanceof Error ? error.message : String(error)}`);
-            return;
+            console.warn('Optional image proxy failed', error);
           }
         }
         addVisualReference({
@@ -268,8 +226,10 @@ if (panel && audioInput) {
           query: searchInput.value.trim() || null,
         });
         refreshMeta();
-        label.textContent = '採用済み';
-        setStatus('参考画像をprojectへ追加しました。');
+        label.textContent = fixed ? '採用済み・固定済み' : '採用済み';
+        setStatus(fixed
+          ? '参考画像を録画可能なdata URLとしてprojectへ追加しました。'
+          : '参考画像をprojectへ追加しました。完成レンダーへ使う場合はローカル素材化してください。');
       });
       results.appendChild(button);
     }
@@ -292,40 +252,8 @@ if (panel && audioInput) {
     }
   });
 
-  generateButton?.addEventListener('click', async () => {
-    const prompt = promptInput.value.trim();
-    if (!prompt) return;
-    generateButton.disabled = true;
-    setStatus('参考画像を生成中…');
-    try {
-      const payload = await generateReferenceImage({prompt});
-      const first = payload?.data?.[0] || payload || {};
-      const b64 = first.b64_json || first.b64 || null;
-      const url = first.url || first.imageUrl || first.image_url || (b64 ? `data:image/png;base64,${b64}` : null);
-      if (!url) throw new Error('画像生成APIから画像が返りませんでした。');
-      const item = {
-        id: crypto.randomUUID(),
-        kind: 'generated',
-        title: prompt,
-        url,
-        thumbnailUrl: url,
-        sourceUrl: null,
-        creator: 'OpenAI',
-        license: null,
-        prompt,
-      };
-      renderImageCards([item]);
-      setStatus('参考画像を生成しました。クリックするとprojectへ追加します。');
-    } catch (error) {
-      console.error(error);
-      setStatus(`画像生成API: ${error instanceof Error ? error.message : String(error)}`);
-    } finally {
-      generateButton.disabled = false;
-    }
-  });
-
   window.addEventListener('vrm-studio-project-changed', (event) => {
-    if (['analysis', 'avatar-speaker', 'visual-add', 'visual-remove', 'loaded-awaiting-source', 'source-verified', 'new-source', 'reset'].includes(event.detail?.reason)) {
+    if (['avatar-speaker', 'visual-add', 'visual-remove', 'loaded-awaiting-source', 'source-verified', 'new-source', 'reset', 'analysis'].includes(event.detail?.reason)) {
       refreshMeta();
     }
   });
