@@ -7,12 +7,14 @@ const VISUAL_BATCH_SIZE = 240;
 const VISUAL_BATCH_OVERLAP = 20;
 
 const normalizeBase = (value) => String(value || '').trim().replace(/\/$/, '');
+const BUILD_API_BASE = normalizeBase(import.meta.env.VITE_VRM_STUDIO_API_BASE);
 
 export const getApiBase = () => {
   const saved = normalizeBase(localStorage.getItem(STORAGE_KEY));
   if (saved) return saved;
-  const injected = normalizeBase(window.VRM_STUDIO_API_BASE);
-  if (injected) return injected;
+  const runtimeInjected = normalizeBase(window.VRM_STUDIO_API_BASE);
+  if (runtimeInjected) return runtimeInjected;
+  if (BUILD_API_BASE) return BUILD_API_BASE;
   return '/api';
 };
 
