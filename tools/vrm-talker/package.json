@@ -1,12 +1,13 @@
 {
   "name": "subeha-vrm-talker",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "test:sha": "node scripts/test-sha256.mjs"
+    "test:sha": "node scripts/test-sha256.mjs",
+    "test:project": "node scripts/test-project-state.mjs"
   },
   "dependencies": {
     "@pixiv/three-vrm": "^3.5.3",
