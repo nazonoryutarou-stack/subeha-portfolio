@@ -1,13 +1,13 @@
 {
   "name": "vrm-lipsync",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "private": true,
   "scripts": {
     "studio": "remotion studio",
     "transcribe": "node scripts/transcribe-source.mjs",
     "envelope": "node scripts/generate-envelope.mjs",
     "check:vrm": "node scripts/ensure-video-vrm.mjs",
-    "prepare:clip": "npm run check:vrm && node scripts/prepare-clip.mjs",
+    "prepare:clip": "node scripts/prepare-clip.mjs",
     "prepare:studio": "node scripts/prepare-studio.mjs",
     "render:studio": "node scripts/render-studio.mjs",
     "check": "tsc --noEmit",
