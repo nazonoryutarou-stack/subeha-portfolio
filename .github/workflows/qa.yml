@@ -16,6 +16,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      - name: Setup Node for DeepDream regression test
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test DeepDream v21 runtime contract
+        run: node deepdream/test-v21.mjs
+
       - name: Run static QA
         shell: python
         run: |
