@@ -1,0 +1,102 @@
+name: Gravity 151 Horizontal VRM Render
+
+on:
+  push:
+    branches:
+      - work/whisper-align-151
+    paths:
+      - 'jobs/assistant/current/edit-plan.json'
+      - 'tmp/whisper/base64v2/**'
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/gravity151-horizontal-vrm.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Reconstruct library-derived source clip
+        shell: bash
+        run: |
+          mkdir -p tmp/whisper jobs/assistant/current
+          cat tmp/whisper/base64v2/part-*.txt | tr -d '\n\r' | base64 -d > tmp/whisper/source-v2.ogg
+          ACTUAL_SIZE=$(stat -c%s tmp/whisper/source-v2.ogg)
+          echo "source-v2.ogg bytes=$ACTUAL_SIZE"
+          test "$ACTUAL_SIZE" = "49203"
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper/source-v2.ogg
+          ffmpeg -y -v error -i tmp/whisper/source-v2.ogg -ac 1 -c:a aac -b:a 64k jobs/assistant/current/source.m4a
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 jobs/assistant/current/source.m4a
+
+      - name: Install Remotion dependencies
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+
+      - name: Run open-source Whisper alignment
+        working-directory: remotion/vrm-lipsync
+        shell: bash
+        env:
+          WHISPER_MODEL: small
+          WHISPER_LANGUAGE: ja
+        run: |
+          cat > ../../tmp/whisper/render-job.json <<'JSON'
+          {
+            "sourceAudio": "../../tmp/whisper/source-v2.ogg"
+          }
+          JSON
+          node scripts/transcribe-source.mjs --job=../../tmp/whisper/render-job.json --force
+          cp inputs/source.captions.json ../../tmp/whisper/final-whisper-captions.json
+          cp inputs/source.captions.meta.json ../../tmp/whisper/final-whisper-meta.json
+
+      - name: Require production video VRM
+        shell: bash
+        run: |
+          test -f Subeha.vrm || { echo 'Production Subeha.vrm missing' >&2; exit 1; }
+          echo 'VIDEO_VRM_PATH=../../Subeha.vrm' >> "$GITHUB_ENV"
+
+      - name: Render 1280x720 assistant video
+        working-directory: remotion/vrm-lipsync
+        shell: bash
+        run: |
+          npm run render:assistant -- \
+            --plan=../../jobs/assistant/current/edit-plan.json \
+            --audio=../../jobs/assistant/current/source.m4a \
+            --output=out/gravity151-horizontal-vrm.mp4
+
+      - name: Structural QC
+        shell: bash
+        run: |
+          ffprobe -v error -show_entries stream=index,codec_type,codec_name,width,height -show_entries format=duration -of json remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4 | tee tmp/whisper/final-ffprobe.json
+          WIDTH=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4)
+          HEIGHT=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4)
+          test "$WIDTH" = "1280"
+          test "$HEIGHT" = "720"
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4 | grep -qx audio
+
+      - name: Upload horizontal VRM video and QC
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity151-horizontal-vrm
+          path: |
+            remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4
+            remotion/vrm-lipsync/out/qc-frames/**
+            remotion/vrm-lipsync/jobs/.generated/assistant-project.json
+            jobs/assistant/current/edit-plan.json
+            tmp/whisper/final-whisper-captions.json
+            tmp/whisper/final-whisper-meta.json
+            tmp/whisper/final-ffprobe.json
+          retention-days: 14
