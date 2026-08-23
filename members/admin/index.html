@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="配信観測記録の管理者閲覧室。">
+<meta name="theme-color" content="#f3efe4">
+<title>配信観測記録 管理室 | すべての歯が見える</title>
+<link rel="stylesheet" href="../../assets/home-redesign.css">
+<style>
+.admin-page{max-width:1180px;margin:0 auto;padding:54px 24px 120px}.admin-head{display:flex;gap:24px;justify-content:space-between;align-items:end;padding-bottom:28px;border-bottom:1px solid var(--line)}.admin-head h1{font-size:clamp(42px,7vw,82px);line-height:.95;margin:8px 0 12px}.admin-head p{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;line-height:1.8}.admin-button{appearance:none;border:1px solid var(--ink);background:var(--ink);color:var(--bone);padding:11px 16px;text-decoration:none;font:700 .9rem/1 system-ui,-apple-system,"Yu Gothic",sans-serif;cursor:pointer}.admin-button.secondary{background:transparent;color:var(--ink)}.admin-status{min-height:1.5em;margin:14px 0 0;font:600 .8rem/1.5 var(--mono);color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:26px 0}.stat{border:1px solid var(--line);padding:18px;background:var(--paper)}.stat small{display:block;font:700 .72rem/1 var(--mono);color:var(--muted)}.stat strong{display:block;font-size:clamp(24px,4vw,38px);margin-top:8px}.toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:24px 0 18px}.toolbar input{width:min(650px,100%);border:1px solid var(--line);background:var(--paper);padding:13px 14px;font:inherit;color:var(--ink)}.workspace{display:grid;grid-template-columns:minmax(280px,.38fr) minmax(0,.62fr);gap:24px;align-items:start}.report-list{display:grid;gap:9px;max-height:74vh;overflow:auto;padding-right:4px}.report-item{appearance:none;text-align:left;border:1px solid var(--line);background:var(--paper);padding:14px;color:var(--ink);cursor:pointer}.report-item:hover,.report-item:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}.report-item b{display:block}.report-item small{display:block;margin-top:5px;color:var(--muted);font:600 .72rem/1.4 var(--mono)}.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.tags span{border:1px solid var(--line);padding:3px 5px;font-size:.66rem}.report-body{min-height:460px;border:1px solid var(--line);background:var(--paper);padding:clamp(18px,4vw,42px)}.report-head{padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line)}.report-head small{font:700 .75rem/1 var(--mono)}.report-head h2{font-size:clamp(28px,4vw,48px);margin:8px 0 0}.markdown{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;line-height:1.95}.markdown h2,.markdown h3,.markdown h4{font-family:inherit;line-height:1.35;margin:2em 0 .7em}.markdown p{margin:.7em 0}.markdown ul{padding-left:1.4em}.markdown blockquote{margin:1.2em 0;padding:.7em 1em;border-left:3px solid var(--ink);background:rgba(0,0,0,.035)}.markdown code{font-family:var(--mono);font-size:.9em}.empty{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;color:var(--muted)}[hidden]{display:none!important}@media(max-width:780px){.admin-page{padding:38px 16px 90px}.admin-head{display:block}.admin-head .actions{margin-top:18px}.stats{grid-template-columns:1fr}.workspace{grid-template-columns:1fr}.report-list{max-height:38vh}.toolbar{align-items:stretch;flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../../home.html" aria-label="すべての歯が見える ホーム"><img class="brand-crest" src="../../hitotsu-ore-choji.png" alt="一つ折れ丁字"><span><b>すべての歯が見える</b><small>管理室</small></span></a>
+</header>
+<main class="admin-page">
+  <section class="admin-head">
+    <div>
+      <p class="section-label">OWNER / BROADCAST REPORT ARCHIVE</p>
+      <h1>配信観測記録<br>管理室</h1>
+      <p>private transcript repo に蓄積された要点レポートを、管理者として検索・閲覧する。</p>
+      <p id="admin-status" class="admin-status" aria-live="polite"></p>
+    </div>
+    <div class="actions">
+      <button class="admin-button" id="login-button" type="button">管理者ログイン</button>
+      <button class="admin-button secondary" id="logout-button" type="button" hidden>ログアウト</button>
+    </div>
+  </section>
+
+  <section id="admin-view" hidden>
+    <div class="stats">
+      <div class="stat"><small>REPORTS</small><strong id="stat-total">0</strong></div>
+      <div class="stat"><small>LATEST EPISODE</small><strong id="stat-latest">-</strong></div>
+      <div class="stat"><small>LOGGED IN</small><strong id="stat-user" style="font-size:1rem;word-break:break-all">-</strong></div>
+    </div>
+
+    <div class="toolbar">
+      <input id="report-search" type="search" placeholder="式神、呪文、祭祀技師、父、ありがとう…" autocomplete="off" aria-label="レポートを検索">
+      <small id="result-count">0件</small>
+    </div>
+
+    <div class="workspace">
+      <div class="report-list" id="report-list" aria-label="配信観測記録一覧"></div>
+      <div class="report-body" id="report-body"><p class="empty">左の一覧から記録を選択。</p></div>
+    </div>
+  </section>
+</main>
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
