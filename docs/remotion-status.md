@@ -1,131 +1,92 @@
 # Remotion / VRM 実装状況
 
-最終更新: 2026-08-21
-
-## 先に読むもの
-
-1. `docs/production-rules.md`
-2. この文書
-
-配信切り抜き・VRM動画を扱う別チャットでは、上記を読んでから作業する。
+最終更新: 2026-08-23
 
 ## 現在の正しい実装場所
 
-VRM切り抜きの新しい実装は **`feature/remotion-workflow-v2`** にある。
+動画制作の本線は **PR #22 / `feature/vrm-studio-webapp`**。
 
-`main` の `remotion/vrm-lipsync/` は旧・最小実装であり、現時点では本番動画作成に使わない。
+PR #22は `fix/vtuber-qc-v3-integrated` をbaseに、これまでのVRM姿勢補正、実音声同期、HOST/GUEST/UNKNOWN話者ゲート、Assistant edit plan、決定論的Remotionレンダー、構造QCを統合している。
 
-新実装の主なファイル:
+旧動画PR #17 / #18 / #19 / #20 / #21 / #26 / #28 は2026-08-23に整理のためclose済み。履歴としてのみ参照する。
 
-- `remotion/vrm-lipsync/src/VrmLipSyncV2.tsx`
-- `remotion/vrm-lipsync/src/Root.tsx`
-- `remotion/vrm-lipsync/scripts/prepare-clip.mjs`
-- `remotion/vrm-lipsync/scripts/transcribe-source.mjs`
-- `remotion/vrm-lipsync/scripts/generate-envelope.mjs`
-- `remotion/vrm-lipsync/scripts/extract-qc-frames.mjs`
-- `remotion/vrm-lipsync/AI_WORKFLOW.md`
-
-## 2026-08-21 修正済み
-
-### 1. Tポーズ対策
-
-旧レンダーではVRMの標準Tポーズをそのまま出していた。
-
-新しい `VrmLipSyncV2.tsx` では、読み込み直後に肩・上腕・前腕を自然体へ補正する。
-
-### 2. 口パク
-
-- 実音声のRMS envelopeを使用
-- 小さい声にも反応するよう閾値を調整
-- `aa / ih / ou / ee / oh` をフレームごとに更新
-- Remotionのキャプチャ前にcanvasを更新するため `useLayoutEffect` を使用
-
-既成の口が動かないMP4をループする方式は禁止。
-
-### 3. 音声と字幕の0秒基準
-
-旧処理の `ffmpeg -ss / -to` による中間AAC切り出しをやめた。
-
-現在は:
+## 正規構成
 
 ```text
-元音声
-→ atrim=start=...:end=...
-→ asetpts=PTS-STARTPTS
-→ PCM WAV (public/voice.wav)
+長尺の実音声
+→ 同一音声からtimed ASR
+→ 会話全体の文脈から候補選定
+→ HOST / GUEST / UNKNOWN分類
+→ edit-plan.json
+→ 採用区間だけ元音声から切り出す
+→ jobs/assistant/current/
+→ npm run render:assistant
+→ HOST区間だけVRM口・頭胸モーション
+→ 字幕 / 背景 / 参考画像
+→ H.264 MP4
+→ 構造QC
+→ QC静止画の目視確認
 ```
 
-とする。
+## 実装済み
 
-これにより、中間AACのencoder delayや二重seekによるズレを避ける。
+### Assistant edit plan
 
-### 4. VRMの自動配置
+- `remotion/vrm-lipsync/assistant-plan.schema.json`
+- `scripts/import-assistant-plan.mjs`
+- `scripts/render-assistant.mjs`
+- `npm run import:assistant`
+- `npm run render:assistant`
+- 既定 `npm run render` もassistant route
 
-リポジトリ直下の `subeha-web-site.vrm` を、`npm run prepare` 時に `public/Subeha.vrm` へ自動コピーする。
+### 音声・字幕ロック
 
-手動配置忘れを理由に別素材へ逃げない。
+- 実音声からdurationとSHA-256を取得する。
+- 最終WAVを0秒基準へ揃える。
+- 字幕、speaker turns、口パクは同じ音声へ結び付ける。
+- 別配信の文字起こしや推測タイムコードは使わない。
 
-### 5. QCフレーム
+### 話者安全
 
-`npm run clip` 後に以下を自動抽出する。
+- アバター話者は `HOST`。
+- `GUEST` と `UNKNOWN` ではVRM発話モーションを停止する。
+- 本番はspeaker-turn情報なしで通さない。
+- HOST発話を含まない切り抜きは完成レンダーにしない。
 
-- `out/qc/start.png`
-- `out/qc/speech-peak.png`
-- `out/qc/middle.png`
-- `out/qc/end.png`
+### Production VRM
 
-ただし、抽出しただけでは合格ではない。**実際に画像を見て**、姿勢・口・字幕・オチを確認してから完成とする。
+- 動画用はリポジトリ直下の `Subeha.vrm`。
+- native viseme `aa / ih / ou / ee / oh` を使用する。
+- 軽量 `subeha-web-site.vrm` へはフォールバックしない。
 
-### 6. TypeScriptチェック
+### QC
 
-`npm run clip` の途中で `npm run check` を実行する。
+- TypeScript / plan validation
+- ffprobeによる解像度、stream、尺、A/V drift確認
+- QC静止画抽出
+- 冒頭 / 発話ピーク / 中盤 / オチを実際に目視する
 
-さらに `feature/remotion-workflow-v2` には `.github/workflows/remotion-vrm-check.yml` を追加し、RemotionコードのTypeScriptチェックをCIで行う。
+## Web Studioの位置付け
 
-## まだ未完成
+`tools/vrm-talker/` は正規AI解析器ではない。
 
-### A. 実素材を使った完成レンダーの再検証
+project確認、字幕・レイアウトの微調整、ブラウザプレビュー用の補助UIとして扱う。候補選定やASRの正本にはしない。
 
-コード修正は済んでいるが、第158回「遺影→遊戯王カード→破門」の実素材で、以下を再検証する必要がある。
+## 文字起こし方針
 
-- 腕が本当に自然体になっているか
-- 発話ピークで口が十分動いているか
-- 字幕が実発話に一致しているか
-- オチまで30〜60秒程度に収まっているか
+有料OpenAI APIは正規経路の前提にしない。
 
-ここを見ずに「直った」と断言しない。
+長尺音声の候補発見にはローカルまたはGitHub Actions上の `whisper.cpp` を利用できる。ただし、音声を壊れやすいbase64テキストへ変換してGitHubへ搬送する方式は採用しない。
 
-### B. 単語内タイミングの完全自動補正
+最終字幕は必ず採用区間の元音声に対して再整列する。
 
-Whisperのタイムコードを使うが、ASRの字幕チャンクが粗い場合、単語単位では数百msずれる可能性がある。
+## 現在の未完了
 
-既知の人工ギャップを補正する仕組みは、まだ一般化されていない。
+1. 実配信から正しい候補区間を確定する。
+2. その区間のtimed ASRを同一元音声から作る。
+3. `HOST / GUEST / UNKNOWN` を確定する。
+4. 本物の `jobs/assistant/current/edit-plan.json` と短い実音声を置く。
+5. GitHub Actionsで実MP4をレンダーする。
+6. 客発話中にHOSTアバターが喋らないことを含め、QC静止画を目視確認する。
 
-### C. 自動画像判定
-
-QCフレームは自動抽出できるが、以下はまだ人または画像を見られるAIの目視が必要。
-
-- Tポーズ判定
-- 口が開いているか
-- 字幕位置の破綻
-- 画面外クリップ
-
-### D. mainへの統合
-
-新実装はまだ `feature/remotion-workflow-v2` にあり、`main` へ未統合。
-
-統合前に、実レンダーとQCを通す。
-
-## 完成判定
-
-次を全部満たして初めて完成。
-
-- 実音声
-- 実タイムコード字幕
-- Tポーズではない
-- 発話中に口が動く
-- 冒頭 / 発話ピーク / 中盤 / オチのQC確認
-- 個人情報を含まない
-- 90秒以内を原則とする
-
-一つでも未確認なら「検証版」「草案」と呼ぶ。
+未確認項目を完成扱いしない。
