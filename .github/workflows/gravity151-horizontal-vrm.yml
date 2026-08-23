@@ -9,6 +9,14 @@ on:
       - 'tmp/whisper/base64v2/**'
       - 'remotion/vrm-lipsync/**'
       - '.github/workflows/gravity151-horizontal-vrm.yml'
+  pull_request:
+    branches:
+      - feature/vrm-studio-webapp
+    paths:
+      - 'jobs/assistant/current/edit-plan.json'
+      - 'tmp/whisper/base64v2/**'
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/gravity151-horizontal-vrm.yml'
   workflow_dispatch:
 
 permissions:
