@@ -1,1 +1,1 @@
-Gravity 159 temporary public Whisper model fetch trigger.
+Gravity 159 temporary public Whisper model and CLI fetch trigger v2.
