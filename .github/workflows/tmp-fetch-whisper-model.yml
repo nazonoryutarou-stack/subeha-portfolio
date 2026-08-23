@@ -12,7 +12,7 @@ permissions:
 jobs:
   fetch-model:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Download public multilingual Whisper tiny q5_1 model
         run: |
@@ -22,9 +22,24 @@ jobs:
             -o /tmp/ggml-tiny-q5_1.bin
           test "$(stat -c%s /tmp/ggml-tiny-q5_1.bin)" = "32152673"
           sha256sum /tmp/ggml-tiny-q5_1.bin
+      - name: Build whisper.cpp CLI
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ggml-org/whisper.cpp.git /tmp/whisper.cpp
+          cmake -S /tmp/whisper.cpp -B /tmp/whisper.cpp/build -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=ON
+          cmake --build /tmp/whisper.cpp/build -j2
+          test -x /tmp/whisper.cpp/build/bin/whisper-cli
+          cp /tmp/whisper.cpp/build/bin/whisper-cli /tmp/whisper-cli
+          ldd /tmp/whisper-cli || true
       - uses: actions/upload-artifact@v4
         with:
           name: whisper-tiny-q5_1-public-model
           path: /tmp/ggml-tiny-q5_1.bin
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-cpp-linux-cli
+          path: /tmp/whisper-cli
           retention-days: 1
           if-no-files-found: error
