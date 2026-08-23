@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "sourceLabel": "GRAVITY #151 / library-verified source",
+  "selection": {
+    "reason": "第151回の実音声から、ADHD診断は高齢でも遅くないという一節を横画面VRMの検証用に選定。冒頭のWhisper認識崩れ区間を避け、意味が明瞭な約10秒だけを使う。",
+    "hook": "100歳でも、診断は遅くない",
+    "summary": "ADHDの診断は年齢に関係なく受けてよい、という配信中の説明。"
+  },
+  "clip": {
+    "startMs": 9000,
+    "endMs": 19000
+  },
+  "layout": {
+    "width": 1280,
+    "height": 720,
+    "captionBottomPx": 58,
+    "background": "#0d1016"
+  },
+  "text": {
+    "title": "100歳でも、診断は遅くない",
+    "telop": "GRAVITY #151 / ADHDの話"
+  },
+  "captions": [
+    {
+      "startMs": 9000,
+      "endMs": 11200,
+      "speaker": "HOST",
+      "text": "だけど、やっぱそうなんだろうなっていう人が",
+      "speakerConfidence": 0.96,
+      "speakerReason": "同一区間の配信者による連続モノローグ"
+    },
+    {
+      "startMs": 11200,
+      "endMs": 14500,
+      "speaker": "HOST",
+      "text": "ある時、ADHDって診断されました",
+      "speakerConfidence": 0.96,
+      "speakerReason": "同一区間の配信者による連続モノローグ"
+    },
+    {
+      "startMs": 14500,
+      "endMs": 16500,
+      "speaker": "HOST",
+      "text": "何歳でも遅くないんですよ",
+      "speakerConfidence": 0.96,
+      "speakerReason": "同一区間の配信者による連続モノローグ"
+    },
+    {
+      "startMs": 16500,
+      "endMs": 19000,
+      "speaker": "HOST",
+      "text": "100歳でも、そんな診断受けていいんで",
+      "speakerConfidence": 0.96,
+      "speakerReason": "同一区間の配信者による連続モノローグ"
+    }
+  ],
+  "motion": {
+    "profile": "normal",
+    "notes": "横画面PoC。説明口調なので過剰な身体モーションは避け、口形と頭胸の小さな発話連動を優先する。"
+  }
+}
