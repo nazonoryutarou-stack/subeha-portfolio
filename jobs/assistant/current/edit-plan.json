@@ -1,14 +1,14 @@
 {
   "version": 1,
-  "sourceLabel": "GRAVITY #151 / library-verified source",
+  "sourceLabel": "GRAVITY #151 / library source / OSS Whisper aligned",
   "selection": {
-    "reason": "第151回の実音声から、ADHD診断は高齢でも遅くないという一節を横画面VRMの検証用に選定。冒頭のWhisper認識崩れ区間を避け、意味が明瞭な約10秒だけを使う。",
+    "reason": "ライブラリの配信151.m4aから切り出した18.5秒をGitHub上でSHA-256照合し、whisper.cpp small/jaで再整列。認識の曖昧な前半を捨て、ADHD診断・100歳・遅くない・診断を受けていい、が連続する実測区間だけを採用。",
     "hook": "100歳でも、診断は遅くない",
-    "summary": "ADHDの診断は年齢に関係なく受けてよい、という配信中の説明。"
+    "summary": "ADHDの診断は高齢でも遅すぎることはない、という配信中の一節。"
   },
   "clip": {
-    "startMs": 9000,
-    "endMs": 19000
+    "startMs": 5760,
+    "endMs": 18380
   },
   "layout": {
     "width": 1280,
@@ -22,40 +22,48 @@
   },
   "captions": [
     {
-      "startMs": 9000,
-      "endMs": 11200,
+      "startMs": 5760,
+      "endMs": 7380,
       "speaker": "HOST",
-      "text": "だけど、やっぱそうなんだろうなっていう人が",
-      "speakerConfidence": 0.96,
-      "speakerReason": "同一区間の配信者による連続モノローグ"
+      "text": "ADHDって診断されました",
+      "speakerConfidence": 0.94,
+      "speakerReason": "whisper.cpp実測トークン 5.76-7.38秒。文字化けした診断語尾のみ文脈補正。"
     },
     {
-      "startMs": 11200,
-      "endMs": 14500,
+      "startMs": 7380,
+      "endMs": 10160,
       "speaker": "HOST",
-      "text": "ある時、ADHDって診断されました",
+      "text": "100歳です、みたいな",
       "speakerConfidence": 0.96,
-      "speakerReason": "同一区間の配信者による連続モノローグ"
+      "speakerReason": "whisper.cpp実測トークン 7.38-10.16秒。"
     },
     {
-      "startMs": 14500,
-      "endMs": 16500,
+      "startMs": 10160,
+      "endMs": 13360,
       "speaker": "HOST",
-      "text": "何歳でも遅くないんですよ",
-      "speakerConfidence": 0.96,
-      "speakerReason": "同一区間の配信者による連続モノローグ"
+      "text": "あったんですよ",
+      "speakerConfidence": 0.95,
+      "speakerReason": "whisper.cpp実測トークン 10.16-13.36秒。"
     },
     {
-      "startMs": 16500,
-      "endMs": 19000,
+      "startMs": 13360,
+      "endMs": 14880,
       "speaker": "HOST",
-      "text": "100歳でも、そんな診断受けていいんで",
+      "text": "何も遅くないんですよ",
+      "speakerConfidence": 0.90,
+      "speakerReason": "whisper.cpp実測で『…くないんですよ』を確認。冒頭語のみ文脈補正。"
+    },
+    {
+      "startMs": 14880,
+      "endMs": 18380,
+      "speaker": "HOST",
+      "text": "もう100歳でも、そんな診断受けていいんで",
       "speakerConfidence": 0.96,
-      "speakerReason": "同一区間の配信者による連続モノローグ"
+      "speakerReason": "whisper.cpp実測トークン 14.88-18.38秒。"
     }
   ],
   "motion": {
     "profile": "normal",
-    "notes": "横画面PoC。説明口調なので過剰な身体モーションは避け、口形と頭胸の小さな発話連動を優先する。"
+    "notes": "16:9横画面。説明口調なので過剰な身体モーションは避け、production Subeha.vrmの口形と小さな頭胸モーションを優先。"
   }
 }
