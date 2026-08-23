@@ -1,0 +1,30 @@
+name: Temporary Fetch Whisper Model
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.tmp/whisper-model-fetch-trigger.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download public multilingual Whisper tiny q5_1 model
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 \
+            https://raw.githubusercontent.com/bnosac/audio.whisper/master/inst/repo/ggml-tiny-q5_1.bin \
+            -o /tmp/ggml-tiny-q5_1.bin
+          test "$(stat -c%s /tmp/ggml-tiny-q5_1.bin)" = "32152673"
+          sha256sum /tmp/ggml-tiny-q5_1.bin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-tiny-q5_1-public-model
+          path: /tmp/ggml-tiny-q5_1.bin
+          retention-days: 1
+          if-no-files-found: error
