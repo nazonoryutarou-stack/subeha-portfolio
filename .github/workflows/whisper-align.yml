@@ -41,6 +41,7 @@ jobs:
           echo "size=$ACTUAL_SIZE"
           test "$ACTUAL_SIZE" = "49203"
           ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper/source-v2.ogg
+          ffmpeg -y -v error -i tmp/whisper/source-v2.ogg -ac 1 -c:a aac -b:a 64k tmp/whisper/source-v2.m4a
 
       - name: Prepare alignment job
         shell: bash
@@ -68,6 +69,8 @@ jobs:
           mkdir -p tmp/whisper/output-v2
           cp remotion/vrm-lipsync/inputs/source.captions.json tmp/whisper/output-v2/captions.json
           cp remotion/vrm-lipsync/inputs/source.captions.meta.json tmp/whisper/output-v2/meta.json
+          cp tmp/whisper/source-v2.ogg tmp/whisper/output-v2/source-v2.ogg
+          cp tmp/whisper/source-v2.m4a tmp/whisper/output-v2/source-v2.m4a
           cat tmp/whisper/output-v2/captions.json
 
       - uses: actions/upload-artifact@v4
