@@ -5,6 +5,10 @@ on:
     branches: [work/fetch-whisper-model-159]
     paths:
       - '.github/workflows/tmp-fetch-whisper-model.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/tmp-fetch-whisper-model.yml'
 
 permissions:
   contents: read
@@ -26,9 +30,7 @@ jobs:
           cp /tmp/whisper.cpp/build/bin/whisper-cli /tmp/runtime/bin/
           find /tmp/whisper.cpp/build -type f -name '*.so*' -exec cp -L {} /tmp/runtime/lib/ \;
           chmod +x /tmp/runtime/bin/whisper-cli
-          echo 'CLI dependencies:'
           ldd /tmp/runtime/bin/whisper-cli || true
-          echo 'Packaged libraries:'
           ls -lh /tmp/runtime/lib
       - uses: actions/upload-artifact@v4
         with:
