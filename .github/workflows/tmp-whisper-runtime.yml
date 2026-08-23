@@ -1,0 +1,34 @@
+name: Temporary Whisper Runtime Pack
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.tmp/whisper-runtime-trigger.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  build-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Build whisper.cpp runtime
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch v1.9.1 https://github.com/ggml-org/whisper.cpp.git /tmp/whisper.cpp
+          cmake -S /tmp/whisper.cpp -B /tmp/whisper.cpp/build -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=ON
+          cmake --build /tmp/whisper.cpp/build -j2
+          mkdir -p /tmp/runtime/bin /tmp/runtime/lib
+          cp /tmp/whisper.cpp/build/bin/whisper-cli /tmp/runtime/bin/
+          find /tmp/whisper.cpp/build -type f -name '*.so*' -exec cp -L {} /tmp/runtime/lib/ \;
+          chmod +x /tmp/runtime/bin/whisper-cli
+          ldd /tmp/runtime/bin/whisper-cli || true
+          ls -lh /tmp/runtime/lib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-cpp-linux-runtime
+          path: /tmp/runtime
+          retention-days: 1
+          if-no-files-found: error
