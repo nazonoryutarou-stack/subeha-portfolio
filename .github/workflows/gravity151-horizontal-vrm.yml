@@ -6,7 +6,7 @@ on:
       - work/whisper-align-151
     paths:
       - 'jobs/assistant/current/edit-plan.json'
-      - 'tmp/whisper/base64v2/**'
+      - 'tmp/gravity151-clean/base64/**'
       - 'remotion/vrm-lipsync/**'
       - '.github/workflows/gravity151-horizontal-vrm.yml'
   pull_request:
@@ -14,7 +14,7 @@ on:
       - feature/vrm-studio-webapp
     paths:
       - 'jobs/assistant/current/edit-plan.json'
-      - 'tmp/whisper/base64v2/**'
+      - 'tmp/gravity151-clean/base64/**'
       - 'remotion/vrm-lipsync/**'
       - '.github/workflows/gravity151-horizontal-vrm.yml'
   workflow_dispatch:
@@ -38,16 +38,19 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
 
-      - name: Reconstruct library-derived source clip
+      - name: Reconstruct and lock clean library source
         shell: bash
         run: |
-          mkdir -p tmp/whisper jobs/assistant/current
-          cat tmp/whisper/base64v2/part-*.txt | tr -d '\n\r' | base64 -d > tmp/whisper/source-v2.ogg
-          ACTUAL_SIZE=$(stat -c%s tmp/whisper/source-v2.ogg)
-          echo "source-v2.ogg bytes=$ACTUAL_SIZE"
-          test "$ACTUAL_SIZE" = "49203"
-          ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper/source-v2.ogg
-          ffmpeg -y -v error -i tmp/whisper/source-v2.ogg -ac 1 -c:a aac -b:a 64k jobs/assistant/current/source.m4a
+          mkdir -p tmp/gravity151-clean jobs/assistant/current
+          cat tmp/gravity151-clean/base64/part-*.txt | tr -d '\n\r' | base64 -d > tmp/gravity151-clean/source-clean.ogg
+          ACTUAL_SIZE=$(stat -c%s tmp/gravity151-clean/source-clean.ogg)
+          ACTUAL_SHA=$(sha256sum tmp/gravity151-clean/source-clean.ogg | awk '{print $1}')
+          echo "source-clean.ogg bytes=$ACTUAL_SIZE"
+          echo "source-clean.ogg sha256=$ACTUAL_SHA"
+          test "$ACTUAL_SIZE" = "37248"
+          test "$ACTUAL_SHA" = "eb977d851b6920b983079bbff0365afac20982a5c738e2e611fbf3e3d1036a17"
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/gravity151-clean/source-clean.ogg
+          ffmpeg -y -v error -i tmp/gravity151-clean/source-clean.ogg -ac 1 -c:a aac -b:a 96k jobs/assistant/current/source.m4a
           ffprobe -v error -show_entries format=duration,size -of default=nw=1 jobs/assistant/current/source.m4a
 
       - name: Install Remotion dependencies
@@ -61,14 +64,14 @@ jobs:
           WHISPER_MODEL: small
           WHISPER_LANGUAGE: ja
         run: |
-          cat > ../../tmp/whisper/render-job.json <<'JSON'
+          cat > ../../tmp/gravity151-clean/render-job.json <<'JSON'
           {
-            "sourceAudio": "../../tmp/whisper/source-v2.ogg"
+            "sourceAudio": "../../tmp/gravity151-clean/source-clean.ogg"
           }
           JSON
-          node scripts/transcribe-source.mjs --job=../../tmp/whisper/render-job.json --force
-          cp inputs/source.captions.json ../../tmp/whisper/final-whisper-captions.json
-          cp inputs/source.captions.meta.json ../../tmp/whisper/final-whisper-meta.json
+          node scripts/transcribe-source.mjs --job=../../tmp/gravity151-clean/render-job.json --force
+          cp inputs/source.captions.json ../../tmp/gravity151-clean/final-whisper-captions.json
+          cp inputs/source.captions.meta.json ../../tmp/gravity151-clean/final-whisper-meta.json
 
       - name: Require production video VRM
         shell: bash
@@ -88,9 +91,11 @@ jobs:
       - name: Structural QC
         shell: bash
         run: |
-          ffprobe -v error -show_entries stream=index,codec_type,codec_name,width,height -show_entries format=duration -of json remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4 | tee tmp/whisper/final-ffprobe.json
+          ffprobe -v error -show_entries stream=index,codec_type,codec_name,width,height -show_entries format=duration -of json remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4 | tee tmp/gravity151-clean/final-ffprobe.json
           WIDTH=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4)
           HEIGHT=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4)
+          DURATION=$(ffprobe -v error -show_entries format=duration -of csv=p=0 remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4)
+          echo "render=${WIDTH}x${HEIGHT} duration=${DURATION}"
           test "$WIDTH" = "1280"
           test "$HEIGHT" = "720"
           ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 remotion/vrm-lipsync/out/gravity151-horizontal-vrm.mp4 | grep -qx audio
@@ -104,7 +109,7 @@ jobs:
             remotion/vrm-lipsync/out/qc-frames/**
             remotion/vrm-lipsync/jobs/.generated/assistant-project.json
             jobs/assistant/current/edit-plan.json
-            tmp/whisper/final-whisper-captions.json
-            tmp/whisper/final-whisper-meta.json
-            tmp/whisper/final-ffprobe.json
+            tmp/gravity151-clean/final-whisper-captions.json
+            tmp/gravity151-clean/final-whisper-meta.json
+            tmp/gravity151-clean/final-ffprobe.json
           retention-days: 14
