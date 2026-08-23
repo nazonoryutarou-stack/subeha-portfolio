@@ -1,1 +1,58 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="description" content="霊務記録閲覧室のUI試作。現在は認証・会員データベース未実装。"><meta name="theme-color" content="#f3efe4"><meta property="og:type" content="website"><meta property="og:title" content="すべての歯が見える"><meta property="og:description" content="霊務記録閲覧室のUI試作。"><title>すべての歯が見える</title><link rel="stylesheet" href="/assets/unified-shell.css"></head><body><noscript>このページの表示にはJavaScriptが必要です。</noscript><script src="/assets/chunks/0.js"></script><script src="/assets/chunks/1.js"></script><script src="/assets/chunks/2.js"></script><script src="/assets/chunks/3.js"></script><script src="/assets/chunks/4.js"></script><script src="/assets/bootstrap.js"></script><script src="/assets/legal-links.js" defer></script></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="常連向けの配信観測記録アーカイブ。">
+<meta name="theme-color" content="#f3efe4">
+<title>配信観測記録 | すべての歯が見える</title>
+<link rel="stylesheet" href="../assets/home-redesign.css">
+<style>
+.members-page{max-width:1120px;margin:0 auto;padding:60px 24px 120px}.members-hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.6fr);gap:36px;align-items:end;padding-bottom:38px;border-bottom:1px solid var(--line)}.members-hero h1{font-size:clamp(46px,8vw,88px);line-height:.95;margin:8px 0 18px}.members-hero p{max-width:720px;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;line-height:1.9}.member-plan{border:1px solid var(--line);padding:22px;background:var(--paper)}.member-plan b{display:block;font-size:2rem;margin:.2rem 0 .5rem}.member-plan strong{display:block;font-size:1.4rem}.member-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.member-button{appearance:none;border:1px solid var(--ink);background:var(--ink);color:var(--bone);padding:11px 16px;text-decoration:none;font:700 .92rem/1 system-ui,-apple-system,"Yu Gothic",sans-serif;cursor:pointer}.member-button.secondary{background:transparent;color:var(--ink)}.member-status{min-height:1.5em;margin:16px 0 0;font:600 .82rem/1.5 var(--mono);color:var(--muted)}.archive{margin-top:44px}.archive-toolbar{display:flex;gap:14px;align-items:center;justify-content:space-between;margin-bottom:20px}.archive-toolbar input{width:min(560px,100%);border:1px solid var(--line);background:var(--paper);padding:13px 14px;font:inherit;color:var(--ink)}.archive-toolbar small{font:700 .78rem/1 var(--mono)}.archive-grid{display:grid;grid-template-columns:minmax(260px,.38fr) minmax(0,.62fr);gap:24px;align-items:start}.report-list{display:grid;gap:10px;max-height:72vh;overflow:auto;padding-right:4px}.report-item{appearance:none;text-align:left;border:1px solid var(--line);background:var(--paper);padding:15px;color:var(--ink);cursor:pointer}.report-item:hover,.report-item:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}.report-item b{display:block;font-size:1rem}.report-item small{display:block;margin-top:6px;color:var(--muted);font:600 .72rem/1.3 var(--mono)}.report-topics{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.report-topics span{border:1px solid var(--line);padding:3px 5px;font-size:.66rem}.report-body{min-height:420px;border:1px solid var(--line);background:var(--paper);padding:clamp(18px,4vw,42px)}.report-placeholder{color:var(--muted);font-family:system-ui,-apple-system,"Yu Gothic",sans-serif}.report-head{padding-bottom:22px;margin-bottom:22px;border-bottom:1px solid var(--line)}.report-head small{font:700 .75rem/1 var(--mono)}.report-head h2{font-size:clamp(28px,4vw,48px);margin:8px 0 0}.markdown{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;line-height:1.95}.markdown h2,.markdown h3,.markdown h4{font-family:inherit;line-height:1.35;margin:2.1em 0 .7em}.markdown p{margin:.7em 0}.markdown ul{padding-left:1.4em}.markdown blockquote{margin:1.2em 0;padding:.7em 1em;border-left:3px solid var(--ink);background:rgba(0,0,0,.035)}.markdown code{font-family:var(--mono);font-size:.9em}.empty{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;color:var(--muted)}[hidden]{display:none!important}@media(max-width:780px){.members-page{padding:40px 16px 90px}.members-hero{grid-template-columns:1fr}.archive-grid{grid-template-columns:1fr}.report-list{max-height:38vh}.archive-toolbar{align-items:stretch;flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="../home.html" aria-label="すべての歯が見える ホーム"><img class="brand-crest" src="../hitotsu-ore-choji.png" alt="一つ折れ丁字"><span><b>すべての歯が見える</b><small>霊能者・祭祀技師</small></span></a>
+  <details class="menu-wrap"><summary class="menu-button">MENU</summary><nav class="global-nav" aria-label="主要メニュー"><a href="../home.html#profile">自己紹介</a><a href="../products/">商品</a><a href="../research/">研究</a><a href="../contents/">コンテンツ</a></nav></details>
+</header>
+<main class="members-page">
+  <section class="members-hero">
+    <div>
+      <p class="section-label">MEMBERS / BROADCAST REPORT ARCHIVE</p>
+      <h1>配信観測記録</h1>
+      <p>各配信の要点レポートを蓄積する、常連向けアーカイブ。</p>
+      <p id="member-status" class="member-status" aria-live="polite"></p>
+    </div>
+    <aside class="member-plan" id="guest-view">
+      <small>MEMBERSHIP</small>
+      <b id="plan-name">常連</b>
+      <strong id="plan-price">1,000円 / 月</strong>
+      <div class="member-actions">
+        <a class="member-button" id="signup-button" href="#">入会</a>
+        <button class="member-button secondary" id="login-button" type="button">会員ログイン</button>
+      </div>
+    </aside>
+  </section>
+
+  <section class="archive" id="member-view" hidden>
+    <div class="archive-toolbar">
+      <input id="report-search" type="search" placeholder="式神、呪文、祭祀技師、人工精霊…" autocomplete="off" aria-label="配信観測記録を検索">
+      <small id="report-count">0件</small>
+    </div>
+    <div class="member-actions" style="margin:0 0 20px">
+      <button class="member-button secondary" id="portal-button" type="button">契約・支払方法</button>
+      <button class="member-button secondary" id="logout-button" type="button">ログアウト</button>
+    </div>
+    <div class="archive-grid">
+      <div class="report-list" id="report-list" aria-label="配信観測記録一覧"></div>
+      <div class="report-body" id="report-body"><p class="report-placeholder">左の一覧から記録を選択。</p></div>
+    </div>
+  </section>
+</main>
+<footer class="site-footer"><div class="footer-brand"><img class="brand-crest" src="../hitotsu-ore-choji.png" alt="一つ折れ丁字"><div><b>すべての歯が見える</b><p>呪われてても心は錦。</p></div></div><nav aria-label="法務情報" style="display:flex;flex-wrap:wrap;gap:.75rem 1rem;margin-top:1rem;font-size:.82rem"><a href="../tokusho/">特定商取引法に基づく表記</a><a href="../contact/">お問い合わせ</a></nav></footer>
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
