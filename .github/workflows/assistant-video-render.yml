@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       job_dir:
-        description: 'edit-plan.json と source.m4a を置いたjob directory'
+        description: 'edit-plan.json と音声を置いたjob directory'
         required: true
         default: 'jobs/assistant/current'
         type: string
@@ -38,6 +38,7 @@ jobs:
       - name: Resolve job
         shell: bash
         run: |
+          set -euo pipefail
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             job='${{ inputs.job_dir }}'
           else
@@ -48,8 +49,34 @@ jobs:
             *) echo 'job_dir must stay under jobs/assistant/' >&2; exit 1 ;;
           esac
           test -f "$job/edit-plan.json" || { echo "Missing $job/edit-plan.json" >&2; exit 1; }
-          test -f "$job/source.m4a" || test -f "$job/source.wav" || { echo "Missing $job/source.m4a or source.wav" >&2; exit 1; }
-          if [ -f "$job/source.m4a" ]; then audio="$job/source.m4a"; else audio="$job/source.wav"; fi
+
+          if [ -f "$job/source.m4a" ]; then
+            audio="$job/source.m4a"
+          elif [ -f "$job/source.wav" ]; then
+            audio="$job/source.wav"
+          elif [ -f "$job/source.opus" ]; then
+            audio="$job/source.opus"
+          elif [ -f "$job/source-parts.txt" ]; then
+            joined="$RUNNER_TEMP/assistant-source.b64"
+            : > "$joined"
+            while IFS= read -r part || [ -n "$part" ]; do
+              [ -z "$part" ] && continue
+              case "$part" in
+                jobs/assistant/assets/*) ;;
+                *) echo "Audio chunk must stay under jobs/assistant/assets/: $part" >&2; exit 1 ;;
+              esac
+              test -f "$part" || { echo "Missing audio chunk: $part" >&2; exit 1; }
+              cat "$part" >> "$joined"
+            done < "$job/source-parts.txt"
+            base64 --decode "$joined" > "$job/source.opus"
+            test -s "$job/source.opus" || { echo 'Decoded audio is empty' >&2; exit 1; }
+            audio="$job/source.opus"
+          else
+            echo "Missing $job/source.m4a/source.wav/source.opus or source-parts.txt" >&2
+            exit 1
+          fi
+
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$audio"
           echo "ASSISTANT_JOB=$job" >> "$GITHUB_ENV"
           echo "ASSISTANT_AUDIO=$audio" >> "$GITHUB_ENV"
 
