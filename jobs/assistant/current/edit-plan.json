@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "sourceLabel": "Gravity 第151回 / 02:20:07.880–02:20:58.880",
+  "sourceLabel": "Gravity 第151回 / 02:20:07.880–02:20:39.880",
   "selection": {
     "reason": "『守護霊が馬』から『前半分しかない』へ急に絵面が壊れるため、VRM・口パク・画像切替の検証に向く。",
     "hook": "",
-    "summary": "彼氏の守護霊を確認すると馬だったが、腰から後ろが存在しない前半分だけの馬だった、という約51秒のくだり。"
+    "summary": "彼氏の守護霊を確認すると馬だったが、腰から後ろが存在しない前半分だけの馬だった、という32秒のテスト。"
   },
-  "clip": {"startMs": 0, "endMs": 51000},
+  "clip": {"startMs": 0, "endMs": 32000},
   "layout": {"width": 1280, "height": 720, "captionBottomPx": 54, "background": "#111318"},
   "text": {"title": "守護霊が『前半分だけの馬』だった", "telop": ""},
   "captions": [
@@ -17,19 +17,11 @@
     {"startMs":15000,"endMs":20000,"speaker":"HOST","text":"馬ですね。","speakerConfidence":0.99},
     {"startMs":20000,"endMs":22000,"speaker":"GUEST","text":"馬？","speakerConfidence":0.97},
     {"startMs":22000,"endMs":28000,"speaker":"HOST","text":"馬っつっても、前半しかないですよ。","speakerConfidence":0.99},
-    {"startMs":28000,"endMs":32000,"speaker":"HOST","text":"腰のあたりから切り落とされたみたいに、前の方しかないですよ。","speakerConfidence":0.98},
-    {"startMs":32000,"endMs":35000,"speaker":"GUEST","text":"すごい中途半端な馬ですね。","speakerConfidence":0.96},
-    {"startMs":35000,"endMs":37000,"speaker":"HOST","text":"背は低いですね。","speakerConfidence":0.98},
-    {"startMs":37000,"endMs":40000,"speaker":"HOST","text":"150センチくらいの馬です。","speakerConfidence":0.98},
-    {"startMs":40000,"endMs":44000,"speaker":"UNKNOWN","text":"馬ですね。","speakerConfidence":0.55,"speakerReason":"短い発話で話者が曖昧なため安全側"},
-    {"startMs":44000,"endMs":47000,"speaker":"HOST","text":"すべてを守ってくれるわけじゃないです。","speakerConfidence":0.98},
-    {"startMs":47000,"endMs":49000,"speaker":"HOST","text":"いるだけですね。","speakerConfidence":0.99},
-    {"startMs":49000,"endMs":51000,"speaker":"HOST","text":"乗れないし。","speakerConfidence":0.98}
+    {"startMs":28000,"endMs":32000,"speaker":"HOST","text":"腰のあたりから切り落とされたみたいに、前の方しかないですよ。","speakerConfidence":0.98}
   ],
   "visualReferences": [
     {"startMs":14000,"endMs":22000,"kind":"repo","title":"守護霊：馬","renderFile":"visuals/horse151-full.svg"},
-    {"startMs":22000,"endMs":36000,"kind":"repo","title":"前半分しかない馬","renderFile":"visuals/horse151-half.svg"},
-    {"startMs":36000,"endMs":51000,"kind":"repo","title":"前半馬の仕様","renderFile":"visuals/horse151-specs.svg"}
+    {"startMs":22000,"endMs":32000,"kind":"repo","title":"前半分しかない馬","renderFile":"visuals/horse151-half.svg"}
   ],
-  "motion": {"profile":"normal","notes":"今回は演技よりもリップシンク、瞬き、頭・首・胸の微動を確認する。"}
+  "motion": {"profile":"normal","notes":"今回は演技よりもリップシンク、瞬き、頭・首・胸の微動を確認する。GUEST区間20〜22秒では口を閉じる。"}
 }
