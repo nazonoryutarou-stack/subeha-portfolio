@@ -52,7 +52,7 @@ const job = {
   endMs,
   title: String(studio.text?.title || studio.title || studio.source?.name || 'VRM Studio'),
   telop: String(studio.text?.telop || studio.telop || ''),
-  hook: String(studio.hook || ''),
+  hook: String(studio.hook || studio.selection?.hook || ''),
   captions: studio.captions,
 };
 fs.writeFileSync(tempJobPath, JSON.stringify(job, null, 2) + '\n');
