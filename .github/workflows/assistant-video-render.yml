@@ -30,10 +30,11 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install ffmpeg
+      - name: Install ffmpeg and Japanese fonts
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          fc-cache -f
 
       - name: Resolve job
         shell: bash
@@ -123,6 +124,7 @@ jobs:
           name: assistant-vrm-video
           path: |
             remotion/vrm-lipsync/out/assistant-current.mp4
+            remotion/vrm-lipsync/out/qc/**
             remotion/vrm-lipsync/out/qc-frames/**
             remotion/vrm-lipsync/jobs/.generated/assistant-project.json
             ${{ env.ASSISTANT_JOB }}/edit-plan.json
