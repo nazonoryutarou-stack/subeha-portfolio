@@ -1,0 +1,142 @@
+name: Whisper.cpp Scale Test 151
+
+on:
+  push:
+    branches:
+      - work/whisper-scale-151
+    paths:
+      - '.github/workflows/whisper-scale-151.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scale-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      WHISPER_MODEL: small
+      WHISPER_LANGUAGE: ja
+      WHISPER_CPP_VERSION: 1.5.5
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install ffmpeg and time
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg time
+
+      - name: Reconstruct verified real Gravity 151 sample
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/whisper-scale/source
+          cat tmp/gravity151-clean/base64/part-*.txt | tr -d '\n\r' | base64 -d > tmp/whisper-scale/source/source-clean.ogg
+          ACTUAL_SIZE=$(stat -c%s tmp/whisper-scale/source/source-clean.ogg)
+          ACTUAL_SHA=$(sha256sum tmp/whisper-scale/source/source-clean.ogg | awk '{print $1}')
+          echo "bytes=$ACTUAL_SIZE"
+          echo "sha256=$ACTUAL_SHA"
+          test "$ACTUAL_SIZE" = "37248"
+          test "$ACTUAL_SHA" = "eb977d851b6920b983079bbff0365afac20982a5c738e2e611fbf3e3d1036a17"
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper-scale/source/source-clean.ogg
+
+      - name: Build 1m, 10m and 60m load-test audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          for seconds in 60 600 3600; do
+            ffmpeg -hide_banner -loglevel error -y \
+              -stream_loop -1 \
+              -i tmp/whisper-scale/source/source-clean.ogg \
+              -t "$seconds" \
+              -ac 1 -ar 16000 -c:a libopus -b:a 24k \
+              "tmp/whisper-scale/source/${seconds}s.ogg"
+            echo "--- ${seconds}s ---"
+            ffprobe -v error -show_entries format=duration,size -of default=nw=1 "tmp/whisper-scale/source/${seconds}s.ogg"
+            sha256sum "tmp/whisper-scale/source/${seconds}s.ogg"
+          done
+
+      - name: Install Remotion dependencies once
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+
+      - name: Transcribe 1 minute
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/whisper-scale/output/1m
+          cat > tmp/whisper-scale/job.json <<'JSON'
+          {"sourceAudio":"../../tmp/whisper-scale/source/60s.ogg"}
+          JSON
+          cd remotion/vrm-lipsync
+          /usr/bin/time -f 'elapsed_sec=%e\nmax_rss_kb=%M' -o ../../tmp/whisper-scale/output/1m/metrics.txt \
+            node scripts/transcribe-source.mjs --job=../../tmp/whisper-scale/job.json --force
+          cp inputs/source.captions.json ../../tmp/whisper-scale/output/1m/captions.json
+          cp inputs/source.captions.meta.json ../../tmp/whisper-scale/output/1m/meta.json
+          jq 'length' inputs/source.captions.json | tee ../../tmp/whisper-scale/output/1m/caption-count.txt
+          cat ../../tmp/whisper-scale/output/1m/metrics.txt
+
+      - name: Transcribe 10 minutes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/whisper-scale/output/10m
+          cat > tmp/whisper-scale/job.json <<'JSON'
+          {"sourceAudio":"../../tmp/whisper-scale/source/600s.ogg"}
+          JSON
+          cd remotion/vrm-lipsync
+          /usr/bin/time -f 'elapsed_sec=%e\nmax_rss_kb=%M' -o ../../tmp/whisper-scale/output/10m/metrics.txt \
+            node scripts/transcribe-source.mjs --job=../../tmp/whisper-scale/job.json --force
+          cp inputs/source.captions.json ../../tmp/whisper-scale/output/10m/captions.json
+          cp inputs/source.captions.meta.json ../../tmp/whisper-scale/output/10m/meta.json
+          jq 'length' inputs/source.captions.json | tee ../../tmp/whisper-scale/output/10m/caption-count.txt
+          cat ../../tmp/whisper-scale/output/10m/metrics.txt
+
+      - name: Transcribe 60 minutes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/whisper-scale/output/60m
+          cat > tmp/whisper-scale/job.json <<'JSON'
+          {"sourceAudio":"../../tmp/whisper-scale/source/3600s.ogg"}
+          JSON
+          cd remotion/vrm-lipsync
+          /usr/bin/time -f 'elapsed_sec=%e\nmax_rss_kb=%M' -o ../../tmp/whisper-scale/output/60m/metrics.txt \
+            node scripts/transcribe-source.mjs --job=../../tmp/whisper-scale/job.json --force
+          cp inputs/source.captions.json ../../tmp/whisper-scale/output/60m/captions.json
+          cp inputs/source.captions.meta.json ../../tmp/whisper-scale/output/60m/meta.json
+          jq 'length' inputs/source.captions.json | tee ../../tmp/whisper-scale/output/60m/caption-count.txt
+          cat ../../tmp/whisper-scale/output/60m/metrics.txt
+
+      - name: Write summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '# whisper.cpp scale test'
+            echo
+            echo '| test | captions | metrics |'
+            echo '|---|---:|---|'
+            for d in 1m 10m 60m; do
+              count='not-completed'
+              metrics='not-completed'
+              test -f "tmp/whisper-scale/output/$d/caption-count.txt" && count=$(cat "tmp/whisper-scale/output/$d/caption-count.txt")
+              test -f "tmp/whisper-scale/output/$d/metrics.txt" && metrics=$(tr '\n' ' ' < "tmp/whisper-scale/output/$d/metrics.txt")
+              echo "| $d | $count | $metrics |"
+            done
+          } | tee tmp/whisper-scale/summary.md
+          cat tmp/whisper-scale/summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: whisper-scale-151
+          path: |
+            tmp/whisper-scale/output/
+            tmp/whisper-scale/summary.md
+          retention-days: 3
