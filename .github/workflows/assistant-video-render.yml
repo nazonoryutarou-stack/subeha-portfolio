@@ -1,0 +1,149 @@
+name: Assistant VRM Video Render
+
+on:
+  push:
+    branches:
+      - feature/vrm-studio-webapp
+    paths:
+      - 'jobs/assistant/current/**'
+      - 'remotion/vrm-lipsync/**'
+      - '.github/workflows/assistant-video-render.yml'
+  workflow_dispatch:
+    inputs:
+      job_dir:
+        description: 'edit-plan.json と短尺音声を置いたjob directory'
+        required: true
+        default: 'jobs/assistant/current'
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  WHISPER_CPP_VERSION: '1.5.5'
+  WHISPER_MODEL: small
+  WHISPER_LANGUAGE: ja
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve complete assistant job
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            job='${{ inputs.job_dir }}'
+          else
+            job='jobs/assistant/current'
+          fi
+          case "$job" in
+            jobs/assistant/*) ;;
+            *) echo 'job_dir must stay under jobs/assistant/' >&2; exit 1 ;;
+          esac
+
+          if [ ! -f "$job/edit-plan.json" ]; then
+            echo "No edit-plan.json in $job; nothing to render."
+            echo 'ASSISTANT_READY=0' >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          if [ -f "$job/source.m4a" ]; then
+            audio="$job/source.m4a"
+          elif [ -f "$job/source.wav" ]; then
+            audio="$job/source.wav"
+          elif [ -f "$job/source.opus" ]; then
+            audio="$job/source.opus"
+          else
+            echo "No real audio file in $job; waiting for source.m4a/source.wav/source.opus."
+            echo 'Base64 audio reconstruction is intentionally unsupported.'
+            echo 'ASSISTANT_READY=0' >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          test -s "$audio"
+          echo 'ASSISTANT_READY=1' >> "$GITHUB_ENV"
+          echo "ASSISTANT_JOB=$job" >> "$GITHUB_ENV"
+          echo "ASSISTANT_AUDIO=$audio" >> "$GITHUB_ENV"
+
+      - name: Install ffmpeg and Japanese fonts
+        if: env.ASSISTANT_READY == '1'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          fc-cache -f
+
+      - name: Probe source audio
+        if: env.ASSISTANT_READY == '1'
+        shell: bash
+        run: ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 "$ASSISTANT_AUDIO"
+
+      - name: Require production video VRM
+        if: env.ASSISTANT_READY == '1'
+        shell: bash
+        run: |
+          if [ -f Subeha.vrm ]; then
+            echo 'VIDEO_VRM_PATH=../../Subeha.vrm' >> "$GITHUB_ENV"
+          elif [ -f remotion/vrm-lipsync/inputs/Subeha.vrm ]; then
+            echo 'VIDEO_VRM_PATH=inputs/Subeha.vrm' >> "$GITHUB_ENV"
+          else
+            echo 'Production Subeha.vrm is not checked into this ref.' >&2
+            echo 'The lightweight subeha-web-site.vrm is intentionally not accepted because it lacks aa/ih/ou/ee/oh mouth morphs.' >&2
+            exit 1
+          fi
+
+      - name: Cache whisper.cpp and model
+        if: env.ASSISTANT_READY == '1'
+        uses: actions/cache@v4
+        with:
+          path: remotion/vrm-lipsync/.cache/whisper-align
+          key: ${{ runner.os }}-whispercpp-${{ env.WHISPER_CPP_VERSION }}-${{ env.WHISPER_MODEL }}
+
+      - name: Install Remotion and Whisper dependencies
+        if: env.ASSISTANT_READY == '1'
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+
+      - name: Whisper transcription + assistant render
+        if: env.ASSISTANT_READY == '1'
+        working-directory: remotion/vrm-lipsync
+        shell: bash
+        run: |
+          npm run render:assistant -- \
+            --plan="../../${ASSISTANT_JOB}/edit-plan.json" \
+            --audio="../../${ASSISTANT_AUDIO}" \
+            --asr-output=out/timed-asr \
+            --output=out/assistant-current.mp4
+
+      - name: Verify Whisper artifacts
+        if: env.ASSISTANT_READY == '1'
+        working-directory: remotion/vrm-lipsync
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s out/timed-asr/timed-asr.json
+          test -s out/timed-asr/timed-asr.srt
+          test -s out/timed-asr/timed-asr.vtt
+          test -s out/timed-asr/timed-asr.meta.json
+          node -e "const fs=require('fs'); const rows=JSON.parse(fs.readFileSync('out/timed-asr/timed-asr.json','utf8')); if(!Array.isArray(rows)||!rows.length) process.exit(1); for(const r of rows){if(!(Number.isFinite(r.startMs)&&Number.isFinite(r.endMs)&&r.endMs>r.startMs)) process.exit(2)} console.log('verified timed captions:', rows.length)"
+
+      - name: Upload final video, Whisper transcript and QC
+        if: env.ASSISTANT_READY == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: assistant-vrm-video
+          path: |
+            remotion/vrm-lipsync/out/assistant-current.mp4
+            remotion/vrm-lipsync/out/timed-asr/**
+            remotion/vrm-lipsync/out/qc/**
+            remotion/vrm-lipsync/out/qc-frames/**
+            remotion/vrm-lipsync/jobs/.generated/assistant-project.json
+            ${{ env.ASSISTANT_JOB }}/edit-plan.json
+          retention-days: 14

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://subeha.example/schemas/vrm-studio-project-v1.json",
+  "title": "VRM Studio Project",
+  "type": "object",
+  "required": ["version", "source", "clip", "avatar", "text", "captions", "speakerTurns", "visualCues", "visualReferences", "layout"],
+  "properties": {
+    "version": {"const": 1},
+    "source": {
+      "type": "object",
+      "required": ["name", "sha256", "durationMs"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+        "durationMs": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "clip": {
+      "type": "object",
+      "required": ["startMs", "endMs"],
+      "properties": {
+        "startMs": {"type": "number", "minimum": 0},
+        "endMs": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "avatar": {
+      "type": "object",
+      "required": ["speaker", "model"],
+      "properties": {
+        "speaker": {"type": ["string", "null"]},
+        "model": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": true
+    },
+    "text": {
+      "type": "object",
+      "required": ["title", "telop"],
+      "properties": {
+        "title": {"type": "string"},
+        "telop": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "captions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "startMs", "endMs"],
+        "properties": {
+          "text": {"type": "string", "minLength": 1},
+          "startMs": {"type": "number", "minimum": 0},
+          "endMs": {"type": "number", "exclusiveMinimum": 0},
+          "speaker": {"type": ["string", "null"]},
+          "confidence": {"type": ["number", "null"]},
+          "sourceChunk": {"type": ["integer", "null"], "minimum": 0}
+        },
+        "additionalProperties": true
+      }
+    },
+    "speakerTurns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["speaker", "startMs", "endMs"],
+        "properties": {
+          "speaker": {"type": "string", "minLength": 1},
+          "startMs": {"type": "number", "minimum": 0},
+          "endMs": {"type": "number", "exclusiveMinimum": 0}
+        },
+        "additionalProperties": true
+      }
+    },
+    "visualCues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "startIndex", "endIndex", "startMs", "endMs", "mode"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "startIndex": {"type": "integer", "minimum": 0},
+          "endIndex": {"type": "integer", "minimum": 0},
+          "startMs": {"type": "number", "minimum": 0},
+          "endMs": {"type": "number", "exclusiveMinimum": 0},
+          "mode": {"enum": ["search", "generate"]},
+          "query": {"type": ["string", "null"]},
+          "prompt": {"type": ["string", "null"]},
+          "reason": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "visualReferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "startMs", "endMs"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1, "description": "タイムライン上の配置固有ID"},
+          "assetId": {"type": ["string", "null"], "description": "検索/生成元素材のID。同じ素材を複数配置しても共有できる"},
+          "kind": {"enum": ["search", "generated", "upload"]},
+          "provider": {"type": ["string", "null"]},
+          "startMs": {"type": "number", "minimum": 0},
+          "endMs": {"type": "number", "exclusiveMinimum": 0},
+          "query": {"type": ["string", "null"]},
+          "prompt": {"type": ["string", "null"]},
+          "url": {"type": ["string", "null"]},
+          "thumbnailUrl": {"type": ["string", "null"]},
+          "originalUrl": {"type": ["string", "null"]},
+          "sourceUrl": {"type": ["string", "null"]},
+          "creator": {"type": ["string", "null"]},
+          "license": {"type": ["string", "null"]},
+          "title": {"type": ["string", "null"]},
+          "renderFile": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "layout": {
+      "type": "object",
+      "required": ["width", "height", "captionBottomPx"],
+      "properties": {
+        "width": {"type": "integer"},
+        "height": {"type": "integer"},
+        "captionBottomPx": {"type": "integer", "minimum": 0},
+        "showSafeArea": {"type": "boolean"},
+        "background": {"type": ["string", "null"]}
+      },
+      "oneOf": [
+        {"properties": {"width": {"const": 720}, "height": {"const": 1280}}},
+        {"properties": {"width": {"const": 900}, "height": {"const": 900}}},
+        {"properties": {"width": {"const": 1280}, "height": {"const": 720}}}
+      ],
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
