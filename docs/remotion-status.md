@@ -1,98 +1,103 @@
 # Remotion / VRM 実装状況
 
-最終更新: 2026-08-22
-
-## 先に読むもの
-
-1. `docs/production-rules.md`
-2. この文書
-3. Webアプリ開発時は `docs/video-app-architecture.md`
+最終更新: 2026-08-26
 
 ## 現在の正しい実装場所
 
-高品質レンダーの本命は `remotion/vrm-lipsync/`。
+動画制作の本線は **PR #22 / `feature/vrm-studio-webapp`**。
 
-現行の中核:
+高品質レンダー本体は `remotion/vrm-lipsync/`。編集jobは `jobs/assistant/`。
 
-- `src/VrmLipSyncV2.tsx`
-- `src/Root.tsx`
-- `scripts/prepare-clip.mjs`
-- `scripts/transcribe-source.mjs`
-- `scripts/generate-envelope.mjs`
-- `scripts/extract-qc-frames.mjs`
-- `speaker-turns.example.json`
-
-## 現在までに解決したこと
-
-### Tポーズ / 非同期読み込み
-
-現行 `VrmLipSyncV2.tsx` は自然姿勢補正を行い、VRM / envelope / clip の読み込みに `delayRender / continueRender` を使う。
-
-### 音声と字幕の0秒基準
+## 正規構成
 
 ```text
-元音声
-→ atrim=start=...:end=...
-→ asetpts=PTS-STARTPTS
-→ PCM WAV (public/voice.wav)
+ChatGPTが長尺配信から候補選定
+→ 採用区間だけ短尺実音声へ切り出す
+→ edit-plan.json + source.m4a/wav/opus
+→ render:assistant
+→ local whisper.cpp timed ASR
+→ assistant project生成
+→ HOST / GUEST / UNKNOWN gate
+→ HOST-only口パク・頭胸モーション
+→ Remotion render
+→ 構造QC + 目視QC
+→ MP4 + Whisper JSON/SRT/VTT/meta
 ```
 
-このWAVを字幕・話者分離・口パクの共通ソースとする。
+## Whisper
 
-### 口パク
+2026-08-26に正規レンダーへ統合済み。
 
-`aa / ih / ou / ee / oh` を使用する。
+- `scripts/transcribe-source.mjs`
+- open-source `whisper.cpp`
+- `@remotion/install-whisper-cpp`
+- 既定model `small`
+- language `ja`
+- 元音声をffmpegで16kHz mono PCMへ変換
+- token-level timestamps
+- `timed-asr.json`
+- `timed-asr.srt`
+- `timed-asr.vtt`
+- `timed-asr.meta.json`
+- metaへ元音声SHA-256 / duration / model / whisper.cpp versionを保存
 
-動画用モデルは `Subeha.vrm`。`subeha-web-site.vrm` は動画口パクに使わない。
+GitHub Actionsではwhisper.cpp本体とmodelをcacheする。有料OpenAI API / API keyは不要。
 
-### 話者ゲート
+`Assistant VRM Video Render` はWhisperを自動前処理として実行する。
+ASRだけ必要な場合は `Assistant Whisper Transcription` を手動実行する。
 
-2026-08-22に、音声全体のRMSだけで口を動かしていた問題を修正中。
+Base64分割音声と `source-parts.txt` は正規経路から撤去済み。入力は実音声ファイルのみ。
 
-`generate-envelope.mjs` は `speaker-turns.json` の `avatarSpeaker` 区間だけを通す。
+## Assistant edit plan
 
-本番コマンドは `REQUIRE_SPEAKER_TURNS=1` とし、話者区間なしで完成レンダーを作らない。
+- `remotion/vrm-lipsync/assistant-plan.schema.json`
+- `scripts/import-assistant-plan.mjs`
+- `scripts/render-assistant.mjs`
+- `npm run import:assistant`
+- `npm run render:assistant`
+- 既定 `npm run render` もassistant route
 
-話者区間は音声SHA-256と音声長へ結び付ける。
+Whisperは時刻付きASRと監査レイヤー。面白い区間の選定や話者の文脈判断そのものをWhisperへ丸投げしない。
+
+## 音声・字幕ロック
+
+- 実音声からdurationとSHA-256を取得する。
+- Whisper metaも同じ元音声SHA-256へ結び付ける。
+- 最終WAVを0秒基準へ揃える。
+- 字幕、speaker turns、口パクは同じ音声へ結び付ける。
+- 別配信の文字起こしや推測タイムコードは使わない。
+
+## 話者安全
+
+- アバター話者は `HOST`。
+- `GUEST` と `UNKNOWN` ではVRM発話モーションを停止する。
+- 本番はspeaker-turn情報なしで通さない。
+- HOST発話を含まない切り抜きは完成レンダーにしない。
+
+## Production VRM
+
+- 動画用はリポジトリ直下の `Subeha.vrm`。
+- native viseme `aa / ih / ou / ee / oh` を使用する。
+- 軽量 `subeha-web-site.vrm` へはフォールバックしない。
 
 ## QC
 
-Remotion側は以下を担当する。
+- TypeScript / plan validation
+- Whisper ASR artifact validation
+- ffprobeによる解像度、stream、尺、A/V drift確認
+- QC静止画抽出
+- 冒頭 / 発話ピーク / 中盤 / オチを目視確認
 
-- TypeScript check
-- 決定論的レンダー
-- QCフレーム抽出
-- ffprobeベースの動画構造検査
-- 最終目視QC
+## Web Studio
 
-## 今日からの位置付け
+`tools/vrm-talker/` は正規AI解析器ではない。
+project確認、字幕・レイアウトの微調整、ブラウザプレビュー用の補助UIとして扱う。
 
-Remotionは制作UIそのものではない。
+## 現在の未完了
 
-日常の制作入口は `tools/vrm-talker/` のWebアプリへ移す。
-
-```text
-Webアプリ
-  音声入力
-  字幕
-  話者分離
-  参考画像
-  レイアウト
-  プレビュー
-       ↓ project.json
-Remotion
-  高品質レンダー
-  再現レンダー
-  最終QC
-```
-
-## 未完成
-
-- Webアプリから使える話者分離処理
-- Webアプリから使えるtimed ASR
-- 参考画像検索
-- 画像生成
-- WebアプリとRemotionで共用するproject JSON schema
-- 第158回素材で、客発話中に口が閉じることを確認した最終レンダー
+1. `jobs/assistant/current/` に実際の短尺 `source.m4a / wav / opus` を置く。
+2. Whisperを含む本物のActions runを完走させる。
+3. MP4とtimed ASRをArtifactで確認する。
+4. 客発話中にHOSTアバターが喋らないことをQC静止画で目視確認する。
 
 未確認項目を完成扱いしない。
