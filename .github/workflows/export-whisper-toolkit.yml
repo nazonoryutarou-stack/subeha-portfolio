@@ -1,0 +1,57 @@
+name: Export Whisper Toolkit
+
+on:
+  push:
+    branches:
+      - whisper-toolkit-export
+    paths:
+      - '.github/workflows/export-whisper-toolkit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build whisper.cpp v1.5.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq build-essential git curl
+          mkdir -p toolkit
+          git clone --depth 1 --branch v1.5.5 https://github.com/ggerganov/whisper.cpp.git toolkit/whisper.cpp
+          make -C toolkit/whisper.cpp -j2 main
+          ./toolkit/whisper.cpp/main -h >/dev/null
+
+      - name: Download quantized Japanese-capable small model
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 \
+            -o toolkit/whisper.cpp/ggml-small-q5_1.bin \
+            https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin
+          ls -lh toolkit/whisper.cpp/main toolkit/whisper.cpp/ggml-small-q5_1.bin
+          sha256sum toolkit/whisper.cpp/main toolkit/whisper.cpp/ggml-small-q5_1.bin | tee toolkit/SHA256SUMS.txt
+
+      - name: Package toolkit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p export
+          cp toolkit/whisper.cpp/main export/whisper-main
+          cp toolkit/whisper.cpp/ggml-small-q5_1.bin export/
+          cp toolkit/SHA256SUMS.txt export/
+          chmod +x export/whisper-main
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-toolkit-linux-x64
+          path: export/
+          retention-days: 1
+          compression-level: 0
