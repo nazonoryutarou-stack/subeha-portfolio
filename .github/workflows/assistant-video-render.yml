@@ -35,13 +35,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install ffmpeg and Japanese fonts
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
-          fc-cache -f
-
-      - name: Resolve job and source audio
+      - name: Resolve complete assistant job
         shell: bash
         run: |
           set -euo pipefail
@@ -54,7 +48,12 @@ jobs:
             jobs/assistant/*) ;;
             *) echo 'job_dir must stay under jobs/assistant/' >&2; exit 1 ;;
           esac
-          test -f "$job/edit-plan.json" || { echo "Missing $job/edit-plan.json" >&2; exit 1; }
+
+          if [ ! -f "$job/edit-plan.json" ]; then
+            echo "No edit-plan.json in $job; nothing to render."
+            echo 'ASSISTANT_READY=0' >> "$GITHUB_ENV"
+            exit 0
+          fi
 
           if [ -f "$job/source.m4a" ]; then
             audio="$job/source.m4a"
@@ -63,17 +62,31 @@ jobs:
           elif [ -f "$job/source.opus" ]; then
             audio="$job/source.opus"
           else
-            echo "Missing $job/source.m4a/source.wav/source.opus" >&2
-            echo 'Base64 audio reconstruction is intentionally unsupported.' >&2
-            exit 1
+            echo "No real audio file in $job; waiting for source.m4a/source.wav/source.opus."
+            echo 'Base64 audio reconstruction is intentionally unsupported.'
+            echo 'ASSISTANT_READY=0' >> "$GITHUB_ENV"
+            exit 0
           fi
 
           test -s "$audio"
-          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 "$audio"
+          echo 'ASSISTANT_READY=1' >> "$GITHUB_ENV"
           echo "ASSISTANT_JOB=$job" >> "$GITHUB_ENV"
           echo "ASSISTANT_AUDIO=$audio" >> "$GITHUB_ENV"
 
+      - name: Install ffmpeg and Japanese fonts
+        if: env.ASSISTANT_READY == '1'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          fc-cache -f
+
+      - name: Probe source audio
+        if: env.ASSISTANT_READY == '1'
+        shell: bash
+        run: ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 "$ASSISTANT_AUDIO"
+
       - name: Require production video VRM
+        if: env.ASSISTANT_READY == '1'
         shell: bash
         run: |
           if [ -f Subeha.vrm ]; then
@@ -87,16 +100,19 @@ jobs:
           fi
 
       - name: Cache whisper.cpp and model
+        if: env.ASSISTANT_READY == '1'
         uses: actions/cache@v4
         with:
           path: remotion/vrm-lipsync/.cache/whisper-align
           key: ${{ runner.os }}-whispercpp-${{ env.WHISPER_CPP_VERSION }}-${{ env.WHISPER_MODEL }}
 
       - name: Install Remotion and Whisper dependencies
+        if: env.ASSISTANT_READY == '1'
         working-directory: remotion/vrm-lipsync
         run: npm install --no-audit --no-fund
 
       - name: Whisper transcription + assistant render
+        if: env.ASSISTANT_READY == '1'
         working-directory: remotion/vrm-lipsync
         shell: bash
         run: |
@@ -107,6 +123,7 @@ jobs:
             --output=out/assistant-current.mp4
 
       - name: Verify Whisper artifacts
+        if: env.ASSISTANT_READY == '1'
         working-directory: remotion/vrm-lipsync
         shell: bash
         run: |
@@ -118,6 +135,7 @@ jobs:
           node -e "const fs=require('fs'); const rows=JSON.parse(fs.readFileSync('out/timed-asr/timed-asr.json','utf8')); if(!Array.isArray(rows)||!rows.length) process.exit(1); for(const r of rows){if(!(Number.isFinite(r.startMs)&&Number.isFinite(r.endMs)&&r.endMs>r.startMs)) process.exit(2)} console.log('verified timed captions:', rows.length)"
 
       - name: Upload final video, Whisper transcript and QC
+        if: env.ASSISTANT_READY == '1'
         uses: actions/upload-artifact@v4
         with:
           name: assistant-vrm-video
