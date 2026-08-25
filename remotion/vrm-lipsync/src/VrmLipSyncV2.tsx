@@ -32,12 +32,18 @@ type EnvelopeFile = {
   values: number[];
 };
 
+type StudioCaption = Caption & {
+  speaker?: 'HOST' | 'GUEST' | 'UNKNOWN' | string;
+  speakerConfidence?: number;
+  speakerReason?: string;
+};
+
 type ClipFile = {
   title?: string;
   telop?: string;
   hook?: string;
   sourceLabel?: string;
-  captions?: Caption[];
+  captions?: StudioCaption[];
   layout?: {
     width?: number;
     height?: number;
@@ -53,7 +59,7 @@ type SceneState = {
 };
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
-const overlayFontFamily = '"Noto Sans JP","Yu Gothic",system-ui,sans-serif';
+const overlayFontFamily = '"Noto Sans CJK JP","Noto Sans JP","Yu Gothic",system-ui,sans-serif';
 
 const mouthWeights = (frame: number, level: number) => {
   const gate = clamp01((level - 0.025) / 0.48);
@@ -177,8 +183,6 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
     scene.background = background === 'transparent' ? null : new THREE.Color(background);
 
     const camera = new THREE.PerspectiveCamera(27, width / height, 0.01, 100);
-    camera.position.set(0, 1.5, 3.0);
-    camera.lookAt(0, 1.42, 0);
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x23252b, 2.5));
     const key = new THREE.DirectionalLight(0xffffff, 3.6);
@@ -214,6 +218,20 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
           vrm.scene.position.x -= center.x;
           vrm.scene.position.z -= center.z;
 
+          // Landscape QC prioritizes a visible face and upper body, while leaving the
+          // right side free for reference images. The old fixed camera cropped the head.
+          const framedBox = new THREE.Box3().setFromObject(vrm.scene);
+          const framedSize = new THREE.Vector3();
+          framedBox.getSize(framedSize);
+          const landscape = width > height;
+          const targetHeight = framedSize.y * (landscape ? 0.72 : 0.88);
+          const targetCenterY = framedBox.max.y - targetHeight / 2 - framedSize.y * 0.02;
+          const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
+          const cameraDistance = (targetHeight / 2) / Math.tan(halfFov) * 1.12;
+          if (landscape) vrm.scene.position.x -= 0.18;
+          camera.position.set(0, targetCenterY, cameraDistance);
+          camera.lookAt(0, targetCenterY, 0);
+
           applyNaturalPose(vrm);
           vrm.update(0);
           renderer.render(scene, camera);
@@ -236,6 +254,11 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
   }, [background, height, modelFile, modelHandle, width]);
 
   const level = envelope?.[Math.min(frame, Math.max(0, envelope.length - 1))] ?? 0;
+  const nowMs = (frame / fps) * 1000;
+  const currentCaption = clip?.captions?.find((caption) => caption.startMs <= nowMs && caption.endMs > nowMs) ?? null;
+  const currentSpeaker = currentCaption?.speaker ?? 'UNKNOWN';
+  const hostSpeaking = currentSpeaker === 'HOST';
+  const drivenLevel = hostSpeaking ? level : 0;
 
   useLayoutEffect(() => {
     const s = sceneState.current;
@@ -243,7 +266,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
 
     const vrm = s.vrm;
     const em = vrm.expressionManager;
-    const mouth = mouthWeights(frame, level);
+    const mouth = mouthWeights(frame, drivenLevel);
     em?.setValue('aa', mouth.aa);
     em?.setValue('ih', mouth.ih);
     em?.setValue('ou', mouth.ou);
@@ -254,7 +277,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
     const head = vrm.humanoid?.getNormalizedBoneNode('head');
     const neck = vrm.humanoid?.getNormalizedBoneNode('neck');
     const chest = vrm.humanoid?.getNormalizedBoneNode('chest');
-    const speech = Math.max(0, level - 0.03);
+    const speech = Math.max(0, drivenLevel - 0.03);
 
     if (head) {
       head.rotation.x = Math.sin(frame * 0.055) * 0.018 - speech * 0.035;
@@ -270,10 +293,8 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
     vrm.scene.position.y = Math.sin(frame * 0.025) * 0.005;
     vrm.update(1 / fps);
     s.renderer.render(s.scene, s.camera);
-  }, [envelope, fps, frame, level, modelReady]);
+  }, [drivenLevel, envelope, fps, frame, modelReady]);
 
-  const nowMs = (frame / fps) * 1000;
-  const currentCaption = clip?.captions?.find((caption) => caption.startMs <= nowMs && caption.endMs > nowMs) ?? null;
   const displayTitle = title || clip?.title || '';
   const displayTelop = currentCaption?.text || telop || clip?.telop || '';
   const displayHook = clip?.hook || '';
@@ -304,7 +325,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
       ) : null}
 
       {sourceLabel ? (
-        <div style={{position: 'absolute', top: Math.round(height * 0.022), left: padX, color: 'rgba(255,255,255,.58)', fontFamily: 'ui-monospace, monospace', fontSize: Math.max(11, Math.round(base * 0.017)), letterSpacing: '0.12em'}}>
+        <div style={{position: 'absolute', top: Math.round(height * 0.022), left: padX, color: 'rgba(255,255,255,.58)', fontFamily: overlayFontFamily, fontSize: Math.max(11, Math.round(base * 0.017)), letterSpacing: '0.12em'}}>
           {sourceLabel}
         </div>
       ) : null}
@@ -368,7 +389,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
 
       {showMeter ? (
         <div style={{position: 'absolute', left: padX, bottom: Math.round(height * 0.025), color: 'rgba(255,255,255,.55)', fontFamily: 'ui-monospace, monospace', fontSize: Math.max(11, Math.round(base * 0.018)), letterSpacing: 2}}>
-          AUDIO DRIVE {meter.toString().padStart(3, '0')}
+          AUDIO DRIVE {meter.toString().padStart(3, '0')} / {currentSpeaker}
         </div>
       ) : null}
     </AbsoluteFill>
