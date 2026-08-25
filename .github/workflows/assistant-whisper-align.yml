@@ -1,14 +1,6 @@
-name: Assistant Whisper Alignment
+name: Assistant Whisper Transcription
 
 on:
-  push:
-    branches:
-      - feature/vrm-studio-webapp
-    paths:
-      - 'jobs/assistant/current/**'
-      - 'remotion/vrm-lipsync/scripts/transcribe-source.mjs'
-      - 'remotion/vrm-lipsync/package.json'
-      - '.github/workflows/assistant-whisper-align.yml'
   workflow_dispatch:
     inputs:
       job_dir:
@@ -20,8 +12,13 @@ on:
 permissions:
   contents: read
 
+env:
+  WHISPER_CPP_VERSION: '1.5.5'
+  WHISPER_MODEL: small
+  WHISPER_LANGUAGE: ja
+
 jobs:
-  align:
+  transcribe:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -40,11 +37,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            job='${{ inputs.job_dir }}'
-          else
-            job='jobs/assistant/current'
-          fi
+          job='${{ inputs.job_dir }}'
           case "$job" in
             jobs/assistant/*) ;;
             *) echo 'job_dir must stay under jobs/assistant/' >&2; exit 1 ;;
@@ -56,31 +49,9 @@ jobs:
             audio="$job/source.wav"
           elif [ -f "$job/source.opus" ]; then
             audio="$job/source.opus"
-          elif [ -f "$job/source-parts.txt" ]; then
-            joined="$RUNNER_TEMP/assistant-source.b64"
-            clean="$RUNNER_TEMP/assistant-source.clean.b64"
-            : > "$joined"
-            while IFS= read -r part || [ -n "$part" ]; do
-              [ -z "$part" ] && continue
-              case "$part" in
-                jobs/assistant/assets/*) ;;
-                *) echo "Audio chunk must stay under jobs/assistant/assets/: $part" >&2; exit 1 ;;
-              esac
-              test -f "$part" || { echo "Missing audio chunk: $part" >&2; exit 1; }
-              cat "$part" >> "$joined"
-            done < "$job/source-parts.txt"
-            tr -d '\r\n\t ' < "$joined" > "$clean"
-            remainder=$(( $(wc -c < "$clean") % 4 ))
-            case "$remainder" in
-              0) ;;
-              2) printf '==' >> "$clean" ;;
-              3) printf '=' >> "$clean" ;;
-              1) echo 'Invalid base64 length: remainder 1 cannot be repaired safely.' >&2; exit 1 ;;
-            esac
-            base64 --decode "$clean" > "$RUNNER_TEMP/assistant-source.opus"
-            audio="$RUNNER_TEMP/assistant-source.opus"
           else
-            echo "Missing $job/source.m4a/source.wav/source.opus or source-parts.txt" >&2
+            echo "Missing $job/source.m4a/source.wav/source.opus" >&2
+            echo 'Base64 audio reconstruction is intentionally unsupported.' >&2
             exit 1
           fi
 
@@ -88,15 +59,18 @@ jobs:
           ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 "$audio"
           echo "ASSISTANT_AUDIO=$(realpath "$audio")" >> "$GITHUB_ENV"
 
-      - name: Install Remotion Whisper dependencies
+      - name: Cache whisper.cpp and model
+        uses: actions/cache@v4
+        with:
+          path: remotion/vrm-lipsync/.cache/whisper-align
+          key: ${{ runner.os }}-whispercpp-${{ env.WHISPER_CPP_VERSION }}-${{ env.WHISPER_MODEL }}
+
+      - name: Install Whisper dependencies
         working-directory: remotion/vrm-lipsync
         run: npm install --no-audit --no-fund
 
-      - name: Generate real timed ASR with local whisper.cpp
+      - name: Generate timed ASR with local whisper.cpp
         working-directory: remotion/vrm-lipsync
-        env:
-          WHISPER_MODEL: small
-          WHISPER_LANGUAGE: ja
         run: |
           npm run transcribe -- \
             --audio="$ASSISTANT_AUDIO" \
