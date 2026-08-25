@@ -1,35 +1,52 @@
-# ChatGPT → GitHub → VRM video pipeline
+# ChatGPT → Whisper → GitHub → VRM video pipeline
 
-この動画制作系の正規ルートは、ブラウザや外部の有料AI APIへ判断を分散させず、ChatGPTが編集判断を行い、GitHub上のRemotionが決定論的に動画へする。
+この動画制作系の正規ルートは、編集判断をChatGPT、音声の時間整列をローカルの `whisper.cpp`、最終動画生成をGitHub Actions / Remotionへ分担する。
+
+有料OpenAI Transcription APIは使わない。WhisperはGitHub runner上でローカル実行し、API keyもOpenAI課金も不要。
 
 ## Canonical flow
 
 ```text
 長尺配信音声をChatGPTへ渡す
-→ ChatGPTが全体を聞く / 面白い区間を選ぶ
-→ 切り抜き開始・終了を確定
-→ 発話をHOST / GUEST / UNKNOWNへ文脈で分類
-→ タイトル / フック / 字幕 / 画像候補 / モーション方針を作る
-→ assistant edit-plan.json
-→ 必要区間だけ短い音声ファイルへ切り出す
-→ GitHub jobへplan + short audio + optional assetsを置く
-→ Remotion render:assistant
+→ ChatGPTが会話全体から面白い区間を選ぶ
+→ 必要区間だけ短い source.m4a / source.wav / source.opus に切り出す
+→ GitHub jobへ edit-plan.json + short audio + optional assets を置く
+→ render:assistant
+→ whisper.cpp が同じ短尺音声を自動文字起こし
+→ timed-asr.json / .srt / .vtt / .meta.json を生成
+→ assistant plan validation
+→ HOST / GUEST / UNKNOWN の話者ゲート
 → HOST区間だけVRMの口・発話連動頭/胸モーションを許可
-→ GUEST / UNKNOWN区間は発話モーションを停止
 → 字幕・画像・背景を合成
-→ 構造QC
-→ 目視QC
-→ MP4
+→ 構造QC + 目視QC
+→ MP4 + Whisper transcript をArtifact出力
 ```
+
+## Whisper policy
+
+正規ASRは `remotion/vrm-lipsync/scripts/transcribe-source.mjs`。
+
+- engine: open-source `whisper.cpp`
+- installer/runtime: `@remotion/install-whisper-cpp`
+- default model: `small`
+- language: `ja`
+- analysis audio: ffmpegで16kHz mono PCMへ変換
+- token-level timestampsを取得
+- 出力: `timed-asr.json`, `timed-asr.srt`, `timed-asr.vtt`, `timed-asr.meta.json`
+- metaに元音声SHA-256、duration、model、whisper.cpp versionを保存
+- GitHub Actionsではwhisper.cpp本体とmodelをcacheする
+
+`render:assistant` はWhisperを前処理として自動実行する。ASRだけ欲しい場合はGitHub Actionsの `Assistant Whisper Transcription` を手動実行できる。
+
+Base64へ変換した音声分割は正規経路では使用しない。入力は実音声ファイルのみ。
 
 ## Why this architecture
 
-- 面白い箇所の判断は音量や単語頻度ではなく、会話全体の文脈・オチ・キャラクター性を使う。
-- 話者識別も音響特徴だけへ依存せず、発話内容・呼びかけ・応答関係・前後文脈を使える。
-- 曖昧な相槌や一語発話は無理にHOST/GUESTへ断定せず `UNKNOWN` にする。
-- `UNKNOWN` はVRM発話モーションを止めるため、誤推定でゲスト音声に口が動くより安全。
-- 外部OpenAI APIは正規レンダー経路に不要。ChatGPTの会話内判断とGitHub/Remotionで完結させる。
-- 長尺原音をGitHubへ置く必要はない。採用区間だけ短い音声へ切り出してjobへ渡す。
+- 面白い箇所の判断は音量や単語頻度ではなく、ChatGPTが会話全体の文脈・オチ・キャラクター性から行う。
+- Whisperは編集判断をしない。実音声に対する時刻付き文字起こしと監査レイヤーに限定する。
+- 話者識別は発話内容・呼びかけ・応答関係・前後文脈も使う。曖昧な相槌や一語発話は `UNKNOWN` にする。
+- `UNKNOWN` はVRM発話モーションを止めるため、ゲスト音声に誤って口が動くより安全。
+- 長尺原音はGitHubへ置かない。採用区間だけ短い音声としてjobへ渡す。
 
 ## Edit plan contract
 
@@ -49,7 +66,7 @@ Schema:
 - `motion.profile`: `deadpan | calm | normal | energetic`
 - `selection`: なぜこの区間を選んだか、フック、要約
 
-`edit-plan.json` 自体には音声SHAや音声長を手書きしない。`import-assistant-plan.mjs` が実音声からSHA-256とdurationを計算し、既存Studio project形式へ変換する。
+`edit-plan.json` 自体には音声SHAや音声長を手書きしない。Whisper metaと `import-assistant-plan.mjs` が実音声からSHA-256とdurationを取得する。
 
 ## One-command render
 
@@ -58,13 +75,17 @@ cd remotion/vrm-lipsync
 npm run render:assistant -- \
   --plan=../../jobs/assistant/current/edit-plan.json \
   --audio=../../jobs/assistant/current/source.m4a \
+  --asr-output=out/timed-asr \
   --output=out/assistant-current.mp4
 ```
 
 内部処理:
 
 ```text
-assistant plan validation
+exact source audio
+→ local whisper.cpp timed ASR
+→ ASR artifact validation
+→ assistant plan validation
 → actual audio SHA/duration
 → Studio project生成
 → clip WAV生成
@@ -79,22 +100,18 @@ assistant plan validation
 
 ## Speaker policy
 
-話者分類は編集判断であり、100%確実でない区間を無理に断定しない。
-
 - `HOST`: 配信者本人と十分に判断できる
 - `GUEST`: 相手話者と十分に判断できる
 - `UNKNOWN`: 相槌、短い声、重なり、曖昧な区間
 
-レンダー時のアバター話者は常に `HOST`。
-`GUEST` と `UNKNOWN` は口パク・発話連動の頭/胸モーションを無効化する。
+レンダー時のアバター話者は常に `HOST`。`GUEST` と `UNKNOWN` は口パク・発話連動の頭/胸モーションを無効化する。
 
 ## Role of Web Studio
 
-`tools/vrm-talker/` は正規AI解析器ではなく、必要ならproject.jsonの確認・微調整・ブラウザプレビューに使う補助ツールとする。
+`tools/vrm-talker/` は正規AI解析器ではなく、project.jsonの確認・微調整・ブラウザプレビュー用の補助ツール。
 
-ブラウザ内解析やWorker経由解析は、将来の補助経路として残してもよいが、完成動画の正本は `assistant edit-plan.json + source audio + render:assistant`。
+完成動画の正本は `assistant edit-plan.json + exact source audio + local Whisper transcript + render:assistant`。
 
-## Remaining external asset
+## Production VRM
 
-動画用VRMは `aa / ih / ou / ee / oh` を持つ production `Subeha.vrm` が必要。
-軽量 `subeha-web-site.vrm` は口モーフを持たないため完成動画へは使用しない。
+動画用VRMは `aa / ih / ou / ee / oh` を持つ production `Subeha.vrm` を使用する。軽量 `subeha-web-site.vrm` は完成動画へ使用しない。
