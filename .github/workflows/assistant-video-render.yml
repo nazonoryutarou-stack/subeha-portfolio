@@ -58,6 +58,7 @@ jobs:
             audio="$job/source.opus"
           elif [ -f "$job/source-parts.txt" ]; then
             joined="$RUNNER_TEMP/assistant-source.b64"
+            clean="$RUNNER_TEMP/assistant-source.clean.b64"
             : > "$joined"
             while IFS= read -r part || [ -n "$part" ]; do
               [ -z "$part" ] && continue
@@ -68,7 +69,17 @@ jobs:
               test -f "$part" || { echo "Missing audio chunk: $part" >&2; exit 1; }
               cat "$part" >> "$joined"
             done < "$job/source-parts.txt"
-            base64 --decode "$joined" > "$job/source.opus"
+
+            tr -d '\r\n\t ' < "$joined" > "$clean"
+            remainder=$(( $(wc -c < "$clean") % 4 ))
+            case "$remainder" in
+              0) ;;
+              2) printf '==' >> "$clean" ;;
+              3) printf '=' >> "$clean" ;;
+              1) echo 'Invalid base64 length: remainder 1 cannot be repaired safely.' >&2; exit 1 ;;
+            esac
+
+            base64 --decode "$clean" > "$job/source.opus"
             test -s "$job/source.opus" || { echo 'Decoded audio is empty' >&2; exit 1; }
             audio="$job/source.opus"
           else
