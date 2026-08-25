@@ -73,17 +73,18 @@ export const VrmLipSyncStudio: React.FC<VrmLipSyncProps> = (props) => {
     [nowMs, visuals],
   );
 
-  const boxWidth = width * 0.38;
-  const boxHeight = Math.min(height * 0.32, boxWidth * 1.1);
-  const right = width * 0.055;
-  const top = height * 0.13;
+  const landscape = width > height;
+  const boxWidth = width * (landscape ? 0.43 : 0.38);
+  const boxHeight = Math.min(height * (landscape ? 0.38 : 0.32), boxWidth * 9 / 16);
+  const right = width * (landscape ? 0.045 : 0.055);
+  const top = height * (landscape ? 0.16 : 0.13);
 
   let opacity = 0;
   if (current) {
     const startFrame = current.startMs / 1000 * fps;
     const endFrame = current.endMs / 1000 * fps;
     const durationFrames = Math.max(1, endFrame - startFrame);
-    const fadeFrames = Math.min(6, Math.max(1, Math.floor(durationFrames / 3)));
+    const fadeFrames = Math.min(8, Math.max(1, Math.floor(durationFrames / 3)));
     opacity = interpolate(
       frame,
       [startFrame, startFrame + fadeFrames, endFrame - fadeFrames, endFrame],
@@ -91,6 +92,8 @@ export const VrmLipSyncStudio: React.FC<VrmLipSyncProps> = (props) => {
       {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
     );
   }
+  const slideX = (1 - opacity) * Math.max(14, width * 0.018);
+  const scale = 0.965 + opacity * 0.035;
 
   return (
     <AbsoluteFill style={{background: props.background}}>
@@ -115,6 +118,8 @@ export const VrmLipSyncStudio: React.FC<VrmLipSyncProps> = (props) => {
             background: '#111',
             boxShadow: `0 ${Math.max(8, height * 0.012)}px ${Math.max(20, width * 0.04)}px rgba(0,0,0,.45)`,
             opacity,
+            transform: `translateX(${slideX}px) scale(${scale})`,
+            transformOrigin: 'center right',
           }}
         >
           <Img
