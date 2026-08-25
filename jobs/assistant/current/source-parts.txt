@@ -1,3 +1,4 @@
-jobs/assistant/assets/horse151-v3/source.b64.part-00
-jobs/assistant/assets/horse151-v3/source.b64.part-01
-jobs/assistant/assets/horse151-v3/source.b64.part-02
+jobs/assistant/assets/horse151/source.b64.part-00
+jobs/assistant/assets/horse151/source.b64.part-01
+jobs/assistant/assets/horse151/source.b64.part-02
+jobs/assistant/assets/horse151/source.b64.part-03
