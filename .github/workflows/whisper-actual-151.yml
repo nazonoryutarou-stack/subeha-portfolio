@@ -1,0 +1,61 @@
+name: Whisper.cpp Actual Gravity 151
+
+on:
+  push:
+    branches:
+      - work/whisper-scale-151
+    paths:
+      - '.github/workflows/whisper-actual-151.yml'
+      - 'tmp/whisper-scale/actual/gravity151-1m.ogg'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actual-1m:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WHISPER_MODEL: small
+      WHISPER_LANGUAGE: ja
+      WHISPER_CPP_VERSION: 1.5.5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install ffmpeg and time
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg time
+      - name: Verify actual source clip
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(stat -c%s tmp/whisper-scale/actual/gravity151-1m.ogg)" = "177042"
+          test "$(sha256sum tmp/whisper-scale/actual/gravity151-1m.ogg | awk '{print $1}')" = "bb60a355d4424e82935e5af7a10e0283c5063bdf346d391c2858244dc79d4afa"
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 tmp/whisper-scale/actual/gravity151-1m.ogg
+      - name: Install Remotion dependencies
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+      - name: Transcribe actual 1 minute
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/whisper-scale/actual-output
+          cat > tmp/whisper-scale/actual-job.json <<'JSON'
+          {"sourceAudio":"../../tmp/whisper-scale/actual/gravity151-1m.ogg"}
+          JSON
+          cd remotion/vrm-lipsync
+          /usr/bin/time -f 'elapsed_sec=%e\nmax_rss_kb=%M' -o ../../tmp/whisper-scale/actual-output/metrics.txt \
+            node scripts/transcribe-source.mjs --job=../../tmp/whisper-scale/actual-job.json --force
+          cp inputs/source.captions.json ../../tmp/whisper-scale/actual-output/captions.json
+          cp inputs/source.captions.meta.json ../../tmp/whisper-scale/actual-output/meta.json
+          jq 'length' inputs/source.captions.json | tee ../../tmp/whisper-scale/actual-output/caption-count.txt
+          cat ../../tmp/whisper-scale/actual-output/metrics.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-actual-gravity151-1m
+          path: tmp/whisper-scale/actual-output/
+          retention-days: 3
