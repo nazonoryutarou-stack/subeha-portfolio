@@ -1,0 +1,121 @@
+name: Assistant Whisper Alignment
+
+on:
+  push:
+    branches:
+      - feature/vrm-studio-webapp
+    paths:
+      - 'jobs/assistant/current/**'
+      - 'remotion/vrm-lipsync/scripts/transcribe-source.mjs'
+      - 'remotion/vrm-lipsync/package.json'
+      - '.github/workflows/assistant-whisper-align.yml'
+  workflow_dispatch:
+    inputs:
+      job_dir:
+        description: '短尺音声を置いた assistant job directory'
+        required: true
+        default: 'jobs/assistant/current'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Resolve source audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            job='${{ inputs.job_dir }}'
+          else
+            job='jobs/assistant/current'
+          fi
+          case "$job" in
+            jobs/assistant/*) ;;
+            *) echo 'job_dir must stay under jobs/assistant/' >&2; exit 1 ;;
+          esac
+
+          if [ -f "$job/source.m4a" ]; then
+            audio="$job/source.m4a"
+          elif [ -f "$job/source.wav" ]; then
+            audio="$job/source.wav"
+          elif [ -f "$job/source.opus" ]; then
+            audio="$job/source.opus"
+          elif [ -f "$job/source-parts.txt" ]; then
+            joined="$RUNNER_TEMP/assistant-source.b64"
+            clean="$RUNNER_TEMP/assistant-source.clean.b64"
+            : > "$joined"
+            while IFS= read -r part || [ -n "$part" ]; do
+              [ -z "$part" ] && continue
+              case "$part" in
+                jobs/assistant/assets/*) ;;
+                *) echo "Audio chunk must stay under jobs/assistant/assets/: $part" >&2; exit 1 ;;
+              esac
+              test -f "$part" || { echo "Missing audio chunk: $part" >&2; exit 1; }
+              cat "$part" >> "$joined"
+            done < "$job/source-parts.txt"
+            tr -d '\r\n\t ' < "$joined" > "$clean"
+            remainder=$(( $(wc -c < "$clean") % 4 ))
+            case "$remainder" in
+              0) ;;
+              2) printf '==' >> "$clean" ;;
+              3) printf '=' >> "$clean" ;;
+              1) echo 'Invalid base64 length: remainder 1 cannot be repaired safely.' >&2; exit 1 ;;
+            esac
+            base64 --decode "$clean" > "$RUNNER_TEMP/assistant-source.opus"
+            audio="$RUNNER_TEMP/assistant-source.opus"
+          else
+            echo "Missing $job/source.m4a/source.wav/source.opus or source-parts.txt" >&2
+            exit 1
+          fi
+
+          test -s "$audio"
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 "$audio"
+          echo "ASSISTANT_AUDIO=$(realpath "$audio")" >> "$GITHUB_ENV"
+
+      - name: Install Remotion Whisper dependencies
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+
+      - name: Generate real timed ASR with local whisper.cpp
+        working-directory: remotion/vrm-lipsync
+        env:
+          WHISPER_MODEL: small
+          WHISPER_LANGUAGE: ja
+        run: |
+          npm run transcribe -- \
+            --audio="$ASSISTANT_AUDIO" \
+            --output-dir=out/timed-asr \
+            --force
+
+      - name: Verify timed ASR artifacts
+        working-directory: remotion/vrm-lipsync
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s out/timed-asr/timed-asr.json
+          test -s out/timed-asr/timed-asr.srt
+          test -s out/timed-asr/timed-asr.vtt
+          test -s out/timed-asr/timed-asr.meta.json
+          node -e "const fs=require('fs'); const rows=JSON.parse(fs.readFileSync('out/timed-asr/timed-asr.json','utf8')); if(!Array.isArray(rows)||!rows.length) process.exit(1); for(const r of rows){if(!(Number.isFinite(r.startMs)&&Number.isFinite(r.endMs)&&r.endMs>r.startMs)) process.exit(2)} console.log('verified timed captions:', rows.length)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assistant-timed-asr
+          path: remotion/vrm-lipsync/out/timed-asr/
+          retention-days: 14
