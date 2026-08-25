@@ -44,18 +44,11 @@ const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 const sans = '"Noto Sans CJK JP","Noto Sans JP","Yu Gothic",system-ui,sans-serif';
 const mono = '"IBM Plex Mono","Noto Sans Mono CJK JP",ui-monospace,monospace';
 
-const mouthWeights = (frame: number, level: number) => {
+const mouthWeights = (level: number) => {
   const gate = clamp01((level - 0.018) / 0.38);
   if (gate < 0.015) return {aa: 0, ih: 0, ou: 0, ee: 0, oh: 0};
-  const phase = Math.floor(frame / 2) % 5;
-  const base = Math.min(1, 0.24 + gate * 1.05);
-  return {
-    aa: phase === 0 || phase === 4 ? base : base * 0.18,
-    ih: phase === 1 ? base * 0.82 : 0,
-    ou: phase === 2 ? base * 0.70 : 0,
-    ee: phase === 3 ? base * 0.78 : 0,
-    oh: phase === 4 ? base * 0.70 : 0,
-  };
+  const open = Math.min(1, 0.2 + gate * 1.05);
+  return {aa: open, ih: 0, ou: 0, ee: 0, oh: 0};
 };
 
 const blinkWeight = (frame: number) => {
@@ -71,10 +64,14 @@ const applyNaturalPose = (vrm: VRM) => {
   const rs = vrm.humanoid?.getNormalizedBoneNode('rightShoulder');
   const la = vrm.humanoid?.getNormalizedBoneNode('leftUpperArm');
   const ra = vrm.humanoid?.getNormalizedBoneNode('rightUpperArm');
-  if (ls) ls.rotation.z = 0.04;
-  if (rs) rs.rotation.z = -0.04;
-  if (la) { la.rotation.z = Math.PI * 0.36; la.rotation.x = -0.05; }
-  if (ra) { ra.rotation.z = -Math.PI * 0.36; ra.rotation.x = -0.05; }
+  const lla = vrm.humanoid?.getNormalizedBoneNode('leftLowerArm');
+  const rla = vrm.humanoid?.getNormalizedBoneNode('rightLowerArm');
+  if (ls) ls.rotation.z = -0.04;
+  if (rs) rs.rotation.z = 0.04;
+  if (la) { la.rotation.z = -Math.PI * 0.46; la.rotation.x = -0.04; }
+  if (ra) { ra.rotation.z = Math.PI * 0.46; ra.rotation.x = -0.04; }
+  if (lla) lla.rotation.y = -0.10;
+  if (rla) rla.rotation.y = 0.10;
 };
 
 export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
@@ -163,12 +160,15 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
         const framed = new THREE.Box3().setFromObject(vrm.scene);
         const fs = new THREE.Vector3(); framed.getSize(fs);
         const landscape = width > height;
-        // Landscape is intentionally a bust-up shot. Head + shoulders + upper chest fill the left visual zone.
         const targetHeight = fs.y * (landscape ? 0.47 : 0.84);
         const targetCenterY = framed.max.y - targetHeight * (landscape ? 0.53 : 0.56) - fs.y * 0.01;
         const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
         const cameraDistance = (targetHeight / 2) / Math.tan(halfFov) * (landscape ? 1.04 : 1.10);
-        if (landscape) vrm.scene.position.x -= 0.49;
+        if (landscape) {
+          const horizontalSpan = 2 * cameraDistance * Math.tan(halfFov) * (width / height);
+          const leftZoneCenter = 0.45 / 2;
+          vrm.scene.position.x += (leftZoneCenter - 0.5) * horizontalSpan;
+        }
         camera.position.set(0, targetCenterY, cameraDistance);
         camera.lookAt(0, targetCenterY, 0);
 
@@ -195,7 +195,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
     if (!s?.vrm || !envelope || !modelReady) return;
     const vrm = s.vrm;
     const em = vrm.expressionManager;
-    const mouth = mouthWeights(frame, drivenLevel);
+    const mouth = mouthWeights(drivenLevel);
     em?.setValue('aa', mouth.aa); em?.setValue('ih', mouth.ih); em?.setValue('ou', mouth.ou);
     em?.setValue('ee', mouth.ee); em?.setValue('oh', mouth.oh); em?.setValue('blink', blinkWeight(frame));
     const head = vrm.humanoid?.getNormalizedBoneNode('head');
