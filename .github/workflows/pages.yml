@@ -1,4 +1,4 @@
-name: Deploy cold monochrome shell to GitHub Pages
+name: Deploy cold monochrome site to GitHub Pages
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Prepare cold monochrome shell
+      - name: Prepare cold monochrome site
         shell: bash
         run: |
           rm -rf _site
@@ -40,24 +40,31 @@ jobs:
             <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
             <meta name="robots" content="noindex,nofollow,noarchive">
             <meta name="theme-color" content="#eeeeea">
-            <title>不氣屋</title>
+            <title>すべての歯が見える</title>
             <style>
               *{box-sizing:border-box}
               html,body{margin:0;min-height:100%;background:#eeeeea;color:#111}
               body{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;-webkit-font-smoothing:antialiased}
-              main{min-height:100svh;display:flex;justify-content:center;padding:9svh 24px 48px}
-              .shell{width:min(100%,520px);text-align:center}
+              main{min-height:100svh;display:flex;justify-content:center;padding:28px 24px 64px}
+              .shell{width:min(100%,560px)}
+              .site-name{margin:0;text-align:center;font-size:12px;font-weight:400;letter-spacing:.36em;text-indent:.36em}
+              .hero{text-align:center;padding-top:10svh}
               .mark{display:block;width:min(35vw,150px);height:auto;margin:0 auto 34px;filter:grayscale(1) contrast(1.45)}
-              .motto{margin:0 0 16svh;font-size:clamp(13px,3.2vw,16px);font-weight:400;letter-spacing:.28em;text-indent:.28em}
-              .section-title{margin:0 0 22px;font-size:13px;font-weight:400;letter-spacing:.42em;text-indent:.42em}
+              .motto{margin:0;font-size:clamp(13px,3.2vw,16px);font-weight:400;letter-spacing:.28em;text-indent:.28em}
+              .greeting{margin:13svh 0 11svh;padding-top:18px;border-top:1px solid #111}
+              .greeting h2{margin:0 0 24px;text-align:center;font-size:13px;font-weight:400;letter-spacing:.38em;text-indent:.38em}
+              .greeting p{margin:0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:12.5px;font-weight:400;line-height:2.05;letter-spacing:.04em;text-align:left}
+              .section-title{margin:0 0 22px;text-align:center;font-size:13px;font-weight:400;letter-spacing:.42em;text-indent:.42em}
               .split{position:relative;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #111}
               .split::after{content:"";position:absolute;left:50%;top:0;width:1px;height:18px;background:#111}
-              .split a{display:block;padding:28px 12px 16px;color:#111;text-decoration:none;font-size:14px;letter-spacing:.34em;text-indent:.34em}
+              .split a{display:block;padding:28px 12px 16px;color:#111;text-align:center;text-decoration:none;font-size:14px;letter-spacing:.34em;text-indent:.34em}
               .split a:hover,.split a:focus-visible{text-decoration:underline;text-underline-offset:5px}
               .split a:focus-visible{outline:1px solid #111;outline-offset:4px}
               @media (max-width:420px){
-                main{padding-top:8svh}
-                .motto{margin-bottom:14svh}
+                main{padding:22px 24px 52px}
+                .hero{padding-top:9svh}
+                .greeting{margin-top:12svh;margin-bottom:10svh}
+                .greeting p{font-size:12px;line-height:2}
                 .split a{font-size:13px;letter-spacing:.26em;text-indent:.26em}
               }
             </style>
@@ -65,8 +72,23 @@ jobs:
           <body>
             <main>
               <div class="shell">
-                <img class="mark" src="./hitotsu-ore-choji.png" alt="">
-                <p class="motto">遅滞なく、直ちに。</p>
+                <p class="site-name">すべての歯が見える</p>
+
+                <div class="hero">
+                  <img class="mark" src="./hitotsu-ore-choji.png" alt="">
+                  <p class="motto">遅滞なく、直ちに。</p>
+                </div>
+
+                <section class="greeting" aria-labelledby="greeting-title">
+                  <h2 id="greeting-title">ごあいさつ</h2>
+                  <p>
+                    いつもお世話になっております。<br>
+                    バレたので作り直しました。一般の方も利用できるようになっております。同業各位におかれましては、一般向け商品の大量購入をご遠慮ください。<br>
+                    引き続き、ジジイには内緒でお願いいたします。<br>
+                    なお、サイトの仮設にともないTelegram（テレグラム）での販売は終了いたしました。
+                  </p>
+                </section>
+
                 <h1 class="section-title">商品</h1>
                 <nav class="split" aria-label="商品区分">
                   <a href="./trade/">同業者</a>
@@ -86,7 +108,7 @@ jobs:
             <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
             <meta name="robots" content="noindex,nofollow,noarchive">
             <meta name="theme-color" content="#eeeeea">
-            <title>同業者｜不氣屋</title>
+            <title>同業者｜すべての歯が見える</title>
             <style>
               *{box-sizing:border-box}
               html,body{margin:0;min-height:100%;background:#eeeeea;color:#111}
@@ -119,7 +141,7 @@ jobs:
             <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
             <meta name="robots" content="noindex,nofollow,noarchive">
             <meta name="theme-color" content="#eeeeea">
-            <title>一般｜不氣屋</title>
+            <title>一般｜すべての歯が見える</title>
             <style>
               *{box-sizing:border-box}
               html,body{margin:0;min-height:100%;background:#eeeeea;color:#111}
