@@ -1,0 +1,208 @@
+name: Gravity161 MPT VRM E2E
+
+on:
+  push:
+    branches:
+      - gravity161-final
+    paths:
+      - 'jobs/video/gravity161-angel-record-14s/**'
+      - 'remotion/vrm-lipsync/**'
+      - 'Subeha.vrm'
+      - '.github/workflows/gravity161-mpt-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MPT_BASE_URL: ${{ secrets.MPT_BASE_URL }}
+      MPT_API_KEY: ${{ secrets.MPT_API_KEY }}
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install ffmpeg, fonts and renderer dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          fc-cache -f
+          npm install --no-audit --no-fund
+
+      - name: Prepare exact Gravity161 audio and production VRM
+        shell: bash
+        run: |
+          set -euo pipefail
+          job='../../jobs/video/gravity161-angel-record-14s'
+          mkdir -p public/visuals out/qc-161
+
+          cp "$job/voice-161.opus" out/source-161.opus
+          fixture_sha="$(sha256sum out/source-161.opus | cut -d' ' -f1)"
+          echo "fixture_sha256=$fixture_sha"
+          test "$fixture_sha" = '5ad1db9ebdc37cc93dee840b31753dc02724db00d0a30001cccf64baea47a2e7'
+          source_duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/source-161.opus)"
+          node -e "const d=Number(process.argv[1]); if(!Number.isFinite(d)||d<13.8||d>14.2){throw new Error('invalid source fixture duration '+d)}" "$source_duration"
+          ffmpeg -hide_banner -loglevel error -y -i out/source-161.opus -ac 1 -ar 48000 -c:a pcm_s16le public/voice.wav
+
+          cp "$job/clip.json" public/clip.json
+          cp "$job/visuals/spirit-council.svg" public/visuals/spirit-council.svg
+          cp "$job/visuals/angel-record.svg" public/visuals/angel-record.svg
+          cp ../../Subeha.vrm public/Subeha.vrm
+
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 public/voice.wav
+          node scripts/ensure-video-vrm.mjs public/Subeha.vrm
+
+      - name: Lock HOST turn to normalized WAV
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const {execFileSync} = require('child_process');
+          const wav = fs.readFileSync('public/voice.wav');
+          const sha = crypto.createHash('sha256').update(wav).digest('hex');
+          const durationSec = Number(execFileSync('ffprobe', ['-v','error','-show_entries','format=duration','-of','default=nw=1:nk=1','public/voice.wav'], {encoding:'utf8'}).trim());
+          if (!Number.isFinite(durationSec) || durationSec < 13.8 || durationSec > 14.2) throw new Error(`unexpected duration ${durationSec}`);
+          const payload = {
+            version: 2,
+            audioSha256: sha,
+            durationMs: durationSec * 1000,
+            avatarSpeaker: 'HOST',
+            turns: [{speaker:'HOST', startMs:0, endMs:durationSec * 1000}]
+          };
+          fs.writeFileSync('public/speaker-turns.json', JSON.stringify(payload, null, 2));
+          console.log(`speaker lock: ${sha} / ${durationSec.toFixed(3)}s`);
+          NODE
+
+      - name: Run MoneyPrinterTurbo terms bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/mpt-bridge.mjs --clip=public/clip.json --output=out/mpt-terms.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const x = JSON.parse(fs.readFileSync('out/mpt-terms.json','utf8'));
+          if (!Array.isArray(x.video_terms) || x.video_terms.length < 2) throw new Error('MPT bridge returned too few terms');
+          console.log(`MPT bridge mode=${x.mode}; terms=${x.video_terms.length}`);
+          NODE
+
+      - name: Generate HOST lip envelope
+        shell: bash
+        env:
+          REQUIRE_SPEAKER_TURNS: '1'
+        run: |
+          node scripts/generate-envelope.mjs
+          node - <<'NODE'
+          const fs = require('fs');
+          const e = JSON.parse(fs.readFileSync('public/envelope.json','utf8'));
+          if (!Array.isArray(e.values) || e.values.length < 390) throw new Error('invalid envelope');
+          console.log(`envelope frames=${e.values.length}`);
+          NODE
+
+      - name: Apply landscape bust-up and right-avatar layout
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          {
+            const path = 'src/VrmLipSyncV3.tsx';
+            let s = fs.readFileSync(path, 'utf8');
+            const pairs = [
+              ["const targetHeight = fs.y * (landscape ? 0.47 : 0.84);", "const targetHeight = fs.y * (landscape ? 0.34 : 0.84);"],
+              ["const targetCenterY = framed.max.y - targetHeight * (landscape ? 0.53 : 0.56) - fs.y * 0.01;", "const targetCenterY = landscape ? framed.max.y - targetHeight * 0.47 - fs.y * 0.005 : framed.max.y - targetHeight * 0.56 - fs.y * 0.01;"],
+              ["const leftZoneCenter = 0.45 / 2;", "const rightZoneCenter = 1 - 0.45 / 2;"],
+              ["vrm.scene.position.x += (leftZoneCenter - 0.5) * horizontalSpan;", "vrm.scene.position.x += (rightZoneCenter - 0.5) * horizontalSpan;"]
+            ];
+            for (const [a,b] of pairs) {
+              if (!s.includes(a)) throw new Error(`VRM layout source changed: ${a}`);
+              s = s.replace(a,b);
+            }
+            fs.writeFileSync(path, s);
+          }
+          {
+            const path = 'src/VrmLipSyncStudio.tsx';
+            let s = fs.readFileSync(path, 'utf8');
+            const a = "right:44,top:102,width:620,height:444";
+            const b = "left:44,top:132,width:620,height:414";
+            if (!s.includes(a)) throw new Error('visual card layout source changed');
+            s = s.replace(a,b);
+            s = s.replace("left:'43%'", "left:'57%'");
+            fs.writeFileSync(path, s);
+          }
+          console.log('layout: 1280x720, image left, VRM right, upper 34% bust-up');
+          NODE
+
+      - name: TypeScript check
+        run: npm run check
+
+      - name: Render Gravity161 angel record clip
+        run: npx remotion render VrmLipSyncLandscape out/gravity161-angel-record.mp4 --codec=h264 --crf=20
+
+      - name: Structural QC
+        shell: bash
+        run: |
+          node scripts/validate-render.mjs \
+            --input=out/gravity161-angel-record.mp4 \
+            --width=1280 --height=720 \
+            --min-duration=13.8 --max-duration=14.2 \
+            --max-av-drift=0.15
+
+      - name: Visual QC frames
+        shell: bash
+        run: |
+          ffmpeg -hide_banner -loglevel error -y -ss 1.0  -i out/gravity161-angel-record.mp4 -frames:v 1 out/qc-161/01-open.png
+          ffmpeg -hide_banner -loglevel error -y -ss 5.5  -i out/gravity161-angel-record.mp4 -frames:v 1 out/qc-161/02-transition.png
+          ffmpeg -hide_banner -loglevel error -y -ss 9.0  -i out/gravity161-angel-record.mp4 -frames:v 1 out/qc-161/03-angel.png
+          ffmpeg -hide_banner -loglevel error -y -ss 13.0 -i out/gravity161-angel-record.mp4 -frames:v 1 out/qc-161/04-end.png
+
+      - name: Write reproducibility manifest
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const hash = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+          const terms = JSON.parse(fs.readFileSync('out/mpt-terms.json','utf8'));
+          const manifest = {
+            version: 1,
+            source: 'GRAVITY #161 01:45:16-01:45:30',
+            layout: '1280x720-image-left-vrm-right-bust-up',
+            landscapeVisibleBodyFraction: 0.34,
+            sourceFixtureSha256: hash('out/source-161.opus'),
+            normalizedAudioSha256: hash('public/voice.wav'),
+            vrmSha256: hash('public/Subeha.vrm'),
+            clipSha256: hash('public/clip.json'),
+            outputSha256: hash('out/gravity161-angel-record.mp4'),
+            mptMode: terms.mode,
+            mptTerms: terms.video_terms,
+            node: process.version,
+            githubSha: process.env.GITHUB_SHA
+          };
+          fs.writeFileSync('out/build-manifest.json', JSON.stringify(manifest,null,2));
+          console.log(JSON.stringify(manifest,null,2));
+          NODE
+
+      - name: Upload video and QC
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity161-mpt-vrm-e2e
+          path: |
+            remotion/vrm-lipsync/out/gravity161-angel-record.mp4
+            remotion/vrm-lipsync/out/mpt-terms.json
+            remotion/vrm-lipsync/out/build-manifest.json
+            remotion/vrm-lipsync/out/qc-161/*.png
+            remotion/vrm-lipsync/public/speaker-turns.json
+            remotion/vrm-lipsync/public/envelope.json
+            jobs/video/gravity161-angel-record-14s/clip.json
+          retention-days: 14
