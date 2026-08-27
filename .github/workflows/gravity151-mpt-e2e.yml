@@ -46,8 +46,22 @@ jobs:
           job='../../jobs/video/gravity151-dating-app-29s'
           mkdir -p public/visuals out/qc-151
 
-          base64 -d "$job/voice-151-6k.opus.b64" > out/source-151.opus
-          echo "fixture_sha256=$(sha256sum out/source-151.opus | cut -d' ' -f1)"
+          cat \
+            "$job/fixture-v2-00.b64" \
+            "$job/fixture-v2-01.b64" \
+            "$job/fixture-v2-02.b64" \
+            "$job/fixture-v2-03.b64" \
+            "$job/fixture-v2-04.b64" \
+            "$job/fixture-v2-05.b64" \
+            "$job/fixture-v2-06.b64" \
+            "$job/fixture-v2-07.b64" \
+            "$job/fixture-v2-08.b64" > out/source-151.b64
+          chars="$(wc -c < out/source-151.b64 | tr -d ' ')"
+          test "$chars" = '32216'
+          base64 -d out/source-151.b64 > out/source-151.opus
+          fixture_sha="$(sha256sum out/source-151.opus | cut -d' ' -f1)"
+          echo "fixture_sha256=$fixture_sha"
+          test "$fixture_sha" = 'b3e245efa111ea22437bbb3b59644e2eba78a9272914774e2ec04096b2835e60'
           source_duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/source-151.opus)"
           node -e "const d=Number(process.argv[1]); if(!Number.isFinite(d)||d<28.8||d>29.2){throw new Error('invalid source fixture duration '+d)}" "$source_duration"
           ffmpeg -hide_banner -loglevel error -y -i out/source-151.opus -ac 1 -ar 48000 -c:a pcm_s16le public/voice.wav
