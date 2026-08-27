@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "audioSha256": "11d6b013170bac2543515bcd92db20f6c92847d978bbe6690b421fbae0ce5952",
+  "durationMs": 29013.333,
+  "avatarSpeaker": "HOST",
+  "turns": [
+    {"speaker":"HOST","startMs":0,"endMs":9000},
+    {"speaker":"GUEST","startMs":9000,"endMs":11000},
+    {"speaker":"HOST","startMs":11000,"endMs":29000}
+  ]
+}
