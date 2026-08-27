@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620">
+  <rect width="900" height="620" fill="#0d1117"/>
+  <text x="52" y="66" font-family="monospace" font-size="20" fill="#d2aa62">RECOMMENDATION / PROBABILITY</text>
+  <line x1="52" y1="92" x2="848" y2="92" stroke="#3a424d"/>
+  <g font-family="sans-serif" font-size="19" fill="#e9edf1">
+    <text x="74" y="166">PROFILE A</text><text x="74" y="260">PROFILE B</text><text x="74" y="354">PROFILE C</text><text x="74" y="448">DEVELOPER</text>
+  </g>
+  <g fill="#252d38"><rect x="238" y="132" width="540" height="44" rx="8"/><rect x="238" y="226" width="540" height="44" rx="8"/><rect x="238" y="320" width="540" height="44" rx="8"/><rect x="238" y="414" width="540" height="44" rx="8"/></g>
+  <g fill="#737b86"><rect x="238" y="132" width="97" height="44" rx="8"/><rect x="238" y="226" width="143" height="44" rx="8"/><rect x="238" y="320" width="75" height="44" rx="8"/></g>
+  <rect x="238" y="414" width="510" height="44" rx="8" fill="#d2aa62"/>
+  <g font-family="monospace" font-size="18" fill="#cfd5dc"><text x="795" y="162">18%</text><text x="795" y="256">27%</text><text x="795" y="350">14%</text><text x="795" y="444" fill="#d2aa62">94%</text></g>
+  <path d="M740 112l38 0 0 340" fill="none" stroke="#d2aa62" stroke-width="2" stroke-dasharray="6 8"/>
+  <text x="52" y="548" font-family="sans-serif" font-weight="700" font-size="29" fill="#f4f2eb">「かなり高い確率で、うちの親父が表示される」</text>
+  <text x="52" y="580" font-family="monospace" font-size="14" fill="#747b85">ILLUSTRATIVE DIAGRAM / NOT ACTUAL SYSTEM DATA</text>
+</svg>
