@@ -128,17 +128,34 @@ jobs:
           console.log(`envelope frames=${e.values.length}; guest gate=PASS`);
           NODE
 
+      - name: Apply landscape bust-up framing
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'src/VrmLipSyncV3.tsx';
+          let s = fs.readFileSync(path, 'utf8');
+          const beforeHeight = "const targetHeight = fs.y * (landscape ? 0.47 : 0.84);";
+          const afterHeight = "const targetHeight = fs.y * (landscape ? 0.34 : 0.84);";
+          const beforeCenter = "const targetCenterY = framed.max.y - targetHeight * (landscape ? 0.53 : 0.56) - fs.y * 0.01;";
+          const afterCenter = "const targetCenterY = landscape ? framed.max.y - targetHeight * 0.47 - fs.y * 0.005 : framed.max.y - targetHeight * 0.56 - fs.y * 0.01;";
+          if (!s.includes(beforeHeight) || !s.includes(beforeCenter)) throw new Error('landscape framing source changed; refusing blind patch');
+          s = s.replace(beforeHeight, afterHeight).replace(beforeCenter, afterCenter);
+          fs.writeFileSync(path, s);
+          console.log('landscape framing: upper 34% of VRM, headroom preserved');
+          NODE
+
       - name: TypeScript check
         run: npm run check
 
       - name: Render exact 29-second Gravity151 clip
-        run: npx remotion render VrmLipSyncLandscape out/gravity151-dating-app-landscape.mp4 --codec=h264 --crf=20
+        run: npx remotion render VrmLipSyncLandscape out/gravity151-dating-app-landscape-bust.mp4 --codec=h264 --crf=20
 
       - name: Structural QC
         shell: bash
         run: |
           node scripts/validate-render.mjs \
-            --input=out/gravity151-dating-app-landscape.mp4 \
+            --input=out/gravity151-dating-app-landscape-bust.mp4 \
             --width=1280 --height=720 \
             --min-duration=28.8 --max-duration=29.2 \
             --max-av-drift=0.15
@@ -146,10 +163,10 @@ jobs:
       - name: Visual QC frames
         shell: bash
         run: |
-          ffmpeg -hide_banner -loglevel error -y -ss 1.0  -i out/gravity151-dating-app-landscape.mp4 -frames:v 1 out/qc-151/01-open.png
-          ffmpeg -hide_banner -loglevel error -y -ss 10.0 -i out/gravity151-dating-app-landscape.mp4 -frames:v 1 out/qc-151/02-guest.png
-          ffmpeg -hide_banner -loglevel error -y -ss 18.0 -i out/gravity151-dating-app-landscape.mp4 -frames:v 1 out/qc-151/03-punchline.png
-          ffmpeg -hide_banner -loglevel error -y -ss 27.5 -i out/gravity151-dating-app-landscape.mp4 -frames:v 1 out/qc-151/04-end.png
+          ffmpeg -hide_banner -loglevel error -y -ss 1.0  -i out/gravity151-dating-app-landscape-bust.mp4 -frames:v 1 out/qc-151/01-open.png
+          ffmpeg -hide_banner -loglevel error -y -ss 10.0 -i out/gravity151-dating-app-landscape-bust.mp4 -frames:v 1 out/qc-151/02-guest.png
+          ffmpeg -hide_banner -loglevel error -y -ss 18.0 -i out/gravity151-dating-app-landscape-bust.mp4 -frames:v 1 out/qc-151/03-punchline.png
+          ffmpeg -hide_banner -loglevel error -y -ss 27.5 -i out/gravity151-dating-app-landscape-bust.mp4 -frames:v 1 out/qc-151/04-end.png
 
       - name: Write reproducibility manifest
         shell: bash
@@ -162,12 +179,13 @@ jobs:
           const manifest = {
             version: 1,
             source: 'GRAVITY #151 01:54:31-01:55:00',
-            layout: '1280x720-landscape',
+            layout: '1280x720-landscape-bust-up',
+            landscapeVisibleBodyFraction: 0.34,
             sourceFixtureSha256: hash('out/source-151.opus'),
             normalizedAudioSha256: hash('public/voice.wav'),
             vrmSha256: hash('public/Subeha.vrm'),
             clipSha256: hash('public/clip.json'),
-            outputSha256: hash('out/gravity151-dating-app-landscape.mp4'),
+            outputSha256: hash('out/gravity151-dating-app-landscape-bust.mp4'),
             mptMode: terms.mode,
             mptTerms: terms.video_terms,
             node: process.version,
@@ -182,7 +200,7 @@ jobs:
         with:
           name: gravity151-mpt-vrm-e2e
           path: |
-            remotion/vrm-lipsync/out/gravity151-dating-app-landscape.mp4
+            remotion/vrm-lipsync/out/gravity151-dating-app-landscape-bust.mp4
             remotion/vrm-lipsync/out/mpt-terms.json
             remotion/vrm-lipsync/out/build-manifest.json
             remotion/vrm-lipsync/out/qc-151/*.png
