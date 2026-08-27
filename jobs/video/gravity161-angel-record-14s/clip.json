@@ -1,0 +1,23 @@
+{
+  "version": 3,
+  "title": "天使の見た目、\n記述がやたら細かい",
+  "hook": "本物の霊の者が参加したのでは、という話。",
+  "sourceLabel": "GRAVITY #161 / 01:45:16–01:45:30",
+  "layout": {"width": 1280, "height": 720, "captionBottomPx": 34},
+  "mpt": {
+    "subject": "宗教史の議論で霊的な参加者と天使の外見記述について語る短い話",
+    "fallbackTerms": [
+      "ancient religious council manuscript, anonymous robed figures, parchment diagram, no logos",
+      "historical angel manuscript illustration, many wings and eyes, archival parchment, public-domain inspired"
+    ]
+  },
+  "captions": [
+    {"text":"本物の霊の者が参加したんでしょうね。","startMs":0,"endMs":4800,"speaker":"HOST"},
+    {"text":"天使の見た目についての記述は、","startMs":4800,"endMs":7600,"speaker":"HOST"},
+    {"text":"やったら細かいんですよ。","startMs":7600,"endMs":14000,"speaker":"HOST"}
+  ],
+  "visualReferences": [
+    {"id":"mpt-01","kind":"mpt-term","title":"霊的な参加者？","query":"ancient religious council manuscript, anonymous robed figures, parchment diagram, no logos","startMs":0,"endMs":5600,"renderFile":"visuals/spirit-council.svg","creator":"local fixture","license":"generated"},
+    {"id":"mpt-02","kind":"mpt-term","title":"天使の姿の記述","query":"historical angel manuscript illustration, many wings and eyes, archival parchment, public-domain inspired","startMs":5600,"endMs":14000,"renderFile":"visuals/angel-record.svg","creator":"local fixture","license":"generated"}
+  ]
+}
