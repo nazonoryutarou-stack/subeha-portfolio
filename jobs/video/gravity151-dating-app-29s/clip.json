@@ -1,0 +1,30 @@
+{
+  "version": 3,
+  "title": "父親が作った出会い系、\nなぜか父親が出続ける",
+  "hook": "初期の出会い系を作った父親。問題はアルゴリズムだった。",
+  "sourceLabel": "GRAVITY #151 / 01:54:31–01:55:00",
+  "layout": {"width": 720, "height": 1280, "captionBottomPx": 120},
+  "mpt": {
+    "subject": "初期の出会い系サイトで開発者本人が高確率表示される話",
+    "fallbackTerms": [
+      "early 2000s dating website on desktop computer, generic interface, no logos",
+      "recommendation algorithm probability ranking diagram, profile cards, generic UI"
+    ]
+  },
+  "captions": [
+    {"text":"コンピューターの時代になってから","startMs":0,"endMs":2000,"speaker":"HOST"},
+    {"text":"パソコンでアプリ開発みたいなね","startMs":2000,"endMs":5000,"speaker":"HOST"},
+    {"text":"出会い系サイトの走りですね","startMs":5000,"endMs":9000,"speaker":"HOST"},
+    {"text":"おー、すごい","startMs":9000,"endMs":11000,"speaker":"GUEST"},
+    {"text":"そんなものを作りまして","startMs":11000,"endMs":13000,"speaker":"HOST"},
+    {"text":"その出会い系アプリ、何が問題って","startMs":13000,"endMs":16000,"speaker":"HOST"},
+    {"text":"かなり高い確率で、うちの親父が表示されるっていう","startMs":16000,"endMs":19000,"speaker":"HOST"},
+    {"text":"確率いじってんですよ","startMs":19000,"endMs":23000,"speaker":"HOST"},
+    {"text":"登録した女の人には、基本的に出るようになってます","startMs":25000,"endMs":28000,"speaker":"HOST"},
+    {"text":"親父が","startMs":28000,"endMs":29000,"speaker":"HOST"}
+  ],
+  "visualReferences": [
+    {"id":"mpt-01","kind":"mpt-term","title":"初期の出会い系サイト","query":"early 2000s dating website on desktop computer, generic interface, no logos","startMs":3500,"endMs":13000,"renderFile":"visuals/early-dating.svg","creator":"local fixture","license":"generated"},
+    {"id":"mpt-02","kind":"mpt-term","title":"表示確率を調整","query":"recommendation algorithm probability ranking diagram, profile cards, generic UI","startMs":14500,"endMs":28500,"renderFile":"visuals/ranking-algorithm.svg","creator":"local fixture","license":"generated"}
+  ]
+}
