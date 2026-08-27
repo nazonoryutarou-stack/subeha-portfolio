@@ -1,0 +1,175 @@
+name: Gravity151 MPT VRM E2E
+
+on:
+  push:
+    branches:
+      - feature/mpt-151-e2e
+    paths:
+      - 'jobs/video/gravity151-dating-app-29s/**'
+      - 'remotion/vrm-lipsync/**'
+      - 'Subeha.vrm'
+      - '.github/workflows/gravity151-mpt-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MPT_BASE_URL: ${{ secrets.MPT_BASE_URL }}
+      MPT_API_KEY: ${{ secrets.MPT_API_KEY }}
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install ffmpeg, fonts and renderer dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          fc-cache -f
+          npm install --no-audit --no-fund
+
+      - name: Prepare exact Gravity151 audio and production VRM
+        shell: bash
+        run: |
+          set -euo pipefail
+          job='../../jobs/video/gravity151-dating-app-29s'
+          mkdir -p public/visuals out/qc-151
+
+          base64 -d "$job/voice-151-6k.opus.b64" > out/source-151.opus
+          test "$(sha256sum out/source-151.opus | cut -d' ' -f1)" = 'b3e245efa111ea22437bbb3b59644e2eba78a9272914774e2ec04096b2835e60'
+          ffmpeg -hide_banner -loglevel error -y -i out/source-151.opus -ac 1 -ar 48000 -c:a pcm_s16le public/voice.wav
+
+          cp "$job/clip.json" public/clip.json
+          cp "$job/visuals/early-dating.svg" public/visuals/early-dating.svg
+          cp "$job/visuals/ranking-algorithm.svg" public/visuals/ranking-algorithm.svg
+          cp ../../Subeha.vrm public/Subeha.vrm
+
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 public/voice.wav
+          node scripts/ensure-video-vrm.mjs public/Subeha.vrm
+
+      - name: Lock HOST/GUEST turns to normalized WAV
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const {execFileSync} = require('child_process');
+          const wav = fs.readFileSync('public/voice.wav');
+          const sha = crypto.createHash('sha256').update(wav).digest('hex');
+          const durationSec = Number(execFileSync('ffprobe', ['-v','error','-show_entries','format=duration','-of','default=nw=1:nk=1','public/voice.wav'], {encoding:'utf8'}).trim());
+          if (!Number.isFinite(durationSec) || durationSec < 28.8 || durationSec > 29.2) throw new Error(`unexpected duration ${durationSec}`);
+          const payload = {
+            version: 2,
+            audioSha256: sha,
+            durationMs: durationSec * 1000,
+            avatarSpeaker: 'HOST',
+            turns: [
+              {speaker:'HOST', startMs:0, endMs:9000},
+              {speaker:'GUEST', startMs:9000, endMs:11000},
+              {speaker:'HOST', startMs:11000, endMs:durationSec * 1000}
+            ]
+          };
+          fs.writeFileSync('public/speaker-turns.json', JSON.stringify(payload, null, 2));
+          console.log(`speaker lock: ${sha} / ${durationSec.toFixed(3)}s`);
+          NODE
+
+      - name: Run MoneyPrinterTurbo terms bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/mpt-bridge.mjs --clip=public/clip.json --output=out/mpt-terms.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const x = JSON.parse(fs.readFileSync('out/mpt-terms.json','utf8'));
+          if (!Array.isArray(x.video_terms) || x.video_terms.length < 2) throw new Error('MPT bridge returned too few terms');
+          console.log(`MPT bridge mode=${x.mode}; terms=${x.video_terms.length}`);
+          NODE
+
+      - name: Generate speaker-gated lip envelope
+        shell: bash
+        env:
+          REQUIRE_SPEAKER_TURNS: '1'
+        run: |
+          node scripts/generate-envelope.mjs
+          node - <<'NODE'
+          const fs = require('fs');
+          const e = JSON.parse(fs.readFileSync('public/envelope.json','utf8'));
+          if (!Array.isArray(e.values) || e.values.length < 850) throw new Error('invalid envelope');
+          const guest = e.values.slice(270,330);
+          if (guest.some(v => Number(v) !== 0)) throw new Error('GUEST interval leaked into avatar lip envelope');
+          console.log(`envelope frames=${e.values.length}; guest gate=PASS`);
+          NODE
+
+      - name: TypeScript check
+        run: npm run check
+
+      - name: Render exact 29-second Gravity151 clip
+        run: npx remotion render VrmLipSync out/gravity151-dating-app.mp4 --codec=h264 --crf=20
+
+      - name: Structural QC
+        shell: bash
+        run: |
+          node scripts/validate-render.mjs \
+            --input=out/gravity151-dating-app.mp4 \
+            --width=720 --height=1280 \
+            --min-duration=28.8 --max-duration=29.2 \
+            --max-av-drift=0.15
+
+      - name: Visual QC frames
+        shell: bash
+        run: |
+          ffmpeg -hide_banner -loglevel error -y -ss 1.0  -i out/gravity151-dating-app.mp4 -frames:v 1 out/qc-151/01-open.png
+          ffmpeg -hide_banner -loglevel error -y -ss 10.0 -i out/gravity151-dating-app.mp4 -frames:v 1 out/qc-151/02-guest.png
+          ffmpeg -hide_banner -loglevel error -y -ss 18.0 -i out/gravity151-dating-app.mp4 -frames:v 1 out/qc-151/03-punchline.png
+          ffmpeg -hide_banner -loglevel error -y -ss 27.5 -i out/gravity151-dating-app.mp4 -frames:v 1 out/qc-151/04-end.png
+
+      - name: Write reproducibility manifest
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const hash = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+          const terms = JSON.parse(fs.readFileSync('out/mpt-terms.json','utf8'));
+          const manifest = {
+            version: 1,
+            source: 'GRAVITY #151 01:54:31-01:55:00',
+            sourceFixtureSha256: 'b3e245efa111ea22437bbb3b59644e2eba78a9272914774e2ec04096b2835e60',
+            normalizedAudioSha256: hash('public/voice.wav'),
+            vrmSha256: hash('public/Subeha.vrm'),
+            clipSha256: hash('public/clip.json'),
+            outputSha256: hash('out/gravity151-dating-app.mp4'),
+            mptMode: terms.mode,
+            mptTerms: terms.video_terms,
+            node: process.version,
+            githubSha: process.env.GITHUB_SHA
+          };
+          fs.writeFileSync('out/build-manifest.json', JSON.stringify(manifest,null,2));
+          console.log(JSON.stringify(manifest,null,2));
+          NODE
+
+      - name: Upload video and QC
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity151-mpt-vrm-e2e
+          path: |
+            remotion/vrm-lipsync/out/gravity151-dating-app.mp4
+            remotion/vrm-lipsync/out/mpt-terms.json
+            remotion/vrm-lipsync/out/build-manifest.json
+            remotion/vrm-lipsync/out/qc-151/*.png
+            remotion/vrm-lipsync/public/speaker-turns.json
+            remotion/vrm-lipsync/public/envelope.json
+            jobs/video/gravity151-dating-app-29s/clip.json
+          retention-days: 14
