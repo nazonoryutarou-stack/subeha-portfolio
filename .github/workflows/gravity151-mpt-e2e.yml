@@ -128,21 +128,39 @@ jobs:
           console.log(`envelope frames=${e.values.length}; guest gate=PASS`);
           NODE
 
-      - name: Apply landscape bust-up framing
+      - name: Apply landscape side swap and bust-up framing
         shell: bash
         run: |
           node <<'NODE'
           const fs = require('fs');
-          const path = 'src/VrmLipSyncV3.tsx';
-          let s = fs.readFileSync(path, 'utf8');
+
+          const vrmPath = 'src/VrmLipSyncV3.tsx';
+          let vrm = fs.readFileSync(vrmPath, 'utf8');
           const beforeHeight = "const targetHeight = fs.y * (landscape ? 0.47 : 0.84);";
           const afterHeight = "const targetHeight = fs.y * (landscape ? 0.34 : 0.84);";
           const beforeCenter = "const targetCenterY = framed.max.y - targetHeight * (landscape ? 0.53 : 0.56) - fs.y * 0.01;";
-          const afterCenter = "const targetCenterY = landscape ? framed.max.y - targetHeight * 0.47 - fs.y * 0.005 : framed.max.y - targetHeight * 0.56 - fs.y * 0.01;";
-          if (!s.includes(beforeHeight) || !s.includes(beforeCenter)) throw new Error('landscape framing source changed; refusing blind patch');
-          s = s.replace(beforeHeight, afterHeight).replace(beforeCenter, afterCenter);
-          fs.writeFileSync(path, s);
-          console.log('landscape framing: upper 34% of VRM, headroom preserved');
+          const afterCenter = "const targetCenterY = landscape ? framed.max.y - targetHeight * 0.47 + fs.y * 0.012 : framed.max.y - targetHeight * 0.56 - fs.y * 0.01;";
+          const beforeZone = "const leftZoneCenter = 0.45 / 2;\n          vrm.scene.position.x += (leftZoneCenter - 0.5) * horizontalSpan;";
+          const afterZone = "const rightZoneCenter = 1 - (0.45 / 2);\n          vrm.scene.position.x += (rightZoneCenter - 0.5) * horizontalSpan;";
+          if (!vrm.includes(beforeHeight) || !vrm.includes(beforeCenter) || !vrm.includes(beforeZone)) {
+            throw new Error('VRM landscape layout source changed; refusing blind patch');
+          }
+          vrm = vrm.replace(beforeHeight, afterHeight).replace(beforeCenter, afterCenter).replace(beforeZone, afterZone);
+          fs.writeFileSync(vrmPath, vrm);
+
+          const studioPath = 'src/VrmLipSyncStudio.tsx';
+          let studio = fs.readFileSync(studioPath, 'utf8');
+          const beforeDivider = "left:'43%'";
+          const afterDivider = "left:'57%'";
+          const beforeCard = "position:'absolute',zIndex:5,right:44,top:102,width:620,height:444,opacity,transform:`translateX(${slide}px) scale(${0.985 + reveal * .015})`,transformOrigin:'center right'";
+          const afterCard = "position:'absolute',zIndex:5,left:44,top:102,width:620,height:444,opacity,transform:`translateX(-${slide}px) scale(${0.985 + reveal * .015})`,transformOrigin:'center left'";
+          if (!studio.includes(beforeDivider) || !studio.includes(beforeCard)) {
+            throw new Error('visual landscape layout source changed; refusing blind patch');
+          }
+          studio = studio.replace(beforeDivider, afterDivider).replace(beforeCard, afterCard);
+          fs.writeFileSync(studioPath, studio);
+
+          console.log('layout: visual LEFT / VRM RIGHT / VRM shifted slightly down');
           NODE
 
       - name: TypeScript check
