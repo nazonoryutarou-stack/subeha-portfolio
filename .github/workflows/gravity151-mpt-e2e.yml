@@ -132,24 +132,24 @@ jobs:
         run: npm run check
 
       - name: Render exact 29-second Gravity151 clip
-        run: npx remotion render VrmLipSync out/gravity151-dating-app.mp4 --codec=h264 --crf=20
+        run: npx remotion render VrmLipSyncLandscape out/gravity151-dating-app-landscape.mp4 --codec=h264 --crf=20
 
       - name: Structural QC
         shell: bash
         run: |
           node scripts/validate-render.mjs \
-            --input=out/gravity151-dating-app.mp4 \
-            --width=720 --height=1280 \
+            --input=out/gravity151-dating-app-landscape.mp4 \
+            --width=1280 --height=720 \
             --min-duration=28.8 --max-duration=29.2 \
             --max-av-drift=0.15
 
       - name: Visual QC frames
         shell: bash
         run: |
-          ffmpeg -hide_banner -loglevel error -y -ss 1.0  -i out/gravity151-dating-app.mp4 -frames:v 1 out/qc-151/01-open.png
-          ffmpeg -hide_banner -loglevel error -y -ss 10.0 -i out/gravity151-dating-app.mp4 -frames:v 1 out/qc-151/02-guest.png
-          ffmpeg -hide_banner -loglevel error -y -ss 18.0 -i out/gravity151-dating-app.mp4 -frames:v 1 out/qc-151/03-punchline.png
-          ffmpeg -hide_banner -loglevel error -y -ss 27.5 -i out/gravity151-dating-app.mp4 -frames:v 1 out/qc-151/04-end.png
+          ffmpeg -hide_banner -loglevel error -y -ss 1.0  -i out/gravity151-dating-app-landscape.mp4 -frames:v 1 out/qc-151/01-open.png
+          ffmpeg -hide_banner -loglevel error -y -ss 10.0 -i out/gravity151-dating-app-landscape.mp4 -frames:v 1 out/qc-151/02-guest.png
+          ffmpeg -hide_banner -loglevel error -y -ss 18.0 -i out/gravity151-dating-app-landscape.mp4 -frames:v 1 out/qc-151/03-punchline.png
+          ffmpeg -hide_banner -loglevel error -y -ss 27.5 -i out/gravity151-dating-app-landscape.mp4 -frames:v 1 out/qc-151/04-end.png
 
       - name: Write reproducibility manifest
         shell: bash
@@ -162,11 +162,12 @@ jobs:
           const manifest = {
             version: 1,
             source: 'GRAVITY #151 01:54:31-01:55:00',
+            layout: '1280x720-landscape',
             sourceFixtureSha256: hash('out/source-151.opus'),
             normalizedAudioSha256: hash('public/voice.wav'),
             vrmSha256: hash('public/Subeha.vrm'),
             clipSha256: hash('public/clip.json'),
-            outputSha256: hash('out/gravity151-dating-app.mp4'),
+            outputSha256: hash('out/gravity151-dating-app-landscape.mp4'),
             mptMode: terms.mode,
             mptTerms: terms.video_terms,
             node: process.version,
@@ -181,7 +182,7 @@ jobs:
         with:
           name: gravity151-mpt-vrm-e2e
           path: |
-            remotion/vrm-lipsync/out/gravity151-dating-app.mp4
+            remotion/vrm-lipsync/out/gravity151-dating-app-landscape.mp4
             remotion/vrm-lipsync/out/mpt-terms.json
             remotion/vrm-lipsync/out/build-manifest.json
             remotion/vrm-lipsync/out/qc-151/*.png
