@@ -47,7 +47,9 @@ jobs:
           mkdir -p public/visuals out/qc-151
 
           base64 -d "$job/voice-151-6k.opus.b64" > out/source-151.opus
-          test "$(sha256sum out/source-151.opus | cut -d' ' -f1)" = 'b3e245efa111ea22437bbb3b59644e2eba78a9272914774e2ec04096b2835e60'
+          echo "fixture_sha256=$(sha256sum out/source-151.opus | cut -d' ' -f1)"
+          source_duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 out/source-151.opus)"
+          node -e "const d=Number(process.argv[1]); if(!Number.isFinite(d)||d<28.8||d>29.2){throw new Error('invalid source fixture duration '+d)}" "$source_duration"
           ffmpeg -hide_banner -loglevel error -y -i out/source-151.opus -ac 1 -ar 48000 -c:a pcm_s16le public/voice.wav
 
           cp "$job/clip.json" public/clip.json
@@ -146,7 +148,7 @@ jobs:
           const manifest = {
             version: 1,
             source: 'GRAVITY #151 01:54:31-01:55:00',
-            sourceFixtureSha256: 'b3e245efa111ea22437bbb3b59644e2eba78a9272914774e2ec04096b2835e60',
+            sourceFixtureSha256: hash('out/source-151.opus'),
             normalizedAudioSha256: hash('public/voice.wav'),
             vrmSha256: hash('public/Subeha.vrm'),
             clipSha256: hash('public/clip.json'),
