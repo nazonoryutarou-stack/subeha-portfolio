@@ -12,6 +12,7 @@
     "prepare:studio": "node scripts/prepare-studio.mjs",
     "import:assistant": "node scripts/import-assistant-plan.mjs",
     "director:auto": "node scripts/auto-director.mjs",
+    "plan:full": "node scripts/full-duration-plan.mjs",
     "visuals:auto": "node scripts/materialize-director-visuals.mjs",
     "vtuber:auto": "node scripts/vtuber-auto.mjs",
     "render:assistant": "node scripts/render-assistant.mjs",
