@@ -8,6 +8,7 @@ on:
       - '.tmp/vtuber-local-runtime-trigger.txt'
       - '.github/workflows/vtuber-local-runtime-bundle.yml'
       - 'remotion/vrm-lipsync/scripts/prefetch-local-runtime.mjs'
+      - 'docs/vtuber-golden-reference-v1.json'
   workflow_dispatch:
 
 permissions:
@@ -53,11 +54,12 @@ jobs:
           test -n "$MODEL_FILE"
           test -f "$MODEL_FILE"
 
-          mkdir -p "$CORE/remotion" "$WRUN/remotion/vrm-lipsync/.cache/whisper-align" "$WMODEL/remotion/vrm-lipsync/.cache/whisper-align/whisper.cpp-1.5.5"
+          mkdir -p "$CORE/remotion" "$CORE/docs" "$WRUN/remotion/vrm-lipsync/.cache/whisper-align" "$WMODEL/remotion/vrm-lipsync/.cache/whisper-align/whisper.cpp-1.5.5"
 
           cp -a "$PROJECT" "$CORE/remotion/"
           rm -rf "$CORE/remotion/vrm-lipsync/.cache"
           cp -a Subeha.vrm "$CORE/Subeha.vrm"
+          cp -a docs/vtuber-golden-reference-v1.json "$CORE/docs/vtuber-golden-reference-v1.json"
 
           cp -a "$WHISPER" "$WRUN/remotion/vrm-lipsync/.cache/whisper-align/"
           find "$WRUN" -type f -name 'ggml-small*.bin' -delete
