@@ -6,6 +6,7 @@ import html
 import json
 import re
 import subprocess
+import time
 from pathlib import Path
 from urllib.parse import quote
 
@@ -33,19 +34,21 @@ STORY = [
     "それ以来、2時17分の放送は止んだそうです。ただ今年、海開き前の点検で一度だけ、今年は四人です、と流れた、と。",
 ]
 
+# Only four distinct Commons searches are used. Shared GitHub runner IPs are
+# aggressively rate-limited by Commons when a job fires many search requests.
 SCENES = [
-    ("閉鎖された海水浴場", "Japan empty beach coast"),
-    ("午前2時17分の防災無線", "Japan disaster prevention loudspeaker coast"),
-    ("夜の波打ち際", "Japan beach dusk empty"),
-    ("海から上がってくる影", "Japan dark sea coast waves"),
-    ("『人数が、一人足りません』", "Japan public address speaker outdoor"),
-    ("濡れた砂", "wet sand footprints beach"),
-    ("録音の後ろの声", "portable recorder dark room"),
-    ("『今年は四人です』", "Japan beach warning sign coast"),
+    ("閉鎖された海水浴場", "Japan beach coast"),
+    ("午前2時17分の防災無線", "Japan public address loudspeaker"),
+    ("夜の波打ち際", "Japan beach coast"),
+    ("海から上がってくる影", "Japan beach coast"),
+    ("『人数が、一人足りません』", "Japan public address loudspeaker"),
+    ("濡れた砂", "wet sand footprint beach"),
+    ("録音の後ろの声", "portable audio recorder"),
+    ("『今年は四人です』", "Japan beach coast"),
 ]
 
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
-UA = "subeha-kaidan-vrm/1.0 (GitHub Actions)"
+UA = "subeha-kaidan-vrm/1.1 (GitHub Actions)"
 
 
 def run(args: list[str], *, capture: bool = False) -> str:
@@ -72,7 +75,7 @@ def clean_html(value: str | None) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def commons_candidates(query: str, limit: int = 18) -> list[dict]:
+def commons_candidates(query: str, limit: int = 36) -> list[dict]:
     params = {
         "action": "query",
         "format": "json",
@@ -85,32 +88,46 @@ def commons_candidates(query: str, limit: int = 18) -> list[dict]:
         "iiurlwidth": 1280,
         "origin": "*",
     }
-    r = requests.get(COMMONS_API, params=params, timeout=25, headers={"User-Agent": UA})
-    r.raise_for_status()
-    pages = (r.json().get("query") or {}).get("pages") or {}
-    rows = []
-    for page in pages.values():
-        info = (page.get("imageinfo") or [{}])[0]
-        mime = str(info.get("mime") or "")
-        if mime not in {"image/jpeg", "image/png", "image/webp"}:
-            continue
-        meta = info.get("extmetadata") or {}
-        license_name = clean_html((meta.get("LicenseShortName") or {}).get("value"))
-        if not license_name:
-            continue
-        rows.append({
-            "pageid": page.get("pageid"),
-            "title": str(page.get("title") or ""),
-            "thumb": str(info.get("thumburl") or info.get("url") or ""),
-            "source_page": str(info.get("descriptionurl") or ""),
-            "creator": clean_html((meta.get("Artist") or {}).get("value"))[:180],
-            "license": license_name[:100],
-        })
-    return [x for x in rows if x["thumb"]]
+    last = None
+    for attempt in range(4):
+        try:
+            r = requests.get(COMMONS_API, params=params, timeout=25, headers={"User-Agent": UA})
+            if r.status_code == 429:
+                pause = max(float(r.headers.get("Retry-After") or 0), 3.0 * (attempt + 1))
+                print(f"WARN Commons search rate-limited for {query!r}; retrying after {pause:.1f}s", flush=True)
+                time.sleep(pause)
+                continue
+            r.raise_for_status()
+            pages = (r.json().get("query") or {}).get("pages") or {}
+            rows = []
+            for page in pages.values():
+                info = (page.get("imageinfo") or [{}])[0]
+                mime = str(info.get("mime") or "")
+                if mime not in {"image/jpeg", "image/png", "image/webp"}:
+                    continue
+                meta = info.get("extmetadata") or {}
+                license_name = clean_html((meta.get("LicenseShortName") or {}).get("value"))
+                if not license_name:
+                    continue
+                rows.append({
+                    "pageid": page.get("pageid"),
+                    "title": str(page.get("title") or ""),
+                    "thumb": str(info.get("thumburl") or info.get("url") or ""),
+                    "source_page": str(info.get("descriptionurl") or ""),
+                    "creator": clean_html((meta.get("Artist") or {}).get("value"))[:180],
+                    "license": license_name[:100],
+                })
+            return [x for x in rows if x["thumb"]]
+        except Exception as exc:
+            last = exc
+            if attempt < 3:
+                time.sleep(2.0 * (attempt + 1))
+    raise RuntimeError(f"Commons search failed for {query!r}: {last}")
 
 
 def download_as_jpeg(url: str, out: Path) -> None:
-    # wsrv gives Remotion a predictable JPEG even when Commons serves PNG/WebP.
+    # First try wsrv explicitly. The sitecustomize transport shim also routes
+    # direct upload.wikimedia.org fallback requests through a cleaned wsrv URL.
     proxy = f"https://wsrv.nl/?url={quote(url, safe='')}&output=jpg&w=1280&q=84"
     last = None
     for candidate in (proxy, url):
@@ -125,7 +142,7 @@ def download_as_jpeg(url: str, out: Path) -> None:
                 raise RuntimeError(f"direct source is not JPEG: {ctype}")
             out.write_bytes(data)
             return
-        except Exception as exc:  # pragma: no cover - network fallback
+        except Exception as exc:
             last = exc
     raise RuntimeError(f"could not download {url}: {last}")
 
@@ -177,14 +194,19 @@ def build_visuals(timing: list[dict]) -> tuple[list[dict], list[dict]]:
     used: set[str] = set()
     refs: list[dict] = []
     sources: list[dict] = []
+    cache: dict[str, list[dict]] = {}
 
     for index, ((label, query), t) in enumerate(zip(SCENES, timing), 1):
-        candidates = commons_candidates(query)
+        if query not in cache:
+            cache[query] = commons_candidates(query)
+            print(f"Commons search {query!r}: {len(cache[query])} candidates", flush=True)
+            time.sleep(1.2)
+        candidates = cache[query]
         chosen = next((c for c in candidates if c["title"] not in used), None)
         if not chosen:
-            # Broader fallback, still from Commons.
-            candidates = commons_candidates("Japan coast beach")
-            chosen = next((c for c in candidates if c["title"] not in used), None)
+            # Reuse an unused coast candidate without another API request.
+            coast = cache.get("Japan beach coast", [])
+            chosen = next((c for c in coast if c["title"] not in used), None)
         if not chosen:
             raise RuntimeError(f"No reusable Commons image found for scene {index}: {query}")
         used.add(chosen["title"])
@@ -204,7 +226,7 @@ def build_visuals(timing: list[dict]) -> tuple[list[dict], list[dict]]:
             "license": chosen["license"],
         })
         sources.append({"scene": index, "query": query, "label": label, **chosen, "renderFile": rel})
-        print(f"scene {index}: {chosen['title']} -> {rel}")
+        print(f"scene {index}: {chosen['title']} -> {rel}", flush=True)
     return refs, sources
 
 
