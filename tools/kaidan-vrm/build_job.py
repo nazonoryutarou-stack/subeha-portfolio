@@ -8,7 +8,7 @@ import re
 import subprocess
 import time
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import edge_tts
 import requests
@@ -34,8 +34,6 @@ STORY = [
     "それ以来、2時17分の放送は止んだそうです。ただ今年、海開き前の点検で一度だけ、今年は四人です、と流れた、と。",
 ]
 
-# Only four distinct Commons searches are used. Shared GitHub runner IPs are
-# aggressively rate-limited by Commons when a job fires many search requests.
 SCENES = [
     ("閉鎖された海水浴場", "Japan beach coast"),
     ("午前2時17分の防災無線", "Japan public address loudspeaker"),
@@ -48,17 +46,12 @@ SCENES = [
 ]
 
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
-UA = "subeha-kaidan-vrm/1.1 (GitHub Actions)"
+UA = "subeha-kaidan-vrm/1.2 (GitHub Actions)"
 
 
 def run(args: list[str], *, capture: bool = False) -> str:
     print("+", " ".join(str(x) for x in args), flush=True)
-    cp = subprocess.run(
-        args,
-        check=True,
-        text=capture,
-        stdout=subprocess.PIPE if capture else None,
-    )
+    cp = subprocess.run(args, check=True, text=capture, stdout=subprocess.PIPE if capture else None)
     return cp.stdout.strip() if capture else ""
 
 
@@ -77,16 +70,10 @@ def clean_html(value: str | None) -> str:
 
 def commons_candidates(query: str, limit: int = 36) -> list[dict]:
     params = {
-        "action": "query",
-        "format": "json",
-        "generator": "search",
-        "gsrsearch": query,
-        "gsrnamespace": 6,
-        "gsrlimit": limit,
-        "prop": "imageinfo",
-        "iiprop": "url|mime|extmetadata",
-        "iiurlwidth": 1280,
-        "origin": "*",
+        "action": "query", "format": "json", "generator": "search",
+        "gsrsearch": query, "gsrnamespace": 6, "gsrlimit": limit,
+        "prop": "imageinfo", "iiprop": "url|mime|extmetadata",
+        "iiurlwidth": 1280, "origin": "*",
     }
     last = None
     for attempt in range(4):
@@ -94,7 +81,7 @@ def commons_candidates(query: str, limit: int = 36) -> list[dict]:
             r = requests.get(COMMONS_API, params=params, timeout=25, headers={"User-Agent": UA})
             if r.status_code == 429:
                 pause = max(float(r.headers.get("Retry-After") or 0), 3.0 * (attempt + 1))
-                print(f"WARN Commons search rate-limited for {query!r}; retrying after {pause:.1f}s", flush=True)
+                print(f"WARN Commons search rate-limited for {query!r}; retry after {pause:.1f}s", flush=True)
                 time.sleep(pause)
                 continue
             r.raise_for_status()
@@ -102,8 +89,7 @@ def commons_candidates(query: str, limit: int = 36) -> list[dict]:
             rows = []
             for page in pages.values():
                 info = (page.get("imageinfo") or [{}])[0]
-                mime = str(info.get("mime") or "")
-                if mime not in {"image/jpeg", "image/png", "image/webp"}:
+                if str(info.get("mime") or "") not in {"image/jpeg", "image/png", "image/webp"}:
                     continue
                 meta = info.get("extmetadata") or {}
                 license_name = clean_html((meta.get("LicenseShortName") or {}).get("value"))
@@ -125,31 +111,41 @@ def commons_candidates(query: str, limit: int = 36) -> list[dict]:
     raise RuntimeError(f"Commons search failed for {query!r}: {last}")
 
 
+def _clean_url(url: str) -> str:
+    p = urlsplit(url)
+    return urlunsplit((p.scheme, p.netloc, p.path, "", ""))
+
+
 def download_as_jpeg(url: str, out: Path) -> None:
-    # First try wsrv explicitly. The sitecustomize transport shim also routes
-    # direct upload.wikimedia.org fallback requests through a cleaned wsrv URL.
-    proxy = f"https://wsrv.nl/?url={quote(url, safe='')}&output=jpg&w=1280&q=84"
-    last = None
-    for candidate in (proxy, url):
-        try:
-            r = requests.get(candidate, timeout=35, headers={"User-Agent": UA})
-            r.raise_for_status()
-            data = r.content
-            if len(data) < 4000:
-                raise RuntimeError(f"image too small: {len(data)} bytes")
-            ctype = (r.headers.get("content-type") or "").lower()
-            if candidate == url and "jpeg" not in ctype and "jpg" not in ctype:
-                raise RuntimeError(f"direct source is not JPEG: {ctype}")
-            out.write_bytes(data)
-            return
-        except Exception as exc:
-            last = exc
-    raise RuntimeError(f"could not download {url}: {last}")
+    clean = _clean_url(url)
+    variants = [
+        f"https://wsrv.nl/?url={quote(clean, safe='')}&output=jpg&w=1280&q=84",
+        f"https://wsrv.nl/?url={quote(clean, safe='')}&output=jpg&w=960&q=82",
+        clean,
+    ]
+    errors = []
+    for attempt in range(2):
+        for candidate in variants:
+            try:
+                r = requests.get(candidate, timeout=35, headers={"User-Agent": UA})
+                r.raise_for_status()
+                data = r.content
+                if len(data) < 4000:
+                    raise RuntimeError(f"image too small: {len(data)} bytes")
+                ctype = (r.headers.get("content-type") or "").lower()
+                if not any(x in ctype for x in ("jpeg", "jpg", "png", "webp")):
+                    raise RuntimeError(f"not an image response: {ctype}")
+                out.write_bytes(data)
+                return
+            except Exception as exc:
+                errors.append(f"{candidate[:100]}: {exc}")
+        if attempt == 0:
+            time.sleep(1.5)
+    raise RuntimeError(" | ".join(errors[-4:]))
 
 
 async def synthesize(text: str, output: Path) -> None:
-    communicate = edge_tts.Communicate(text=text, voice=VOICE, rate=RATE)
-    await communicate.save(str(output))
+    await edge_tts.Communicate(text=text, voice=VOICE, rate=RATE).save(str(output))
 
 
 def build_audio() -> tuple[Path, list[dict]]:
@@ -157,34 +153,27 @@ def build_audio() -> tuple[Path, list[dict]]:
     parts: list[Path] = []
     timing: list[dict] = []
     cursor = 0.0
-
     for i, text in enumerate(STORY, 1):
         mp3 = AUDIO / f"voice_{i:02d}.mp3"
         wav = AUDIO / f"part_{i:02d}.wav"
         asyncio.run(synthesize(text, mp3))
         raw = duration(mp3)
         run([
-            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-            "-i", str(mp3), "-af", f"apad=pad_dur={PAUSE_SECONDS}",
-            "-ar", "44100", "-ac", "1", "-c:a", "pcm_s16le", str(wav),
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(mp3),
+            "-af", f"apad=pad_dur={PAUSE_SECONDS}", "-ar", "44100", "-ac", "1",
+            "-c:a", "pcm_s16le", str(wav),
         ])
         padded = duration(wav)
-        timing.append({
-            "text": text,
-            "startMs": round(cursor * 1000),
-            "endMs": round((cursor + raw) * 1000),
-            "visualEndMs": round((cursor + padded) * 1000),
-        })
+        timing.append({"text": text, "startMs": round(cursor * 1000), "endMs": round((cursor + raw) * 1000), "visualEndMs": round((cursor + padded) * 1000)})
         cursor += padded
         parts.append(wav)
-
     concat_file = WORK / "audio-concat.txt"
     concat_file.write_text("".join(f"file '{p.as_posix()}'\n" for p in parts), encoding="utf-8")
     source = OUT / "source.wav"
     run([
-        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-        "-f", "concat", "-safe", "0", "-i", str(concat_file),
-        "-c:a", "pcm_s16le", "-ar", "44100", "-ac", "1", str(source),
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-f", "concat",
+        "-safe", "0", "-i", str(concat_file), "-c:a", "pcm_s16le", "-ar", "44100",
+        "-ac", "1", str(source),
     ])
     return source, timing
 
@@ -201,29 +190,29 @@ def build_visuals(timing: list[dict]) -> tuple[list[dict], list[dict]]:
             cache[query] = commons_candidates(query)
             print(f"Commons search {query!r}: {len(cache[query])} candidates", flush=True)
             time.sleep(1.2)
-        candidates = cache[query]
-        chosen = next((c for c in candidates if c["title"] not in used), None)
-        if not chosen:
-            # Reuse an unused coast candidate without another API request.
-            coast = cache.get("Japan beach coast", [])
-            chosen = next((c for c in coast if c["title"] not in used), None)
-        if not chosen:
-            raise RuntimeError(f"No reusable Commons image found for scene {index}: {query}")
-        used.add(chosen["title"])
+        candidate_pool = [c for c in cache[query] if c["title"] not in used]
+        if len(candidate_pool) < 8:
+            candidate_pool += [c for c in cache.get("Japan beach coast", []) if c["title"] not in used and c not in candidate_pool]
+
+        chosen = None
         filename = f"scene_{index:02d}.jpg"
         target = PUBLIC / filename
-        download_as_jpeg(chosen["thumb"], target)
+        for candidate in candidate_pool[:8]:
+            try:
+                download_as_jpeg(candidate["thumb"], target)
+                chosen = candidate
+                break
+            except Exception as exc:
+                print(f"WARN skipping image candidate {candidate['title']}: {exc}", flush=True)
+        if not chosen:
+            raise RuntimeError(f"No downloadable Commons image found for scene {index}: {query}")
+
+        used.add(chosen["title"])
         rel = f"kaidan-0217/{filename}"
         refs.append({
-            "id": f"kaidan-{index:02d}",
-            "assetId": f"kaidan-{index:02d}",
-            "startMs": t["startMs"],
-            "endMs": t["visualEndMs"],
-            "kind": "repo",
-            "title": label,
-            "renderFile": rel,
-            "creator": chosen["creator"],
-            "license": chosen["license"],
+            "id": f"kaidan-{index:02d}", "assetId": f"kaidan-{index:02d}",
+            "startMs": t["startMs"], "endMs": t["visualEndMs"], "kind": "repo",
+            "title": label, "renderFile": rel, "creator": chosen["creator"], "license": chosen["license"],
         })
         sources.append({"scene": index, "query": query, "label": label, **chosen, "renderFile": rel})
         print(f"scene {index}: {chosen['title']} -> {rel}", flush=True)
@@ -232,17 +221,11 @@ def build_visuals(timing: list[dict]) -> tuple[list[dict], list[dict]]:
 
 def build_plan(source: Path, timing: list[dict], refs: list[dict]) -> dict:
     total_ms = round(duration(source) * 1000)
-    captions = [
-        {
-            "startMs": t["startMs"],
-            "endMs": t["endMs"],
-            "speaker": "HOST",
-            "text": t["text"],
-            "speakerConfidence": 1.0,
-            "speakerReason": "Single-speaker synthetic Japanese narration generated for this original fictional kaidan.",
-        }
-        for t in timing
-    ]
+    captions = [{
+        "startMs": t["startMs"], "endMs": t["endMs"], "speaker": "HOST", "text": t["text"],
+        "speakerConfidence": 1.0,
+        "speakerReason": "Single-speaker synthetic Japanese narration generated for this original fictional kaidan.",
+    } for t in timing]
     for ref in refs:
         ref["endMs"] = min(ref["endMs"], total_ms)
     return {
@@ -268,11 +251,9 @@ def build_plan(source: Path, timing: list[dict], refs: list[dict]) -> dict:
 def main() -> None:
     for p in (OUT, WORK, AUDIO, PUBLIC):
         p.mkdir(parents=True, exist_ok=True)
-
     source, timing = build_audio()
     refs, sources = build_visuals(timing)
     plan = build_plan(source, timing, refs)
-
     (OUT / "edit-plan.json").write_text(json.dumps(plan, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (OUT / "sources.json").write_text(json.dumps({"title": TITLE, "fiction": True, "assets": sources}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     credits = [
@@ -287,16 +268,9 @@ def main() -> None:
         credits.append(f"{row['scene']}. {row['title']} | {row['creator'] or 'unknown'} | {row['license']} | {row['source_page']}")
     (OUT / "CREDITS.txt").write_text("\n".join(credits) + "\n", encoding="utf-8")
     meta = {
-        "title": TITLE,
-        "fiction": True,
-        "duration": duration(source),
-        "scenes": len(STORY),
-        "realAssets": len(refs),
-        "generatedImages": 0,
-        "voice": VOICE,
-        "rate": RATE,
-        "layout": "1280x720",
-        "avatar": "Subeha.vrm",
+        "title": TITLE, "fiction": True, "duration": duration(source), "scenes": len(STORY),
+        "realAssets": len(refs), "generatedImages": 0, "voice": VOICE, "rate": RATE,
+        "layout": "1280x720", "avatar": "Subeha.vrm",
     }
     (OUT / "metadata.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(meta, ensure_ascii=False, indent=2))
