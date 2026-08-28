@@ -1,0 +1,100 @@
+name: Kaidan VTuber Render
+
+on:
+  push:
+    branches:
+      - feature/kaidan-vrm-short
+    paths:
+      - 'tools/kaidan-vrm/**'
+      - '.github/workflows/kaidan-vrm-render.yml'
+      - 'remotion/vrm-lipsync/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VIDEO_VRM_PATH: ../../Subeha.vrm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          fc-cache -f
+
+      - name: Install kaidan builder dependencies
+        run: pip install 'edge-tts>=7,<8' 'requests>=2.31,<3'
+
+      - name: Build Japanese narration, Commons assets and edit plan
+        run: python tools/kaidan-vrm/build_job.py
+
+      - name: Verify production VRM and generated job
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s Subeha.vrm
+          test -s dist/kaidan-vrm/source.wav
+          test -s dist/kaidan-vrm/edit-plan.json
+          test -s dist/kaidan-vrm/sources.json
+          test "$(find remotion/vrm-lipsync/public/kaidan-0217 -type f -name 'scene_*.jpg' | wc -l)" -eq 8
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 dist/kaidan-vrm/source.wav
+
+      - name: Install Remotion dependencies
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+
+      - name: Render VTuber kaidan
+        working-directory: remotion/vrm-lipsync
+        shell: bash
+        run: |
+          npm run render:assistant -- \
+            --plan=../../dist/kaidan-vrm/edit-plan.json \
+            --audio=../../dist/kaidan-vrm/source.wav \
+            --output=out/kaidan-vrm.mp4 \
+            --project-out=jobs/.generated/kaidan-vrm-project.json \
+            --skip-whisper
+
+      - name: Create contact sheet and validate final
+        shell: bash
+        run: |
+          set -euo pipefail
+          video=remotion/vrm-lipsync/out/kaidan-vrm.mp4
+          test -s "$video"
+          ffprobe -v error \
+            -show_entries stream=codec_type,width,height,r_frame_rate \
+            -show_entries format=duration,size \
+            -of json "$video"
+          ffmpeg -y -hide_banner -loglevel error -i "$video" \
+            -vf "fps=1/12,scale=320:180,tile=3x2" -frames:v 1 \
+            dist/kaidan-vrm/contact.jpg
+
+      - name: Upload combined VTuber kaidan
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaidan-vrm-combined
+          path: |
+            remotion/vrm-lipsync/out/kaidan-vrm.mp4
+            remotion/vrm-lipsync/out/qc/**
+            remotion/vrm-lipsync/out/qc-frames/**
+            remotion/vrm-lipsync/jobs/.generated/kaidan-vrm-project.json
+            dist/kaidan-vrm/edit-plan.json
+            dist/kaidan-vrm/sources.json
+            dist/kaidan-vrm/CREDITS.txt
+            dist/kaidan-vrm/metadata.json
+            dist/kaidan-vrm/contact.jpg
+          retention-days: 14
