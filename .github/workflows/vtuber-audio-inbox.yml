@@ -49,6 +49,17 @@ jobs:
           fi
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
+      - name: Assemble connector chunks when needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          inbox="../../jobs/vtuber-inbox/${{ steps.inbox.outputs.id }}"
+          if [ ! -f "$inbox/audio.b64" ]; then
+            mapfile -t parts < <(find "$inbox" -maxdepth 1 -type f -name 'audio.b64.part-*' | sort -V)
+            test "${#parts[@]}" -gt 0
+            cat "${parts[@]}" > "$inbox/audio.b64"
+          fi
+
       - name: Decode and validate audio
         run: |
           node scripts/ingest-audio-inbox.mjs \
