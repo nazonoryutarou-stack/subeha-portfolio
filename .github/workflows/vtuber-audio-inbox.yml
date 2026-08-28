@@ -1,0 +1,66 @@
+name: VTuber Audio Inbox
+
+on:
+  push:
+    branches:
+      - feature/vtuber-auto-director
+    paths:
+      - 'jobs/vtuber-inbox/**'
+      - 'remotion/vrm-lipsync/scripts/ingest-audio-inbox.mjs'
+      - '.github/workflows/vtuber-audio-inbox.yml'
+  workflow_dispatch:
+    inputs:
+      inbox_id:
+        description: 'Folder name under jobs/vtuber-inbox'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Resolve inbox folder
+        id: inbox
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            id='${{ inputs.inbox_id }}'
+          else
+            id="$(find ../../jobs/vtuber-inbox -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort | tail -n 1)"
+          fi
+          test -n "$id"
+          test -f "../../jobs/vtuber-inbox/$id/manifest.json"
+          test -f "../../jobs/vtuber-inbox/$id/audio.b64"
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      - name: Decode and validate audio
+        run: |
+          node scripts/ingest-audio-inbox.mjs \
+            --inbox=../../jobs/vtuber-inbox/${{ steps.inbox.outputs.id }} \
+            --output=out/audio-ingest/${{ steps.inbox.outputs.id }}
+
+      - name: Upload normalized ingress artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vtuber-audio-${{ steps.inbox.outputs.id }}
+          path: |
+            remotion/vrm-lipsync/out/audio-ingest/${{ steps.inbox.outputs.id }}/source.*
+            remotion/vrm-lipsync/out/audio-ingest/${{ steps.inbox.outputs.id }}/ingest-manifest.json
+          if-no-files-found: error
+          retention-days: 7
