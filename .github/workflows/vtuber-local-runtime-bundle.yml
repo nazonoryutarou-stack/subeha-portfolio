@@ -39,30 +39,76 @@ jobs:
           WHISPER_MODEL: small
         run: node scripts/prefetch-local-runtime.mjs
 
-      - name: Build portable bundle
+      - name: Build split portable bundles
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p /tmp/vtuber-local-runtime/remotion
-          cp -a remotion/vrm-lipsync /tmp/vtuber-local-runtime/remotion/
-          cp -a Subeha.vrm /tmp/vtuber-local-runtime/Subeha.vrm
-          cat > /tmp/vtuber-local-runtime/README.txt <<'EOF'
-          Portable VTuber runtime.
-          Audio is intentionally NOT included.
-          Feed Library materialized audio directly to remotion/vrm-lipsync.
 
-          Example:
+          CORE=/tmp/vtuber-local-runtime-core
+          WRUN=/tmp/vtuber-whisper-runtime
+          WMODEL=/tmp/vtuber-whisper-small-model
+          PROJECT=remotion/vrm-lipsync
+          WHISPER="$PROJECT/.cache/whisper-align/whisper.cpp-1.5.5"
+          MODEL_FILE="$(find "$WHISPER" -maxdepth 2 -type f -name 'ggml-small*.bin' | head -n 1)"
+          test -n "$MODEL_FILE"
+          test -f "$MODEL_FILE"
+
+          mkdir -p "$CORE/remotion" "$WRUN/remotion/vrm-lipsync/.cache/whisper-align" "$WMODEL/remotion/vrm-lipsync/.cache/whisper-align/whisper.cpp-1.5.5"
+
+          cp -a "$PROJECT" "$CORE/remotion/"
+          rm -rf "$CORE/remotion/vrm-lipsync/.cache"
+          cp -a Subeha.vrm "$CORE/Subeha.vrm"
+
+          cp -a "$WHISPER" "$WRUN/remotion/vrm-lipsync/.cache/whisper-align/"
+          find "$WRUN" -type f -name 'ggml-small*.bin' -delete
+
+          cp -a "$MODEL_FILE" "$WMODEL/remotion/vrm-lipsync/.cache/whisper-align/whisper.cpp-1.5.5/"
+
+          cat > "$CORE/README.txt" <<'EOF'
+          Portable VTuber local runtime, split into three GitHub artifacts.
+          Audio is intentionally NOT included.
+
+          Extract these three artifacts into the same directory:
+            1. vtuber-local-runtime-core
+            2. vtuber-whisper-runtime
+            3. vtuber-whisper-small-model
+
+          Then feed Library materialized audio directly:
             cd remotion/vrm-lipsync
             npm run vtuber:auto -- --audio=/mnt/data/input.m4a
           EOF
-          find /tmp/vtuber-local-runtime -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/vtuber-local-runtime/BUNDLE-SHA256SUMS.txt
 
-      - name: Upload portable runtime
+          for dir in "$CORE" "$WRUN" "$WMODEL"; do
+            find "$dir" -type f -print0 | sort -z | xargs -0 sha256sum > "$dir/BUNDLE-SHA256SUMS.txt"
+            du -sh "$dir"
+          done
+
+      - name: Upload core runtime
         uses: actions/upload-artifact@v4
         with:
-          name: vtuber-local-runtime
-          path: /tmp/vtuber-local-runtime
+          name: vtuber-local-runtime-core
+          path: /tmp/vtuber-local-runtime-core
           if-no-files-found: error
           retention-days: 7
           compression-level: 6
+          include-hidden-files: true
+
+      - name: Upload Whisper runtime
+        uses: actions/upload-artifact@v4
+        with:
+          name: vtuber-whisper-runtime
+          path: /tmp/vtuber-whisper-runtime
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
+          include-hidden-files: true
+
+      - name: Upload Whisper small model
+        uses: actions/upload-artifact@v4
+        with:
+          name: vtuber-whisper-small-model
+          path: /tmp/vtuber-whisper-small-model
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
           include-hidden-files: true
