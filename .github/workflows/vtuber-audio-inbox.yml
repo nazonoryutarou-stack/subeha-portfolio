@@ -6,8 +6,6 @@ on:
       - feature/vtuber-auto-director
     paths:
       - 'jobs/vtuber-inbox/**'
-      - 'remotion/vrm-lipsync/scripts/ingest-audio-inbox.mjs'
-      - '.github/workflows/vtuber-audio-inbox.yml'
   workflow_dispatch:
     inputs:
       inbox_id:
