@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import textwrap
 from dataclasses import asdict
 from pathlib import Path
 
@@ -49,6 +50,20 @@ QUERIES = [
 ]
 
 
+def wrap_japanese_caption(text: str, width: int = 13) -> str:
+    """Force vertical-video-safe line breaks for Japanese ASS subtitles."""
+    return "\n".join(
+        textwrap.wrap(
+            text,
+            width=width,
+            break_long_words=True,
+            break_on_hyphens=False,
+            replace_whitespace=False,
+            drop_whitespace=True,
+        )
+    )
+
+
 def collect_story_assets(needed: int):
     assets = []
     for q in QUERIES:
@@ -73,7 +88,7 @@ def render_horror_scene(image: Path, voice: Path, out: Path, duration: float) ->
         f"zoompan=z='min(zoom+0.0007,1.07)':d={frames}:s=1080x1920:fps=30,"
         "eq=brightness=-0.24:contrast=1.18:saturation=0.48,"
         "noise=alls=5:allf=t+u,"
-        "drawbox=x=0:y=1390:w=1080:h=530:color=black@0.52:t=fill,"
+        "drawbox=x=0:y=1320:w=1080:h=600:color=black@0.54:t=fill,"
         "format=yuv420p[v]"
     )
     run([
@@ -118,7 +133,8 @@ def main() -> None:
     body = work / "body.mp4"
     concat(scene_files, body)
     ass = work / "subtitles.ass"
-    write_ass(TITLE, TEXTS, durations, ass)
+    display_texts = [wrap_japanese_caption(text) for text in TEXTS]
+    write_ass(TITLE, display_texts, durations, ass)
     total = sum(durations)
     bgm = work / "bgm.wav"
     make_bgm(bgm, total, bpm=72.0)
@@ -161,6 +177,7 @@ def main() -> None:
         "generated_images": 0,
         "voice": VOICE,
         "rate": RATE,
+        "caption_wrap": 13,
     }
     (outdir / "metadata.json").write_text(
         json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
