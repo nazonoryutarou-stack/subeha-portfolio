@@ -8,6 +8,7 @@ import {
   transcribe,
   toCaptions,
 } from '@remotion/install-whisper-cpp';
+import {aggregateTimedCaptions} from './caption-aggregation.mjs';
 
 const root = process.cwd();
 const valueArg = (name) => process.argv.find((arg) => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
@@ -32,8 +33,10 @@ const sourceStat = fs.statSync(sourceAudio);
 const whisperCppVersion = process.env.WHISPER_CPP_VERSION || '1.5.5';
 const model = process.env.WHISPER_MODEL || 'small';
 const language = process.env.WHISPER_LANGUAGE || 'ja';
+const captionAggregation = 'phrase-v1';
 
 const captionsPath = path.join(outputDir, 'timed-asr.json');
+const tokensPath = path.join(outputDir, 'timed-asr.tokens.json');
 const srtPath = path.join(outputDir, 'timed-asr.srt');
 const vttPath = path.join(outputDir, 'timed-asr.vtt');
 const metaPath = path.join(outputDir, 'timed-asr.meta.json');
@@ -45,7 +48,8 @@ if (fs.existsSync(captionsPath) && fs.existsSync(metaPath) && !process.argv.incl
     meta.sourceSha256 === sourceSha256 &&
     meta.model === model &&
     meta.whisperCppVersion === whisperCppVersion &&
-    meta.language === language
+    meta.language === language &&
+    meta.captionAggregation === captionAggregation
   ) {
     console.log(`Transcription cache hit: ${captionsPath}`);
     process.exit(0);
@@ -85,7 +89,7 @@ const whisperCppOutput = await transcribe({
   language,
 });
 const converted = toCaptions({whisperCppOutput});
-const captions = (converted.captions || [])
+const tokenCaptions = (converted.captions || [])
   .map((caption) => ({
     text: String(caption.text || '').trim(),
     startMs: Number(caption.startMs),
@@ -95,18 +99,22 @@ const captions = (converted.captions || [])
   }))
   .filter((caption) => caption.text && Number.isFinite(caption.startMs) && Number.isFinite(caption.endMs) && caption.endMs > caption.startMs);
 
-if (!captions.length) throw new Error('Whisper returned no timed captions.');
-for (const caption of captions) {
+if (!tokenCaptions.length) throw new Error('Whisper returned no timed captions.');
+for (const caption of tokenCaptions) {
   if (caption.startMs < 0 || caption.endMs > sourceDurationSeconds * 1000 + 1000) {
     throw new Error(`Whisper timestamp outside source duration: ${caption.startMs}-${caption.endMs}ms`);
   }
 }
 
+const captions = aggregateTimedCaptions(tokenCaptions);
+if (!captions.length) throw new Error('Caption aggregation returned no readable captions.');
+
+fs.writeFileSync(tokensPath, JSON.stringify(tokenCaptions, null, 2) + '\n');
 fs.writeFileSync(captionsPath, JSON.stringify(captions, null, 2) + '\n');
 fs.writeFileSync(srtPath, toSrt(captions));
 fs.writeFileSync(vttPath, toVtt(captions));
 fs.writeFileSync(metaPath, JSON.stringify({
-  version: 1,
+  version: 2,
   sourceAudio: path.relative(root, sourceAudio),
   sourceSha256,
   sourceSize: sourceStat.size,
@@ -114,13 +122,17 @@ fs.writeFileSync(metaPath, JSON.stringify({
   model,
   whisperCppVersion,
   language,
+  captionAggregation,
+  tokenCaptionCount: tokenCaptions.length,
   captionCount: captions.length,
 }, null, 2) + '\n');
 
-console.log(`Transcribed ${captions.length} timed captions from ${sourceDurationSeconds.toFixed(3)}s source.`);
-console.log(`JSON: ${captionsPath}`);
-console.log(`SRT:  ${srtPath}`);
-console.log(`VTT:  ${vttPath}`);
+console.log(`Transcribed ${tokenCaptions.length} timed tokens from ${sourceDurationSeconds.toFixed(3)}s source.`);
+console.log(`Aggregated to ${captions.length} readable captions (${captionAggregation}).`);
+console.log(`JSON:   ${captionsPath}`);
+console.log(`Tokens: ${tokensPath}`);
+console.log(`SRT:    ${srtPath}`);
+console.log(`VTT:    ${vttPath}`);
 
 function toSrt(items) {
   return items.map((caption, index) => [
