@@ -12,10 +12,15 @@ const valueArg = (name) => {
 const projectArg = valueArg('project');
 const audioArg = valueArg('audio');
 const outputArg = valueArg('output');
+const concurrencyRaw = valueArg('concurrency') || process.env.REMOTION_CONCURRENCY || '';
+const concurrency = concurrencyRaw ? Number(concurrencyRaw) : null;
 const planOnly = process.argv.includes('--plan-only');
 if (!projectArg || !audioArg) {
-  console.error('使い方: npm run render:studio -- --project=/path/project.json --audio=/path/source.m4a [--output=out/studio.mp4] [--plan-only]');
+  console.error('使い方: npm run render:studio -- --project=/path/project.json --audio=/path/source.m4a [--output=out/studio.mp4] [--concurrency=4] [--plan-only]');
   process.exit(2);
+}
+if (concurrency != null && (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16)) {
+  throw new Error(`concurrency は1〜16の整数で指定してください: ${concurrencyRaw}`);
 }
 
 const studioProjectPath = path.resolve(projectRoot, projectArg);
@@ -44,6 +49,7 @@ if (planOnly) {
     width,
     height,
     expectedDurationSeconds,
+    concurrency,
     project: studioProjectPath,
     audio: path.resolve(projectRoot, audioArg),
     output: outputPath,
@@ -70,12 +76,14 @@ run(process.execPath, [
 ], {env: {REQUIRE_SPEAKER_TURNS: '1'}});
 
 run('npm', ['run', 'check']);
-run('npx', [
+const remotionArgs = [
   '--no-install',
   'remotion', 'render', composition, outputPath,
   '--codec=h264',
   '--crf=20',
-]);
+];
+if (concurrency != null) remotionArgs.push(`--concurrency=${concurrency}`);
+run('npx', remotionArgs);
 
 const tolerance = 0.5;
 run(process.execPath, [
@@ -97,5 +105,6 @@ console.log('');
 console.log('Studio render structurally valid');
 console.log(`Composition: ${composition} (${width}x${height})`);
 console.log(`Expected duration: ${expectedDurationSeconds.toFixed(3)}s`);
+console.log(`Concurrency: ${concurrency ?? 'remotion default'}`);
 console.log(`Output: ${outputPath}`);
 console.log('QC frames extracted. 実人物話者・字幕・画像タイミングは目視QCしてください。');
