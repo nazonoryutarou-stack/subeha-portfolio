@@ -1,0 +1,62 @@
+name: Haishin161 First 3m VTuber
+
+on:
+  push:
+    branches:
+      - feature/vtuber-auto-director
+    paths:
+      - 'jobs/video/161-first3m/RENDER'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install renderer dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          fc-cache -f
+          npm install --no-audit --no-fund
+      - name: Reconstruct first 3 minute audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/161-asr out/qc-161 public/visuals
+          cat ../../jobs/video/161-first3m/audio-*.b64 > out/161-source.b64
+          base64 -d out/161-source.b64 > out/161-first3m.opus
+          test "$(sha256sum out/161-first3m.opus | cut -d' ' -f1)" = '74269aa77d78c2cc7c31af4d9d3ed21afbeb3e427a3fca6b45757a7c406f92a8'
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 out/161-first3m.opus
+      - name: Transcribe exact test audio
+        run: node scripts/transcribe-source.mjs --audio=out/161-first3m.opus --output-dir=out/161-asr
+      - name: Build full three minute edit plan
+        run: node scripts/build-full-audio-plan.mjs --asr-dir=out/161-asr --output=out/161-edit-plan.json --source-label='配信161 / 00:00-03:00' --title='配信161 / 冒頭3分'
+      - name: Render with golden VTuber framing
+        run: npm run render:assistant -- --plan=out/161-edit-plan.json --audio=out/161-first3m.opus --asr-output=out/161-asr --output=out/haishin161-first3m.mp4 --skip-whisper
+      - name: Extract fixed QC frames
+        shell: bash
+        run: |
+          ffmpeg -hide_banner -loglevel error -y -ss 5   -i out/haishin161-first3m.mp4 -frames:v 1 out/qc-161/01-005s.png
+          ffmpeg -hide_banner -loglevel error -y -ss 60  -i out/haishin161-first3m.mp4 -frames:v 1 out/qc-161/02-060s.png
+          ffmpeg -hide_banner -loglevel error -y -ss 120 -i out/haishin161-first3m.mp4 -frames:v 1 out/qc-161/03-120s.png
+          ffmpeg -hide_banner -loglevel error -y -ss 175 -i out/haishin161-first3m.mp4 -frames:v 1 out/qc-161/04-175s.png
+      - name: Upload render and QC
+        uses: actions/upload-artifact@v4
+        with:
+          name: haishin161-first3m-vtuber
+          path: |
+            remotion/vrm-lipsync/out/haishin161-first3m.mp4
+            remotion/vrm-lipsync/out/161-edit-plan.json
+            remotion/vrm-lipsync/out/161-asr/**
+            remotion/vrm-lipsync/out/qc-161/**
