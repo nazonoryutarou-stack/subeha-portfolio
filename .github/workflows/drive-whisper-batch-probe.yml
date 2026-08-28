@@ -1,0 +1,32 @@
+name: Drive Whisper Batch Probe
+
+on:
+  push:
+    branches: [work/drive-whisper-batch-probe]
+    paths: ['.github/workflows/drive-whisper-batch-probe.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Fetch existing Drive audio
+        shell: bash
+        run: |
+          set -euxo pipefail
+          FILE_ID='1_RcyXQZkr21MGApZqyI2UDAyfCR99uiZ'
+          curl -fL --retry 3 --retry-delay 2 -A 'Mozilla/5.0' \
+            "https://drive.usercontent.google.com/download?id=${FILE_ID}&export=download&confirm=t" \
+            -o probe.ogg
+          file probe.ogg
+          stat -c '%s bytes' probe.ogg
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 probe.ogg
