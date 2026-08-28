@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "locked": true,
+  "name": "vtuber-landscape-v1",
+  "acceptedAt": "2026-08-28T11:38:32Z",
+  "acceptedBy": "user visual approval",
+  "renderCommitSha": "4b1f9b1b950ead5ed4dcb2bd7a6b65bf9f391cf8",
+  "workflow": {
+    "name": "Gravity151 MPT VRM E2E",
+    "runId": 33167356448,
+    "artifactId": 9684338885,
+    "artifactName": "gravity151-mpt-vrm-e2e",
+    "artifactDigest": "sha256:d0bedae069f52c91b3868c9ee55d71507f9e7f9196aa2c29df68d16fb85ce7c8"
+  },
+  "render": {
+    "composition": "VrmLipSyncLandscape",
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "crf": 20,
+    "durationSeconds": 29.056,
+    "layout": "visual-left-vrm-right-landscape-bust-up",
+    "landscapeVisibleBodyFraction": 0.34,
+    "vrmYawRadians": -0.2617993877991494,
+    "vrmYawDegrees": -15,
+    "vrmFacing": "toward-frame-center",
+    "productionVrm": "Subeha.vrm"
+  },
+  "hashes": {
+    "sourceFixtureSha256": "b3e245efa111ea22437bbb3b59644e2eba78a9272914774e2ec04096b2835e60",
+    "normalizedAudioSha256": "1e5fe7dd3a3c6eb3634c6663e7d0f2620dfbe6f03184133d98cf142441470456",
+    "vrmSha256": "e4a71e2f4f09e9994553bdc941b46fb5100c66c980fe22b324b35b5002d450f9",
+    "clipSha256": "a2488c65f91f397271020b40f64c65e3b483e97365c2d0fd69f2b815f623e410",
+    "outputSha256": "fb3cd73c5c5e951ced6b0b6b7357855b5e7a2284de975664a3df7c4853a82299",
+    "qcOpenSha256": "c94603f9046fc99c6e9429dfe0cb3585153720116e82f411f12e74989fface66",
+    "qcGuestSha256": "d76715b496ff6ef2c86ef660ac814799b5a01a0347ecbfa0fa3e560004f0deb6",
+    "qcPunchlineSha256": "1b7b00f4eadb3f43ef1847e0a081db5e73cdbf7c79952046cb8e9075e928c6c9",
+    "qcEndSha256": "e456437815d85882e418eaa752fcf88d90da6d1ad8b6668cef5be729d613455b"
+  },
+  "qualityContract": {
+    "productionVrmOnly": true,
+    "vrmOnRight": true,
+    "visualOnLeft": true,
+    "vrmFacesFrameCenter": true,
+    "hostOnlyLipMotion": true,
+    "guestAndUnknownLipMotionDisabled": true,
+    "structuralQcRequired": true,
+    "visualQcFramesRequired": [1.0, 10.0, 18.0, 27.5],
+    "maxAvDriftSeconds": 0.15,
+    "noTpose": true,
+    "naturalArms": true,
+    "rejectInsteadOfPublishOnQcFailure": true
+  },
+  "environment": {
+    "node": "v22.23.2",
+    "runner": "ubuntu-latest"
+  },
+  "policy": "Do not modify this branch for experiments. New automatic-director work must branch from this reference and preserve the quality contract."
+}
