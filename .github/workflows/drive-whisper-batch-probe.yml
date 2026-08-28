@@ -12,21 +12,17 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
+    env:
+      HAS_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
+      HAS_WHISPER_API_KEY: ${{ secrets.WHISPER_API_KEY != '' }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Install ffmpeg
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
-      - name: Fetch existing Drive audio
+      - name: Report secret presence only
         shell: bash
         run: |
-          set -euxo pipefail
-          FILE_ID='1_RcyXQZkr21MGApZqyI2UDAyfCR99uiZ'
-          curl -fL --retry 3 --retry-delay 2 -A 'Mozilla/5.0' \
-            "https://drive.usercontent.google.com/download?id=${FILE_ID}&export=download&confirm=t" \
-            -o probe.ogg
-          file probe.ogg
-          stat -c '%s bytes' probe.ogg
-          ffprobe -v error -show_entries format=duration,size -of default=nw=1 probe.ogg
+          echo "OPENAI_API_KEY configured: $HAS_OPENAI_API_KEY"
+          echo "WHISPER_API_KEY configured: $HAS_WHISPER_API_KEY"
+          if [ "$HAS_OPENAI_API_KEY" != "true" ] && [ "$HAS_WHISPER_API_KEY" != "true" ]; then
+            echo '::error::No transcription API secret detected.'
+            exit 1
+          fi
