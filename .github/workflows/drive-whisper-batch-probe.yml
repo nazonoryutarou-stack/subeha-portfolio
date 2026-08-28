@@ -12,17 +12,23 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    env:
-      HAS_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
-      HAS_WHISPER_API_KEY: ${{ secrets.WHISPER_API_KEY != '' }}
+    timeout-minutes: 10
     steps:
-      - name: Report secret presence only
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg jq
+      - name: Reconstruct temporary audio from Git blob
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          echo "OPENAI_API_KEY configured: $HAS_OPENAI_API_KEY"
-          echo "WHISPER_API_KEY configured: $HAS_WHISPER_API_KEY"
-          if [ "$HAS_OPENAI_API_KEY" != "true" ] && [ "$HAS_WHISPER_API_KEY" != "true" ]; then
-            echo '::error::No transcription API secret detected.'
-            exit 1
-          fi
+          set -euo pipefail
+          SHA='92b31a4d2b53488f6bd8a7b0a40c531efe1423cd'
+          curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/blobs/${SHA}" \
+            | jq -r '.content' | tr -d '\n' | base64 -d > probe.opus
+          file probe.opus
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 probe.opus
+          test $(stat -c%s probe.opus) -gt 50000
