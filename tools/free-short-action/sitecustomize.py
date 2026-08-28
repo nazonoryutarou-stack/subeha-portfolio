@@ -7,7 +7,7 @@ Source attribution and license metadata still come from Wikimedia Commons.
 """
 from __future__ import annotations
 
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import unquote, urlsplit, urlunsplit
 
 import requests
 
@@ -21,15 +21,12 @@ def _clean(url: str) -> str:
 
 def _get(url, *args, **kwargs):
     if isinstance(url, str) and urlsplit(url).hostname == "upload.wikimedia.org":
-        origin = _clean(url)
-        existing_params = kwargs.pop("params", None)
-        # Wikimedia thumbnail URLs are often already around 1200px. wsrv acts as
-        # a cache/proxy here and caps width so runners do not pull huge originals.
+        # MediaWiki already percent-encodes many filenames. requests will encode
+        # query parameter values again, so decode the origin path once here to
+        # prevent `%2C` -> `%252C` and similar double-encoding 404s at wsrv.
+        origin = unquote(_clean(url))
+        kwargs.pop("params", None)
         proxy_params = {"url": origin, "w": "1200"}
-        if existing_params:
-            # Image requests normally have no params; preserve any unexpected
-            # caller params by adding them to the origin URL rather than the proxy.
-            pass
         print(f"INFO proxying Wikimedia image via wsrv.nl: {origin}", flush=True)
         return _ORIGINAL_GET("https://wsrv.nl/", *args, params=proxy_params, **kwargs)
     return _ORIGINAL_GET(url, *args, **kwargs)
