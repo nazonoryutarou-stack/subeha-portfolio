@@ -1,0 +1,79 @@
+name: Kaidan Short - Real Assets
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/free-short-studio-actions
+    paths:
+      - ".github/workflows/kaidan-short.yml"
+      - "tools/free-short-action/render_kaidan.py"
+      - "tools/free-short-action/render_topic.py"
+      - "tools/free-short-action/sitecustomize.py"
+      - "tools/free-short-action/requirements.txt"
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: tools/free-short-action
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tools/free-short-action/requirements.txt
+
+      - name: Install Python dependencies
+        run: pip install -r tools/free-short-action/requirements.txt
+
+      - name: Verify real-image transport
+        run: |
+          python - <<'PY'
+          import requests
+          assert requests.get.__name__ == '_get', 'sitecustomize transport shim was not loaded'
+          print('Wikimedia binary transport:', requests.get.__module__, requests.get.__name__)
+          PY
+
+      - name: Render original kaidan
+        run: python tools/free-short-action/render_kaidan.py
+
+      - name: Validate output
+        run: |
+          ffprobe -v error -show_entries stream=width,height,r_frame_rate -show_entries format=duration -of json dist/kaidan/video.mp4
+          test -s dist/kaidan/video.mp4
+          test -s dist/kaidan/sources.json
+          python - <<'PY'
+          import json
+          x=json.load(open('dist/kaidan/metadata.json'))
+          assert x['fiction'] is True
+          assert x['generated_images'] == 0
+          assert x['real_assets'] >= 8
+          assert x['duration'] > 25
+          print(x)
+          PY
+
+      - name: Upload kaidan video
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaidan-short-${{ github.run_number }}
+          path: |
+            dist/kaidan/video.mp4
+            dist/kaidan/contact.jpg
+            dist/kaidan/sources.json
+            dist/kaidan/CREDITS.txt
+            dist/kaidan/metadata.json
+          if-no-files-found: error
+          retention-days: 14
