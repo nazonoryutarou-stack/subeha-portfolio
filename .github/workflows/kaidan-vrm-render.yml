@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 30
     env:
       VIDEO_VRM_PATH: ../../Subeha.vrm
+      PYTHONPATH: tools/kaidan-vrm
     steps:
       - uses: actions/checkout@v4
 
@@ -38,6 +39,14 @@ jobs:
 
       - name: Install kaidan builder dependencies
         run: pip install 'edge-tts>=7,<8' 'requests>=2.31,<3'
+
+      - name: Verify Wikimedia image transport
+        run: |
+          python - <<'PY'
+          import requests
+          assert requests.get.__name__ == '_get', 'sitecustomize transport shim was not loaded'
+          print('Wikimedia binary transport:', requests.get.__module__, requests.get.__name__)
+          PY
 
       - name: Build Japanese narration, Commons assets and edit plan
         run: python tools/kaidan-vrm/build_job.py
