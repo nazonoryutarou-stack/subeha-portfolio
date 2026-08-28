@@ -40,6 +40,10 @@ jobs:
           WHISPER_MODEL: small
         run: node scripts/prefetch-local-runtime.mjs
 
+      - name: Prefetch Remotion headless browser
+        working-directory: remotion/vrm-lipsync
+        run: npx --no-install remotion browser ensure
+
       - name: Build split portable bundles
         shell: bash
         run: |
@@ -53,6 +57,7 @@ jobs:
           MODEL_FILE="$(find "$WHISPER" -maxdepth 2 -type f -name 'ggml-small*.bin' | head -n 1)"
           test -n "$MODEL_FILE"
           test -f "$MODEL_FILE"
+          test -d "$PROJECT/node_modules/.remotion/chrome-headless-shell"
 
           mkdir -p "$CORE/remotion" "$CORE/docs" "$WRUN/remotion/vrm-lipsync/.cache/whisper-align" "$WMODEL/remotion/vrm-lipsync/.cache/whisper-align/whisper.cpp-1.5.5"
 
@@ -75,6 +80,8 @@ jobs:
             vtuber-local-runtime-core.tar.gz
             vtuber-whisper-runtime.tar.gz
             vtuber-whisper-small-model.tar
+
+          The core contains Remotion's tested Chrome Headless Shell, so rendering does not need to download a browser.
 
           Then feed Library materialized audio directly:
             cd remotion/vrm-lipsync
