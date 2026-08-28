@@ -21,6 +21,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: free-short-real-assets-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   render:
     runs-on: ubuntu-latest
@@ -28,6 +32,7 @@ jobs:
     env:
       TOPIC: ${{ github.event.inputs.topic || 'コーヒー' }}
       FACTS: ${{ github.event.inputs.facts || '6' }}
+      PYTHONPATH: tools/free-short-action
     steps:
       - uses: actions/checkout@v4
 
@@ -45,6 +50,14 @@ jobs:
 
       - name: Install Python dependencies
         run: pip install -r tools/free-short-action/requirements.txt
+
+      - name: Verify real-image transport
+        run: |
+          python - <<'PY'
+          import requests
+          assert requests.get.__name__ == '_get', 'sitecustomize transport shim was not loaded'
+          print('Wikimedia binary transport:', requests.get.__module__, requests.get.__name__)
+          PY
 
       - name: Render real-asset short
         run: |
