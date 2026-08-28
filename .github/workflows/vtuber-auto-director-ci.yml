@@ -1,0 +1,46 @@
+name: VTuber Auto Director CI
+
+on:
+  push:
+    branches:
+      - feature/vtuber-auto-director
+    paths:
+      - 'remotion/vrm-lipsync/**'
+      - 'docs/vtuber-golden-reference-v1.json'
+      - 'Subeha.vrm'
+      - '.github/workflows/vtuber-auto-director-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: remotion/vrm-lipsync
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Check auto-pipeline script syntax
+        run: |
+          node --check scripts/check-golden-contract.mjs
+          node --check scripts/auto-director.mjs
+          node --check scripts/materialize-director-visuals.mjs
+          node --check scripts/vtuber-auto.mjs
+
+      - name: Enforce golden VTuber contract
+        run: npm run check:golden
+
+      - name: TypeScript check
+        run: npm run check
