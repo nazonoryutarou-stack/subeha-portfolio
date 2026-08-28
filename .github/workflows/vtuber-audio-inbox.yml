@@ -5,7 +5,7 @@ on:
     branches:
       - feature/vtuber-auto-director
     paths:
-      - 'jobs/vtuber-inbox/**'
+      - 'jobs/vtuber-inbox/**/manifest.json'
   workflow_dispatch:
     inputs:
       inbox_id:
@@ -40,11 +40,13 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             id='${{ inputs.inbox_id }}'
           else
-            id="$(find ../../jobs/vtuber-inbox -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort | tail -n 1)"
+            id="$(find ../../jobs/vtuber-inbox -mindepth 2 -maxdepth 2 -type f -name manifest.json -printf '%h\n' | xargs -r -n1 basename | sort | tail -n 1)"
           fi
           test -n "$id"
           test -f "../../jobs/vtuber-inbox/$id/manifest.json"
-          test -f "../../jobs/vtuber-inbox/$id/audio.b64"
+          if [ ! -f "../../jobs/vtuber-inbox/$id/audio.b64" ]; then
+            compgen -G "../../jobs/vtuber-inbox/$id/audio.b64.part-*" >/dev/null
+          fi
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
       - name: Decode and validate audio
