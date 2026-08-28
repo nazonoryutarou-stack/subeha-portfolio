@@ -153,13 +153,14 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
         const box = new THREE.Box3().setFromObject(vrm.scene);
         const size = new THREE.Vector3(); box.getSize(size);
         vrm.scene.scale.setScalar(2.35 / (size.y || 1));
+        const landscape = width > height;
+        if (landscape) vrm.scene.rotation.y = -Math.PI / 12;
         const b2 = new THREE.Box3().setFromObject(vrm.scene);
         const center = new THREE.Vector3(); b2.getCenter(center);
         vrm.scene.position.x -= center.x; vrm.scene.position.z -= center.z;
 
         const framed = new THREE.Box3().setFromObject(vrm.scene);
         const fs = new THREE.Vector3(); framed.getSize(fs);
-        const landscape = width > height;
         const targetHeight = fs.y * (landscape ? 0.47 : 0.84);
         const targetCenterY = framed.max.y - targetHeight * (landscape ? 0.53 : 0.56) - fs.y * 0.01;
         const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
