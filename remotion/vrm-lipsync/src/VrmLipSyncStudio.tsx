@@ -68,13 +68,13 @@ export const VrmLipSyncStudio: React.FC<VrmLipSyncProps> = (props) => {
       {landscape ? <>
         <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at 20% 45%, rgba(69,86,108,.20), transparent 34%), radial-gradient(circle at 83% 35%, rgba(187,143,74,.08), transparent 28%), #0b0e13'}} />
         <div style={{position:'absolute',inset:0,opacity:.12,backgroundImage:'linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px)',backgroundSize:'44px 44px'}} />
-        <div style={{position:'absolute',left:'43%',top:108,bottom:126,width:1,background:'linear-gradient(transparent,rgba(210,170,98,.28) 18%,rgba(210,170,98,.28) 82%,transparent)'}} />
+        <div style={{position:'absolute',left:'57%',top:108,bottom:126,width:1,background:'linear-gradient(transparent,rgba(210,170,98,.28) 18%,rgba(210,170,98,.28) 82%,transparent)'}} />
       </> : null}
 
       <VrmLipSync {...props} background={backgroundFile || landscape ? 'transparent' : props.background} />
 
       {current?.renderFile && landscape ? (
-        <div style={{position:'absolute',zIndex:5,right:44,top:102,width:620,height:444,opacity,transform:`translateX(${slide}px) scale(${0.985 + reveal * .015})`,transformOrigin:'center right',fontFamily:sans}}>
+        <div style={{position:'absolute',zIndex:5,left:44,top:102,width:620,height:444,opacity,transform:`translateX(-${slide}px) scale(${0.985 + reveal * .015})`,transformOrigin:'center left',fontFamily:sans}}>
           <div style={{position:'absolute',inset:0,border:'1px solid rgba(210,170,98,.32)',borderRadius:18,background:'linear-gradient(145deg,rgba(21,24,31,.96),rgba(11,13,18,.94))',boxShadow:'0 26px 70px rgba(0,0,0,.46), inset 0 1px rgba(255,255,255,.045)'}} />
           <div style={{position:'absolute',left:22,top:18,color:'#d2aa62',fontFamily:mono,fontSize:11,letterSpacing:'.20em'}}>OBSERVATION {String(currentIndex + 1).padStart(2,'0')}</div>
           <div style={{position:'absolute',left:22,right:22,top:42,color:'#f3f0e8',fontWeight:760,fontSize:25,lineHeight:1.25}}>{current.title || 'REFERENCE'}</div>
