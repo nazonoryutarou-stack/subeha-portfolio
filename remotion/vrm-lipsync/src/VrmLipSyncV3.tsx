@@ -161,14 +161,14 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
 
         const framed = new THREE.Box3().setFromObject(vrm.scene);
         const fs = new THREE.Vector3(); framed.getSize(fs);
-        const targetHeight = fs.y * (landscape ? 0.47 : 0.84);
-        const targetCenterY = framed.max.y - targetHeight * (landscape ? 0.53 : 0.56) - fs.y * 0.01;
+        const targetHeight = fs.y * (landscape ? 0.34 : 0.84);
+        const targetCenterY = landscape ? framed.max.y - targetHeight * 0.47 + fs.y * 0.012 : framed.max.y - targetHeight * 0.56 - fs.y * 0.01;
         const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
         const cameraDistance = (targetHeight / 2) / Math.tan(halfFov) * (landscape ? 1.04 : 1.10);
         if (landscape) {
           const horizontalSpan = 2 * cameraDistance * Math.tan(halfFov) * (width / height);
-          const leftZoneCenter = 0.45 / 2;
-          vrm.scene.position.x += (leftZoneCenter - 0.5) * horizontalSpan;
+          const rightZoneCenter = 1 - (0.45 / 2);
+          vrm.scene.position.x += (rightZoneCenter - 0.5) * horizontalSpan;
         }
         camera.position.set(0, targetCenterY, cameraDistance);
         camera.lookAt(0, targetCenterY, 0);
@@ -240,7 +240,7 @@ export const VrmLipSync: React.FC<VrmLipSyncProps> = ({
         <div style={{maxWidth:landscape ? 1040 : width-56, padding:landscape ? '12px 24px 13px' : '16px 22px', border:'1px solid rgba(210,170,98,.28)', borderRadius:14, background:'linear-gradient(180deg,rgba(15,17,22,.78),rgba(9,11,15,.91))', boxShadow:'0 12px 38px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.035)', color:'#f8f7f4', fontFamily:sans, fontWeight:750, fontSize:landscape ? 38 : 46, lineHeight:1.32, textAlign:'center', textShadow:'0 2px 9px rgba(0,0,0,.72)', whiteSpace:'pre-wrap'}}>{displayTelop}</div>
       </div> : null}
 
-      {showMeter ? <div style={{position:'absolute', left:32, bottom:14, color:'rgba(255,255,255,.42)', fontFamily:mono, fontSize:10, letterSpacing:1.5}}>AUDIO {meter.toString().padStart(3,'0')} / {currentSpeaker}</div> : null}
+      {showMeter ? <div style={{position:'absolute', left:32, bottom:14, color:'rgba(255,255,255,.42)', fontFamily:mono,fontSize:10,letterSpacing:1.5}}>AUDIO {meter.toString().padStart(3,'0')} / {currentSpeaker}</div> : null}
     </AbsoluteFill>
   );
 };
