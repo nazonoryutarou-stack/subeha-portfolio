@@ -7,7 +7,7 @@ on:
     paths:
       - '.tmp/vtuber-local-runtime-trigger.txt'
       - '.github/workflows/vtuber-local-runtime-bundle.yml'
-      - 'remotion/vrm-lipsync/scripts/prefetch-local-runtime.mjs'
+      - 'remotion/vrm-lipsync/**'
       - 'docs/vtuber-golden-reference-v1.json'
       - 'scripts/**'
   workflow_dispatch:
