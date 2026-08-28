@@ -67,6 +67,12 @@ const runNode = (script, args = [], env = {}) => {
   if (result.status !== 0) throw new Error(`${script} failed (${result.status})`);
 };
 
+// prepare-clip は最後に fallback envelope も生成する。
+// 前回レンダーの speaker-turns.json が残っていると別音声のSHAで拒否されるため、
+// この前段では stale gate を必ず除去し、最終WAV確定後に正しいSHA付きで作り直す。
+const speakerTurnsPath = path.join(projectRoot, 'public', 'speaker-turns.json');
+if (fs.existsSync(speakerTurnsPath)) fs.unlinkSync(speakerTurnsPath);
+
 // prepare-clip 自身が動画用VRMを必ず検品するため、ここでは二重検品しない。
 // 同じ原音から最終 voice.wav / clip.json を作る。この時点のenvelopeは本番扱いしない。
 runNode('prepare-clip.mjs', [`--job=${path.relative(projectRoot, tempJobPath)}`], {REQUIRE_SPEAKER_TURNS: '0'});
@@ -106,7 +112,7 @@ const speakerPayload = {
   avatarSpeaker,
   turns: relativeTurns,
 };
-fs.writeFileSync(path.join(projectRoot, 'public', 'speaker-turns.json'), JSON.stringify(speakerPayload, null, 2) + '\n');
+fs.writeFileSync(speakerTurnsPath, JSON.stringify(speakerPayload, null, 2) + '\n');
 
 // 一時fallback envelopeを、本番話者ゲート付きで必ず上書きする。
 runNode('generate-envelope.mjs', [], {REQUIRE_SPEAKER_TURNS: '1'});
