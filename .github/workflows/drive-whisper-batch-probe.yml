@@ -12,23 +12,26 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
+      WHISPER_API_KEY: ${{ secrets.WHISPER_API_KEY != '' }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY != '' }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY != '' }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY != '' }}
+      DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY != '' }}
+      ASSEMBLYAI_API_KEY: ${{ secrets.ASSEMBLYAI_API_KEY != '' }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN != '' }}
+      HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN != '' }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON != '' }}
+      GDRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON != '' }}
+      GOOGLE_DRIVE_TOKEN: ${{ secrets.GOOGLE_DRIVE_TOKEN != '' }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Install ffmpeg
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg jq
-      - name: Reconstruct temporary audio from Git blob
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Report secret presence only
         shell: bash
         run: |
-          set -euo pipefail
-          SHA='92b31a4d2b53488f6bd8a7b0a40c531efe1423cd'
-          curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/blobs/${SHA}" \
-            | jq -r '.content' | tr -d '\n' | base64 -d > probe.opus
-          file probe.opus
-          ffprobe -v error -show_entries format=duration,size -of default=nw=1 probe.opus
-          test $(stat -c%s probe.opus) -gt 50000
+          for key in OPENAI_API_KEY WHISPER_API_KEY GROQ_API_KEY GEMINI_API_KEY GOOGLE_API_KEY DEEPGRAM_API_KEY ASSEMBLYAI_API_KEY HF_TOKEN HUGGINGFACE_TOKEN CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID GOOGLE_SERVICE_ACCOUNT_JSON GDRIVE_SERVICE_ACCOUNT_JSON GOOGLE_DRIVE_TOKEN; do
+            printf '%s configured: %s\n' "$key" "${!key}"
+          done
