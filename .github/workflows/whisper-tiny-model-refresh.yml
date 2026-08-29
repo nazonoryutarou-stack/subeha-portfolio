@@ -1,0 +1,29 @@
+name: Whisper Tiny Model Refresh
+
+on:
+  push:
+    branches: [work/drive-whisper-batch-probe]
+    paths: ['.github/workflows/whisper-tiny-model-refresh.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download tiny q5_1 model
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 5 --retry-delay 2 \
+            'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q5_1.bin?download=true' \
+            -o /tmp/ggml-tiny-q5_1.bin
+          test $(stat -c%s /tmp/ggml-tiny-q5_1.bin) -gt 30000000
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-tiny-q5_1-model
+          path: /tmp/ggml-tiny-q5_1.bin
+          retention-days: 2
+          if-no-files-found: error
