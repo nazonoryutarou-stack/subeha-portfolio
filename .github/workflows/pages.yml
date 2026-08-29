@@ -113,21 +113,34 @@ jobs:
               *{box-sizing:border-box}
               html,body{margin:0;min-height:100%;background:#eeeeea;color:#111}
               body{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;-webkit-font-smoothing:antialiased}
-              main{min-height:100svh;width:min(calc(100% - 48px),680px);margin:0 auto;padding:11svh 0 60px}
+              main{min-height:100svh;width:min(calc(100% - 48px),680px);margin:0 auto;padding:11svh 0 72px}
               header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding-bottom:14px;border-bottom:1px solid #111}
               h1{margin:0;font-size:15px;font-weight:400;letter-spacing:.36em;text-indent:.36em}
-              a{color:#111;text-decoration:none;font-size:11px;letter-spacing:.18em}
+              a{color:#111;text-decoration:none}
               a:hover,a:focus-visible{text-decoration:underline;text-underline-offset:4px}
-              .empty{height:56svh;border-bottom:1px solid #111}
+              .back{font-size:11px;letter-spacing:.18em}
+              .lead{margin:34px 0 48px;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:12px;line-height:2;color:#222}
+              .catalog{border-top:1px solid #111}
+              .row{display:grid;grid-template-columns:1fr auto;gap:18px;padding:20px 0;border-bottom:1px solid #aaa}
+              .row h2{margin:0;font-size:14px;font-weight:400;letter-spacing:.18em}
+              .status{align-self:start;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:10px;letter-spacing:.12em;white-space:nowrap}
+              .note{margin:46px 0 0;padding-top:16px;border-top:1px solid #111;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:11px;line-height:1.9}
             </style>
           </head>
           <body>
             <main>
               <header>
                 <h1>同業者</h1>
-                <a href="../">戻</a>
+                <a class="back" href="../">戻</a>
               </header>
-              <div class="empty" aria-hidden="true"></div>
+              <p class="lead">霊能・祭祀等を業務として扱う方向けの商品区分です。現在、仮設サイトへの移行にともない販売内容を再編しております。</p>
+              <section class="catalog" aria-label="同業者向け区分">
+                <article class="row"><h2>妹字</h2><span class="status">準備中</span></article>
+                <article class="row"><h2>式神</h2><span class="status">準備中</span></article>
+                <article class="row"><h2>術式・鑑定</h2><span class="status">準備中</span></article>
+                <article class="row"><h2>祭祀具・異物製品</h2><span class="status">準備中</span></article>
+              </section>
+              <p class="note">一般向け商品の大量購入はご遠慮ください。同業者向けの販売条件・取扱品は、確定したものから順次掲載します。</p>
             </main>
           </body>
           </html>
@@ -146,21 +159,85 @@ jobs:
               *{box-sizing:border-box}
               html,body{margin:0;min-height:100%;background:#eeeeea;color:#111}
               body{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;-webkit-font-smoothing:antialiased}
-              main{min-height:100svh;width:min(calc(100% - 48px),680px);margin:0 auto;padding:11svh 0 60px}
+              main{min-height:100svh;width:min(calc(100% - 48px),680px);margin:0 auto;padding:11svh 0 72px}
               header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding-bottom:14px;border-bottom:1px solid #111}
               h1{margin:0;font-size:15px;font-weight:400;letter-spacing:.36em;text-indent:.36em}
-              a{color:#111;text-decoration:none;font-size:11px;letter-spacing:.18em}
+              a{color:#111;text-decoration:none}
               a:hover,a:focus-visible{text-decoration:underline;text-underline-offset:4px}
-              .empty{height:56svh;border-bottom:1px solid #111}
+              .back{font-size:11px;letter-spacing:.18em}
+              .lead{margin:34px 0 48px;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:12px;line-height:2;color:#222}
+              .catalog{border-top:1px solid #111}
+              .item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;padding:24px 0;border-bottom:1px solid #aaa}
+              .meta{display:flex;gap:8px;align-items:center;margin:0 0 9px;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:9px;letter-spacing:.13em}
+              .meta span{padding:3px 6px;border:1px solid #777}
+              h2{margin:0 0 9px;font-size:18px;font-weight:400;letter-spacing:.08em}
+              .desc{margin:0;max-width:500px;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:11.5px;line-height:1.9}
+              .side{text-align:right;align-self:center;min-width:118px}
+              .price{display:block;margin-bottom:9px;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:12px;font-weight:600;white-space:nowrap}
+              .buy{display:inline-block;padding:8px 11px;border:1px solid #111;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:10px;letter-spacing:.08em}
+              .buy:hover,.buy:focus-visible{background:#111;color:#eeeeea;text-decoration:none}
+              .pending{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:10px;letter-spacing:.1em;color:#555}
+              .note{margin:46px 0 0;padding-top:16px;border-top:1px solid #111;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:10.5px;line-height:1.9}
+              @media(max-width:520px){
+                main{width:min(calc(100% - 36px),680px);padding-top:8svh}
+                .item{grid-template-columns:1fr;gap:14px}
+                .side{text-align:left;min-width:0}
+                h2{font-size:17px}
+              }
             </style>
           </head>
           <body>
             <main>
               <header>
                 <h1>一般</h1>
-                <a href="../">戻</a>
+                <a class="back" href="../">戻</a>
               </header>
-              <div class="empty" aria-hidden="true"></div>
+              <p class="lead">一般の方向けの商品・相談窓口です。現在購入または予約できるものから掲載しています。</p>
+              <section class="catalog" aria-label="一般向け商品一覧">
+                <article class="item">
+                  <div>
+                    <p class="meta"><span>相談</span><span>予約制</span></p>
+                    <h2>人生相談</h2>
+                    <p class="desc">霊視・占い・未来予測を行わず、相談内容を言葉にし、状況と現実的な選択肢を整理する60分の対話サービス。</p>
+                  </div>
+                  <div class="side">
+                    <strong class="price">60分 5,000円</strong>
+                    <a class="buy" href="https://book.stripe.com/28E28q9owdqi6jV2m3gjC04">予約する</a>
+                  </div>
+                </article>
+
+                <article class="item">
+                  <div>
+                    <p class="meta"><span>札</span><span>受注生産</span></p>
+                    <h2>パワーワード札</h2>
+                  </div>
+                  <div class="side">
+                    <strong class="price">1,000円</strong>
+                    <a class="buy" href="https://buy.stripe.com/28E28q1W4gCu6jV5yfgjC01">購入する</a>
+                  </div>
+                </article>
+
+                <article class="item">
+                  <div>
+                    <p class="meta"><span>札</span></p>
+                    <h2>絵画札（最高に本気EDITION）</h2>
+                  </div>
+                  <div class="side">
+                    <strong class="price">100,000円</strong>
+                    <a class="buy" href="https://buy.stripe.com/14AbJ0eIQbia37JbWDgjC02">購入する</a>
+                  </div>
+                </article>
+
+                <article class="item">
+                  <div>
+                    <p class="meta"><span>異物製品</span><span>受注生産</span></p>
+                    <h2>テルテルボット</h2>
+                    <p class="desc">てるてる坊主の上位機種。機械化したため、雨に弱い。</p>
+                  </div>
+                  <div class="side"><span class="pending">販売準備中</span></div>
+                </article>
+              </section>
+              <p class="note">人生相談は医療・法律・金融その他の専門判断の代替ではありません。各商品の詳細・販売条件は決済画面の表示を優先します。</p>
             </main>
           </body>
           </html>
