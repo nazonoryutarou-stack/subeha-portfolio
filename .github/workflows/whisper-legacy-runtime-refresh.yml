@@ -1,0 +1,33 @@
+name: Whisper Legacy Runtime Refresh
+
+on:
+  push:
+    branches: [work/drive-whisper-batch-probe]
+    paths: ['.github/workflows/whisper-legacy-runtime-refresh.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Build whisper.cpp v1.5.5
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq build-essential git
+          git clone --depth 1 --branch v1.5.5 https://github.com/ggerganov/whisper.cpp.git /tmp/whisper.cpp
+          make -C /tmp/whisper.cpp -j2 main
+          mkdir -p /tmp/runtime
+          cp /tmp/whisper.cpp/main /tmp/runtime/whisper-main
+          chmod +x /tmp/runtime/whisper-main
+          /tmp/runtime/whisper-main -h >/dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whisper-v1.5.5-linux-runtime
+          path: /tmp/runtime
+          retention-days: 2
+          if-no-files-found: error
