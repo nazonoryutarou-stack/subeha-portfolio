@@ -113,18 +113,57 @@ jobs:
               *{box-sizing:border-box}
               html,body{margin:0;min-height:100%;background:#eeeeea;color:#111}
               body{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;-webkit-font-smoothing:antialiased}
-              main{min-height:100svh;width:min(calc(100% - 48px),680px);margin:0 auto;padding:11svh 0 72px}
+              main{min-height:100svh;width:min(calc(100% - 48px),920px);margin:0 auto;padding:8svh 0 76px}
               header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding-bottom:14px;border-bottom:1px solid #111}
               h1{margin:0;font-size:15px;font-weight:400;letter-spacing:.36em;text-indent:.36em}
               a{color:#111;text-decoration:none}
               a:hover,a:focus-visible{text-decoration:underline;text-underline-offset:4px}
               .back{font-size:11px;letter-spacing:.18em}
-              .lead{margin:34px 0 48px;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:12px;line-height:2;color:#222}
-              .catalog{border-top:1px solid #111}
-              .row{display:grid;grid-template-columns:1fr auto;gap:18px;padding:20px 0;border-bottom:1px solid #aaa}
-              .row h2{margin:0;font-size:14px;font-weight:400;letter-spacing:.18em}
-              .status{align-self:start;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:10px;letter-spacing:.12em;white-space:nowrap}
-              .note{margin:46px 0 0;padding-top:16px;border-top:1px solid #111;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:11px;line-height:1.9}
+              .lead{margin:27px 0 0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:11px;line-height:1.9;color:#333}
+
+              .tree-wrap{margin:clamp(58px,9svh,108px) 0 72px;overflow-x:auto;overflow-y:hidden;padding:10px 6px 30px}
+              .product-tree,.product-tree ul{list-style:none;margin:0;padding:0}
+              .product-tree{min-width:760px;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+              .product-tree>li,.product-tree ul>li{display:flex;position:relative;align-items:flex-start}
+
+              .tree-node{position:relative;display:inline-flex;align-items:baseline;gap:9px;min-height:42px;padding:8px 0;white-space:nowrap;background:#eeeeea;z-index:2}
+              .tree-node strong{font-size:19px;line-height:1.35;font-weight:650;letter-spacing:.02em}
+              .tree-node small{font-size:9px;line-height:1;letter-spacing:.12em;color:#666}
+              .root-node{min-width:132px;padding-top:5px}
+              .root-node strong{font-size:clamp(28px,4vw,42px);font-weight:700;letter-spacing:.01em}
+              .group-node strong{font-size:18px}
+              .version-node strong{font-size:15px;font-weight:600}
+
+              .product-tree ul{position:relative;margin-left:48px;padding-left:34px}
+              .product-tree ul::before{content:"";position:absolute;left:0;top:21px;bottom:21px;width:1.5px;background:#111}
+              .product-tree ul>li{padding:0 0 28px 32px}
+              .product-tree ul>li::before{content:"";position:absolute;left:0;top:21px;width:32px;height:1.5px;background:#111}
+              .product-tree ul>li:last-child{padding-bottom:0}
+              .product-tree ul>li:last-child::after{content:"";position:absolute;left:-1px;top:22px;bottom:-2px;width:4px;background:#eeeeea;z-index:1}
+              .product-tree .has-children>.tree-node::after{content:"";position:absolute;right:-49px;top:21px;width:49px;height:1.5px;background:#111}
+              .product-tree>li>.root-node::after{content:"";position:absolute;right:-49px;top:21px;width:49px;height:1.5px;background:#111}
+
+              .node-link{border-bottom:1px solid transparent}
+              .node-link:hover,.node-link:focus-visible{border-bottom-color:#111;text-decoration:none}
+              .pending{color:#777}
+              .pending strong{font-weight:500}
+
+              .legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:34px;padding-top:14px;border-top:1px solid #111;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:9.5px;line-height:1.8;color:#555}
+              .legend span::before{content:"";display:inline-block;width:18px;height:1px;margin:0 7px 3px 0;background:#111}
+              .note{margin:44px 0 0;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:10.5px;line-height:1.9;color:#333}
+
+              @media(max-width:620px){
+                main{width:min(calc(100% - 36px),920px);padding-top:6svh}
+                .lead{font-size:10.5px}
+                .tree-wrap{margin-top:50px;margin-right:-18px;padding-right:18px}
+                .product-tree{min-width:650px}
+                .root-node{min-width:112px}
+                .root-node strong{font-size:28px}
+                .product-tree ul{margin-left:36px;padding-left:28px}
+                .product-tree ul>li{padding-left:27px;padding-bottom:24px}
+                .product-tree ul>li::before{width:27px}
+                .product-tree .has-children>.tree-node::after,.product-tree>li>.root-node::after{right:-37px;width:37px}
+              }
             </style>
           </head>
           <body>
@@ -133,14 +172,41 @@ jobs:
                 <h1>同業者</h1>
                 <a class="back" href="../">戻</a>
               </header>
-              <p class="lead">霊能・祭祀等を業務として扱う方向けの商品区分です。現在、仮設サイトへの移行にともない販売内容を再編しております。</p>
-              <section class="catalog" aria-label="同業者向け区分">
-                <article class="row"><h2>妹字</h2><span class="status">準備中</span></article>
-                <article class="row"><h2>式神</h2><span class="status">準備中</span></article>
-                <article class="row"><h2>術式・鑑定</h2><span class="status">準備中</span></article>
-                <article class="row"><h2>祭祀具・異物製品</h2><span class="status">準備中</span></article>
+              <p class="lead">商品は系統・種類・版ごとに分岐しています。枝の先にある名称が現在の取扱単位です。</p>
+
+              <section class="tree-wrap" aria-label="同業者向け商品系統図">
+                <ul class="product-tree">
+                  <li>
+                    <div class="tree-node root-node"><strong>同業者</strong></div>
+                    <ul>
+                      <li class="has-children">
+                        <div class="tree-node group-node"><strong>御札</strong></div>
+                        <ul>
+                          <li><div class="tree-node"><strong>GI札</strong><small>準備中</small></div></li>
+                        </ul>
+                      </li>
+
+                      <li class="has-children">
+                        <div class="tree-node group-node"><strong>斎串</strong></div>
+                        <ul>
+                          <li><div class="tree-node version-node"><strong>v2</strong><small>準備中</small></div></li>
+                        </ul>
+                      </li>
+
+                      <li>
+                        <div class="tree-node"><strong>論理写真</strong><small>準備中</small></div>
+                      </li>
+
+                      <li>
+                        <div class="tree-node"><strong>テルテルボット</strong><small>準備中</small></div>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
               </section>
-              <p class="note">一般向け商品の大量購入はご遠慮ください。同業者向けの販売条件・取扱品は、確定したものから順次掲載します。</p>
+
+              <div class="legend" aria-label="系統図の見方"><span>コネクタラインは商品系統を示します</span><span>版がある商品は右へさらに分岐します</span></div>
+              <p class="note">一般向け商品の大量購入はご遠慮ください。同業者向けの販売条件・取扱品は、確定したものから枝先に追加します。</p>
             </main>
           </body>
           </html>
