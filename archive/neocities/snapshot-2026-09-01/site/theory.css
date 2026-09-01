@@ -1,0 +1,12 @@
+.theory-shell{width:min(100%,760px);margin:0 auto;padding:3svh 2px 0}
+.theory-kicker{margin:0 0 22px;font:500 8px/1.4 system-ui,-apple-system,"Yu Gothic",sans-serif;letter-spacing:.24em;color:#756f65}
+.theory-title{margin:0;font-size:clamp(36px,6vw,64px);font-weight:600;line-height:1.15;letter-spacing:.02em}
+.theory-intro{max-width:640px;margin:36px 0 72px;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:12px;line-height:2.15;letter-spacing:.035em;color:#39342d}
+.theory-list{border-top:.75px solid rgba(24,22,18,.28)}
+.theory-item{display:grid;grid-template-columns:72px 1fr;gap:30px;padding:34px 0 38px;border-bottom:.75px solid rgba(24,22,18,.28)}
+.theory-no{font:500 9px/1.5 system-ui,-apple-system,"Yu Gothic",sans-serif;letter-spacing:.18em;color:#756f65}
+.theory-item h2{margin:0 0 16px;font-size:19px;font-weight:600;letter-spacing:.08em}
+.theory-item p{margin:0;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:11.5px;line-height:2.1;letter-spacing:.035em;color:#403a32}
+.theory-caution{max-width:640px;margin:42px 0 0;padding-top:20px;border-top:.75px solid rgba(24,22,18,.28);font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:9.5px;line-height:2;color:#756f65}
+@media(prefers-reduced-motion:no-preference){.theory-shell{animation:soft-theory-in .95s .12s both}@keyframes soft-theory-in{from{opacity:0;transform:translateY(6px);filter:blur(1.6px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}}
+@media(max-width:620px){.theory-shell{padding-top:2svh}.theory-intro{font-size:11.5px;margin-bottom:56px}.theory-item{grid-template-columns:42px 1fr;gap:18px;padding:28px 0 32px}.theory-item h2{font-size:18px}.theory-item p{font-size:11px}}

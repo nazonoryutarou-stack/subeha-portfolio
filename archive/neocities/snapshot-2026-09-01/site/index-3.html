@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#16181C" />
+  <meta name="description" content="わらしべ通運。貨物 No.0001『藁 1本』を、交換という積み替えによって屋敷まで輸送する公開貨物追跡サイト。" />
+  <title>わらしべ通運｜貨物追跡 WRS-0001</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=M+PLUS+1+Code:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --cargo-black: #16181C;
+      --concrete: #2E3238;
+      --fluoro: #EDF0EA;
+      --straw: #E9C449;
+      --carbon: #6E93B8;
+      --muted: #9DA3AA;
+      --line: rgba(237, 240, 234, .17);
+      --line-strong: rgba(237, 240, 234, .32);
+      --danger: #D8C15A;
+      --shadow: rgba(0,0,0,.38);
+      --paper: #E9ECE8;
+      --paper-ink: #171A1E;
+      --max: 1240px;
+      --rope-progress: 0;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--cargo-black); }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--fluoro);
+      background:
+        radial-gradient(circle at 50% -15%, rgba(110,147,184,.11), transparent 32rem),
+        linear-gradient(180deg, #1a1d21 0%, var(--cargo-black) 38%, #101216 100%);
+      font-family: "BIZ UDPGothic", system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .14;
+      z-index: 50;
+      background-image:
+        repeating-radial-gradient(circle at 0 0, transparent 0, rgba(255,255,255,.11) 1px, transparent 1.6px),
+        linear-gradient(rgba(255,255,255,.017), rgba(255,255,255,.017));
+      background-size: 4px 4px, 100% 100%;
+      mix-blend-mode: overlay;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 49;
+      background: linear-gradient(180deg, rgba(255,255,255,.025), transparent 16%, transparent 80%, rgba(0,0,0,.22));
+      animation: fluorescentFlicker 9s steps(1,end) infinite;
+    }
+
+    @keyframes fluorescentFlicker {
+      0%, 7%, 9%, 11%, 42%, 44%, 100% { opacity: 1; }
+      8%, 10%, 43% { opacity: .58; }
+    }
+
+    ::selection { background: var(--straw); color: var(--cargo-black); }
+    a { color: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    .mono { font-family: "M PLUS 1 Code", ui-monospace, monospace; }
+    .container { width: min(calc(100% - 32px), var(--max)); margin: 0 auto; }
+
+    .boot {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: grid;
+      place-items: center;
+      background: #111318;
+      transition: opacity .45s ease, visibility .45s ease;
+    }
+    .boot.is-hidden { opacity: 0; visibility: hidden; }
+
+    .printer {
+      width: min(88vw, 430px);
+      position: relative;
+      padding-top: 34px;
+    }
+    .printer-slot {
+      position: absolute;
+      top: 0;
+      left: 4%;
+      width: 92%;
+      height: 38px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(#2a2e34, #16181d);
+      box-shadow: 0 15px 35px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.08);
+    }
+    .printer-slot::after {
+      content: "";
+      position: absolute;
+      inset: 12px 18px;
+      background: #050607;
+      border-radius: 999px;
+    }
+    .boot-ticket {
+      position: relative;
+      z-index: 2;
+      min-height: 260px;
+      padding: 25px 26px;
+      color: var(--paper-ink);
+      background:
+        repeating-linear-gradient(180deg, rgba(23,26,30,.03) 0 1px, transparent 1px 6px),
+        var(--paper);
+      border-left: 10px solid rgba(110,147,184,.3);
+      box-shadow: 0 25px 70px rgba(0,0,0,.45);
+      transform-origin: top center;
+      animation: printTicket .95s cubic-bezier(.22,.8,.24,1) both;
+      overflow: hidden;
+    }
+    .boot-ticket::before,
+    .boot-ticket::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 7px;
+      background: repeating-linear-gradient(90deg, transparent 0 12px, rgba(23,26,30,.18) 12px 14px);
+    }
+    .boot-ticket::before { top: 0; }
+    .boot-ticket::after { bottom: 0; }
+    .boot-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 9px 0;
+      border-bottom: 1px dashed rgba(23,26,30,.32);
+      opacity: 0;
+      animation: linePrint .18s linear forwards;
+    }
+    .boot-row:nth-child(1) { animation-delay: .12s; }
+    .boot-row:nth-child(2) { animation-delay: .28s; }
+    .boot-row:nth-child(3) { animation-delay: .44s; }
+    .boot-row:nth-child(4) { animation-delay: .60s; }
+    .boot-row:nth-child(5) { animation-delay: .76s; }
+    .boot-row strong { font-size: clamp(1.1rem, 4vw, 1.65rem); }
+    .boot-row span { font-size: .74rem; letter-spacing: .12em; }
+    @keyframes printTicket {
+      from { transform: translateY(-190px) scaleY(.25); filter: contrast(.7); }
+      to { transform: translateY(0) scaleY(1); filter: contrast(1); }
+    }
+    @keyframes linePrint { to { opacity: 1; } }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: rgba(22,24,28,.78);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 13px;
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      position: relative;
+      border: 1px solid rgba(233,196,73,.8);
+      background:
+        linear-gradient(45deg, transparent 42%, rgba(233,196,73,.25) 43% 57%, transparent 58%),
+        #20242a;
+    }
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      width: 19px;
+      height: 4px;
+      background: var(--straw);
+      left: 8px;
+      top: 15px;
+      transform: rotate(18deg);
+      box-shadow: 0 -6px 0 rgba(233,196,73,.5), 0 6px 0 rgba(233,196,73,.34);
+    }
+    .brand-mark::after { transform: rotate(-18deg); }
+    .brand-name { display: grid; gap: 1px; }
+    .brand-name strong { letter-spacing: .12em; font-size: .96rem; }
+    .brand-name small { color: var(--muted); font-size: .61rem; letter-spacing: .2em; }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--fluoro);
+      font-size: .68rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--straw);
+      box-shadow: 0 0 0 6px rgba(233,196,73,.08), 0 0 18px rgba(233,196,73,.32);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse { 50% { opacity: .42; transform: scale(.78); } }
+
+    .hero {
+      min-height: 100svh;
+      padding: 122px 0 66px;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(290px, .72fr);
+      align-items: center;
+      gap: clamp(40px, 8vw, 108px);
+    }
+    .eyebrow {
+      margin: 0 0 18px;
+      color: var(--carbon);
+      font-size: .72rem;
+      letter-spacing: .2em;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(3.3rem, 11vw, 9rem);
+      font-weight: 700;
+      line-height: .87;
+      letter-spacing: -.055em;
+    }
+    .hero h1 span { display: block; color: var(--straw); }
+    .hero-copy {
+      max-width: 610px;
+      margin: 28px 0 0;
+      color: #c8cdc8;
+      font-size: clamp(.98rem, 1.7vw, 1.18rem);
+      line-height: 1.95;
+    }
+    .hero-copy strong { color: var(--fluoro); font-weight: 700; }
+
+    .tracking-head {
+      margin-top: 36px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .tracking-code {
+      padding: 10px 14px;
+      border: 1px solid var(--line-strong);
+      background: rgba(255,255,255,.025);
+      font-size: .79rem;
+      letter-spacing: .13em;
+    }
+    .tracking-note { color: var(--muted); font-size: .72rem; }
+
+    .cargo-stage {
+      position: relative;
+      min-height: 510px;
+      display: grid;
+      place-items: center;
+      isolation: isolate;
+    }
+    .cargo-ring {
+      position: absolute;
+      width: min(74vw, 430px);
+      aspect-ratio: 1;
+      border: 1px solid rgba(233,196,73,.16);
+      border-radius: 50%;
+      box-shadow: inset 0 0 80px rgba(233,196,73,.035);
+    }
+    .cargo-ring::before,
+    .cargo-ring::after {
+      content: "";
+      position: absolute;
+      inset: 15%;
+      border: 1px dashed rgba(237,240,234,.10);
+      border-radius: 50%;
+    }
+    .cargo-ring::after { inset: 31%; border-style: solid; opacity: .35; }
+
+    .straw-object {
+      width: min(40vw, 210px);
+      height: 330px;
+      position: relative;
+      transform: rotate(5deg);
+      filter: drop-shadow(0 28px 30px rgba(0,0,0,.48));
+    }
+    .straw-object i {
+      position: absolute;
+      left: 50%;
+      bottom: 24px;
+      width: 4px;
+      height: 278px;
+      border-radius: 999px 999px 60% 60%;
+      transform-origin: bottom center;
+      background: linear-gradient(90deg, #ad8c2c, #e9c449 43%, #f6dc79 62%, #a47c1e);
+    }
+    .straw-object i:nth-child(1) { transform: translateX(-50%) rotate(-3deg); }
+    .straw-object i:nth-child(2) { transform: translateX(-50%) rotate(2deg) scaleY(.95); opacity: .7; }
+    .straw-object i:nth-child(3) { transform: translateX(-50%) rotate(7deg) scaleY(.8); opacity: .48; }
+    .straw-object i::before,
+    .straw-object i::after {
+      content: "";
+      position: absolute;
+      top: -8px;
+      width: 49px;
+      height: 2px;
+      background: var(--straw);
+      transform-origin: left center;
+      box-shadow: 7px -7px 0 -0.4px rgba(233,196,73,.72), 14px 7px 0 -0.4px rgba(233,196,73,.56);
+    }
+    .straw-object i::before { left: 0; transform: rotate(-28deg); }
+    .straw-object i::after { right: 0; transform-origin: right center; transform: rotate(28deg); }
+
+    .cargo-label {
+      position: absolute;
+      width: 170px;
+      padding: 12px 14px;
+      color: var(--paper-ink);
+      background: var(--paper);
+      border-left: 7px solid var(--carbon);
+      box-shadow: 0 12px 30px rgba(0,0,0,.34);
+      transform: rotate(-3deg) translate(52px, 160px);
+      font-size: .66rem;
+      line-height: 1.55;
+    }
+    .cargo-label strong { display: block; font-size: .82rem; margin-bottom: 2px; }
+
+    .scanline {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--carbon), transparent);
+      box-shadow: 0 0 18px rgba(110,147,184,.65);
+      animation: scan 4.8s ease-in-out infinite;
+      opacity: .58;
+    }
+    @keyframes scan {
+      0%, 100% { top: 22%; opacity: .2; }
+      50% { top: 77%; opacity: .75; }
+    }
+
+    .hero-metrics {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .metric {
+      position: absolute;
+      min-width: 150px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--line-strong);
+      color: var(--muted);
+      font-size: .64rem;
+      letter-spacing: .1em;
+    }
+    .metric strong { display: block; color: var(--fluoro); font-size: .88rem; margin-top: 5px; letter-spacing: .05em; }
+    .metric::after {
+      content: "";
+      position: absolute;
+      top: -1px;
+      width: 34px;
+      height: 1px;
+      background: var(--line-strong);
+    }
+    .metric:nth-child(1) { top: 9%; left: 0; }
+    .metric:nth-child(1)::after { right: -31px; transform: rotate(24deg); transform-origin: left; }
+    .metric:nth-child(2) { top: 20%; right: 0; text-align: right; }
+    .metric:nth-child(2)::after { left: -31px; transform: rotate(-24deg); transform-origin: right; }
+    .metric:nth-child(3) { bottom: 17%; left: 1%; }
+    .metric:nth-child(3)::after { right: -31px; transform: rotate(-24deg); transform-origin: left; }
+    .metric:nth-child(4) { bottom: 8%; right: 2%; text-align: right; }
+    .metric:nth-child(4)::after { left: -31px; transform: rotate(24deg); transform-origin: right; }
+
+    .section {
+      padding: clamp(82px, 11vw, 150px) 0;
+      position: relative;
+    }
+    .section-kicker { color: var(--carbon); font-size: .69rem; letter-spacing: .18em; margin-bottom: 14px; }
+    .section-title {
+      margin: 0;
+      max-width: 920px;
+      font-size: clamp(2.3rem, 6vw, 5.6rem);
+      line-height: 1.04;
+      letter-spacing: -.045em;
+    }
+    .section-lead {
+      max-width: 690px;
+      margin: 28px 0 0;
+      color: #b9bfbc;
+      line-height: 2;
+    }
+
+    .manifest {
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.018);
+    }
+    .manifest-grid {
+      display: grid;
+      grid-template-columns: .85fr 1.15fr;
+      gap: clamp(34px, 7vw, 90px);
+      align-items: start;
+    }
+    .manifest-table {
+      border: 1px solid var(--line-strong);
+      background: #1b1e23;
+      box-shadow: 0 24px 70px var(--shadow);
+    }
+    .manifest-row {
+      display: grid;
+      grid-template-columns: .82fr 1.18fr;
+      min-height: 66px;
+      border-bottom: 1px solid var(--line);
+    }
+    .manifest-row:last-child { border-bottom: 0; }
+    .manifest-row > div {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+    }
+    .manifest-row > div:first-child {
+      color: var(--muted);
+      border-right: 1px solid var(--line);
+      font-size: .73rem;
+      letter-spacing: .08em;
+    }
+    .manifest-row > div:last-child {
+      justify-content: space-between;
+      gap: 12px;
+      font-family: "M PLUS 1 Code", ui-monospace, monospace;
+      font-weight: 600;
+    }
+    .status-live { color: var(--straw); }
+
+    .barcode {
+      height: 64px;
+      margin-top: 18px;
+      border: 1px solid var(--line-strong);
+      background:
+        repeating-linear-gradient(90deg,
+          var(--fluoro) 0 2px,
+          transparent 2px 5px,
+          var(--fluoro) 5px 6px,
+          transparent 6px 10px,
+          var(--fluoro) 10px 14px,
+          transparent 14px 17px,
+          var(--fluoro) 17px 18px,
+          transparent 18px 23px
+        );
+      opacity: .72;
+      position: relative;
+      overflow: hidden;
+    }
+    .barcode::after {
+      content: "WRS0001 0400 0000";
+      position: absolute;
+      left: 50%;
+      bottom: 3px;
+      transform: translateX(-50%);
+      padding: 0 8px;
+      color: var(--cargo-black);
+      background: var(--fluoro);
+      font: 700 .63rem/1.1 "M PLUS 1 Code", monospace;
+      letter-spacing: .14em;
+      white-space: nowrap;
+    }
+
+    .route {
+      min-height: 1900px;
+      background:
+        linear-gradient(90deg, transparent calc(50% - .5px), rgba(237,240,234,.08) 50%, transparent calc(50% + .5px));
+      overflow: clip;
+    }
+    .route-head { text-align: center; margin-bottom: 74px; }
+    .route-head .section-title { margin: 0 auto; }
+    .route-head .section-lead { margin-inline: auto; }
+
+    .rope-field {
+      position: relative;
+      min-height: 1330px;
+      width: min(100%, 950px);
+      margin: 0 auto;
+    }
+    .rope-core,
+    .rope-future {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      border-radius: 12px;
+    }
+    .rope-core {
+      top: 0;
+      height: calc(var(--rope-progress) * 1%);
+      min-height: 90px;
+      max-height: 980px;
+      overflow: hidden;
+      background:
+        repeating-linear-gradient(135deg, #96752a 0 5px, #e1be50 5px 11px, #b99131 11px 16px);
+      box-shadow: 0 0 0 1px rgba(233,196,73,.15), 0 0 22px rgba(233,196,73,.08);
+      transition: height .12s linear;
+    }
+    .rope-core::before,
+    .rope-core::after {
+      content: "";
+      position: absolute;
+      inset: 0 3px 0 auto;
+      width: 4px;
+      background: rgba(255,255,255,.22);
+      transform: skewY(-32deg);
+    }
+    .rope-core::after { inset: 0 auto 0 3px; opacity: .13; }
+    .rope-future {
+      top: 975px;
+      height: 280px;
+      border-left: 2px dashed rgba(237,240,234,.24);
+      width: 2px;
+      border-radius: 0;
+    }
+    .rope-fray {
+      position: absolute;
+      top: 939px;
+      left: 50%;
+      width: 100px;
+      height: 100px;
+      transform: translateX(-50%);
+    }
+    .rope-fray i {
+      position: absolute;
+      left: 48px;
+      top: 0;
+      width: 3px;
+      height: 80px;
+      background: var(--straw);
+      transform-origin: top;
+      opacity: .72;
+    }
+    .rope-fray i:nth-child(1) { transform: rotate(-21deg); }
+    .rope-fray i:nth-child(2) { transform: rotate(-10deg); }
+    .rope-fray i:nth-child(3) { transform: rotate(3deg); }
+    .rope-fray i:nth-child(4) { transform: rotate(14deg); }
+    .rope-fray i:nth-child(5) { transform: rotate(25deg); }
+
+    .route-label {
+      position: absolute;
+      left: calc(50% + 44px);
+      top: 330px;
+      width: min(330px, calc(50vw - 54px));
+      padding: 16px 18px;
+      border: 1px solid var(--line-strong);
+      background: rgba(22,24,28,.82);
+      backdrop-filter: blur(8px);
+    }
+    .route-label::before {
+      content: "";
+      position: absolute;
+      width: 44px;
+      height: 1px;
+      left: -44px;
+      top: 29px;
+      background: var(--line-strong);
+    }
+    .route-label strong { display: block; margin-bottom: 8px; font-size: .82rem; }
+    .route-label p { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.7; }
+
+    .zero-knot {
+      position: absolute;
+      left: 50%;
+      top: 82px;
+      transform: translate(-50%, -50%);
+      width: 46px;
+      height: 46px;
+      border: 1px dashed rgba(233,196,73,.5);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--straw);
+      background: var(--cargo-black);
+      font: 600 .63rem/1 "M PLUS 1 Code", monospace;
+      box-shadow: 0 0 0 8px rgba(233,196,73,.025);
+    }
+
+    .records-wrap { background: #15171b; border-top: 1px solid var(--line); }
+    .records-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 30px;
+      margin-bottom: 42px;
+    }
+    .record-count { color: var(--straw); font-size: clamp(2rem, 7vw, 5rem); line-height: .9; }
+    .record-count small { display: block; margin-top: 12px; color: var(--muted); font-size: .65rem; letter-spacing: .14em; }
+
+    .record-card {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      color: var(--paper-ink);
+      background:
+        repeating-linear-gradient(180deg, rgba(23,26,30,.03) 0 1px, transparent 1px 7px),
+        var(--paper);
+      box-shadow: 0 24px 70px rgba(0,0,0,.33);
+      border-left: 12px solid var(--carbon);
+    }
+    .record-stub {
+      padding: 26px 18px;
+      border-right: 1px dashed rgba(23,26,30,.38);
+      position: relative;
+      overflow: hidden;
+    }
+    .record-stub::after {
+      content: "";
+      position: absolute;
+      inset: auto 20px 24px;
+      height: 74px;
+      background:
+        repeating-linear-gradient(90deg, #171A1E 0 2px, transparent 2px 5px, #171A1E 5px 6px, transparent 6px 9px);
+      opacity: .75;
+    }
+    .record-stub strong { display: block; font-size: 1.18rem; }
+    .record-stub small { display: block; margin-top: 6px; font: 600 .66rem/1.6 "M PLUS 1 Code", monospace; }
+    .record-main { padding: clamp(24px, 5vw, 48px); }
+    .record-main h3 { margin: 0 0 28px; font-size: clamp(1.4rem, 3vw, 2.4rem); }
+    .record-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border-top: 1px solid rgba(23,26,30,.28);
+      border-left: 1px solid rgba(23,26,30,.28);
+    }
+    .record-field {
+      min-height: 88px;
+      padding: 15px 17px;
+      border-right: 1px solid rgba(23,26,30,.28);
+      border-bottom: 1px solid rgba(23,26,30,.28);
+    }
+    .record-field span { display: block; color: #6b7176; font-size: .66rem; letter-spacing: .08em; margin-bottom: 9px; }
+    .record-field strong { font-family: "M PLUS 1 Code", monospace; font-size: .89rem; }
+    .record-note { margin: 24px 0 0; font-size: .84rem; line-height: 1.85; }
+
+    .rules {
+      color: var(--paper-ink);
+      background: var(--fluoro);
+      border-top: 16px solid var(--straw);
+    }
+    .rules-grid {
+      display: grid;
+      grid-template-columns: .68fr 1.32fr;
+      gap: clamp(38px, 9vw, 120px);
+      align-items: start;
+    }
+    .rules .section-kicker { color: #587a9a; }
+    .rules .section-title { color: var(--paper-ink); }
+    .rule-list { list-style: none; padding: 0; margin: 0; border-top: 2px solid var(--paper-ink); }
+    .rule-list li {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 18px;
+      align-items: baseline;
+      padding: 27px 0;
+      border-bottom: 1px solid rgba(23,26,30,.32);
+      font-size: clamp(1.2rem, 3vw, 2.15rem);
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+    .rule-list .mono { color: #597896; font-size: .74rem; letter-spacing: .12em; }
+    .rules-foot { margin-top: 30px; color: #585d61; line-height: 1.8; font-size: .82rem; }
+
+    .progress-section { overflow: hidden; }
+    .destination-card {
+      display: grid;
+      grid-template-columns: 1fr .9fr;
+      gap: clamp(36px, 8vw, 100px);
+      align-items: end;
+      margin-top: 54px;
+      padding: clamp(28px, 5vw, 54px);
+      border: 1px solid var(--line-strong);
+      background: linear-gradient(135deg, rgba(110,147,184,.06), rgba(255,255,255,.018));
+    }
+    .destination-meta { display: grid; gap: 18px; }
+    .destination-row {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .destination-row span { color: var(--muted); font-size: .7rem; }
+    .destination-row strong { font-family: "M PLUS 1 Code", monospace; font-size: .86rem; }
+    .progress-number {
+      font: 700 clamp(3.3rem, 8vw, 7.2rem)/.9 "M PLUS 1 Code", monospace;
+      letter-spacing: -.08em;
+      text-align: right;
+    }
+    .progress-number b { color: var(--straw); font-weight: inherit; }
+    .floor-gauge {
+      grid-column: 1 / -1;
+      position: relative;
+      height: 34px;
+      margin-top: 4px;
+      border: 1px solid rgba(233,196,73,.34);
+      background:
+        repeating-linear-gradient(135deg, rgba(233,196,73,.09) 0 12px, transparent 12px 24px);
+      overflow: hidden;
+    }
+    .floor-gauge::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0%;
+      background: var(--straw);
+    }
+    .floor-gauge::after {
+      content: "0 / 1000 区画";
+      position: absolute;
+      right: 11px;
+      top: 8px;
+      color: var(--muted);
+      font: 600 .62rem/1 "M PLUS 1 Code", monospace;
+      letter-spacing: .12em;
+    }
+
+    .ritual-note {
+      margin-top: 42px;
+      padding: 18px 20px;
+      border-left: 3px solid var(--carbon);
+      color: var(--muted);
+      background: rgba(110,147,184,.04);
+      font-size: .76rem;
+      line-height: 1.85;
+    }
+    .ritual-note strong { color: var(--fluoro); }
+
+    .cta {
+      padding: 110px 0 130px;
+      text-align: center;
+      border-top: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 50% 100%, rgba(233,196,73,.11), transparent 40rem),
+        #111317;
+    }
+    .cta-mark {
+      width: 92px;
+      height: 92px;
+      margin: 0 auto 30px;
+      border: 1px solid rgba(233,196,73,.38);
+      display: grid;
+      place-items: center;
+      font: 700 1.2rem/1 "M PLUS 1 Code", monospace;
+      color: var(--straw);
+      transform: rotate(45deg);
+    }
+    .cta-mark span { transform: rotate(-45deg); }
+    .cta h2 { margin: 0; font-size: clamp(2.4rem, 7vw, 6.8rem); letter-spacing: -.05em; }
+    .cta p { max-width: 650px; margin: 26px auto 0; color: #aeb4b0; line-height: 1.95; }
+    .cta-requirements {
+      width: min(100%, 690px);
+      margin: 34px auto 0;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      text-align: left;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.8;
+    }
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 44px;
+      min-width: min(100%, 410px);
+      margin-top: 28px;
+      padding: 20px 24px;
+      color: var(--cargo-black);
+      background: var(--straw);
+      border: 1px solid var(--straw);
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: .08em;
+      transition: transform .2s ease, background .2s ease;
+    }
+    .cta-button:hover { transform: translateY(-3px); background: #f0cf5d; }
+    .cta-button .mono { font-size: .68rem; }
+
+    footer {
+      padding: 26px 0 34px;
+      color: #747a80;
+      background: #0d0f12;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: .64rem;
+      letter-spacing: .1em;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity .75s ease, transform .75s ease;
+    }
+    .reveal.is-visible { opacity: 1; transform: none; }
+
+    @media (max-width: 900px) {
+      .hero-grid, .manifest-grid, .rules-grid, .destination-card { grid-template-columns: 1fr; }
+      .hero { padding-top: 110px; }
+      .cargo-stage { order: -1; min-height: 460px; }
+      .hero h1 { font-size: clamp(3.4rem, 18vw, 7rem); }
+      .manifest-grid { gap: 48px; }
+      .rules-grid { gap: 52px; }
+      .progress-number { text-align: left; }
+    }
+
+    @media (max-width: 680px) {
+      .container { width: min(calc(100% - 22px), var(--max)); }
+      .topbar-inner { min-height: 62px; }
+      .brand-name small { display: none; }
+      .status-chip { font-size: .58rem; }
+      .hero { min-height: auto; padding: 82px 0 50px; }
+      .hero-grid { gap: 14px; }
+      .cargo-stage { min-height: 315px; }
+      .cargo-ring { width: 76vw; max-width: 300px; }
+      .straw-object { width: 150px; height: 215px; }
+      .straw-object i { height: 175px; }
+      .cargo-label { width: 148px; transform: rotate(-3deg) translate(34px, 82px); font-size: .58rem; }
+      .hero h1 { font-size: clamp(3.05rem, 17vw, 4.55rem); }
+      .eyebrow { margin-bottom: 12px; font-size: .62rem; }
+      .hero-copy { margin-top: 18px; font-size: .9rem; line-height: 1.75; }
+      .tracking-head { margin-top: 22px; }
+      .metric { min-width: 108px; padding: 7px; font-size: .51rem; }
+      .metric strong { font-size: .68rem; }
+      .manifest-row { grid-template-columns: 112px 1fr; }
+      .manifest-row > div { padding: 15px 14px; }
+      .route { min-height: 1700px; }
+      .rope-field { min-height: 1200px; }
+      .route-label { left: calc(50% + 30px); width: calc(50vw - 42px); padding: 12px; }
+      .route-label::before { width: 30px; left: -30px; }
+      .record-card { grid-template-columns: 1fr; border-left-width: 8px; }
+      .record-stub { min-height: 150px; border-right: 0; border-bottom: 1px dashed rgba(23,26,30,.38); }
+      .record-stub::after { inset: auto 18px 18px auto; width: 52%; }
+      .record-grid { grid-template-columns: 1fr; }
+      .rule-list li { grid-template-columns: 56px 1fr; gap: 10px; }
+      .destination-row { grid-template-columns: 105px 1fr; }
+      .cta-button { min-width: 100%; gap: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+      .boot { display: none; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="boot" aria-hidden="true">
+    <div class="printer">
+      <div class="printer-slot"></div>
+      <div class="boot-ticket mono">
+        <div class="boot-row"><span>貨物登録</span><strong>WRS-0001</strong></div>
+        <div class="boot-row"><span>品名</span><strong>藁 1本</strong></div>
+        <div class="boot-row"><span>重量</span><strong>0.4 g</strong></div>
+        <div class="boot-row"><span>状態</span><strong>交換待機中</strong></div>
+        <div class="boot-row"><span>最終配送先</span><strong>屋敷</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="#top" aria-label="わらしべ通運 トップへ">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">
+          <strong>わらしべ通運</strong>
+          <small class="mono">WARASHIBE EXPRESS / PUBLIC CARGO TRACE</small>
+        </span>
+      </a>
+      <div class="status-chip mono">
+        <span class="status-dot" aria-hidden="true"></span>
+        交換待機中
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy-wrap reveal">
+          <p class="eyebrow mono">PUBLIC CARGO TRACE / NIGHT TERMINAL 00</p>
+          <h1>わらしべ<span>通運</span></h1>
+          <p class="hero-copy">
+            貨物 No.0001「藁 1本」を輸送中。<br>
+            この貨物は、価値が変わるたびに<strong>交換という積み替え</strong>を行い、最終配送先「屋敷」へ向かいます。
+          </p>
+          <div class="tracking-head">
+            <span class="tracking-code mono">TRACKING: WRS-0001</span>
+            <span class="tracking-note">現在地：第零積替区域</span>
+          </div>
+        </div>
+
+        <div class="cargo-stage reveal" aria-label="貨物 藁一本">
+          <div class="cargo-ring"></div>
+          <div class="scanline"></div>
+          <div class="straw-object" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="cargo-label mono">
+            <strong>WRS-0001</strong>
+            DRY STRAW / 1 PCS<br>
+            HANDLE WITH HISTORY
+          </div>
+          <div class="hero-metrics mono">
+            <div class="metric">所持品<strong>藁 1本</strong></div>
+            <div class="metric">重量<strong>0.4 g</strong></div>
+            <div class="metric">申告価額<strong>¥ <span data-count="0">0</span></strong></div>
+            <div class="metric">結節数<strong>0000</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section manifest">
+      <div class="container manifest-grid">
+        <div class="reveal">
+          <p class="section-kicker mono">CURRENT MANIFEST / 現在貨物</p>
+          <h2 class="section-title">これは売買ではない。<br>貨物の積み替えである。</h2>
+          <p class="section-lead">
+            わらしべ通運は、藁一本から始まる公開輸送計画です。交換のたび、貨物番号は引き継がれ、重量・来歴・所有の痕跡だけが増えていきます。
+          </p>
+        </div>
+
+        <div class="reveal">
+          <div class="manifest-table">
+            <div class="manifest-row"><div>貨物番号</div><div>WRS-0001 <span>登録済</span></div></div>
+            <div class="manifest-row"><div>品名</div><div>乾燥藁 1本 <span>DRY</span></div></div>
+            <div class="manifest-row"><div>重量</div><div>0.4 g <span>±0.1</span></div></div>
+            <div class="manifest-row"><div>申告価額</div><div>¥0 <span>未査定</span></div></div>
+            <div class="manifest-row"><div>交換価値</div><div>未確定 <span>OPEN</span></div></div>
+            <div class="manifest-row"><div>運行状態</div><div class="status-live">交換待機中 <span>LIVE</span></div></div>
+          </div>
+          <div class="barcode" aria-label="貨物バーコード"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section route" id="route">
+      <div class="container">
+        <div class="route-head reveal">
+          <p class="section-kicker mono">ROPE TRACE / 綯合追跡</p>
+          <h2 class="section-title">交換のたび、<br>縄に結び目が増える。</h2>
+          <p class="section-lead">
+            現在、結び目はゼロ。縄の先はほどけた藁、その先はまだ綯われていない未来です。
+          </p>
+        </div>
+
+        <div class="rope-field" aria-label="交換履歴を表す縄">
+          <div class="rope-core"></div>
+          <div class="zero-knot">0000</div>
+          <div class="route-label reveal">
+            <strong class="mono">結節 No.0000 / 未成立</strong>
+            <p>最初の積み替えを待っています。ここから先の形状は、誰にも決められていません。</p>
+          </div>
+          <div class="rope-fray" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="rope-future"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section records-wrap" id="records">
+      <div class="container">
+        <div class="records-header reveal">
+          <div>
+            <p class="section-kicker mono">TRANSFER RECORD / 積替記録</p>
+            <h2 class="section-title">貨物登録記録</h2>
+          </div>
+          <div class="record-count mono">0000<small>COMPLETED TRANSFERS</small></div>
+        </div>
+
+        <article class="record-card reveal">
+          <div class="record-stub mono">
+            <strong>取扱記録</strong>
+            <small>REGISTER<br>NO.0000<br>WRS-0001</small>
+          </div>
+          <div class="record-main">
+            <h3>貨物登録</h3>
+            <div class="record-grid">
+              <div class="record-field"><span>差出人</span><strong>わらしべ通運 管理室</strong></div>
+              <div class="record-field"><span>受取人</span><strong>未定</strong></div>
+              <div class="record-field"><span>登録貨物</span><strong>乾燥藁 1本</strong></div>
+              <div class="record-field"><span>重量</span><strong>0.4 g</strong></div>
+              <div class="record-field"><span>状態</span><strong>未綯・結節なし</strong></div>
+              <div class="record-field"><span>価値のずれ</span><strong>未発生</strong></div>
+            </div>
+            <p class="record-note">
+              第零積替区域にて貨物登録。由来不明。市場価値なし。交換価値は未確定。最初の積み替えが成立するまで、本貨物は夜間待機区画に留め置く。
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section rules" id="rules">
+      <div class="container rules-grid">
+        <div class="reveal">
+          <p class="section-kicker mono">TRANSFER PROTOCOL / 交換の掟</p>
+          <h2 class="section-title">三つだけ。<br>それ以外は未定。</h2>
+        </div>
+        <div class="reveal">
+          <ol class="rule-list">
+            <li><span class="mono">RULE 01</span><span>金銭を介在させない</span></li>
+            <li><span class="mono">RULE 02</span><span>等価であってはならない</span></li>
+            <li><span class="mono">RULE 03</span><span>手放したものは取り戻さない</span></li>
+          </ol>
+          <p class="rules-foot">
+            市場価格が高い必要はありません。実用品と記念品、重い物と軽い物、来歴のない物と強い記憶を持つ物。何か一つ、価値の軸がずれていることを積み替え条件とします。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section progress-section" id="destination">
+      <div class="container">
+        <div class="reveal">
+          <p class="section-kicker mono">FINAL DESTINATION / 最終配送先</p>
+          <h2 class="section-title">屋敷まで、<br>あと 100.000％。</h2>
+          <p class="section-lead">
+            目的地は登録されています。所在地も、到達条件も、まだ取得されていません。
+          </p>
+        </div>
+
+        <div class="destination-card reveal">
+          <div class="destination-meta">
+            <div class="destination-row"><span>名称</span><strong>屋敷</strong></div>
+            <div class="destination-row"><span>所在地</span><strong>未取得</strong></div>
+            <div class="destination-row"><span>到達条件</span><strong>不明</strong></div>
+            <div class="destination-row"><span>現在貨物</span><strong>藁 1本</strong></div>
+          </div>
+          <div class="progress-number"><b data-progress>0.000</b>%</div>
+          <div class="floor-gauge" aria-label="屋敷までの進捗 0パーセント"></div>
+        </div>
+
+        <div class="ritual-note mono reveal">
+          <strong>INTERNAL NOTICE:</strong><br>
+          本輸送は、第一綯合計画の一部として実施されています。貨物の最終用途については開示されません。
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" id="contact">
+      <div class="container reveal">
+        <div class="cta-mark"><span>01</span></div>
+        <h2>交換を申し出る</h2>
+        <p>
+          あなたの手元にある物を、この貨物と積み替えます。物の値段より、なぜそれを手放すのかを教えてください。
+        </p>
+        <div class="cta-requirements">
+          交換候補の写真、物の説明、手放す理由、受け渡し方法をDMで送ってください。生き物・食品・危険物・違法物・個人情報を含む物は取り扱いません。掲載範囲は相談のうえ決定します。
+        </div>
+        <a class="cta-button" href="https://x.com/orz884" target="_blank" rel="noreferrer noopener">
+          <span>交換を申し出る</span>
+          <span class="mono">OPEN X / DM</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner mono">
+      <span>© WARASHIBE EXPRESS / FICTIONAL CARRIER</span>
+      <span>NO AFFILIATION WITH ANY REAL TRANSPORT COMPANY</span>
+    </div>
+  </footer>
+
+  <script>
+    const boot = document.querySelector('.boot');
+    window.addEventListener('load', () => {
+      window.setTimeout(() => boot?.classList.add('is-hidden'), 1050);
+    });
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+
+    const route = document.querySelector('.route');
+    const updateRope = () => {
+      if (!route) return;
+      const rect = route.getBoundingClientRect();
+      const viewH = window.innerHeight;
+      const total = Math.max(1, rect.height - viewH * .45);
+      const entered = Math.min(total, Math.max(0, viewH * .58 - rect.top));
+      const progress = Math.min(100, Math.max(9, (entered / total) * 100));
+      document.documentElement.style.setProperty('--rope-progress', progress.toFixed(2));
+    };
+    updateRope();
+    window.addEventListener('scroll', updateRope, { passive: true });
+    window.addEventListener('resize', updateRope);
+
+    const progressTarget = document.querySelector('[data-progress]');
+    const progressObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting || !progressTarget) return;
+        const start = performance.now();
+        const duration = 850;
+        const animate = (now) => {
+          const t = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - t, 3);
+          const flickerValue = (0.037 * Math.sin(eased * Math.PI)) * (1 - eased);
+          progressTarget.textContent = Math.max(0, flickerValue).toFixed(3);
+          if (t < 1) requestAnimationFrame(animate);
+          else progressTarget.textContent = '0.000';
+        };
+        requestAnimationFrame(animate);
+        progressObserver.disconnect();
+      });
+    }, { threshold: .5 });
+    if (progressTarget) progressObserver.observe(progressTarget);
+  </script>
+</body>
+</html>
