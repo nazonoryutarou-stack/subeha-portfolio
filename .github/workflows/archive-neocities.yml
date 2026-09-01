@@ -25,7 +25,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p snapshot/site snapshot/metadata
+          mkdir -p snapshot/site snapshot/metadata snapshot/recovered
           curl --fail --silent --show-error \
             -H "Authorization: Bearer ${NEOCITIES_TOKEN}" \
             https://neocities.org/api/info \
@@ -76,7 +76,6 @@ jobs:
               url = base_url + urllib.parse.quote(rel, safe='/')
 
               last_error = None
-              data = None
               for attempt in range(1, 4):
                   try:
                       req = urllib.request.Request(url, headers={
@@ -160,37 +159,87 @@ jobs:
               raise SystemExit('Neocities changed while the snapshot was being taken; rerun for a coherent archive.')
           PY
 
+      - name: Add recovered pre-migration index
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > snapshot/recovered/index-pre-migration-2026-08-26.html <<'EOF'
+          <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#efefeb"><title>すべての歯が見える</title><link rel="stylesheet" href="./assets/style.css"></head><body>
+          <div class="wrap">
+            <header class="sitebar"><div class="brand">すべての歯が見える</div><nav><a href="./work/">取扱</a><a href="#footer">連絡</a></nav></header>
+            <main>
+              <section class="hero"><img class="mark" src="./assets/mark.png" alt=""><p class="motto">遅滞なく、直ちに。</p></section>
+              <section class="greeting"><h2 class="rule-title">ごあいさつ</h2><div class="body">
+                <p>いつもお世話になっております。<br>バレたので、こちらでやり直します。</p>
+                <p>今回から一般の方にも一部商品をお分けします。<br>同業各位におかれましては、一般向け商品の大量購入をご遠慮ください。同業向けに必要なものは別途用意します。</p>
+                <p>引き続き、ジジイにはご内密にお願いいたします。</p>
+                <p>Telegramでの販売は終了しました。<br>今後の販売はこちらで行います。</p>
+              </div></section>
+              <section><h1 class="rule-title">商品</h1><nav class="split" aria-label="商品区分"><a href="./trade/">同業者</a><a href="./general/">一般</a></nav></section>
+            </main>
+            <footer id="footer" class="footer"><span>仮設中</span><span>連絡・表示事項は公開時に整備</span></footer>
+          </div></body></html>
+          EOF
+          cat > snapshot/recovered/README.txt <<'EOF'
+          Recovered pre-migration homepage
+          =================================
+
+          index-pre-migration-2026-08-26.html was recovered from the user's prior
+          ChatGPT file library after Neocities site/index.html had already been overwritten
+          by the new GitHub-driven homepage.
+
+          It is intentionally stored outside site/ so the archive does not falsely claim
+          that this was the live index.html at snapshot time.
+
+          The HTML references ./assets/style.css and ./assets/mark.png. If those historical
+          assets are still present in site/assets/, copying this recovered file to the root
+          as index.html reconstructs that earlier homepage against the archived assets.
+          EOF
+
       - name: Write archive notes and checksums
         shell: bash
         run: |
           set -euo pipefail
           cat > snapshot/README.txt <<'EOF'
-          Neocities full-site snapshot
-          =============================
+          Neocities complete archive
+          ===========================
 
-          This directory contains every non-directory file returned by the authenticated
-          Neocities /api/list endpoint at snapshot time.
+          site/
+            Every non-directory file returned by the authenticated Neocities /api/list
+            endpoint at snapshot time, preserving its original path.
 
-          site/                       downloaded website files, preserving paths
-          metadata/info.json          authenticated Neocities site information
-          metadata/manifest-before.json  authoritative file list before download
-          metadata/manifest-after.json   file list after download
-          metadata/verification.json  per-file SHA1/size verification results
-          SHA1SUMS                    SHA1 checksums of the downloaded local files
+          recovered/
+            Files recovered from prior user-provided sources that had already been
+            overwritten on the live Neocities site. These are separated from site/ to keep
+            provenance explicit.
 
-          The snapshot job fails if any listed file cannot be downloaded, if its SHA1/size
-          differs from the Neocities manifest, or if the remote file list changes during
-          capture. This makes the archive internally auditable rather than merely a pile
-          of files that happened to download without complaint.
+          metadata/info.json
+            Authenticated Neocities site information.
+
+          metadata/manifest-before.json
+          metadata/manifest-after.json
+            Authoritative Neocities file lists before and after capture. The job fails if
+            they differ.
+
+          metadata/verification.json
+            Per-file size and SHA1 verification against the Neocities manifest.
+
+          SHA1SUMS
+            Local SHA1 checksums for both the live snapshot and recovered files.
+
+          The job fails if any listed Neocities file cannot be downloaded, if its size or
+          SHA1 differs from the API manifest, or if the site changes while capture is in
+          progress. The recovered pre-migration index is separately labeled because it was
+          no longer live when the authenticated snapshot was taken.
           EOF
-          (cd snapshot/site && find . -type f -print0 | sort -z | xargs -0 sha1sum) > snapshot/SHA1SUMS
-          tar -C snapshot -czf neocities-full-snapshot.tar.gz .
+          (cd snapshot && find site recovered -type f -print0 | sort -z | xargs -0 sha1sum) > snapshot/SHA1SUMS
+          tar -C snapshot -czf neocities-complete-archive.tar.gz .
 
-      - name: Upload verified archive
+      - name: Upload complete verified archive
         uses: actions/upload-artifact@v4
         with:
-          name: neocities-full-snapshot
-          path: neocities-full-snapshot.tar.gz
+          name: neocities-complete-archive
+          path: neocities-complete-archive.tar.gz
           if-no-files-found: error
           retention-days: 90
           compression-level: 0
