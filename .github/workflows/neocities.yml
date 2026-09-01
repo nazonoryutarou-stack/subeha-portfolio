@@ -38,13 +38,13 @@ jobs:
           test -f public/data/trade.json
           test -f public/data/general.json
 
-      - name: Neocities token not configured
+      - name: Require Neocities token
         if: env.NEOCITIES_API_TOKEN == ''
         shell: bash
         run: |
-          echo 'No Neocities API token was found.'
-          echo 'Create a repository Actions secret/variable or github-pages environment secret named NEOCITIES_API_TOKEN.'
-          echo 'NEOCITIES_TOKEN and NEOCITIES_API_KEY are also accepted.'
+          echo 'No Neocities API token was found in repository Actions secrets/variables or the github-pages environment.'
+          echo 'Expected name: NEOCITIES_API_TOKEN (also accepts NEOCITIES_TOKEN or NEOCITIES_API_KEY).'
+          exit 1
 
       - name: Deploy public directory to Neocities
         if: env.NEOCITIES_API_TOKEN != ''
