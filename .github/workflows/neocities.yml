@@ -19,10 +19,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-    env:
-      NEOCITIES_API_TOKEN: ${{ secrets.NEOCITIES_API_TOKEN || secrets.NEOCITIES_TOKEN || secrets.NEOCITIES_API_KEY || vars.NEOCITIES_API_TOKEN || vars.NEOCITIES_TOKEN || vars.NEOCITIES_API_KEY }}
 
     steps:
       - name: Checkout
@@ -38,19 +34,10 @@ jobs:
           test -f public/data/trade.json
           test -f public/data/general.json
 
-      - name: Require Neocities token
-        if: env.NEOCITIES_API_TOKEN == ''
-        shell: bash
-        run: |
-          echo 'No Neocities API token was found in repository Actions secrets/variables or the github-pages environment.'
-          echo 'Expected name: NEOCITIES_API_TOKEN (also accepts NEOCITIES_TOKEN or NEOCITIES_API_KEY).'
-          exit 1
-
       - name: Deploy public directory to Neocities
-        if: env.NEOCITIES_API_TOKEN != ''
         uses: bcomnes/deploy-to-neocities@v3
         with:
-          api_key: ${{ env.NEOCITIES_API_TOKEN }}
+          api_key: ${{ secrets.NEOSITIES_API_TOKEN }}
           dist_dir: public
           cleanup: false
           neocities_supporter: false
