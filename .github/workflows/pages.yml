@@ -39,34 +39,28 @@ jobs:
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
             <meta name="robots" content="noindex,nofollow,noarchive">
-            <meta name="theme-color" content="#eeeeea">
+            <meta name="theme-color" content="#f5f2ea">
             <title>すべての歯が見える</title>
             <style>
+              :root{--paper:#f5f2ea;--ink:#181612;--muted:#756f65;--hair:rgba(24,22,18,.30)}
               *{box-sizing:border-box}
-              html,body{margin:0;min-height:100%;background:#eeeeea;color:#111}
-              body{font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;-webkit-font-smoothing:antialiased}
-              main{min-height:100svh;display:flex;justify-content:center;padding:28px 24px 64px}
+              html,body{margin:0;min-height:100%;background:var(--paper);color:var(--ink)}
+              body{font-family:"Yu Mincho","Hiragino Mincho ProN","Hiragino Mincho Pro","Noto Serif JP",serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-feature-settings:"palt" 1}
+              main{min-height:100svh;display:flex;justify-content:center;padding:30px 24px 72px}
               .shell{width:min(100%,560px)}
-              .site-name{margin:0;text-align:center;font-size:12px;font-weight:400;letter-spacing:.36em;text-indent:.36em}
+              .site-name{margin:0;text-align:center;font-size:11px;font-weight:500;letter-spacing:.4em;text-indent:.4em}
               .hero{text-align:center;padding-top:10svh}
-              .mark{display:block;width:min(35vw,150px);height:auto;margin:0 auto 34px;filter:grayscale(1) contrast(1.45)}
-              .motto{margin:0;font-size:clamp(13px,3.2vw,16px);font-weight:400;letter-spacing:.28em;text-indent:.28em}
-              .greeting{margin:13svh 0 11svh;padding-top:18px;border-top:1px solid #111}
-              .greeting h2{margin:0 0 24px;text-align:center;font-size:13px;font-weight:400;letter-spacing:.38em;text-indent:.38em}
-              .greeting p{margin:0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:12.5px;font-weight:400;line-height:2.05;letter-spacing:.04em;text-align:left}
-              .section-title{margin:0 0 22px;text-align:center;font-size:13px;font-weight:400;letter-spacing:.42em;text-indent:.42em}
-              .split{position:relative;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #111}
-              .split::after{content:"";position:absolute;left:50%;top:0;width:1px;height:18px;background:#111}
-              .split a{display:block;padding:28px 12px 16px;color:#111;text-align:center;text-decoration:none;font-size:14px;letter-spacing:.34em;text-indent:.34em}
-              .split a:hover,.split a:focus-visible{text-decoration:underline;text-underline-offset:5px}
-              .split a:focus-visible{outline:1px solid #111;outline-offset:4px}
-              @media(max-width:420px){
-                main{padding:22px 24px 52px}
-                .hero{padding-top:9svh}
-                .greeting{margin-top:12svh;margin-bottom:10svh}
-                .greeting p{font-size:12px;line-height:2}
-                .split a{font-size:13px;letter-spacing:.26em;text-indent:.26em}
-              }
+              .mark{display:block;width:min(34vw,146px);height:auto;margin:0 auto 36px;filter:grayscale(1) contrast(1.35)}
+              .motto{margin:0;font-size:clamp(13px,3.2vw,16px);font-weight:500;letter-spacing:.3em;text-indent:.3em}
+              .greeting{margin:13svh 0 11svh;padding-top:20px;border-top:.75px solid var(--hair)}
+              .greeting h2{margin:0 0 26px;text-align:center;font-size:12px;font-weight:500;letter-spacing:.42em;text-indent:.42em}
+              .greeting p{margin:0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:11.5px;font-weight:400;line-height:2.15;letter-spacing:.045em;text-align:left;color:#2f2b25}
+              .section-title{margin:0 0 23px;text-align:center;font-size:12px;font-weight:500;letter-spacing:.46em;text-indent:.46em}
+              .split{position:relative;display:grid;grid-template-columns:1fr 1fr;border-top:.75px solid var(--hair)}
+              .split::after{content:"";position:absolute;left:50%;top:0;width:.75px;height:20px;background:var(--hair)}
+              .split a{display:block;padding:31px 12px 17px;color:var(--ink);text-align:center;text-decoration:none;font-size:14px;font-weight:500;letter-spacing:.34em;text-indent:.34em;transition:opacity .45s ease}
+              .split a:hover,.split a:focus-visible{opacity:.52}
+              @media(max-width:420px){main{padding:22px 24px 56px}.hero{padding-top:9svh}.greeting{margin-top:12svh;margin-bottom:10svh}.greeting p{font-size:11px;line-height:2.05}.split a{font-size:13px;letter-spacing:.27em;text-indent:.27em}}
             </style>
           </head>
           <body>
@@ -102,8 +96,9 @@ jobs:
             --paper:#f5f2ea;
             --ink:#181612;
             --muted:#756f65;
-            --hair:rgba(24,22,18,.34);
-            --connector:rgba(24,22,18,.62);
+            --hair:rgba(24,22,18,.28);
+            --connector:rgba(24,22,18,.46);
+            --vermilion:#9b3f2f;
           }
           *{box-sizing:border-box}
           html,body{margin:0;min-height:100%;background:var(--paper);color:var(--ink)}
@@ -111,6 +106,7 @@ jobs:
             font-family:"Yu Mincho","Hiragino Mincho ProN","Hiragino Mincho Pro","Noto Serif JP",serif;
             -webkit-font-smoothing:antialiased;
             text-rendering:optimizeLegibility;
+            font-kerning:normal;
             font-feature-settings:"palt" 1;
           }
           ::selection{background:#d8d1c3;color:var(--ink)}
@@ -120,7 +116,7 @@ jobs:
           a{color:var(--ink);text-decoration:none}
           a:hover,a:focus-visible{text-decoration:underline;text-decoration-thickness:.75px;text-underline-offset:5px}
           .back{font-size:10px;font-weight:500;letter-spacing:.24em;color:var(--muted)}
-          .lead{max-width:600px;margin:30px 2px 0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:10.5px;font-weight:400;line-height:2.05;letter-spacing:.035em;color:var(--muted)}
+          .lead{max-width:620px;margin:30px 2px 0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:10.5px;font-weight:400;line-height:2.05;letter-spacing:.035em;color:var(--muted)}
           .test-label{display:inline-block;margin-left:12px;font:500 8px/1.2 system-ui,-apple-system,"Yu Gothic",sans-serif;letter-spacing:.2em;color:var(--muted);vertical-align:2px}
 
           .tree-wrap{
@@ -129,74 +125,84 @@ jobs:
             overflow-y:hidden;
             padding:16px 10px 44px;
             scrollbar-width:thin;
-            scrollbar-color:rgba(24,22,18,.22) transparent;
+            scrollbar-color:rgba(24,22,18,.2) transparent;
           }
           .tree-wrap::-webkit-scrollbar{height:5px}
-          .tree-wrap::-webkit-scrollbar-thumb{background:rgba(24,22,18,.18);border-radius:999px}
+          .tree-wrap::-webkit-scrollbar-thumb{background:rgba(24,22,18,.16);border-radius:999px}
+          .tree-stage{position:relative;min-width:1060px;padding:8px 0 4px;isolation:isolate}
+          .connectors{position:absolute;left:0;top:0;z-index:0;pointer-events:none;overflow:visible}
+          .connector-path{fill:none;stroke:var(--connector);stroke-width:.9;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;transition:stroke .45s ease,opacity .45s ease,stroke-width .45s ease}
+
           .tree,.tree ul{list-style:none;margin:0;padding:0}
-          .tree{min-width:1120px}
+          .tree{position:relative;z-index:1}
           .tree li{position:relative;display:flex;align-items:flex-start}
+          .tree ul{margin-left:84px}
+          .tree ul>li{padding:0 0 25px}
+          .tree ul>li:last-child{padding-bottom:0}
 
           .node{
             position:relative;
             z-index:2;
             display:inline-flex;
-            align-items:baseline;
-            gap:9px;
             min-height:42px;
-            padding:8px 11px;
+            padding:8px 10px;
             background:var(--paper);
             white-space:nowrap;
+            transition:opacity .48s ease,transform .48s cubic-bezier(.2,.75,.25,1),color .48s ease;
           }
-          .node strong{line-height:1.5;font-weight:500;letter-spacing:.055em}
-          .node small{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:7.5px;font-weight:500;letter-spacing:.16em;color:var(--muted)}
-
-          .root{min-width:168px;padding-left:2px;padding-top:3px}
+          .node strong{line-height:1.48;font-weight:500;letter-spacing:.055em}
+          .root{min-width:170px;padding-left:2px;padding-top:3px;align-items:baseline}
           .root strong{font-size:clamp(34px,4vw,47px);font-weight:600;letter-spacing:.015em}
-          .category{min-width:152px;padding-top:7px}
-          .category strong{font-size:18px;font-weight:600;letter-spacing:.08em}
-          .product{padding-top:8px}
-          .product strong{font-size:14px;font-weight:450;letter-spacing:.09em}
 
-          /* Rounded connector system: each branch draws its own soft elbow. */
-          .tree ul{position:relative;margin-left:52px;padding-left:38px}
-          .tree ul>li{padding:0 0 25px 36px}
-          .tree ul>li::before{
-            content:"";
-            position:absolute;
-            left:0;
-            top:0;
-            width:36px;
-            height:21px;
-            border-left:1px solid var(--connector);
-            border-bottom:1px solid var(--connector);
-            border-bottom-left-radius:15px;
-          }
-          .tree ul>li:not(:last-child)::after{
-            content:"";
-            position:absolute;
-            left:0;
-            top:21px;
-            bottom:0;
-            width:1px;
-            background:var(--connector);
-          }
-          .tree ul>li:last-child{padding-bottom:0}
-          .tree .has-children>.node::after,
-          .tree>li>.root::after{
-            content:"";
-            position:absolute;
-            right:-53px;
-            top:20px;
-            width:53px;
-            height:1px;
-            background:var(--connector);
-            border-radius:999px;
-          }
+          .category{min-width:166px;align-items:center;gap:12px;padding-top:7px}
+          .category-copy{display:flex;flex-direction:column;gap:2px}
+          .category strong{font-size:18px;font-weight:600;letter-spacing:.08em}
+          .category small{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:7px;font-weight:500;letter-spacing:.18em;color:var(--muted)}
+
+          .glyph{position:relative;display:inline-block;width:18px;height:18px;flex:0 0 18px;color:var(--ink);opacity:.62}
+          .glyph::before,.glyph::after{content:"";position:absolute}
+          .glyph-1::before{inset:2px;border:.8px solid currentColor;border-radius:50%}
+          .glyph-1::after{width:3px;height:3px;left:7.5px;top:7.5px;background:currentColor;border-radius:50%}
+          .glyph-2::before{width:10px;height:10px;left:4px;top:4px;border:.8px solid currentColor;transform:rotate(45deg)}
+          .glyph-2::after{width:1px;height:18px;left:8.5px;top:0;background:currentColor;opacity:.5}
+          .glyph-3::before{width:1px;height:16px;left:8.5px;top:1px;background:currentColor}
+          .glyph-3::after{width:15px;height:1px;left:1.5px;top:8.5px;background:currentColor}
+          .glyph-4::before{inset:3px;border:.8px solid currentColor;border-radius:8px 8px 2px 8px;transform:rotate(45deg)}
+          .glyph-4::after{width:3px;height:3px;left:7.5px;top:7.5px;background:currentColor;border-radius:50%}
+          .glyph-5::before{left:2px;right:2px;top:5px;height:7px;border-top:.8px solid currentColor;border-bottom:.8px solid currentColor}
+          .glyph-5::after{width:1px;height:18px;left:8.5px;top:0;background:currentColor;opacity:.5}
+
+          .product{min-width:178px;flex-direction:column;align-items:flex-start;gap:3px;padding-top:8px;cursor:default}
+          .product strong{font-size:14px;font-weight:450;letter-spacing:.09em}
+          .meta{display:flex;align-items:center;gap:6px;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:7.5px;font-weight:500;letter-spacing:.16em;color:var(--muted);opacity:.68;transition:opacity .45s ease,color .45s ease}
+          .meta i{display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--vermilion);opacity:.84}
+
+          .tree-stage.is-focused .node:not(.is-active){opacity:.24}
+          .tree-stage.is-focused .connector-path:not(.is-active){opacity:.16}
+          .node.is-active{opacity:1;transform:translateX(2px)}
+          .product.is-active .meta{opacity:1;color:#5f554b}
+          .connector-path.is-active{stroke:var(--ink);stroke-width:1.15;opacity:.92}
 
           .legend{display:flex;flex-wrap:wrap;gap:12px 26px;padding:17px 2px 0;border-top:.75px solid var(--hair);font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:9px;line-height:1.9;letter-spacing:.04em;color:var(--muted)}
-          .legend span::before{content:"";display:inline-block;width:20px;height:1px;margin:0 8px 3px 0;background:var(--connector);border-radius:999px}
+          .legend span::before{content:"";display:inline-block;width:20px;height:.8px;margin:0 8px 3px 0;background:var(--connector);border-radius:999px}
           .note{max-width:620px;margin:42px 2px 0;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:10px;line-height:2;letter-spacing:.025em;color:var(--muted)}
+
+          @media(prefers-reduced-motion:no-preference){
+            header{animation:soft-in .8s .05s both}
+            .lead{animation:soft-in .9s .18s both}
+            .root{animation:soft-in .95s .15s both}
+            .tree>li>ul>li:nth-child(1)>.category{animation:soft-in .9s .52s both}
+            .tree>li>ul>li:nth-child(2)>.category{animation:soft-in .9s .60s both}
+            .tree>li>ul>li:nth-child(3)>.category{animation:soft-in .9s .68s both}
+            .tree>li>ul>li:nth-child(4)>.category{animation:soft-in .9s .76s both}
+            .tree>li>ul>li:nth-child(5)>.category{animation:soft-in .9s .84s both}
+            .tree>li>ul>li>ul>li:nth-child(1)>.product{animation:soft-in .95s 1.05s both}
+            .tree>li>ul>li>ul>li:nth-child(2)>.product{animation:soft-in .95s 1.13s both}
+            .tree>li>ul>li>ul>li:nth-child(3)>.product{animation:soft-in .95s 1.21s both}
+            .tree>li>ul>li>ul>li:nth-child(4)>.product{animation:soft-in .95s 1.29s both}
+            .tree>li>ul>li>ul>li:nth-child(5)>.product{animation:soft-in .95s 1.37s both}
+            @keyframes soft-in{from{opacity:0;transform:translateY(6px);filter:blur(1.6px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+          }
 
           @media(max-width:620px){
             main{width:min(calc(100% - 36px),1240px);padding-top:6svh;padding-bottom:70px}
@@ -204,19 +210,131 @@ jobs:
             h1{font-size:12px}
             .lead{font-size:10px}
             .tree-wrap{margin-top:54px;margin-right:-18px;padding-right:18px;padding-bottom:36px}
-            .tree{min-width:980px}
-            .root{min-width:126px}
+            .tree-stage{min-width:900px}
+            .tree ul{margin-left:62px}
+            .root{min-width:128px}
             .root strong{font-size:29px}
-            .category{min-width:120px}
+            .category{min-width:145px;gap:9px}
             .category strong{font-size:16px}
+            .product{min-width:158px}
             .product strong{font-size:13px}
-            .tree ul{margin-left:38px;padding-left:30px}
-            .tree ul>li{padding-left:29px;padding-bottom:20px}
-            .tree ul>li::before{width:29px;height:20px;border-bottom-left-radius:12px}
-            .tree ul>li:not(:last-child)::after{top:20px}
-            .tree .has-children>.node::after,.tree>li>.root::after{right:-39px;top:20px;width:39px}
+          }
+
+          @media(prefers-reduced-motion:reduce){
+            *,*::before,*::after{animation-duration:.001ms!important;animation-delay:0ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
           }
           CSS
+
+          cat > _site/tree.js <<'JS'
+          (() => {
+            const NS = 'http://www.w3.org/2000/svg';
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            const initStage = (stage) => {
+              const tree = stage.querySelector('.tree');
+              if (!tree) return;
+
+              const svg = document.createElementNS(NS, 'svg');
+              svg.classList.add('connectors');
+              svg.setAttribute('aria-hidden', 'true');
+              stage.prepend(svg);
+
+              const pathByNode = new Map();
+              let resizeTimer;
+
+              const nodeById = (id) => tree.querySelector(`.node[data-node="${id}"]`);
+
+              const draw = (animate) => {
+                const stageRect = stage.getBoundingClientRect();
+                const width = Math.max(stage.scrollWidth, stage.clientWidth);
+                const height = Math.max(stage.scrollHeight, stage.clientHeight);
+                svg.setAttribute('width', String(width));
+                svg.setAttribute('height', String(height));
+                svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+                svg.replaceChildren();
+                pathByNode.clear();
+
+                const branchItems = [...tree.querySelectorAll('li[data-parent]')];
+                branchItems.forEach((li, index) => {
+                  const child = li.firstElementChild;
+                  const parent = nodeById(li.dataset.parent);
+                  if (!child || !parent) return;
+
+                  const pr = parent.getBoundingClientRect();
+                  const cr = child.getBoundingClientRect();
+                  const sx = pr.right - stageRect.left - 1;
+                  const sy = pr.top - stageRect.top + pr.height / 2;
+                  const ex = cr.left - stageRect.left + 1;
+                  const ey = cr.top - stageRect.top + cr.height / 2;
+                  const span = Math.max(30, ex - sx);
+                  const curve = Math.max(24, Math.min(66, span * .46));
+
+                  const path = document.createElementNS(NS, 'path');
+                  path.classList.add('connector-path');
+                  path.setAttribute('d', `M ${sx} ${sy} C ${sx + curve} ${sy}, ${ex - curve} ${ey}, ${ex} ${ey}`);
+                  path.dataset.to = child.dataset.node || '';
+                  path.dataset.from = li.dataset.parent || '';
+                  svg.appendChild(path);
+                  pathByNode.set(child.dataset.node, path);
+
+                  if (animate && !reduceMotion) {
+                    const length = path.getTotalLength();
+                    path.style.strokeDasharray = `${length}`;
+                    path.style.strokeDashoffset = `${length}`;
+                    path.style.opacity = '0';
+                    const isProduct = child.classList.contains('product');
+                    const delay = isProduct ? 900 + index * 18 : 360 + index * 65;
+                    path.animate(
+                      [
+                        {strokeDashoffset:length, opacity:0},
+                        {strokeDashoffset:0, opacity:1}
+                      ],
+                      {duration:isProduct ? 920 : 760, delay, easing:'cubic-bezier(.25,.72,.25,1)', fill:'forwards'}
+                    );
+                  }
+                });
+              };
+
+              const clearFocus = () => {
+                stage.classList.remove('is-focused');
+                stage.querySelectorAll('.node.is-active').forEach((node) => node.classList.remove('is-active'));
+                stage.querySelectorAll('.connector-path.is-active').forEach((path) => path.classList.remove('is-active'));
+              };
+
+              const focusBranch = (product) => {
+                clearFocus();
+                stage.classList.add('is-focused');
+                let node = product;
+                while (node) {
+                  node.classList.add('is-active');
+                  const id = node.dataset.node;
+                  const path = pathByNode.get(id);
+                  if (path) path.classList.add('is-active');
+                  const li = node.closest('li');
+                  const parentId = li && li.dataset.parent;
+                  if (!parentId) break;
+                  node = nodeById(parentId);
+                }
+              };
+
+              stage.querySelectorAll('.product').forEach((product) => {
+                product.addEventListener('pointerenter', () => focusBranch(product));
+                product.addEventListener('pointerleave', clearFocus);
+              });
+
+              const firstDraw = () => requestAnimationFrame(() => draw(true));
+              if (document.fonts && document.fonts.ready) document.fonts.ready.then(firstDraw);
+              else firstDraw();
+
+              window.addEventListener('resize', () => {
+                window.clearTimeout(resizeTimer);
+                resizeTimer = window.setTimeout(() => draw(false), 120);
+              }, {passive:true});
+            };
+
+            document.querySelectorAll('.tree-stage').forEach(initStage);
+          })();
+          JS
 
           cat > _site/trade/index.html <<'HTML'
           <!doctype html>
@@ -228,29 +346,32 @@ jobs:
             <meta name="theme-color" content="#f5f2ea">
             <title>同業者｜すべての歯が見える</title>
             <link rel="stylesheet" href="../tree.css">
+            <script src="../tree.js" defer></script>
           </head>
           <body>
             <main>
               <header><h1>同業者 <span class="test-label">仮商品</span></h1><a class="back" href="../">戻</a></header>
               <p class="lead">分岐表示確認用の仮商品です。名称・分類・取扱内容はすべて仮置きです。</p>
               <section class="tree-wrap" aria-label="同業者向け仮商品系統図">
-                <ul class="tree"><li><div class="node root"><strong>同業者</strong></div><ul>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 01</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 01-01</strong></div></li><li><div class="node product"><strong>仮商品 01-02</strong></div></li><li><div class="node product"><strong>仮商品 01-03</strong></div></li><li><div class="node product"><strong>仮商品 01-04</strong></div></li><li><div class="node product"><strong>仮商品 01-05</strong></div></li>
-                  </ul></li>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 02</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 02-01</strong></div></li><li><div class="node product"><strong>仮商品 02-02</strong></div></li><li><div class="node product"><strong>仮商品 02-03</strong></div></li><li><div class="node product"><strong>仮商品 02-04</strong></div></li><li><div class="node product"><strong>仮商品 02-05</strong></div></li>
-                  </ul></li>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 03</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 03-01</strong></div></li><li><div class="node product"><strong>仮商品 03-02</strong></div></li><li><div class="node product"><strong>仮商品 03-03</strong></div></li><li><div class="node product"><strong>仮商品 03-04</strong></div></li><li><div class="node product"><strong>仮商品 03-05</strong></div></li>
-                  </ul></li>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 04</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 04-01</strong></div></li><li><div class="node product"><strong>仮商品 04-02</strong></div></li><li><div class="node product"><strong>仮商品 04-03</strong></div></li><li><div class="node product"><strong>仮商品 04-04</strong></div></li><li><div class="node product"><strong>仮商品 04-05</strong></div></li>
-                  </ul></li>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 05</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 05-01</strong></div></li><li><div class="node product"><strong>仮商品 05-02</strong></div></li><li><div class="node product"><strong>仮商品 05-03</strong></div></li><li><div class="node product"><strong>仮商品 05-04</strong></div></li><li><div class="node product"><strong>仮商品 05-05</strong></div></li>
-                  </ul></li>
-                </ul></li></ul>
+                <div class="tree-stage">
+                  <ul class="tree"><li><div class="node root" data-node="t-root"><strong>同業者</strong></div><ul>
+                    <li data-parent="t-root"><div class="node category" data-node="t-c1"><span class="glyph glyph-1" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 01</strong><small>分類 01</small></span></div><ul>
+                      <li data-parent="t-c1"><div class="node product" data-node="t-p0101"><strong>仮商品 01-01</strong><span class="meta"><i></i>T-01-01 / 仮版</span></div></li><li data-parent="t-c1"><div class="node product" data-node="t-p0102"><strong>仮商品 01-02</strong><span class="meta"><i></i>T-01-02 / 仮版</span></div></li><li data-parent="t-c1"><div class="node product" data-node="t-p0103"><strong>仮商品 01-03</strong><span class="meta"><i></i>T-01-03 / 仮版</span></div></li><li data-parent="t-c1"><div class="node product" data-node="t-p0104"><strong>仮商品 01-04</strong><span class="meta"><i></i>T-01-04 / 仮版</span></div></li><li data-parent="t-c1"><div class="node product" data-node="t-p0105"><strong>仮商品 01-05</strong><span class="meta"><i></i>T-01-05 / 仮版</span></div></li>
+                    </ul></li>
+                    <li data-parent="t-root"><div class="node category" data-node="t-c2"><span class="glyph glyph-2" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 02</strong><small>分類 02</small></span></div><ul>
+                      <li data-parent="t-c2"><div class="node product" data-node="t-p0201"><strong>仮商品 02-01</strong><span class="meta"><i></i>T-02-01 / 仮版</span></div></li><li data-parent="t-c2"><div class="node product" data-node="t-p0202"><strong>仮商品 02-02</strong><span class="meta"><i></i>T-02-02 / 仮版</span></div></li><li data-parent="t-c2"><div class="node product" data-node="t-p0203"><strong>仮商品 02-03</strong><span class="meta"><i></i>T-02-03 / 仮版</span></div></li><li data-parent="t-c2"><div class="node product" data-node="t-p0204"><strong>仮商品 02-04</strong><span class="meta"><i></i>T-02-04 / 仮版</span></div></li><li data-parent="t-c2"><div class="node product" data-node="t-p0205"><strong>仮商品 02-05</strong><span class="meta"><i></i>T-02-05 / 仮版</span></div></li>
+                    </ul></li>
+                    <li data-parent="t-root"><div class="node category" data-node="t-c3"><span class="glyph glyph-3" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 03</strong><small>分類 03</small></span></div><ul>
+                      <li data-parent="t-c3"><div class="node product" data-node="t-p0301"><strong>仮商品 03-01</strong><span class="meta"><i></i>T-03-01 / 仮版</span></div></li><li data-parent="t-c3"><div class="node product" data-node="t-p0302"><strong>仮商品 03-02</strong><span class="meta"><i></i>T-03-02 / 仮版</span></div></li><li data-parent="t-c3"><div class="node product" data-node="t-p0303"><strong>仮商品 03-03</strong><span class="meta"><i></i>T-03-03 / 仮版</span></div></li><li data-parent="t-c3"><div class="node product" data-node="t-p0304"><strong>仮商品 03-04</strong><span class="meta"><i></i>T-03-04 / 仮版</span></div></li><li data-parent="t-c3"><div class="node product" data-node="t-p0305"><strong>仮商品 03-05</strong><span class="meta"><i></i>T-03-05 / 仮版</span></div></li>
+                    </ul></li>
+                    <li data-parent="t-root"><div class="node category" data-node="t-c4"><span class="glyph glyph-4" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 04</strong><small>分類 04</small></span></div><ul>
+                      <li data-parent="t-c4"><div class="node product" data-node="t-p0401"><strong>仮商品 04-01</strong><span class="meta"><i></i>T-04-01 / 仮版</span></div></li><li data-parent="t-c4"><div class="node product" data-node="t-p0402"><strong>仮商品 04-02</strong><span class="meta"><i></i>T-04-02 / 仮版</span></div></li><li data-parent="t-c4"><div class="node product" data-node="t-p0403"><strong>仮商品 04-03</strong><span class="meta"><i></i>T-04-03 / 仮版</span></div></li><li data-parent="t-c4"><div class="node product" data-node="t-p0404"><strong>仮商品 04-04</strong><span class="meta"><i></i>T-04-04 / 仮版</span></div></li><li data-parent="t-c4"><div class="node product" data-node="t-p0405"><strong>仮商品 04-05</strong><span class="meta"><i></i>T-04-05 / 仮版</span></div></li>
+                    </ul></li>
+                    <li data-parent="t-root"><div class="node category" data-node="t-c5"><span class="glyph glyph-5" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 05</strong><small>分類 05</small></span></div><ul>
+                      <li data-parent="t-c5"><div class="node product" data-node="t-p0501"><strong>仮商品 05-01</strong><span class="meta"><i></i>T-05-01 / 仮版</span></div></li><li data-parent="t-c5"><div class="node product" data-node="t-p0502"><strong>仮商品 05-02</strong><span class="meta"><i></i>T-05-02 / 仮版</span></div></li><li data-parent="t-c5"><div class="node product" data-node="t-p0503"><strong>仮商品 05-03</strong><span class="meta"><i></i>T-05-03 / 仮版</span></div></li><li data-parent="t-c5"><div class="node product" data-node="t-p0504"><strong>仮商品 05-04</strong><span class="meta"><i></i>T-05-04 / 仮版</span></div></li><li data-parent="t-c5"><div class="node product" data-node="t-p0505"><strong>仮商品 05-05</strong><span class="meta"><i></i>T-05-05 / 仮版</span></div></li>
+                    </ul></li>
+                  </ul></li></ul>
+                </div>
               </section>
               <div class="legend"><span>5分類</span><span>各分類から5商品へ分岐</span><span>計25商品</span></div>
               <p class="note">このページは商品系統図の表示試験です。実商品への置換を前提としています。</p>
@@ -269,29 +390,32 @@ jobs:
             <meta name="theme-color" content="#f5f2ea">
             <title>一般｜すべての歯が見える</title>
             <link rel="stylesheet" href="../tree.css">
+            <script src="../tree.js" defer></script>
           </head>
           <body>
             <main>
               <header><h1>一般 <span class="test-label">仮商品</span></h1><a class="back" href="../">戻</a></header>
               <p class="lead">分岐表示確認用の仮商品です。名称・分類・価格・取扱内容はすべて仮置きです。</p>
               <section class="tree-wrap" aria-label="一般向け仮商品系統図">
-                <ul class="tree"><li><div class="node root"><strong>一般</strong></div><ul>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 01</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 01-01</strong></div></li><li><div class="node product"><strong>仮商品 01-02</strong></div></li><li><div class="node product"><strong>仮商品 01-03</strong></div></li><li><div class="node product"><strong>仮商品 01-04</strong></div></li><li><div class="node product"><strong>仮商品 01-05</strong></div></li>
-                  </ul></li>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 02</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 02-01</strong></div></li><li><div class="node product"><strong>仮商品 02-02</strong></div></li><li><div class="node product"><strong>仮商品 02-03</strong></div></li><li><div class="node product"><strong>仮商品 02-04</strong></div></li><li><div class="node product"><strong>仮商品 02-05</strong></div></li>
-                  </ul></li>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 03</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 03-01</strong></div></li><li><div class="node product"><strong>仮商品 03-02</strong></div></li><li><div class="node product"><strong>仮商品 03-03</strong></div></li><li><div class="node product"><strong>仮商品 03-04</strong></div></li><li><div class="node product"><strong>仮商品 03-05</strong></div></li>
-                  </ul></li>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 04</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 04-01</strong></div></li><li><div class="node product"><strong>仮商品 04-02</strong></div></li><li><div class="node product"><strong>仮商品 04-03</strong></div></li><li><div class="node product"><strong>仮商品 04-04</strong></div></li><li><div class="node product"><strong>仮商品 04-05</strong></div></li>
-                  </ul></li>
-                  <li class="has-children"><div class="node category"><strong>仮商品種 05</strong></div><ul>
-                    <li><div class="node product"><strong>仮商品 05-01</strong></div></li><li><div class="node product"><strong>仮商品 05-02</strong></div></li><li><div class="node product"><strong>仮商品 05-03</strong></div></li><li><div class="node product"><strong>仮商品 05-04</strong></div></li><li><div class="node product"><strong>仮商品 05-05</strong></div></li>
-                  </ul></li>
-                </ul></li></ul>
+                <div class="tree-stage">
+                  <ul class="tree"><li><div class="node root" data-node="g-root"><strong>一般</strong></div><ul>
+                    <li data-parent="g-root"><div class="node category" data-node="g-c1"><span class="glyph glyph-1" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 01</strong><small>分類 01</small></span></div><ul>
+                      <li data-parent="g-c1"><div class="node product" data-node="g-p0101"><strong>仮商品 01-01</strong><span class="meta"><i></i>G-01-01 / 仮版</span></div></li><li data-parent="g-c1"><div class="node product" data-node="g-p0102"><strong>仮商品 01-02</strong><span class="meta"><i></i>G-01-02 / 仮版</span></div></li><li data-parent="g-c1"><div class="node product" data-node="g-p0103"><strong>仮商品 01-03</strong><span class="meta"><i></i>G-01-03 / 仮版</span></div></li><li data-parent="g-c1"><div class="node product" data-node="g-p0104"><strong>仮商品 01-04</strong><span class="meta"><i></i>G-01-04 / 仮版</span></div></li><li data-parent="g-c1"><div class="node product" data-node="g-p0105"><strong>仮商品 01-05</strong><span class="meta"><i></i>G-01-05 / 仮版</span></div></li>
+                    </ul></li>
+                    <li data-parent="g-root"><div class="node category" data-node="g-c2"><span class="glyph glyph-2" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 02</strong><small>分類 02</small></span></div><ul>
+                      <li data-parent="g-c2"><div class="node product" data-node="g-p0201"><strong>仮商品 02-01</strong><span class="meta"><i></i>G-02-01 / 仮版</span></div></li><li data-parent="g-c2"><div class="node product" data-node="g-p0202"><strong>仮商品 02-02</strong><span class="meta"><i></i>G-02-02 / 仮版</span></div></li><li data-parent="g-c2"><div class="node product" data-node="g-p0203"><strong>仮商品 02-03</strong><span class="meta"><i></i>G-02-03 / 仮版</span></div></li><li data-parent="g-c2"><div class="node product" data-node="g-p0204"><strong>仮商品 02-04</strong><span class="meta"><i></i>G-02-04 / 仮版</span></div></li><li data-parent="g-c2"><div class="node product" data-node="g-p0205"><strong>仮商品 02-05</strong><span class="meta"><i></i>G-02-05 / 仮版</span></div></li>
+                    </ul></li>
+                    <li data-parent="g-root"><div class="node category" data-node="g-c3"><span class="glyph glyph-3" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 03</strong><small>分類 03</small></span></div><ul>
+                      <li data-parent="g-c3"><div class="node product" data-node="g-p0301"><strong>仮商品 03-01</strong><span class="meta"><i></i>G-03-01 / 仮版</span></div></li><li data-parent="g-c3"><div class="node product" data-node="g-p0302"><strong>仮商品 03-02</strong><span class="meta"><i></i>G-03-02 / 仮版</span></div></li><li data-parent="g-c3"><div class="node product" data-node="g-p0303"><strong>仮商品 03-03</strong><span class="meta"><i></i>G-03-03 / 仮版</span></div></li><li data-parent="g-c3"><div class="node product" data-node="g-p0304"><strong>仮商品 03-04</strong><span class="meta"><i></i>G-03-04 / 仮版</span></div></li><li data-parent="g-c3"><div class="node product" data-node="g-p0305"><strong>仮商品 03-05</strong><span class="meta"><i></i>G-03-05 / 仮版</span></div></li>
+                    </ul></li>
+                    <li data-parent="g-root"><div class="node category" data-node="g-c4"><span class="glyph glyph-4" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 04</strong><small>分類 04</small></span></div><ul>
+                      <li data-parent="g-c4"><div class="node product" data-node="g-p0401"><strong>仮商品 04-01</strong><span class="meta"><i></i>G-04-01 / 仮版</span></div></li><li data-parent="g-c4"><div class="node product" data-node="g-p0402"><strong>仮商品 04-02</strong><span class="meta"><i></i>G-04-02 / 仮版</span></div></li><li data-parent="g-c4"><div class="node product" data-node="g-p0403"><strong>仮商品 04-03</strong><span class="meta"><i></i>G-04-03 / 仮版</span></div></li><li data-parent="g-c4"><div class="node product" data-node="g-p0404"><strong>仮商品 04-04</strong><span class="meta"><i></i>G-04-04 / 仮版</span></div></li><li data-parent="g-c4"><div class="node product" data-node="g-p0405"><strong>仮商品 04-05</strong><span class="meta"><i></i>G-04-05 / 仮版</span></div></li>
+                    </ul></li>
+                    <li data-parent="g-root"><div class="node category" data-node="g-c5"><span class="glyph glyph-5" aria-hidden="true"></span><span class="category-copy"><strong>仮商品種 05</strong><small>分類 05</small></span></div><ul>
+                      <li data-parent="g-c5"><div class="node product" data-node="g-p0501"><strong>仮商品 05-01</strong><span class="meta"><i></i>G-05-01 / 仮版</span></div></li><li data-parent="g-c5"><div class="node product" data-node="g-p0502"><strong>仮商品 05-02</strong><span class="meta"><i></i>G-05-02 / 仮版</span></div></li><li data-parent="g-c5"><div class="node product" data-node="g-p0503"><strong>仮商品 05-03</strong><span class="meta"><i></i>G-05-03 / 仮版</span></div></li><li data-parent="g-c5"><div class="node product" data-node="g-p0504"><strong>仮商品 05-04</strong><span class="meta"><i></i>G-05-04 / 仮版</span></div></li><li data-parent="g-c5"><div class="node product" data-node="g-p0505"><strong>仮商品 05-05</strong><span class="meta"><i></i>G-05-05 / 仮版</span></div></li>
+                    </ul></li>
+                  </ul></li></ul>
+                </div>
               </section>
               <div class="legend"><span>5分類</span><span>各分類から5商品へ分岐</span><span>計25商品</span></div>
               <p class="note">このページは商品系統図の表示試験です。実商品への置換を前提としています。</p>
