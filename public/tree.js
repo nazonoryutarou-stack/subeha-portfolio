@@ -6,35 +6,52 @@
 
   const renderTree = (stage, data) => {
     const rootId = `${data.prefix}-root`;
-    const categories = data.categories || [];
     const root = document.createElement('ul');
     root.className = 'tree';
 
     const rootLi = document.createElement('li');
     rootLi.innerHTML = `<div class="node root" data-node="${esc(rootId)}"><strong>${esc(data.rootLabel)}</strong></div>`;
-    const categoryList = document.createElement('ul');
+    const rootChildren = document.createElement('ul');
 
-    categories.forEach((category, categoryIndex) => {
-      const categoryId = `${data.prefix}-c${categoryIndex + 1}`;
+    const renderProduct = (product, parentId, path, productIndex) => {
+      const productId = `${data.prefix}-p-${path.join('-')}-${productIndex + 1}`;
       const li = document.createElement('li');
-      li.dataset.parent = rootId;
+      li.dataset.parent = parentId;
 
-      const glyph = ((categoryIndex % 5) + 1);
-      li.innerHTML = `<div class="node category" data-node="${esc(categoryId)}"><span class="glyph glyph-${glyph}" aria-hidden="true"></span><span class="category-copy"><strong>${esc(category.name)}</strong><small>${esc(category.meta || `分類 ${String(categoryIndex + 1).padStart(2,'0')}`)}</small></span></div>`;
+      const fallbackCode = `${String(data.prefix || 'P').toUpperCase()}-${path.map((n) => String(n).padStart(2, '0')).join('-')}-${String(productIndex + 1).padStart(2, '0')}`;
+      li.innerHTML = `<div class="node product" tabindex="0" data-node="${esc(productId)}"><strong>${esc(product.name)}</strong><span class="meta"><i></i>${esc(product.code || fallbackCode)}${product.version ? ` / ${esc(product.version)}` : ''}</span></div>`;
+      return li;
+    };
 
-      const products = document.createElement('ul');
-      (category.products || []).forEach((product, productIndex) => {
-        const productId = `${data.prefix}-p${categoryIndex + 1}-${productIndex + 1}`;
-        const productLi = document.createElement('li');
-        productLi.dataset.parent = categoryId;
-        productLi.innerHTML = `<div class="node product" tabindex="0" data-node="${esc(productId)}"><strong>${esc(product.name)}</strong><span class="meta"><i></i>${esc(product.code || `${data.prefix.toUpperCase()}-${String(categoryIndex + 1).padStart(2,'0')}-${String(productIndex + 1).padStart(2,'0')}`)}${product.version ? ` / ${esc(product.version)}` : ''}</span></div>`;
-        products.appendChild(productLi);
+    const renderClassification = (classification, parentId, path, depth, siblingIndex) => {
+      const classificationId = `${data.prefix}-c-${path.join('-')}`;
+      const li = document.createElement('li');
+      li.dataset.parent = parentId;
+
+      const glyph = Number(classification.glyph) || ((siblingIndex % 5) + 1);
+      const meta = classification.meta || (depth === 1 ? `分類 ${String(siblingIndex + 1).padStart(2, '0')}` : '下位分類');
+      const depthClass = depth > 1 ? ' subcategory' : '';
+      li.innerHTML = `<div class="node category classification${depthClass}" data-node="${esc(classificationId)}" data-depth="${depth}"><span class="glyph glyph-${glyph}" aria-hidden="true"></span><span class="category-copy"><strong>${esc(classification.name)}</strong><small>${esc(meta)}</small></span></div>`;
+
+      const nested = document.createElement('ul');
+      const children = classification.children || classification.categories || classification.subcategories || [];
+      children.forEach((child, childIndex) => {
+        nested.appendChild(renderClassification(child, classificationId, [...path, childIndex + 1], depth + 1, childIndex));
       });
-      li.appendChild(products);
-      categoryList.appendChild(li);
+
+      (classification.products || []).forEach((product, productIndex) => {
+        nested.appendChild(renderProduct(product, classificationId, path, productIndex));
+      });
+
+      if (nested.children.length) li.appendChild(nested);
+      return li;
+    };
+
+    (data.categories || []).forEach((classification, index) => {
+      rootChildren.appendChild(renderClassification(classification, rootId, [index + 1], 1, index));
     });
 
-    rootLi.appendChild(categoryList);
+    rootLi.appendChild(rootChildren);
     root.appendChild(rootLi);
     stage.appendChild(root);
   };
@@ -98,7 +115,8 @@
           path.style.strokeDashoffset = `${length}`;
           path.style.opacity = '0';
           const isProduct = child.classList.contains('product');
-          const delay = isProduct ? 700 + index * 14 : 280 + index * 48;
+          const depth = Number(child.dataset.depth || 1);
+          const delay = isProduct ? 700 + index * 14 : 260 + depth * 90 + index * 24;
           path.animate([
             {strokeDashoffset:length, opacity:0},
             {strokeDashoffset:0, opacity:1}
