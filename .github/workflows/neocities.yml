@@ -20,7 +20,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      NEOCITIES_API_TOKEN: ${{ secrets.NEOCITIES_API_TOKEN }}
+      NEOCITIES_API_TOKEN: ${{ secrets.NEOCITIES_API_TOKEN || secrets.NEOCITIES_TOKEN || secrets.NEOCITIES_API_KEY }}
 
     steps:
       - name: Checkout
@@ -40,15 +40,15 @@ jobs:
         if: env.NEOCITIES_API_TOKEN == ''
         shell: bash
         run: |
-          echo 'NEOCITIES_API_TOKEN is not configured yet.'
-          echo 'Add it under Repository Settings > Secrets and variables > Actions.'
-          echo 'Then run this workflow again from Actions > Deploy site to Neocities.'
+          echo 'No Neocities API token was found.'
+          echo 'Create an Actions repository secret named NEOCITIES_API_TOKEN.'
+          echo 'NEOCITIES_TOKEN and NEOCITIES_API_KEY are also accepted.'
 
       - name: Deploy public directory to Neocities
         if: env.NEOCITIES_API_TOKEN != ''
         uses: bcomnes/deploy-to-neocities@v3
         with:
-          api_key: ${{ secrets.NEOCITIES_API_TOKEN }}
+          api_key: ${{ env.NEOCITIES_API_TOKEN }}
           dist_dir: public
           cleanup: false
           neocities_supporter: false
