@@ -1,0 +1,55 @@
+name: Deploy site to Neocities
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'public/**'
+      - '.github/workflows/neocities.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-to-neocities
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      NEOCITIES_API_TOKEN: ${{ secrets.NEOCITIES_API_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate public site
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f public/index.html
+          test -f public/tree.js
+          test -f public/tree.css
+          test -f public/data/trade.json
+          test -f public/data/general.json
+
+      - name: Neocities token not configured
+        if: env.NEOCITIES_API_TOKEN == ''
+        shell: bash
+        run: |
+          echo 'NEOCITIES_API_TOKEN is not configured yet.'
+          echo 'Add it under Repository Settings > Secrets and variables > Actions.'
+          echo 'Then run this workflow again from Actions > Deploy site to Neocities.'
+
+      - name: Deploy public directory to Neocities
+        if: env.NEOCITIES_API_TOKEN != ''
+        uses: bcomnes/deploy-to-neocities@v3
+        with:
+          api_key: ${{ secrets.NEOCITIES_API_TOKEN }}
+          dist_dir: public
+          cleanup: false
+          neocities_supporter: false
+          preview_before_deploy: true
