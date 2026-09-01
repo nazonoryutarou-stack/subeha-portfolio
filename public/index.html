@@ -6,6 +6,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="theme-color" content="#f5f2ea">
   <title>すべての歯が見える</title>
+  <link rel="stylesheet" href="./nav.css">
   <style>
     :root{--paper:#f5f2ea;--ink:#181612;--muted:#756f65;--hair:rgba(24,22,18,.30)}
     *{box-sizing:border-box}
@@ -13,25 +14,31 @@
     body{font-family:"Yu Mincho","Hiragino Mincho ProN","Hiragino Mincho Pro","Noto Serif JP",serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-feature-settings:"palt" 1}
     main{min-height:100svh;display:flex;justify-content:center;padding:30px 24px 72px}
     .shell{width:min(100%,560px)}
-    .site-name{margin:0;text-align:center;font-size:11px;font-weight:500;letter-spacing:.4em;text-indent:.4em}
-    .hero{text-align:center;padding-top:10svh}
+    .hero{text-align:center;padding-top:7svh}
     .mark{display:block;width:min(34vw,146px);height:auto;margin:0 auto 36px;filter:grayscale(1) contrast(1.35)}
     .motto{margin:0;font-size:clamp(13px,3.2vw,16px);font-weight:500;letter-spacing:.3em;text-indent:.3em}
     .greeting{margin:13svh 0 11svh;padding-top:20px;border-top:.75px solid var(--hair)}
     .greeting h2{margin:0 0 26px;text-align:center;font-size:12px;font-weight:500;letter-spacing:.42em;text-indent:.42em}
     .greeting p{margin:0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:11.5px;font-weight:400;line-height:2.15;letter-spacing:.045em;text-align:left;color:#2f2b25}
-    .section-title{margin:0 0 23px;text-align:center;font-size:12px;font-weight:500;letter-spacing:.46em;text-indent:.46em}
+    .section-title{margin:0 0 23px;text-align:center;font-size:12px;font-weight:500;letter-spacing:.46em;text-indent:.46em;scroll-margin-top:30px}
     .split{position:relative;display:grid;grid-template-columns:1fr 1fr;border-top:.75px solid var(--hair)}
     .split::after{content:"";position:absolute;left:50%;top:0;width:.75px;height:20px;background:var(--hair)}
     .split a{display:block;padding:31px 12px 17px;color:var(--ink);text-align:center;text-decoration:none;font-size:14px;font-weight:500;letter-spacing:.34em;text-indent:.34em;transition:opacity .45s ease}
     .split a:hover,.split a:focus-visible{opacity:.52}
-    @media(max-width:420px){main{padding:22px 24px 56px}.hero{padding-top:9svh}.greeting{margin-top:12svh;margin-bottom:10svh}.greeting p{font-size:11px;line-height:2.05}.split a{font-size:13px;letter-spacing:.27em;text-indent:.27em}}
+    @media(max-width:420px){main{padding:22px 24px 56px}.hero{padding-top:6svh}.greeting{margin-top:12svh;margin-bottom:10svh}.greeting p{font-size:11px;line-height:2.05}.split a{font-size:13px;letter-spacing:.27em;text-indent:.27em}}
   </style>
 </head>
 <body>
   <main>
     <div class="shell">
-      <p class="site-name">すべての歯が見える</p>
+      <nav class="global-nav" aria-label="主要メニュー">
+        <a class="brand" href="./">すべての歯が見える</a>
+        <div class="nav-links">
+          <a href="#products">商品</a>
+          <a href="./theory/">理論</a>
+        </div>
+      </nav>
+
       <div class="hero">
         <img class="mark" src="./hitotsu-ore-choji.png" alt="">
         <p class="motto">遅滞なく、直ちに。</p>
@@ -45,7 +52,7 @@
           なお、サイトの仮設にともないTelegram（テレグラム）での販売は終了いたしました。
         </p>
       </section>
-      <h1 class="section-title">商品</h1>
+      <h1 class="section-title" id="products">商品</h1>
       <nav class="split" aria-label="商品区分">
         <a href="./trade/">同業者</a>
         <a href="./general/">一般</a>
