@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'public/**'
+      - 'hitotsu-ore-choji.png'
       - '.github/workflows/neocities.yml'
   workflow_dispatch:
 
@@ -24,6 +25,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Stage shared assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f hitotsu-ore-choji.png
+          cp hitotsu-ore-choji.png public/hitotsu-ore-choji.png
+
       - name: Validate public site
         shell: bash
         run: |
@@ -33,6 +41,7 @@ jobs:
           test -f public/tree.css
           test -f public/data/trade.json
           test -f public/data/general.json
+          test -f public/hitotsu-ore-choji.png
 
       - name: Deploy public directory to Neocities
         uses: bcomnes/deploy-to-neocities@v3
