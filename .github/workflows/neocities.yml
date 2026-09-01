@@ -19,6 +19,8 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     env:
       NEOCITIES_API_TOKEN: ${{ secrets.NEOCITIES_API_TOKEN || secrets.NEOCITIES_TOKEN || secrets.NEOCITIES_API_KEY || vars.NEOCITIES_API_TOKEN || vars.NEOCITIES_TOKEN || vars.NEOCITIES_API_KEY }}
 
@@ -41,7 +43,7 @@ jobs:
         shell: bash
         run: |
           echo 'No Neocities API token was found.'
-          echo 'Create a repository Actions secret or variable named NEOCITIES_API_TOKEN.'
+          echo 'Create a repository Actions secret/variable or github-pages environment secret named NEOCITIES_API_TOKEN.'
           echo 'NEOCITIES_TOKEN and NEOCITIES_API_KEY are also accepted.'
 
       - name: Deploy public directory to Neocities
@@ -53,5 +55,3 @@ jobs:
           cleanup: false
           neocities_supporter: false
           preview_before_deploy: true
-
-# Fresh push to evaluate newly configured repository credentials.
