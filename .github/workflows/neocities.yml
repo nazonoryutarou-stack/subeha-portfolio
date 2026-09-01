@@ -53,3 +53,5 @@ jobs:
           cleanup: false
           neocities_supporter: false
           preview_before_deploy: true
+
+# Fresh push to evaluate newly configured repository credentials.
