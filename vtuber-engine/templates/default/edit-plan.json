@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "sourceLabel": "ブイチューバーエンジン",
+  "selection": {
+    "reason": "",
+    "hook": "",
+    "summary": ""
+  },
+  "clip": {
+    "startMs": 0,
+    "endMs": 1000
+  },
+  "layout": {
+    "width": 1280,
+    "height": 720,
+    "captionBottomPx": 34,
+    "background": "#111318"
+  },
+  "text": {
+    "title": "",
+    "telop": ""
+  },
+  "captions": [
+    {
+      "startMs": 0,
+      "endMs": 1000,
+      "speaker": "HOST",
+      "text": "字幕をここへ",
+      "speakerConfidence": 1
+    }
+  ],
+  "visualReferences": [],
+  "motion": {
+    "profile": "normal",
+    "notes": ""
+  }
+}
