@@ -1,0 +1,112 @@
+name: ブイチューバーエンジン Render
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'vtuber-engine/projects/ 以下のproject名'
+        required: true
+        default: 'current'
+        type: string
+  push:
+    branches:
+      - feature/vtuber-engine
+    paths:
+      - 'vtuber-engine/projects/**'
+      - 'vtuber-engine/bin/**'
+      - 'vtuber-engine/package.json'
+      - 'remotion/vrm-lipsync/**'
+      - 'Subeha.vrm'
+      - '.github/workflows/vtuber-engine-render.yml'
+
+permissions:
+  contents: read
+
+env:
+  WHISPER_CPP_VERSION: '1.5.5'
+  WHISPER_MODEL: small
+  WHISPER_LANGUAGE: ja
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve project
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            project='${{ inputs.project }}'
+          else
+            project='current'
+          fi
+          case "$project" in
+            ''|*[!A-Za-z0-9._-]*) echo 'Invalid project name' >&2; exit 1 ;;
+          esac
+          dir="vtuber-engine/projects/$project"
+          if [ ! -d "$dir" ]; then
+            echo "Project not found: $dir" >&2
+            echo 'For push renders, keep the active project at vtuber-engine/projects/current/.' >&2
+            exit 1
+          fi
+          test -s "$dir/edit-plan.json"
+          if [ -s "$dir/source.m4a" ]; then audio="$dir/source.m4a"
+          elif [ -s "$dir/source.wav" ]; then audio="$dir/source.wav"
+          elif [ -s "$dir/source.opus" ]; then audio="$dir/source.opus"
+          else echo 'No source.m4a/source.wav/source.opus' >&2; exit 1
+          fi
+          echo "VTUBER_PROJECT=$project" >> "$GITHUB_ENV"
+          echo "VTUBER_PROJECT_DIR=$dir" >> "$GITHUB_ENV"
+          echo "VTUBER_AUDIO=$audio" >> "$GITHUB_ENV"
+
+      - name: Install ffmpeg and Japanese fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          fc-cache -f
+
+      - name: Cache whisper.cpp and model
+        uses: actions/cache@v4
+        with:
+          path: remotion/vrm-lipsync/.cache/whisper-align
+          key: ${{ runner.os }}-whispercpp-${{ env.WHISPER_CPP_VERSION }}-${{ env.WHISPER_MODEL }}
+
+      - name: Install Remotion dependencies
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+
+      - name: Doctor
+        run: node vtuber-engine/bin/vtuber-engine.mjs doctor
+
+      - name: Render
+        run: node vtuber-engine/bin/vtuber-engine.mjs render "$VTUBER_PROJECT"
+
+      - name: Verify output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$VTUBER_PROJECT_DIR/out/$VTUBER_PROJECT.mp4"
+          test -s "$VTUBER_PROJECT_DIR/out/timed-asr/timed-asr.json"
+          test -s "$VTUBER_PROJECT_DIR/out/timed-asr/timed-asr.srt"
+          test -s "$VTUBER_PROJECT_DIR/out/timed-asr/timed-asr.vtt"
+          test -s "$VTUBER_PROJECT_DIR/out/timed-asr/timed-asr.meta.json"
+          ffprobe -v error -show_entries format=duration -show_streams "$VTUBER_PROJECT_DIR/out/$VTUBER_PROJECT.mp4" >/dev/null
+
+      - name: Upload MP4, ASR, edit plan and QC
+        uses: actions/upload-artifact@v4
+        with:
+          name: vtuber-engine-${{ env.VTUBER_PROJECT }}
+          path: |
+            ${{ env.VTUBER_PROJECT_DIR }}/out/**
+            ${{ env.VTUBER_PROJECT_DIR }}/edit-plan.json
+            remotion/vrm-lipsync/out/qc/**
+            remotion/vrm-lipsync/out/qc-frames/**
+            remotion/vrm-lipsync/jobs/.generated/assistant-project.json
+          retention-days: 14
