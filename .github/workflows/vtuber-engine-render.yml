@@ -12,9 +12,7 @@ on:
     branches:
       - feature/vtuber-engine
     paths:
-      - 'vtuber-engine/projects/**'
-      - 'vtuber-engine/bin/**'
-      - 'vtuber-engine/package.json'
+      - 'vtuber-engine/**'
       - 'remotion/vrm-lipsync/**'
       - 'Subeha.vrm'
       - '.github/workflows/vtuber-engine-render.yml'
@@ -44,27 +42,42 @@ jobs:
           set -euo pipefail
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             project='${{ inputs.project }}'
+            explicit=1
           else
             project='current'
+            explicit=0
           fi
           case "$project" in
             ''|*[!A-Za-z0-9._-]*) echo 'Invalid project name' >&2; exit 1 ;;
           esac
           dir="vtuber-engine/projects/$project"
-          if [ ! -d "$dir" ]; then
-            echo "Project not found: $dir" >&2
-            echo 'For push renders, keep the active project at vtuber-engine/projects/current/.' >&2
+
+          renderable=1
+          if [ ! -d "$dir" ]; then renderable=0; fi
+          if [ "$renderable" = 1 ] && [ ! -s "$dir/film-plan.json" ] && [ ! -s "$dir/edit-plan.json" ]; then renderable=0; fi
+          if [ "$renderable" = 1 ]; then
+            if [ -s "$dir/source.m4a" ]; then audio="$dir/source.m4a"
+            elif [ -s "$dir/source.wav" ]; then audio="$dir/source.wav"
+            elif [ -s "$dir/source.opus" ]; then audio="$dir/source.opus"
+            else renderable=0
+            fi
+          fi
+
+          if [ "$explicit" = 1 ] && [ "$renderable" != 1 ]; then
+            echo "Project is not renderable: $dir" >&2
+            echo 'film-plan.json/edit-plan.json と source.m4a|wav|opus を確認してください。' >&2
             exit 1
           fi
-          test -s "$dir/edit-plan.json"
-          if [ -s "$dir/source.m4a" ]; then audio="$dir/source.m4a"
-          elif [ -s "$dir/source.wav" ]; then audio="$dir/source.wav"
-          elif [ -s "$dir/source.opus" ]; then audio="$dir/source.opus"
-          else echo 'No source.m4a/source.wav/source.opus' >&2; exit 1
-          fi
+
           echo "VTUBER_PROJECT=$project" >> "$GITHUB_ENV"
           echo "VTUBER_PROJECT_DIR=$dir" >> "$GITHUB_ENV"
-          echo "VTUBER_AUDIO=$audio" >> "$GITHUB_ENV"
+          echo "VTUBER_SHOULD_RENDER=$renderable" >> "$GITHUB_ENV"
+          if [ "$renderable" = 1 ]; then
+            echo "VTUBER_AUDIO=$audio" >> "$GITHUB_ENV"
+            echo "Render project: $project"
+          else
+            echo 'No active current project. Running engine validation only.'
+          fi
 
       - name: Install ffmpeg and Japanese fonts
         run: |
@@ -85,10 +98,20 @@ jobs:
       - name: Doctor
         run: node vtuber-engine/bin/vtuber-engine.mjs doctor
 
+      - name: Type check
+        working-directory: remotion/vrm-lipsync
+        run: npm run check
+
+      - name: Validate project
+        if: env.VTUBER_SHOULD_RENDER == '1'
+        run: node vtuber-engine/bin/vtuber-engine.mjs validate "$VTUBER_PROJECT"
+
       - name: Render
+        if: env.VTUBER_SHOULD_RENDER == '1'
         run: node vtuber-engine/bin/vtuber-engine.mjs render "$VTUBER_PROJECT"
 
       - name: Verify output
+        if: env.VTUBER_SHOULD_RENDER == '1'
         shell: bash
         run: |
           set -euo pipefail
@@ -99,14 +122,17 @@ jobs:
           test -s "$VTUBER_PROJECT_DIR/out/timed-asr/timed-asr.meta.json"
           ffprobe -v error -show_entries format=duration -show_streams "$VTUBER_PROJECT_DIR/out/$VTUBER_PROJECT.mp4" >/dev/null
 
-      - name: Upload MP4, ASR, edit plan and QC
+      - name: Upload MP4, ASR, plans and QC
+        if: env.VTUBER_SHOULD_RENDER == '1'
         uses: actions/upload-artifact@v4
         with:
           name: vtuber-engine-${{ env.VTUBER_PROJECT }}
           path: |
             ${{ env.VTUBER_PROJECT_DIR }}/out/**
+            ${{ env.VTUBER_PROJECT_DIR }}/film-plan.json
             ${{ env.VTUBER_PROJECT_DIR }}/edit-plan.json
             remotion/vrm-lipsync/out/qc/**
             remotion/vrm-lipsync/out/qc-frames/**
             remotion/vrm-lipsync/jobs/.generated/assistant-project.json
+          if-no-files-found: ignore
           retention-days: 14
