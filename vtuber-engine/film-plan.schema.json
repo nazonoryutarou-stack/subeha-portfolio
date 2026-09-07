@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://subeha.example/schemas/vtuber-film-plan-v1.json",
+  "title": "ブイチューバーエンジン Film Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "title", "captions", "shots"],
+  "properties": {
+    "version": {"const": 1},
+    "title": {"type": "string"},
+    "sourceLabel": {"type": "string"},
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reason": {"type": "string"},
+        "hook": {"type": "string"},
+        "summary": {"type": "string"}
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": {"enum": [720, 900, 1280]},
+        "height": {"enum": [720, 900, 1280]},
+        "captionBottomPx": {"type": "number", "minimum": 0},
+        "background": {"type": "string"}
+      }
+    },
+    "captions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["startMs", "endMs", "speaker", "text"],
+        "properties": {
+          "startMs": {"type": "integer", "minimum": 0},
+          "endMs": {"type": "integer", "minimum": 1},
+          "speaker": {"enum": ["HOST", "GUEST", "UNKNOWN"]},
+          "text": {"type": "string", "minLength": 1},
+          "speakerConfidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "speakerReason": {"type": "string"}
+        }
+      }
+    },
+    "shots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "startMs", "endMs"],
+        "properties": {
+          "type": {"enum": ["vrm", "still", "video", "generated-video", "typography", "black"]},
+          "startMs": {"type": "integer", "minimum": 0},
+          "endMs": {"type": "integer", "minimum": 1},
+          "asset": {"type": "string"},
+          "title": {"type": "string"},
+          "text": {"type": "string"},
+          "placement": {"enum": ["fullscreen", "panel"]},
+          "fit": {"enum": ["cover", "contain"]},
+          "trimStartMs": {"type": "integer", "minimum": 0},
+          "label": {"type": "string"}
+        }
+      }
+    },
+    "motion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profile": {"enum": ["deadpan", "calm", "normal", "energetic"]},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}
