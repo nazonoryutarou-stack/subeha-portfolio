@@ -20,7 +20,9 @@ run('import-studio-project.mjs', process.argv.slice(2));
 const clipPath = path.join(projectRoot, 'public', 'clip.json');
 const clip = fs.existsSync(clipPath) ? JSON.parse(fs.readFileSync(clipPath, 'utf8')) : {};
 const refs = Array.isArray(clip.visualReferences) ? clip.visualReferences : [];
+const proceduralKinds = new Set(['typography', 'black']);
 const preMaterialized = refs.length > 0 && refs.every((ref) => {
+  if (proceduralKinds.has(String(ref?.shotType || ''))) return true;
   if (!ref?.renderFile) return false;
   const resolved = path.resolve(projectRoot, 'public', String(ref.renderFile));
   const publicRoot = path.resolve(projectRoot, 'public') + path.sep;
@@ -28,7 +30,7 @@ const preMaterialized = refs.length > 0 && refs.every((ref) => {
 });
 
 if (preMaterialized) {
-  console.log(`Visual references already materialized: ${refs.length}`);
+  console.log(`Visual references already materialized/procedural: ${refs.length}`);
 } else {
   run('materialize-visuals.mjs');
 }
