@@ -1,17 +1,20 @@
 {
   "name": "vtuber-engine",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "ブイチューバーエンジン - Subeha VRM / Whisper / Remotion / QC unified video pipeline",
+  "description": "ブイチューバーエンジン - Subeha VRM / Whisper / Remotion / shot timeline / QC unified video pipeline",
   "type": "module",
   "bin": {
     "vtuber-engine": "./bin/vtuber-engine.mjs"
   },
   "scripts": {
     "doctor": "node ./bin/vtuber-engine.mjs doctor",
+    "validate": "node ./bin/vtuber-engine.mjs validate",
+    "plan": "node ./bin/vtuber-engine.mjs plan",
     "render": "node ./bin/vtuber-engine.mjs render",
     "transcribe": "node ./bin/vtuber-engine.mjs transcribe",
-    "new": "node ./bin/vtuber-engine.mjs new"
+    "new": "node ./bin/vtuber-engine.mjs new",
+    "list": "node ./bin/vtuber-engine.mjs list"
   },
   "engines": {
     "node": ">=22"
