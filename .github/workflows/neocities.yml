@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
 
       - name: Stage shared assets
         shell: bash
@@ -33,14 +35,21 @@ jobs:
           test -f hitotsu-ore-choji.png
           cp hitotsu-ore-choji.png public/hitotsu-ore-choji.png
 
-      - name: Stage arcade for Neocities
+      - name: Stage Astra arcade for Neocities
         shell: bash
         run: |
           set -euo pipefail
-          test -f arcade/app.html
-          mkdir -p public/arcade
-          cp arcade/app.html public/arcade/index.html
-          cp arcade/app.html public/arcade/app.html
+          git fetch --depth=1 origin feature/arcade-permanent-space
+          rm -rf public/arcade
+          git checkout FETCH_HEAD -- public/arcade
+          test -f public/arcade/index.html
+          test -f public/arcade/arcade.css
+          test -f public/arcade/boot.js
+          test -f public/arcade/main.js
+          test -f public/arcade/world.js
+          test -f public/arcade/shops.js
+          test -f public/arcade/vendor/three.module.min.js
+          grep -q '不氣屋界隈の、歩けるアーケード' public/arcade/index.html
 
       - name: Validate public site
         shell: bash
@@ -53,7 +62,7 @@ jobs:
           test -f public/data/general.json
           test -f public/hitotsu-ore-choji.png
           test -f public/arcade/index.html
-          test -f public/arcade/app.html
+          test -f public/arcade/boot.js
 
       - name: Deploy public directory to Neocities
         uses: bcomnes/deploy-to-neocities@v3
@@ -64,7 +73,7 @@ jobs:
           neocities_supporter: false
           preview_before_deploy: true
 
-      - name: Verify public arcade URL
+      - name: Verify public Astra arcade URL
         env:
           NEOCITIES_TOKEN: ${{ secrets.NEOSITIES_API_TOKEN }}
         shell: bash
@@ -73,7 +82,10 @@ jobs:
           info="$(curl --fail --silent --show-error -H "Authorization: Bearer ${NEOCITIES_TOKEN}" https://neocities.org/api/info)"
           sitename="$(INFO_JSON="$info" python3 -c 'import json,os; print(json.loads(os.environ["INFO_JSON"])["info"]["sitename"])')"
           arcade_url="https://${sitename}.neocities.org/arcade/"
-          echo "Public arcade URL: ${arcade_url}"
+          echo "Public Astra arcade URL: ${arcade_url}"
           curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${arcade_url}" -o /tmp/arcade.html
-          grep -q '不氣屋アーケード' /tmp/arcade.html
-          echo "Verified arcade page: ${arcade_url}"
+          grep -q '不氣屋界隈の、歩けるアーケード' /tmp/arcade.html
+          grep -q './boot.js' /tmp/arcade.html
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${arcade_url}boot.js" -o /tmp/boot.js
+          grep -q 'main.js' /tmp/boot.js
+          echo "Verified Astra arcade page and module boot: ${arcade_url}"
