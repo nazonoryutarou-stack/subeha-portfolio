@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'public/**'
+      - 'arcade/**'
       - 'hitotsu-ore-choji.png'
       - '.github/workflows/neocities.yml'
   workflow_dispatch:
@@ -32,6 +33,15 @@ jobs:
           test -f hitotsu-ore-choji.png
           cp hitotsu-ore-choji.png public/hitotsu-ore-choji.png
 
+      - name: Stage arcade for Neocities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f arcade/app.html
+          mkdir -p public/arcade
+          cp arcade/app.html public/arcade/index.html
+          cp arcade/app.html public/arcade/app.html
+
       - name: Validate public site
         shell: bash
         run: |
@@ -42,6 +52,8 @@ jobs:
           test -f public/data/trade.json
           test -f public/data/general.json
           test -f public/hitotsu-ore-choji.png
+          test -f public/arcade/index.html
+          test -f public/arcade/app.html
 
       - name: Deploy public directory to Neocities
         uses: bcomnes/deploy-to-neocities@v3
