@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "arcade:stage": "node scripts/stage-arcade.mjs",
-    "arcade:check": "node scripts/check-arcade.mjs && node scripts/test-arcade-space.mjs"
+    "arcade:check": "node scripts/check-arcade.mjs && node scripts/test-arcade-space.mjs",
+    "astra:check": "node scripts/check-astra-architecture.mjs"
   },
   "devDependencies": { "vite": "7.3.1" }
 }
