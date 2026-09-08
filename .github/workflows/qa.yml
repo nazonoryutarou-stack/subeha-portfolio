@@ -25,6 +25,12 @@ jobs:
       - name: Test DeepDream v21 runtime contract
         run: node deepdream/test-v21.mjs
 
+      - name: Check arcade deployment and walkable space
+        run: |
+          node scripts/stage-arcade.mjs
+          node scripts/check-arcade.mjs
+          node scripts/test-arcade-space.mjs
+
       - name: Run static QA
         shell: python
         run: |
@@ -33,7 +39,7 @@ jobs:
           import re, sys
 
           root = Path('.')
-          excluded = {'.git', '.github'}
+          excluded = {'.git', '.github', 'node_modules', 'vendor'}
           public_html = []
           for p in root.rglob('*.html'):
               if any(part in excluded for part in p.parts):
@@ -65,7 +71,7 @@ jobs:
           all_text_files=[]
           for ext in ('*.html','*.js','*.css','*.md'):
               for p in root.rglob(ext):
-                  if '.git' in p.parts: continue
+                  if any(part in excluded for part in p.parts): continue
                   if p.parts and p.parts[0] in {'archive','legacy'}: continue
                   all_text_files.append(p)
           for p in all_text_files:

@@ -28,6 +28,9 @@ jobs:
       - name: Prepare site
         shell: bash
         run: |
+          node scripts/stage-arcade.mjs
+          node scripts/check-arcade.mjs
+          node scripts/test-arcade-space.mjs
           rm -rf _site
           cp -R public _site
           cp hitotsu-ore-choji.png _site/hitotsu-ore-choji.png
