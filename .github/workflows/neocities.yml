@@ -63,3 +63,17 @@ jobs:
           cleanup: false
           neocities_supporter: false
           preview_before_deploy: true
+
+      - name: Verify public arcade URL
+        env:
+          NEOCITIES_TOKEN: ${{ secrets.NEOSITIES_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          info="$(curl --fail --silent --show-error -H "Authorization: Bearer ${NEOCITIES_TOKEN}" https://neocities.org/api/info)"
+          sitename="$(INFO_JSON="$info" python3 -c 'import json,os; print(json.loads(os.environ["INFO_JSON"])["info"]["sitename"])')"
+          arcade_url="https://${sitename}.neocities.org/arcade/"
+          echo "Public arcade URL: ${arcade_url}"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${arcade_url}" -o /tmp/arcade.html
+          grep -q '不氣屋アーケード' /tmp/arcade.html
+          echo "Verified arcade page: ${arcade_url}"
