@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#12130f">
+  <meta name="description" content="アストラ建築 001。狭い祭祀技師事務所を歩く実験的3D空間。">
+  <title>アストラ建築 001｜祭祀技師事務所</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <canvas id="c" aria-label="祭祀技師事務所の3D空間" tabindex="0"></canvas>
+
+  <section id="gate" class="gate">
+    <p class="eyebrow">ASTRA ARCHITECTURE / 001</p>
+    <h1>祭祀技師事務所</h1>
+    <p class="lead">表に立つ人間の後ろで、道具・記録・書類だけが増えていく小さな事務所。</p>
+    <p class="warning">狭い室内です。PCはWASD、スマートフォンは画面下の操作で歩けます。</p>
+    <button id="enter" disabled>準備中</button>
+    <p id="load-error" class="error" hidden></p>
+  </section>
+
+  <header class="top" hidden>
+    <div>
+      <span class="kicker">ASTRA ARCHITECTURE 001</span>
+      <strong id="location">入口</strong>
+    </div>
+    <div class="top-actions">
+      <button id="help" aria-expanded="false">操作</button>
+      <a href="../arcade/">アーケードへ</a>
+    </div>
+  </header>
+
+  <button id="interact" class="interact" hidden>
+    <span id="target-label">調べる</span><small>E</small>
+  </button>
+  <div id="notice" class="notice" hidden></div>
+  <pre id="diagnostic" class="diagnostic" hidden></pre>
+
+  <aside id="instructions" class="instructions" hidden>
+    <div class="panel">
+      <p class="eyebrow">操作</p>
+      <h2>歩く／見る／調べる</h2>
+      <p>WASDまたは左下で移動。ドラッグまたは右側操作で視点を動かします。対象が出たらEまたは「調べる」。</p>
+      <label>描画
+        <select id="quality">
+          <option value="auto">自動</option>
+          <option value="low">軽量</option>
+          <option value="high">精細</option>
+        </select>
+      </label>
+      <label class="check"><input id="calm" type="checkbox"> 点滅を止める</label>
+      <label class="check"><input id="button-mode" type="checkbox"> 方向ボタンを使う</label>
+      <div class="panel-actions">
+        <button id="reset">入口へ戻る</button>
+        <button id="lock-mouse">マウス固定</button>
+        <button id="close-help">戻る</button>
+      </div>
+    </div>
+  </aside>
+
+  <div id="touch-controls" class="touch-controls" hidden>
+    <div id="joystick" class="joystick" role="group" aria-label="移動スティック"><i id="stick"></i></div>
+    <div id="dpad" class="dpad" hidden aria-label="方向ボタン">
+      <button data-move="forward" aria-label="前進">▲</button>
+      <button data-move="left" aria-label="左へ移動">◀</button>
+      <button data-move="right" aria-label="右へ移動">▶</button>
+      <button data-move="back" aria-label="後退">▼</button>
+    </div>
+    <span id="look-hint" class="look-hint">右側で見回す</span>
+  </div>
+
+  <script type="module" src="./boot.js"></script>
+</body>
+</html>

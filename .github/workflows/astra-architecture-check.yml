@@ -1,0 +1,28 @@
+name: Astra Architecture Check
+
+on:
+  push:
+    branches:
+      - feature/astra-architecture-sol
+    paths:
+      - 'public/astra-architecture/**'
+      - 'scripts/check-astra-architecture.mjs'
+      - 'package.json'
+      - '.github/workflows/astra-architecture-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Astra Architecture QA
+        run: npm run astra:check
