@@ -60,12 +60,12 @@
   </aside>
 
   <div id="touch-controls" class="touch-controls" hidden>
-    <div id="joystick" class="joystick"><i></i></div>
-    <div id="dpad" class="dpad" hidden>
-      <button data-move="forward">▲</button>
-      <button data-turn="left">◀</button>
-      <button data-turn="right">▶</button>
-      <button data-move="back">▼</button>
+    <div id="joystick" class="joystick" role="group" aria-label="移動スティック"><i id="stick"></i></div>
+    <div id="dpad" class="dpad" hidden aria-label="方向ボタン">
+      <button data-move="forward" aria-label="前進">▲</button>
+      <button data-move="left" aria-label="左へ移動">◀</button>
+      <button data-move="right" aria-label="右へ移動">▶</button>
+      <button data-move="back" aria-label="後退">▼</button>
     </div>
     <span id="look-hint" class="look-hint">右側で見回す</span>
   </div>
