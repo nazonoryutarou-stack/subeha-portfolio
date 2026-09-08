@@ -1,0 +1,68 @@
+name: Deploy Astra arcade candidate to Neocities
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/deploy-astra-arcade-neocities.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-astra-arcade-neocities
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Astra arcade candidate
+        uses: actions/checkout@v6
+        with:
+          ref: feature/arcade-permanent-space
+
+      - name: Validate Astra arcade candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f public/arcade/index.html
+          test -f public/arcade/arcade.css
+          test -f public/arcade/boot.js
+          test -f public/arcade/main.js
+          test -f public/arcade/world.js
+          test -f public/arcade/shops.js
+          test -f public/arcade/vendor/three.module.min.js
+          grep -q '不氣屋界隈の、歩けるアーケード' public/arcade/index.html
+          grep -q './boot.js' public/arcade/index.html
+          node scripts/check-arcade.mjs
+          node scripts/test-arcade-space.mjs
+
+      - name: Deploy Astra candidate public directory to Neocities
+        uses: bcomnes/deploy-to-neocities@v3
+        with:
+          api_key: ${{ secrets.NEOSITIES_API_TOKEN }}
+          dist_dir: public
+          cleanup: false
+          neocities_supporter: false
+          preview_before_deploy: true
+
+      - name: Verify Astra arcade on public URL
+        env:
+          NEOCITIES_TOKEN: ${{ secrets.NEOSITIES_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          info="$(curl --fail --silent --show-error -H "Authorization: Bearer ${NEOCITIES_TOKEN}" https://neocities.org/api/info)"
+          sitename="$(INFO_JSON="$info" python3 -c 'import json,os; print(json.loads(os.environ["INFO_JSON"])["info"]["sitename"])')"
+          arcade_url="https://${sitename}.neocities.org/arcade/"
+          echo "Astra arcade URL: ${arcade_url}"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${arcade_url}" -o /tmp/arcade.html
+          grep -q '不氣屋界隈の、歩けるアーケード' /tmp/arcade.html
+          grep -q './boot.js' /tmp/arcade.html
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${arcade_url}boot.js" -o /tmp/boot.js
+          grep -q 'main.js' /tmp/boot.js
+          echo "Verified Astra arcade page and module boot: ${arcade_url}"
