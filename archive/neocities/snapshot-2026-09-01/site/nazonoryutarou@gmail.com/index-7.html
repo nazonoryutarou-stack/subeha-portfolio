@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="打猿による短編小説『忍者解釈』。なます市立激怒高等学校二年三組、三十二人の変死事件を閲覧する忍者災害対策端末。">
+<meta name="theme-color" content="#050504"><meta name="robots" content="index,follow">
+<meta property="og:type" content="article"><meta property="og:title" content="忍者解釈｜なます市警・忍者災害対策端末"><meta property="og:description" content="二年三組、変死者32名。忍者関与率、算出不能。"><meta property="og:image" content="ogp.svg"><meta name="twitter:card" content="summary_large_image">
+<title>忍者解釈｜なます市警・忍者災害対策端末</title><style>
+@charset "UTF-8";
+:root{
+ --ink:#e9e2cf;--dim:#9d9687;--void:#050504;--void2:#0c0b09;--panel:#11100d;
+ --red:#ec3429;--red2:#6e1713;--acid:#c4f35b;--amber:#d5a84d;--blue:#71a7b5;
+ --line:rgba(233,226,207,.16);--line2:rgba(233,226,207,.34);--font-scale:1;
+ --contam:0;--case-progress:0;--safe-bottom:env(safe-area-inset-bottom,0px)
+}
+*{box-sizing:border-box}
+html{background:var(--void);scroll-behavior:smooth;color-scheme:dark}
+body{margin:0;min-width:320px;color:var(--ink);background:
+ radial-gradient(circle at 76% 6%,rgba(236,52,41,.08),transparent 28rem),
+ linear-gradient(180deg,#020202 0,var(--void) 24%,#080706 100%);
+ font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",system-ui,sans-serif;
+ font-size:calc(16px * var(--font-scale));line-height:1.92;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:200;pointer-events:none;opacity:.13;background:
+ repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.028) 4px),
+ radial-gradient(circle at 50% 50%,transparent 45%,rgba(0,0,0,.58));mix-blend-mode:screen}
+body::after{content:"";position:fixed;inset:-40%;z-index:199;pointer-events:none;opacity:calc(.018 + var(--contam)*.00045);background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain .22s steps(2) infinite}
+@keyframes grain{0%{transform:translate(0)}25%{transform:translate(2%,-1%)}50%{transform:translate(-1%,2%)}75%{transform:translate(1%,1%)}100%{transform:translate(-2%,-1%)}}
+a{color:inherit}button,input{font:inherit}button{color:inherit}.skip{position:fixed;z-index:500;left:10px;top:10px;transform:translateY(-160%);padding:10px 14px;background:var(--ink);color:#111}.skip:focus{transform:none}
+#noiseCanvas{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none;opacity:.66}
+.boot{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#020202;color:var(--ink);transition:opacity .55s ease,visibility .55s ease}.boot.is-done{opacity:0;visibility:hidden}.boot__box{width:min(680px,calc(100% - 36px));border:1px solid var(--line2);padding:clamp(24px,5vw,52px);background:#070706;box-shadow:0 40px 120px #000}.boot__seal{display:grid;place-items:center;width:82px;height:82px;margin-bottom:28px;border:1px solid var(--red);border-radius:50%;color:var(--red);font:700 2.2rem serif;box-shadow:0 0 40px rgba(236,52,41,.12)}.boot h1{margin:0;font:600 clamp(1.45rem,5vw,2.8rem)/1.3 "Yu Mincho",serif;letter-spacing:.08em}.boot p{color:var(--dim);font:clamp(.6rem,2vw,.75rem) ui-monospace,monospace;letter-spacing:.13em}.boot__bar{height:3px;margin:28px 0 14px;background:#24211b;overflow:hidden}.boot__bar i{display:block;height:100%;width:0;background:var(--red);transition:width .22s linear}.boot__row{display:flex;justify-content:space-between;gap:16px;font:.6rem ui-monospace,monospace;color:var(--dim)}.boot button{margin-top:24px;padding:8px 12px;border:1px solid var(--line);background:none;cursor:pointer;font:.62rem ui-monospace,monospace}
+.system-frame{position:fixed;inset:0;z-index:160;pointer-events:none}.corner{position:absolute;width:38px;height:38px;border-color:rgba(236,52,41,.6);border-style:solid}.c-tl{left:12px;top:12px;border-width:1px 0 0 1px}.c-tr{right:12px;top:12px;border-width:1px 1px 0 0}.c-bl{left:12px;bottom:calc(12px + var(--safe-bottom));border-width:0 0 1px 1px}.c-br{right:12px;bottom:calc(12px + var(--safe-bottom));border-width:0 1px 1px 0}.frame-code{position:absolute;color:rgba(233,226,207,.38);font:.48rem ui-monospace,monospace;letter-spacing:.18em}.frame-code.a{left:58px;top:14px}.frame-code.b{right:58px;bottom:calc(14px + var(--safe-bottom));text-align:right}
+.topbar{position:fixed;z-index:150;left:26px;right:26px;top:25px;display:grid;grid-template-columns:auto minmax(90px,1fr) auto auto;gap:16px;align-items:center;padding:10px 13px;border:1px solid var(--line);background:rgba(5,5,4,.84);backdrop-filter:blur(15px);box-shadow:0 15px 50px rgba(0,0,0,.4)}.brand{display:grid;text-decoration:none;line-height:1.05}.brand small,.hud-label{font:.47rem ui-monospace,monospace;letter-spacing:.17em;color:var(--red)}.brand b{font-family:"Yu Mincho",serif;font-size:.9rem;letter-spacing:.08em}.progress-track{height:3px;background:rgba(255,255,255,.08);overflow:hidden}.progress-bar{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--acid));box-shadow:0 0 12px var(--red)}.counter{display:flex;align-items:baseline;gap:5px;font-family:ui-monospace,monospace}.counter strong{font-size:1.35rem;color:var(--red)}.counter span{font-size:.52rem;color:var(--dim)}.contam{display:grid;grid-template-columns:auto 56px;align-items:center;gap:7px;color:var(--dim);font:.49rem ui-monospace,monospace}.contam i{height:3px;background:#24211c}.contam b{display:block;height:100%;width:0;background:var(--acid);box-shadow:0 0 8px rgba(196,243,91,.5)}
+.utility{position:fixed;z-index:170;right:22px;bottom:calc(22px + var(--safe-bottom));display:flex;gap:7px}.utility button{width:42px;height:42px;border:1px solid var(--line);background:rgba(7,7,6,.9);cursor:pointer;font:.58rem ui-monospace,monospace;backdrop-filter:blur(8px)}.utility button:hover,.utility button[aria-pressed="true"]{border-color:var(--red);color:var(--red)}
+.hero{position:relative;z-index:1;min-height:100svh;display:grid;align-items:end;padding:clamp(120px,18vh,190px) clamp(22px,7vw,110px) clamp(84px,11vh,120px);overflow:hidden}.hero::before{content:"";position:absolute;width:min(56vw,710px);aspect-ratio:1;right:-7vw;top:7vh;border-radius:50%;background:radial-gradient(circle at 42% 36%,#fa5848 0,#9a211b 31%,#250706 63%,transparent 67%);filter:blur(.2px);opacity:.82;box-shadow:0 0 90px rgba(236,52,41,.18)}.hero::after{content:"忍 忍 忍 忍 忍 忍 忍 忍 忍 忍 忍 忍 忍 忍 忍 忍";position:absolute;inset:14% -10% auto;transform:rotate(-8deg);color:rgba(233,226,207,.03);font:700 clamp(2rem,7vw,6rem)/1.7 serif;letter-spacing:.24em;word-spacing:.5em}.hero__grid{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:42px;align-items:end}.hero__eyebrow{margin:0;color:var(--red);font:.67rem ui-monospace,monospace;letter-spacing:.23em}.hero h1{margin:.14em 0 .24em;font:700 clamp(5rem,17vw,13rem)/.76 "Yu Mincho",serif;letter-spacing:-.1em;text-shadow:0 8px 0 #000,0 0 50px rgba(236,52,41,.18)}.hero h1 span{display:block}.hero h1 span:last-child{margin-left:.62em}.hero__lead{max-width:48rem;font-family:"Yu Mincho",serif;font-size:clamp(1.05rem,2.3vw,1.48rem)}.hero__meta{display:flex;flex-wrap:wrap;gap:9px 18px;margin-top:25px;color:var(--dim);font:.58rem ui-monospace,monospace}.hero__seal{width:clamp(120px,16vw,220px);aspect-ratio:1;display:grid;place-items:center;border:1px solid var(--red);border-radius:50%;color:var(--red);font:700 clamp(3rem,8vw,7rem) serif;transform:rotate(8deg);box-shadow:0 0 0 12px rgba(236,52,41,.025),0 0 0 28px rgba(236,52,41,.018)}.enter{display:inline-flex;align-items:center;gap:14px;margin-top:30px;text-decoration:none;color:var(--acid);font:.62rem ui-monospace,monospace;letter-spacing:.13em}.enter::before{content:"";width:46px;height:1px;background:var(--acid)}
+.briefing{position:relative;z-index:3;width:min(1160px,calc(100% - 32px));margin:0 auto;padding:clamp(90px,14vw,170px) 0}.briefing__head{display:grid;grid-template-columns:.78fr 1.22fr;gap:clamp(30px,7vw,100px)}.code{margin:0;color:var(--red);font:.62rem ui-monospace,monospace;letter-spacing:.17em}.briefing h2,.relation h2,.ending h2{margin:.25em 0;font:600 clamp(2.6rem,7vw,5.7rem)/1.06 "Yu Mincho",serif;letter-spacing:-.04em}.briefing__text{font-family:"Yu Mincho",serif;font-size:clamp(1.05rem,2.1vw,1.35rem)}.briefing__text p:first-child::first-letter{float:left;padding:.1em .12em 0 0;color:var(--red);font-size:4.5em;line-height:.75}.notice-tape{margin-top:60px;padding:12px 0;overflow:hidden;border-block:1px solid rgba(236,52,41,.5);color:var(--red);font:.58rem ui-monospace,monospace;letter-spacing:.13em;white-space:nowrap}.notice-tape span{display:inline-block;min-width:max-content;animation:tape 22s linear infinite}@keyframes tape{to{transform:translateX(-50%)}}
+.console{position:relative;z-index:4;width:min(1280px,calc(100% - 24px));margin:0 auto 46px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.008));box-shadow:0 40px 100px rgba(0,0,0,.35)}.console__head{display:flex;justify-content:space-between;gap:20px;padding:15px 18px;border-bottom:1px solid var(--line);font:.58rem ui-monospace,monospace;letter-spacing:.12em}.console__head b{color:var(--acid)}.console__grid{display:grid;grid-template-columns:1fr 1.6fr;gap:1px;background:var(--line)}.console__panel{padding:20px;background:var(--void2)}.console label{display:grid;gap:7px;color:var(--dim);font:.55rem ui-monospace,monospace}.console input{width:100%;padding:13px 14px;border:1px solid var(--line);color:var(--ink);background:#080806}.filters{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.filters button{padding:7px 9px;border:1px solid var(--line);background:none;cursor:pointer;font:.52rem ui-monospace,monospace}.filters button.is-active{border-color:var(--red);color:var(--red);background:rgba(236,52,41,.06)}.roster{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}.roster button{position:relative;min-height:44px;padding:5px;border:1px solid var(--line);background:#080806;cursor:pointer;font:.48rem ui-monospace,monospace;text-align:left;overflow:hidden}.roster button::after{content:"";position:absolute;inset:auto 0 0;height:2px;background:var(--red);transform:scaleX(0);transform-origin:left}.roster button.is-dead{color:#776f63}.roster button.is-dead::after{transform:scaleX(1)}.roster button.is-current{border-color:var(--acid);color:var(--acid);box-shadow:inset 0 0 18px rgba(196,243,91,.06)}.roster button[hidden]{display:none}
+.registry{position:relative;z-index:2;width:min(1180px,calc(100% - 26px));margin:auto;padding-bottom:100px}.registry__sticky{position:sticky;top:92px;z-index:40;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:17px 0;border-bottom:1px solid var(--line);background:linear-gradient(var(--void) 82%,transparent)}.registry__sticky h2{margin:0;font:600 clamp(1.5rem,4vw,2.8rem) "Yu Mincho",serif}.registry__state{text-align:right;color:var(--dim);font:.54rem ui-monospace,monospace;letter-spacing:.08em}.registry__state b{color:var(--red)}
+.case-file{position:relative;display:grid;grid-template-columns:82px minmax(0,1fr);padding:clamp(82px,11vw,145px) 0;border-bottom:1px solid var(--line);transition:opacity .35s ease,filter .35s ease}.case-file[hidden]{display:none}.case-file::before{content:"";position:absolute;left:82px;right:0;top:65px;height:1px;background:linear-gradient(90deg,var(--red),transparent 55%);opacity:.28}.case-rail{position:relative;border-right:1px solid var(--line)}.case-num{position:sticky;top:126px;display:block;color:var(--red);font:700 1.55rem ui-monospace,monospace}.case-mark{position:absolute;right:-.48em;top:38%;color:rgba(236,52,41,.075);font:700 5rem serif;transform:rotate(-12deg)}.case-main{padding-left:clamp(24px,6vw,84px);max-width:930px}.case-head{position:relative;padding-right:110px}.case-label{margin:0;color:var(--dim);font:.55rem ui-monospace,monospace;letter-spacing:.13em}.case-head h2{margin:.12em 0 0;font:600 clamp(3rem,9vw,6.8rem)/.95 "Yu Mincho",serif;letter-spacing:-.06em}.cause{margin:.7em 0 1.6em;color:var(--red);font-weight:700}.case-analysis{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 28px}.case-analysis span{padding:5px 8px;border:1px solid var(--line);color:var(--dim);font:.48rem ui-monospace,monospace;letter-spacing:.08em}.case-analysis .danger{color:var(--red);border-color:rgba(236,52,41,.35)}.case-analysis .classified{color:var(--acid);border-color:rgba(196,243,91,.3)}.case-stamp{position:absolute;right:0;top:5px;width:82px;height:82px;display:grid;place-items:center;border:2px solid rgba(236,52,41,.42);border-radius:50%;color:rgba(236,52,41,.65);font:700 1.05rem/1 serif;text-align:center;transform:rotate(8deg)}.case-body{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(1.05rem,2vw,1.23rem)}.case-body p{position:relative;margin:0 0 1.55em;padding-left:2.2em}.case-body p::before{content:attr(data-p);position:absolute;left:0;top:.35em;color:rgba(233,226,207,.25);font:.48rem ui-monospace,monospace}.case-foot{display:grid;grid-template-columns:1fr auto;gap:18px;margin-top:46px;padding-top:13px;border-top:1px dashed var(--line);color:var(--dim);font:.55rem ui-monospace,monospace}.case-foot b{color:var(--red)}.case-file.is-current .case-main{filter:none}.case-file.is-current::after{content:"ACTIVE FILE";position:absolute;right:0;top:58px;color:var(--acid);font:.45rem ui-monospace,monospace;letter-spacing:.15em}.reveal{opacity:.15;transform:translateY(28px);transition:opacity .72s ease,transform .72s ease}.reveal.is-visible{opacity:1;transform:none}
+.intermission{position:relative;margin:0;padding:50px clamp(18px,5vw,58px);border-block:1px solid rgba(236,52,41,.35);background:repeating-linear-gradient(135deg,rgba(236,52,41,.025) 0 8px,transparent 8px 16px);overflow:hidden}.intermission::after{content:"警告";position:absolute;right:-.05em;top:-.2em;color:rgba(236,52,41,.04);font:700 9rem serif}.intermission small{color:var(--red);font:.52rem ui-monospace,monospace;letter-spacing:.17em}.intermission h3{position:relative;z-index:1;margin:.35em 0;font:600 clamp(1.5rem,4vw,2.8rem) "Yu Mincho",serif}.intermission p{position:relative;z-index:1;max-width:48rem;color:var(--dim);font-size:.86rem}
+.evidence{position:fixed;z-index:130;right:26px;top:91px;width:min(330px,calc(100vw - 52px));max-height:calc(100svh - 190px);overflow:auto;border:1px solid var(--line);background:rgba(7,7,6,.94);box-shadow:0 30px 80px rgba(0,0,0,.55);backdrop-filter:blur(14px);transform:translateX(calc(100% + 36px));transition:transform .35s ease}.evidence.is-open{transform:none}.evidence__head{position:sticky;top:0;display:flex;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:#090907;font:.53rem ui-monospace,monospace}.evidence__head b{color:var(--red)}.evidence__body{padding:18px}.evidence__id{color:var(--acid);font:.54rem ui-monospace,monospace}.evidence h3{margin:.3em 0;font:600 2.3rem "Yu Mincho",serif}.evidence__cause{color:var(--red);font-size:.8rem}.meter{margin:18px 0}.meter__row{display:flex;justify-content:space-between;color:var(--dim);font:.5rem ui-monospace,monospace}.meter i{display:block;height:4px;margin-top:6px;background:#27231e}.meter b{display:block;height:100%;width:0;background:var(--red)}.fingerprint{height:120px;margin-top:20px;border:1px solid var(--line);background:
+ repeating-radial-gradient(ellipse at 50% 58%,transparent 0 5px,rgba(233,226,207,.11) 6px 7px,transparent 8px 11px),#080806;filter:contrast(1.4)}.evidence__actions{display:grid;gap:7px;margin-top:14px}.evidence__actions button{padding:10px;border:1px solid var(--line);background:none;cursor:pointer;font:.55rem ui-monospace,monospace}.evidence__actions button:hover{border-color:var(--acid);color:var(--acid)}
+.relation{position:relative;z-index:3;padding:clamp(90px,14vw,170px) 20px;border-top:1px solid var(--line);background:radial-gradient(circle at 50% 60%,rgba(236,52,41,.08),transparent 36rem)}.relation__inner{width:min(1100px,100%);margin:auto}.relation__grid{display:grid;grid-template-columns:.72fr 1.28fr;gap:clamp(30px,6vw,80px);align-items:center}.relation p{color:var(--dim)}#relationCanvas{width:100%;aspect-ratio:1.55;border:1px solid var(--line);background:#070706;box-shadow:inset 0 0 60px #000}.relation__legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;color:var(--dim);font:.5rem ui-monospace,monospace}.relation__legend span::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:var(--red)}.relation__legend span:nth-child(2)::before{background:var(--acid)}
+.ending{position:relative;z-index:3;min-height:100svh;display:grid;place-items:center;padding:clamp(120px,16vw,190px) 20px;overflow:hidden;border-top:1px solid var(--line);background:#060504}.mandala{position:absolute;left:50%;top:50%;width:min(88vw,900px);aspect-ratio:1;transform:translate(-50%,-50%);opacity:.25}.mandala i{position:absolute;inset:var(--i);border:1px solid rgba(236,52,41,.26);border-radius:50%;animation:spin calc(30s - var(--n)*1.7s) linear infinite}.mandala i::before,.mandala i::after{content:"忍";position:absolute;left:50%;top:-.7em;color:rgba(236,52,41,.45);font:1.2rem serif}.mandala i::after{top:auto;bottom:-.7em;transform:rotate(180deg)}@keyframes spin{to{transform:rotate(1turn)}}.ending__inner{position:relative;z-index:2;width:min(800px,100%)}.ending__body{font-family:"Yu Mincho",serif;font-size:clamp(1.08rem,2vw,1.27rem)}.ending__body p{margin:0 0 1.55em}.final-line{text-align:center;margin:2.5em 0;font:600 clamp(2.5rem,8vw,5rem) serif;letter-spacing:.25em}.gong{display:block;margin:40px auto 0;padding:12px 22px;border:1px solid var(--red);background:rgba(236,52,41,.04);cursor:pointer;color:var(--red)}
+.afterword{position:relative;z-index:3;padding:clamp(85px,12vw,150px) 20px;background:#d8d0bd;color:#15130f}.afterword__inner{width:min(960px,100%);margin:auto;display:grid;gap:34px}.afterword h2{margin:0;font:600 clamp(2.3rem,7vw,4.8rem)/1.08 "Yu Mincho",serif}.cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cta{display:flex;justify-content:space-between;gap:20px;padding:20px;border:1px solid rgba(0,0,0,.28);text-decoration:none;font-weight:700}.cta:hover{background:#15130f;color:#d8d0bd}.notice{font-size:.76rem;opacity:.68}
+.compact .case-file{display:block;padding:28px 0}.compact .case-rail,.compact .case-body,.compact .case-foot,.compact .case-stamp{display:none}.compact .case-main{padding:0;max-width:none}.compact .case-head{padding:0;display:grid;grid-template-columns:80px 1fr 1.2fr;align-items:center;gap:14px}.compact .case-head::before{content:attr(data-compact-id);color:var(--red);font:1rem ui-monospace,monospace}.compact .case-head h2{font-size:1.5rem}.compact .cause{margin:0;color:var(--dim);font-weight:400}.compact .case-analysis{display:none}
+.phase-3 .topbar{border-color:rgba(236,52,41,.4)}.phase-3 .brand b{text-shadow:2px 0 var(--red2),-1px 0 var(--blue)}.phase-final .system-frame{filter:hue-rotate(170deg)}.phase-final .topbar{transform:skewX(-.2deg)}
+@media(max-width:900px){.topbar{left:16px;right:16px;grid-template-columns:auto 1fr auto}.contam{display:none}.hero__grid,.briefing__head,.console__grid,.relation__grid{grid-template-columns:1fr}.hero__seal{display:none}.roster{grid-template-columns:repeat(4,1fr)}.evidence{right:16px}.case-file{grid-template-columns:46px 1fr}.case-file::before{left:46px}.case-main{padding-left:20px}.case-num{font-size:1rem}.case-mark{font-size:3.4rem}.case-head{padding-right:0}.case-stamp{position:relative;width:64px;height:64px;margin:14px 0}.compact .case-head{grid-template-columns:50px 1fr}.compact .cause{grid-column:2}.cta-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.topbar{top:16px;left:10px;right:10px;padding:8px 9px;gap:8px}.brand small{display:none}.counter span{display:none}.hero{padding-left:18px;padding-right:18px}.hero h1{font-size:clamp(4.6rem,24vw,7.4rem)}.briefing,.registry,.console{width:calc(100% - 20px)}.roster{grid-template-columns:repeat(4,1fr)}.roster button{min-height:48px}.registry__sticky{top:75px}.registry__state{display:none}.case-body p{padding-left:1.6em}.case-foot{grid-template-columns:1fr}.utility{right:10px;bottom:calc(10px + var(--safe-bottom))}.utility button{width:39px;height:39px}.frame-code{display:none}}
+.motion-off *{animation:none!important;transition:none!important}.motion-off .reveal{opacity:1!important;transform:none!important}.motion-off #noiseCanvas{display:none}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}.boot{display:none}}
+@media print{.boot,.system-frame,.topbar,.utility,.console,.evidence,#noiseCanvas{display:none!important}.case-file{break-inside:avoid;opacity:1;transform:none}.case-body{font-size:10pt}body{background:#fff;color:#111}.registry{width:100%}}
+</style></head>
+<body>
+<a class="skip" href="#story">本文へ移動</a><canvas id="noiseCanvas" aria-hidden="true"></canvas>
+<div class="boot" id="boot"><div class="boot__box"><div class="boot__seal">忍</div><p>NAMASU PREFECTURAL NINJA DISASTER RESPONSE SYSTEM</p><h1>忍者災害対策端末を起動しています</h1><div class="boot__bar"><i id="bootBar"></i></div><div class="boot__row"><span id="bootText">忍者飽和率を照合</span><span>AUTH: G-2/3</span></div><button id="skipBoot" type="button">起動演出を省略</button></div></div>
+<div class="system-frame" aria-hidden="true"><i class="corner c-tl"></i><i class="corner c-tr"></i><i class="corner c-bl"></i><i class="corner c-br"></i><span class="frame-code a">NAMASU / NINJA SATURATION LEVEL 5</span><span class="frame-code b">CLASS 2-3 / 32 RECORDS / DO NOT TRUST THE CEILING</span></div>
+<header class="topbar"><a class="brand" href="#top"><small>NINJA DISASTER TERMINAL</small><b>忍者解釈</b></a><div class="progress-track" aria-hidden="true"><span class="progress-bar" id="progressBar"></span></div><div class="counter"><strong id="deathCount">00</strong><span>/32 DEAD</span></div><div class="contam"><span>汚染 <b id="contamValue">0%</b></span><i><b id="contamBar"></b></i></div></header>
+<nav class="utility" aria-label="表示と端末設定"><button id="evidenceToggle" type="button">鑑</button><button id="compactToggle" type="button" aria-pressed="false">覧</button><button id="fontDown" type="button">A−</button><button id="fontUp" type="button">A＋</button><button id="soundToggle" type="button" aria-pressed="false">無</button><button id="motionToggle" type="button" aria-pressed="false">止</button></nav>
+<aside class="evidence" id="evidence"><div class="evidence__head"><span>FORENSIC INSPECTOR</span><button id="evidenceClose" type="button">閉</button></div><div class="evidence__body"><p class="evidence__id" id="evId">NAMASU-0001</p><h3 id="evName">板垣</h3><p class="evidence__cause" id="evCause"></p><p>分類：<b id="evCat"></b></p><div class="meter"><div class="meter__row"><span>事件危険度</span><span id="evRisk">--</span></div><i><b id="evRiskBar"></b></i></div><div class="meter"><div class="meter__row"><span>忍者関与確度</span><span id="evConf">--</span></div><i><b id="evConfBar"></b></i></div><div class="fingerprint" aria-hidden="true"></div><div class="evidence__actions"><button id="copyFile" type="button">現在の記録をコピー</button><button type="button" onclick="window.print()">報告書を印刷</button></div></div></aside>
+<main id="top">
+<section class="hero"><div class="hero__grid"><div><p class="hero__eyebrow">SHORT FICTION / NINJA SATURATION INCIDENT / 2020</p><h1><span>忍者</span><span>解釈</span></h1><p class="hero__lead">高校生が一クラス丸ごと変死した。手を下したのは忍者。荒唐無稽な死因を、警察、専門家、行政、そして忍者が真顔で処理する三十二件の事故報告書。</p><div class="hero__meta"><span>著者：打猿</span><span>初出：2020.02.27 23:12</span><span>対象：なます市立激怒高等学校 二年三組</span><span>死亡：32/32</span></div><a class="enter" href="#story">端末へ接続する</a></div><div class="hero__seal">忍</div></div></section>
+<section class="briefing" id="story"><div class="briefing__head"><div><p class="code">FILE 00 / NINJA SATURATION</p><h2>世界には<br>忍者が飽和した。</h2></div><div class="briefing__text"><p>ある日、ゴビ砂漠において、ビッグバンを人工的に発生させる実験が行われた。</p><p>その結果、世界には忍者が飽和し、あらゆるものが忍者化するようになった。猫も杓子も忍者忍者。空には忍者が群れをなして飛行し、家かと思って住んでいたら実は忍者だった、という事例が頻発した。</p></div></div><div class="notice-tape"><span>注意：天井裏へ石・ゴミ・昆虫を投げ込まないでください　／　注意：捕獲した忍者を弁当に載せないでください　／　注意：忍者性の症状を自己判断しないでください　／　注意：天井裏へ石・ゴミ・昆虫を投げ込まないでください　／　注意：捕獲した忍者を弁当に載せないでください　／　</span></div></section>
+<section class="console" aria-label="事件検索端末"><header class="console__head"><span>CLASS 2-3 / ROSTER ACCESS</span><span><b id="resultCount">32</b> RECORDS ONLINE</span></header><div class="console__grid"><div class="console__panel"><label>氏名・死因・本文を検索<input id="caseSearch" type="search" placeholder="例：宇宙、脳、老婆、忍者"></label><div class="filters" id="filters"></div></div><div class="console__panel"><div class="roster" id="roster" aria-label="二年三組座席表"></div></div></div></section>
+<section class="registry" id="registry" aria-labelledby="registryTitle"><header class="registry__sticky"><h2 id="registryTitle">二年三組・変死記録</h2><p class="registry__state" id="currentName">閲覧開始<br><b>忍者関与率：算出不能</b></p></header><article class="case-file reveal" data-case="1" data-category="物質変換" data-confidence="65" data-name="板垣" data-risk="75" id="case-01" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">01</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 01</p>
+<h2>板垣</h2>
+<p class="cause">ナウマンゾウによる圧死／硬貨化</p>
+</header>
+<div class="case-body">
+<p data-p="01">なます市立激怒高等学校二年三組の板垣という男が通学中に死亡した。死因はナウマンゾウに踏み潰されたことによる破裂。無論即死である。現場付近では一ヶ月前からナウマンゾウの目撃情報が相次いでおり、自治体が注意を促していた。</p>
+<p data-p="02">踏み潰され、体液が全て抜け出た板垣の遺体は完全な円盤状になっており、表面には100という数字と平成23年の文字が。裏面には桜の花の図柄と日本国、そして百円という文字が刻印されており、側面はぎざぎざになっていた。</p>
+<p data-p="03">事件を受け、日本政府は巨大な自動販売機の開発に着手、完成した自販機に板垣の遺体を投入したところ、見事に巨大ミルクセーキの購入に成功した。</p>
+<p data-p="04">ナウマンゾウは捕獲され動物園に収容されたが、飼育員が目を離した隙に姿を消した。付近の監視カメラには檻を飛び出す忍者の姿が捉えられており、ナウマンゾウ＝忍者説に信憑性が増す結果となった。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：01/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="2" data-category="生体異常" data-confidence="88" data-name="堰口" data-risk="92" id="case-02" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">02</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 02</p>
+<h2>堰口</h2>
+<p class="cause">ふやけ脳症／アパート消失</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣の同級生である堰口という女が死亡した。十月二十八日、堰口の住む二階建てアパート「エルドリッジ荘」は消失した。数分後、アパートは再び元の場所へ戻ってきたが、住人のほとんどは全身が焼け爛れる、壁や床に溶け込む、体の一部が凍りつく、頭部が透明化する、三遊亭小遊三になる、などの変死を遂げており、堰口は水死体のように皮膚がふやけ死んでいた。死因は脳に大量の水が入ったことによるふやけ脳症であった。</p>
+<p data-p="02">いくつかの部屋から、米軍人の主食である米軍まんじゅうの食べカスが発見されており、アメリカ合衆国による極秘実験が行われたのでは無いかとの見方が出る一方、大家の部屋から瓶詰めの脳が複数発見され、付近で連続した殺人事件の犯人が大家であることが判明。大家はアパートの住人に忍者では無いかとの疑いがかけられており、警察は行方不明になった大家の足取りを追っている。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：02/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="3" data-category="大型生物" data-confidence="56" data-name="芦原" data-risk="71" id="case-03" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">03</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 03</p>
+<h2>芦原</h2>
+<p class="cause">エビゴリラ固め</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口の同級生であり、人型のキクラゲである芦原という男は浜辺で、傷を負い異常に興奮したエビゴリラなる生物と遭遇し、死亡した。エビゴリラは、有名な製薬会社の研究員が酔って開発した、頭がゴリラで体がエビの、不気味な生物である。しかも硫黄の匂いがする。</p>
+<p data-p="02">芦原は帯刀していため、エビゴリラに戦いを挑むも、エビゴリラの卑怯な毒霧や目潰しに苦戦、最終的には逆水平チョップからのエビゴリラ固めを受け、敗北した。エビゴリラ側のセコンドは忍者、芦沢側のセコンドは恋人だった。格闘経験の差が、今回の悲劇を招いたと言える。</p>
+<p data-p="03">その遺体は満潮に流され、長いこと行方不明だったが、先日、小豆島で捕獲されたウミガメの腸に詰まっているところが発見された。芦原の遺体は恋人が引き取った。遺体に付着した子キクラゲを自宅で栽培し、元どおりに蘇らせる気でいるらしい。メルボルンの大学ではキクラゲの蘇生に成功した前例があり、不可能ではないと思われる。</p>
+<p data-p="04">現在キクラゲは価格が非常に高騰しており、キクラゲシンジケートによる密売が横行している。芦原の遺体は日本を救う起爆剤となるだろうか。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：03/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="4" data-category="生体異常" data-confidence="79" data-name="椛島" data-risk="88" id="case-04" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">04</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 04</p>
+<h2>椛島</h2>
+<p class="cause">体内蝉発生</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原の同級生である椛島という女が自宅で死亡した。死因は自宅の前を通った石焼き芋売りの売り声が体内蝉発生の周波数とよく似ていたため、運の悪いことに背中から巨大な蝉の幼虫が飛び出したことによる大量出血。無論即死である。唯一の救いは、蝉が飛び出した際に、本人も気づかぬ間に背中にできた人面瘡が吹っ飛んだことである。遺体は内部が空洞化しており、蝉の幼虫に食い尽くされたものと思われる。</p>
+<p data-p="02">幼虫はその場で羽化。窓ガラスを破壊して何処へと去り、遺体の傍には抜け殻のみが残された。</p>
+<p data-p="03">その後、なます市内各地で巨大な蝉の目撃情報が相次いだが、羽化からちょうど七日目、神社の境内にてひっくり返っているところが見つかり、専門家の調査が行われた。その結果、ツクツクホーシの一種であることが確認された。</p>
+<p data-p="04">解剖してみると、ツクツクホーシは雌だった。抱卵しており、中身を調べてみると忍者の雛が入っていた。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：04/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="5" data-category="生体異常" data-confidence="47" data-name="浦部" data-risk="67" id="case-05" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">05</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 05</p>
+<h2>浦部</h2>
+<p class="cause">急性一パチ中毒</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島の同級生である不良男の浦部は、パチンコ店のトイレで青い血液の付着したバタフライナイフを握りしめたまま死亡しており、遺体からは高い放射線量が確認された。死因は急性一パチ中毒と見られる。</p>
+<p data-p="02">遺体発見の数分前、浦部は半透明な黒人の男と口論になっているところを店内の監視カメラに捉えられている。青い血液には銅イオンが含まれており、カブトガニのものとよく似ていた。</p>
+<p data-p="03">生前、最後に打った台は、CRベテラン教師VSバテレン宣教師であり、これにより浦部は四百円ほど儲けていた。黒人の男は、半透明と言っても、広瀬すずの肌くらい透明度が高く、両目の視力が八十八の浦部以外には、よく見えていなかっただろうと考えられる。</p>
+<p data-p="04">黒人の男は入店時には透けていなかったものの、CR忍者を打つうちに、だんだん透けてきたとの目撃情報があるため、なんらかの忍術にかかっていた可能性も否定できない。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：05/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="6" data-category="生体異常" data-confidence="70" data-name="駒木" data-risk="84" id="case-06" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">06</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 06</p>
+<h2>駒木</h2>
+<p class="cause">忍者性ショック</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部の同級生である駒木という男が死亡した。川釣りの最中、十六メートル級のデメニギスに襲撃され、飲み込まれたのである。</p>
+<p data-p="02">デメニギスという魚は本来、東北地方や北海道の沖合にしか生息していないが、この日は偶々、産卵のためになます市へ南下、なます川を遡上していた。</p>
+<p data-p="03">一部始終を見ていた釣り人が警察へ通報し、二十台のパトカーが出動した。しかしパトカーは、自分が陸しか走れないのを忘れており、次々と川に沈んでいった。なます川はパトカーから流れ出した汁、パト汁で汚染され、なます川から水を引いている水田の米を白黒にした。しかし美味だったという。</p>
+<p data-p="04">その後、消化不良のため吐き出された駒木のしゃれこうべが川底から発見されたが、蛍光色の緑に変色しており、これはデメニギスの胃酸に原因があると見られている。</p>
+<p data-p="05">しゃれこうべには無数の手裏剣が刺さっており、死因は溺死や、噛み付かれたことによる失血死ではなく、手裏剣が刺さったことによる忍者性ショックではないかと言われている。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：06/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="7" data-category="物質変換" data-confidence="93" data-name="天草" data-risk="63" id="case-07" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">07</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 07</p>
+<h2>天草</h2>
+<p class="cause">人体リモコン化</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木の同級生である天草という男が死亡した。アルバイト先のコンビニエンスストアにて突如身体が緑色の炎を上げ、全身が焼け崩れたのである。</p>
+<p data-p="02">天草とツーオペを組んでいた店員が、焼け崩れ、灰と化した遺体の中に機械の部品らしきものを発見し、まだ熱い灰に手を突っ込み、全ての部品を回収、バックヤードにて組み立てを行ったところ、通常の三倍もある巨大なテレビ用リモコンが完成した。しかし通常の三倍サイズの単三電池が市販されていないため、動作の確認をすることはできなかった。</p>
+<p data-p="03">ならばと、冷凍庫に仕舞ってあったサイズのちょうどいいデンキナマズを嵌め込んでみると、きちんとリモコンとして機能した。</p>
+<p data-p="04">監視カメラには、天草に向かって吹き矢を構える覆面の男が映っており、忍者の妙薬によって天草がリモコンに変えられた可能性が高い。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：07/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="8" data-category="分類不能" data-confidence="61" data-name="千々石" data-risk="80" id="case-08" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">08</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 08</p>
+<h2>千々石</h2>
+<p class="cause">麦茶の飲み過ぎ</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草の同級生である千々石という男が翌檜の木の先端で死亡した。死因は麦茶の飲み過ぎである。</p>
+<p data-p="02">付近には数日前から麦茶を大量に含有した隕石が降り注いでおり、千々石は隕石群を見ようと木に登ったところで、運悪く隕石を飲み込んでしまったものと思われる。胃は麦茶で大きく膨れていた。遺体を木から降ろす際も口から滝のように麦茶が溢れ出てきたほどである。</p>
+<p data-p="03">翌檜の木は麦茶を吸収しすぎて自我を持ってしまった。自力で移動を始め、なます市と歯車市の市境を越えたあたりで足跡が途絶えた。しかし先日、ベーリング海で翌檜が目撃され、その写真が公開された。</p>
+<p data-p="04">翌檜の細胞内に潜むレトロウイルスは、忍者のような形をしたものも少なくない。隕石の麦茶から摂取したエネルギーで、忍者性が目覚めたのだろうか。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：08/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="9" data-category="物質変換" data-confidence="84" data-name="敷島" data-risk="59" id="case-09" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">09</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 09</p>
+<h2>敷島</h2>
+<p class="cause">風呂場縮小現象</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石の同級生である敷島という女が死んだ。風呂に入っているところを急激な風呂場の縮小現象に巻き込まれ、潰されてしまったのである。</p>
+<p data-p="02">中性子星にも匹敵する密度まで収縮した風呂場は時空の歪みを生み出し、一度は敷島家周辺が消滅の危機に瀕したが、地元消防団による必死の処置により、なんとか風呂場を元の大きさの十七分の十五サイズまで戻すことに成功した。しかし、湯船に浸かっていた敷島は助からず、親指大の遺体となって発見された。</p>
+<p data-p="03">風呂は老朽化しており、いつ縮小してもおかしくなかった。現場からは、風呂場の壁と同じ色柄の布が発見されており、覗きを行なっていた忍者が関与していると見て、警察が捜査中である。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：09/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="10" data-category="対人・兵器" data-confidence="52" data-name="田所" data-risk="76" id="case-10" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">10</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 10</p>
+<h2>田所</h2>
+<p class="cause">豪族の罠</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島の同級生である田所という女はその日、脱走したペットのツノコアラを探しに市内随一の霊山と言われている猿姥韓山に立ち入り死亡した。乳王を名乗る豪族の仕掛けた罠にかかったのである。遺体は手下の毛ガニに持ち去られた。</p>
+<p data-p="02">猿姥韓山には乳王の拠点があり、豪族庁のホームページには「乳王とは、兵士千二百人（うち千百人が毛ガニ）を従えるなます市では唯一の二級豪族です。オルドビス紀から猿姥韓山に拠点を置いています。」と記載されている。</p>
+<p data-p="03">乳王は乳外法権に守られているため、遺体の回収はできなかったが、田所は冒険映画でおなじみ、転がる石球の罠にかかったため、紙のようにペラペラの遺体になったものと思われる。</p>
+<p data-p="04">乳王は語尾がござるであるため、忍者の疑いがかけられている。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：10/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="11" data-category="空間災害" data-confidence="75" data-name="山口" data-risk="93" id="case-11" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">11</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 11</p>
+<h2>山口</h2>
+<p class="cause">宇宙空間での死亡</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所の同級生である山口という男が宇宙空間で死亡しているとナスダが発表した。</p>
+<p data-p="02">なぜ宇宙で死んでいるのか。原因はわからないが、地球の衛星軌道を周回する山口の遺体はなぜか頭部が二つあった。</p>
+<p data-p="03">山口の部屋には遺書が残されていた。「どうせ俺は宇宙空間をさまようしか能の無い男なので宇宙で死にます。どうせ俺は宇宙空間をさまようしか能の無い男なので宇宙で死にます。」という内容で、なぜ同じ文章を二度書いたのか、なぜティッシュ箱の裏にマジックペンで遺書を残したのか。真実を知る男は十一月二日午前七時現在クック諸島上空を周回中である。</p>
+<p data-p="04">山口の自宅周辺では、マネキンの頭部を抱えた忍者がたびたび目撃されていた。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：11/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="12" data-category="対人・兵器" data-confidence="43" data-name="横井" data-risk="72" id="case-12" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">12</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 12</p>
+<h2>横井</h2>
+<p class="cause">ダイモス小型版による打撃</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口の同級生である横井という男はベランダに果物を起き、集まってきた陸クラゲをエアガンで狙撃するという生活をしていたのだが、その日、黄桃の缶詰に集まった陸クラゲがあまりにも巨大だったので、ベランダのエーテル管が破裂、エアコンから飛び出してきた火星の衛星ダイモス小型版で頭を強く打ち死亡した。</p>
+<p data-p="02">陸クラゲ如きにエアガンを発砲し、BB弾を無駄にしたバチが当たったのである。</p>
+<p data-p="03">しかし、小型ながら本物のダイモスが研究機関に回収され、ダイモス研究がさらに発展することとなった。それで判明した新事実によると、ダイモスには忍者の形をした岩があるという。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：12/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="13" data-category="対人・兵器" data-confidence="66" data-name="朴" data-risk="89" id="case-13" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">13</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 13</p>
+<h2>朴</h2>
+<p class="cause">竹槍の頭部刺入</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井の同級生である朴という女は、どこからともなく飛んできた竹槍が頭部に刺さり死亡した。</p>
+<p data-p="02">竹槍は朴の頭部に根を下ろし、屋根を突き破り二百メートルの高さにまで育った。そして、大きな竹の実を一つ実らせた。実の内部には一冊の分厚いコミック本が入っていた。「舌と翡翠と我の太歳」という本である。</p>
+<p data-p="03">大黒龍王作、田楽出版刊と記されているが、そのような作家も出版社も確認されていない。その内容は、中華料理店でアルバイトをする双子の少女がカエルの店長と共に摩訶不思議な冒険をする。というファンタジーだが、その展開は非常にシュールである。</p>
+<p data-p="04">奇妙なのはこの本、開く度に画風が変わるのである。アメリカンコミック風の時に限り、ページからケチャップの匂いがするという現象についても未解明である。</p>
+<p data-p="05">ほとんどの画風において、忍者ペンと呼ばれるペンで執筆されており、作中で忍者のキャラクターがいつもオイシイところを持って行くため、作者の大黒龍王は忍者ではないかと言われている。</p>
+<p data-p="06">現在この本はなます市国会図書館に収蔵されている。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：13/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="14" data-category="生体異常" data-confidence="89" data-name="西野" data-risk="68" id="case-14" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">14</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 14</p>
+<h2>西野</h2>
+<p class="cause">玄翁風邪</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴の同級生である西野という女は中学生の頃から、鏡に映った自分の姿がアンキロサウルスにしか見えないという疾患を抱えていた。そのため、今年の秋頃には自分をアンキロサウルスだとすっかり思い込んでしまった。</p>
+<p data-p="02">自分をアンキロサウルスだと思うプラシーボ効果で、西野の尻からは先端にハンマーのついた尻尾が生えてきた。先端のハンマーは玄翁であり、政雪の銘が入っていた。おそらく正行のパロディであると思われる。</p>
+<p data-p="03">西野はその後、玄翁風邪に罹り死亡した。これは本来恐竜にしか感染しない病気であるが、尻尾がアンキロサウルスのものとなった西野の免疫系が恐竜のものと同じになっていたからである。</p>
+<p data-p="04">玄翁風邪の特効薬が存在するが、忍者が買い占めたため、日本中の病院に在庫がなかった。現在、独占禁止法違反の疑いで、忍者が指名手配されている。懸賞金は二百五十万円である。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：14/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="15" data-category="物質変換" data-confidence="57" data-name="桜庭" data-risk="85" id="case-15" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">15</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 15</p>
+<h2>桜庭</h2>
+<p class="cause">落とし穴帝国のクーデター</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野の同級生である桜庭という男が落とし穴に落下し、死亡した。死因は落とし穴の中に人知れず存在していた封建主義的な帝国に捕獲され、帝国のクーデターに巻き込まれたことによる全身被弾である。</p>
+<p data-p="02">自衛隊穴の中部隊による遺体の回収が済むと、落とし穴には熱々のゼラチンが流し込まれ、封建主義的な帝国のゼリー寄せとなった。</p>
+<p data-p="03">ゼリーまみれの帝国軍は自衛隊に全面降伏。社会システムの全てが煮凝りと化した帝国は放棄され、国民の大半は工場に連行、強制的にコラーゲンを絞られ荒増山の火口に捨てられた。</p>
+<p data-p="04">皇帝の一族が隠したプルンプルンの国宝「寒天玄武像曲槍」が未だ落とし穴の中に眠っているという噂もある。</p>
+<p data-p="05">目撃情報によると、落とし穴を掘ったのはくノ一らしく、現在警察が情報収集をしている。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：15/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="16" data-category="空間災害" data-confidence="80" data-name="小島" data-risk="64" id="case-16" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">16</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 16</p>
+<h2>小島</h2>
+<p class="cause">餓鬼による深海転移</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭の同級生である小島という男が餓鬼の大群に襲われて死亡した。道端で死にかけていた白いヤタガラスをオートバイで踏み潰したバチが当たったのである。</p>
+<p data-p="02">深夜、自宅でテレビを見ていた小島を餓鬼は強襲し、廃業したラーメン店の地下に置かれたテレポーテーションマシンに投じられた。</p>
+<p data-p="03">騒ぎに気がついた地元暴走族「弾力」が鮫ヶ谷にて餓鬼の大群を破ったが、テレポーテーションマシンでなます湖の水深七百メートル地点に転移させられた小島は助からなかった。</p>
+<p data-p="04">専門家がテレポーテーションマシンの内部構造を調べたところ、マシンの中に金運招福のお守りを詰めただけの粗末なものであった。</p>
+<p data-p="05">白いヤタガラスは轢かれてもなお息があったため、通行人の通報で救急車が駆けつけた。しかし車内でドロンと叫び姿を消したという。恐らく忍者であると専門家は語る。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：16/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="17" data-category="分類不能" data-confidence="48" data-name="福島" data-risk="81" id="case-17" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">17</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 17</p>
+<h2>福島</h2>
+<p class="cause">回転する巨大樽</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島の同級生である福島という女は、回転する巨大な樽に潰され死亡した。</p>
+<p data-p="02">帰宅ラッシュの国道百九号線を爆走する樽に五人の力自慢が挑んだが全員圧死。友人との待ち合わせ場所へ急ぐ福島の元へ迫ってきた。</p>
+<p data-p="03">偶然にもなます市で大量発生した大虐殺テントウの討伐用に七千センチ砲搭載重装甲ふきながしがメンタンピンフライドチキンの駐車場に待機していたため、乗組員が自慢の装備で樽を一つ打ち破り、中身のワインをぶちまけたのであるが、第二波として襲来したふた回り大きな樽に敗北した。</p>
+<p data-p="04">福島はマッハ6で走れるため、逃げ足には自信があったが、行く先を非難する車に遮られ、立ち往生したところを潰された。</p>
+<p data-p="05">その後、回転のしすぎで自壊した二つ目の樽から飛び出したのは虹色に輝く生臭い小豆であった。しかし調査の結果、小豆の遺伝子に忍者の遺伝子が混ざっていることが判明した。忍者と豆の雑種だったのである。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：17/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="18" data-category="生体異常" data-confidence="71" data-name="竹内" data-risk="60" id="case-18" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">18</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 18</p>
+<h2>竹内</h2>
+<p class="cause">レプティリアン症候群</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島の同級生である竹内という女は腹部から鱗が生えてきて、なます市内の総合病院にて魚鱗外来を受診した。</p>
+<p data-p="02">その結果、なます市を拠点とし、知育プロレスで有名な、プロレス団体「プロレスリング邪道軍」の選手、ビル・ラプターのように、全身に蛇のような鱗が現れ、非常に凶暴で大柄な人間に変わってしまう、レプティリアン症候群であると診断された。</p>
+<p data-p="03">その日の夜には変身が完了し、夜行性のため竹内は街を駆け回り、脱皮を繰り返した。そして竹内は脱皮のし過ぎで玉ねぎのように縮んで行き、消滅したのである。</p>
+<p data-p="04">レプティリアン症候群を引き起こす寄生虫を忍者が媒介しているという未確認情報もあり、注意が必要である。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：18/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="19" data-category="空間災害" data-confidence="94" data-name="三島" data-risk="77" id="case-19" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">19</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 19</p>
+<h2>三島</h2>
+<p class="cause">アテン神の火球</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内の同級生である三島という男が死亡した。ギネス世界記録に挑戦するため、世界最大の紙飛行機に乗り飛行している最中の悲劇であった。</p>
+<p data-p="02">三島はあまりにも高いところを飛行したため、アテン神の怒りを買い、岩手県上空で火球に撃たれたようである。</p>
+<p data-p="03">そのため、本来は北極点に着陸する予定だった紙飛行機は、近場で唯一紙飛行機専用着陸レーンのある新千歳空港に着陸したが、機体は錘としてセロハンテープで貼り付けていた一円玉周辺を残し焼失、三島は機首にて焼死していた。</p>
+<p data-p="04">しかし、アテン神はエジプトを中心としたアフリカ・ヨーロッパ専門の神であり、岩手に出現した原因は不明である。成田空港の大凧専用レーンを忍者が使用したとの情報があり、実は三島を攻撃したのは、アテン神に変装した空飛ぶ忍者なのではないかとの説も有力視されている。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：19/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="20" data-category="生体異常" data-confidence="62" data-name="森田" data-risk="94" id="case-20" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">20</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 20</p>
+<h2>森田</h2>
+<p class="cause">赤外線によるハンバーガー融合</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島の同級生である森田という女が死亡した。</p>
+<p data-p="02">ファストフード店にて赤外線通信を用い、友人と連絡先の交換を試みた際、店内の特殊な構造により赤外線が反射・増幅され、アルファケンタウリが五十万年かけようやく放つことができるほどの赤外線が森田に直撃したのである。</p>
+<p data-p="03">森田はあまりにも強い赤外線を浴びてしまったため、左手に持っていたチーズバーガーと融合してしまい、ハンバーガー担当店員による診断で、人間かハンバーガーかで言うと僅かながらハンバーガーの状態であると診断され、死亡届が出された。</p>
+<p data-p="04">森田の携帯に送信された連絡先は「ninjya」という名前で、これは友人の連絡先と異なる。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：20/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="21" data-category="対人・兵器" data-confidence="85" data-name="生島" data-risk="73" id="case-21" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">21</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 21</p>
+<h2>生島</h2>
+<p class="cause">襲名妨害／レイピア刺傷</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田の同級生である生島という男は超能力者であり歌舞伎役者でもあったが、十万代目海老川ドンカッチョの名を襲名する際、事件は起きた。</p>
+<p data-p="02">生島に襲名されると困る謎の一党が生島を重爆撃機で襲撃したのである。生島は超能力で敵を全て撃ち落としたが、直後、背後から先輩の海老川ギバチにレイピアで刺された。ギバチも襲名を邪魔したい一党の構成員だったのである。</p>
+<p data-p="03">歌舞伎役者が死ぬと地震が起きるというのは有名な話である。やはり生島が死ぬと地鳴りが始まり、裂けた地面に生島の遺体が吸い込まれていった。</p>
+<p data-p="04">それから三日間、北半球には大見得を切る十万代目海老川ドンカッチョの姿をしたオーロラが出現し、世間を騒がせたが、この一件で歌舞伎の人気が爆発した。</p>
+<p data-p="05">供述によると、海老川ギバチ（本名、全力睾丸助）が犯行に使ったレイピアは私物ではなく、道端で忍者にもらったものだという。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：21/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="22" data-category="生体異常" data-confidence="53" data-name="筒井" data-risk="90" id="case-22" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">22</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 22</p>
+<h2>筒井</h2>
+<p class="cause">菊花石製虎の吐瀉物</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島の同級生である筒井という女が山中で死亡した。死因は菊花石製の虎の吐瀉物を浴びたことによる溶死である。</p>
+<p data-p="02">菊花石はもともと分子構造上虎になりやすいという性質がある。サファイア、オパール、メノウ、ラピスラズリなどは虎になりやすく、そうでない岩石も魚醤で煮込めば虎に変化するが、虎はバターにしかなれない。</p>
+<p data-p="03">しかし、一度虎を経由することで、岩石をバターにするという発想を中世ヨーロッパの商人が本に載せたため、近代における錬金術の考え方に繋がったと、歴史の教科書にも載っている。</p>
+<p data-p="04">それを知った筒井はバター生産で一儲けするべく、様々な岩石を鍋に入れ、魚醤で煮込み、虎に変化するのを待っていた。</p>
+<p data-p="05">虎になりかけの菊花石は、石の硬さと虎の凶暴さを併せ持ち、大変危険である。杜撰な煮込みの結果、筒井は襲われた。</p>
+<p data-p="06">筒井は持っていたクマ撃退スプレーを虎の目に噴射し、助かったかに見えたが、どこからともなく飛んできた手裏剣が虎の口蓋垂（通称喉ペニス）に突き刺さり、虎が嘔吐した。</p>
+<p data-p="07">筒井の遺体は完全に液体化していたという。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：22/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="23" data-category="生体異常" data-confidence="76" data-name="赤城" data-risk="69" id="case-23" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">23</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 23</p>
+<h2>赤城</h2>
+<p class="cause">急性ピータンショック</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井の同級生である赤城という男が自宅で死亡した。死因は体内に人の頭ほどの大きさのピータンが出現し、血流が阻害されたことによる急性ピータンショックである。</p>
+<p data-p="02">赤城は家庭の方針で、幼い頃から背中に某緑色大魔王の刺青が入っていた。高校の授業でプールに入る際も堂々と見せ、学校側もあの大魔王ならと許していた。</p>
+<p data-p="03">赤城の遺体を調べると、口を閉じていた刺青の口が開き、卵を吐き出す図柄に変わっていた。ピータンが現れたのはちょうど卵の絵の下であった。</p>
+<p data-p="04">ピータンを割ってみると、中にミニチュアのドラムやピアノやタンバリンが入っていた。</p>
+<p data-p="05">しばらくは警察がミニチュアの楽器たちを保管していたが、ある日突然小さな忍者に奪われてしまった。忍者たちは見事な演奏を披露しながら、下水道に入っていったという。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：23/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="24" data-category="空間災害" data-confidence="44" data-name="岸辺" data-risk="86" id="case-24" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">24</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 24</p>
+<h2>岸辺</h2>
+<p class="cause">剣豪による斬殺</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城の同級生である岸辺という女が死亡した。剣豪の奇襲を受け、斬り捨てられたのである。</p>
+<p data-p="02">剣豪は助兵衛と言う名の中年で、二十歳の頃旧ソ連の宇宙開発プログラムに参加、お猿のウキキチョフと共に宇宙空間における船外活動を行い、ブラックサテライトが焦げたシャケのムニエルであることを突き止めたことがあるほどの人物である。</p>
+<p data-p="03">何故それほどの人物が高校生を奇襲したのか、それは定かでないが、助兵衛の各関節からテグスが上空へと伸びていたという目撃情報から察するに、雲の上から忍者が操っていたのだろう。</p>
+<p data-p="04">助兵衛の刀は世界で三番目に切れるという妖刀であった。岸辺の遺体は妖刀の呪いでばらばらとチリメンジャコに変わった。そのチリメンジャコは通常よりもタツノオトシゴが多く混入していたという。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：24/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="25" data-category="空間災害" data-confidence="67" data-name="仲松" data-risk="65" id="case-25" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">25</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 25</p>
+<h2>仲松</h2>
+<p class="cause">泥世界への沈降</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺の同級生である仲松という男が自宅の玄関に溜まっていた泥に足を取られ、人知れずゆっくりと沈み、行方不明となった。</p>
+<p data-p="02">学生にとって、泥は天敵である。どこに溜まっているか分からず、足を取られればそのまま沈み、泥の世界に住む老人に、槍で全身を突き刺され死亡する。仲松は運が悪かったのである。</p>
+<p data-p="03">しかし、泥警による捜査で判明したのは、玄関に溜まっていた泥はアイルランドでしか採れない特殊な泥であるという事実であった。</p>
+<p data-p="04">アイルランド泥関に問い合わせたところ、禁漁区の沼で泥をさらう忍者がたびたび目撃されており、玄関に撒かれた泥は忍者が採ってきた泥であることがほぼ確定した。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：25/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="26" data-category="対人・兵器" data-confidence="90" data-name="根本" data-risk="82" id="case-26" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">26</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 26</p>
+<h2>根本</h2>
+<p class="cause">空腹のドローンによる分解</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松の同級生である根本という女が死亡した。</p>
+<p data-p="02">野良猫に盗まれたローファーを取り返すため、少々無茶な追跡を行い、ビルとフェンスの間に挟まっていたところを、腹を空かせたドローンに襲われ、全身を大小合わせ二十の破片に分解された。固まった返り血が絡み、故障したドローンは近くの畑で停止していた。</p>
+<p data-p="03">「ドローン」は「ドロンッ！」と似ているため、忍者の関与が疑われている。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：26/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="27" data-category="生体異常" data-confidence="58" data-name="鬼頭" data-risk="61" id="case-27" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">27</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 27</p>
+<h2>鬼頭</h2>
+<p class="cause">巨大脳タコ化／対脳ミサイル</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本の同級生である鬼頭という男が死亡した。</p>
+<p data-p="02">奉公先の寺で赤いUFOにキャトルミューティレーションされ、手術により取り出された脳が、緑色の粘液で満たされた水槽に浮かべられたのであるが、その粘液は脳の細胞を増殖させ、凶暴化させる培養液だったらしく、脳でできた巨大なタコとなった鬼頭はフランスのダンケルクと言う街に投下され、そのままフランス軍と交戦。</p>
+<p data-p="03">翌日未明、戦車砲の砲撃によりできた傷口から、脳の中の脳に細菌が侵入、激しい炎症を起こし、悶絶しながらフランス中を蹂躙。明け方にフランス海軍の空母シャルルドゴールから対脳ミサイルが三発、発射された。</p>
+<p data-p="04">対脳ミサイルは脳みその活動を停止させ、シナプスをアルプスに変えた。アルプス山脈の香り漂う遺体は防腐処理を施され、ノレーブノレ美術館に収蔵された。</p>
+<p data-p="05">先日、世界的芸術家である草津彌生にペインティングを施され、全体的に水玉模様となった。</p>
+<p data-p="06">後日、オカルト雑誌「ムムム！？」に、件の宇宙人が写り込んだ写真が掲載された。その宇宙人は頬っぺたがグルグルだったため、実は忍者ではないかと、宇宙人ファンの間で噂になったという。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：27/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="28" data-category="生体異常" data-confidence="81" data-name="柴崎" data-risk="78" id="case-28" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">28</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 28</p>
+<h2>柴崎</h2>
+<p class="cause">王水加湿／ミノムシ化</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭の同級生である柴崎という男は加湿器に冗談で王水を入れ、酸の湯気を楽しんだのであるが、一時間ほどで柴崎の体に異常事態が発生した。</p>
+<p data-p="02">柴崎の体は練り飴のようになってしまった。しかし生きてはいたし、移動もできたので、助けを求めるために窓から部屋を脱出、道路へ出たところで枯葉がまとわり付き、今度は巨大なミノムシのようになってしまった。そして、本物のミノムシと勘違いしたハゲタカに襲撃され、死亡した。</p>
+<p data-p="03">警察が加湿器の中を確かめると、半分ほど蒸発した王水から竹筒が飛び出していた。水遁の術である。引っ張ってみると、忍者がくっついてきたが、捕獲する寸前に逃げられてしまった。</p>
+<p data-p="04">警察は忍者が柴崎になんらかの術をかけたと断じ、今も行方を追っている。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：28/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="29" data-category="生体異常" data-confidence="49" data-name="北村" data-risk="95" id="case-29" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">29</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 29</p>
+<h2>北村</h2>
+<p class="cause">ニセ老婆マンによる殴打</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭と柴崎の同級生である北村という女が電車の車内で老婆にタコ殴りにされ死亡した。遺体は原型をとどめていなかった。</p>
+<p data-p="02">有明線の車内で北村が居合わせた老婆は特撮のヒーローが身につけているようなベルトをはめていた。老婆は突然「変身」と叫び、奇怪なポーズをとった。すると老婆は五人に増えた。五人が変身し、二十五人に、二十五人が百二十五人に、次第に数は増え、やがて七万八千百二十五人にまでなった。</p>
+<p data-p="03">老婆たちは正義のヒーロー「老婆マン」と敵対する悪の組織「秘密結社好好爺」が放った「ニセ老婆マン」であった。</p>
+<p data-p="04">本物の老婆マンが駆けつけた時には手遅れで、北村はニセ老婆マンに殴り殺されていた。本物の老婆マンもまた変身し、やはり七万八千百二十五人になった。</p>
+<p data-p="05">関ヶ原の戦いに匹敵する大乱闘が繰り広げられ、辛くも老婆マンが勝利を収めたが、巻き込まれた一般人三十名余りが死亡した。</p>
+<p data-p="06">国家の最高機密である老婆マン変身ベルトの仕組みが秘密結社好好爺に漏洩したのは、老婆マンの自宅で忍者がスパイ行為を働いたものと思われる。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：29/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="30" data-category="物質変換" data-confidence="72" data-name="志田" data-risk="74" id="case-30" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">30</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 30</p>
+<h2>志田</h2>
+<p class="cause">マントル層への落下</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭と柴崎と北村の同級生である志田という男が自宅の庭に深い穴を掘り、地獄への侵入を試みたところ、ユスリカの大群に襲われ、穴の中に設置したハシゴを踏み外しマントル層まで落下、死亡した。遺体は既に地球内部に溶け込んでしまい、回収は不可能であった。</p>
+<p data-p="02">専門家がユスリカの一匹を捕らえ、顕微鏡でよくみてみたところ、トミー・李・御上手や、ウィル・酢味噌のようなメンインブラックを特殊な圧縮技術により小型化し、羽をつけたものであることが判明した。</p>
+<p data-p="03">付近では夜な夜な網を振り回し、虫かごに何かを入れている覆面の男が目撃されており、メンインブラックを志田に差し向けたのは忍者ではないかとの見方が、捜査関係者の間で強まっている。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：30/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="31" data-category="生体異常" data-confidence="95" data-name="秦" data-risk="91" id="case-31" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">31</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 31</p>
+<h2>秦</h2>
+<p class="cause">ぬりかべ性心不全</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭と柴崎と北村と志田の同級生である秦という女が死亡した。目がさめるとぬりかべの着ぐるみに入っていたのである。</p>
+<p data-p="02">立ち上がろうにも立ち上がれず、家族は既に出かけた後で、だんだんと着ぐるみの中も暑くなってきたので、着ぐるみの内側を爪で引っ掻き、遺書を残した。</p>
+<p data-p="03">その内容は現状の説明と、家族への感謝と、「死ぬ前に、忍者になりた、かったなあ、忍者になりた、かっーーーーー（判読不能）」という辞世の句である。</p>
+<p data-p="04">そして死後、自分のスマートフォンにかけられたロックが外れないと不都合があると考えたのであろうか、六桁の暗証番号が記されていた。零零零零零零という単純な暗証番号であった。</p>
+<p data-p="05">ぬりかべから引っ張り出された秦は、汗だくで死んでおり、恐らく脱水によりぬりかべ性心不全を起こしたものと思われる。</p>
+<p data-p="06">ホームセンターでぬりかべを購入した男がいるとの情報を受け、警察が聞き込みを行ったところ、秦は忍者になりたいあまり、忍者を尾行し、忍者の秘密を目撃してしまったという事実が判明した。秦は忍者に口封じをされた可能性が高いのだ。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：31/32</span>
+</footer>
+</div>
+</article>
+<article class="case-file reveal" data-case="32" data-category="物質変換" data-confidence="63" data-name="萩原" data-risk="70" id="case-32" tabindex="-1">
+<div aria-hidden="true" class="case-rail">
+<span class="case-num">32</span>
+<span class="case-mark">忍</span>
+</div>
+<div class="case-main">
+<header class="case-head">
+<p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 32</p>
+<h2>萩原</h2>
+<p class="cause">全身碁盤化</p>
+</header>
+<div class="case-body">
+<p data-p="01">板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭と柴崎と北村と志田と秦の同級生である萩原という女が死亡した。全身に線が入り、皮膚が碁盤となり、絶えず碁石が打たれまくるストレスに耐えられなかったのである。</p>
+<p data-p="02">死後も遺体には碁石が現れては消えて、試合を続けていたという。囲碁の専門家によると、萩原で碁を打つ見えざるプレイヤーは相当な腕前らしく、どちらかというと白の方が勝ち星が多いようである。まれに五目並べの試合も展開され、見えざるプレイヤーが息抜きをしているのがわかる。</p>
+<p data-p="03">火葬中も、窯の中から炎の音に混じり、碁石を打つ音が聞こえていたが、やがて碁石も白黒の灰となった。</p>
+<p data-p="04">東京の路地裏で、エア囲碁を行う二人組の忍者が目撃された翌月の出来事であった。</p>
+</div>
+<footer class="case-foot">
+<span>忍者関与：<b>疑いあり</b></span>
+<span>死亡者累計：32/32</span>
+</footer>
+</div>
+</article></section>
+<section class="relation"><div class="relation__inner"><div class="relation__grid"><div><p class="code">RELATION GRAPH / CEILING NEST</p><h2>三十二人は、<br>一つの巣へ収束する。</h2><p>各事件は独立しているように見える。しかし、事件記録に現れる忍者の痕跡を結ぶと、全ての線が二年三組の天井裏へ戻ってくる。</p><div class="relation__legend"><span>死亡済み生徒</span><span>現在閲覧中</span></div></div><canvas id="relationCanvas" aria-label="生徒32人と忍者の巣の関係図"></canvas></div></div></section>
+<section class="ending" id="interpretation"><div class="mandala" aria-hidden="true"><i style="--i:0%;--n:1"></i><i style="--i:8%;--n:2"></i><i style="--i:16%;--n:3"></i><i style="--i:24%;--n:4"></i><i style="--i:32%;--n:5"></i><i style="--i:40%;--n:6"></i></div><div class="ending__inner"><p class="code">FINAL REPORT / INTERPRETATION CONFIRMED</p><h2>忍者解釈</h2><div class="ending__body"><p>なます市立激怒高等学校二年三組の生徒、三十二人全員が死亡した。</p>
+<p>二年三組の天井裏には、忍者の巣があった。</p>
+<p>昼休みの都度、生徒たちが巣にゴミや石や昆虫を投げ込むので、忍者たちは憤っていた。しかも生徒たちは網で忍者を捕らえては、肛門に爆竹を仕込んで破裂させたり、弁当の米に乗せて忍者丼をしたりするのである。</p>
+<p>ある日、浦部が巣に投げ込んだカエルに、忍者の長が食い殺されてしまったので、忍者たちは生徒を皆殺しすることにした。</p>
+<p>普段馬鹿にされていた忍者たちだが、いざ忍術を使うと無敵である。忍者たちは一人、また一人と生徒たちを始末していった。</p>
+<p>しかし、誰も登校してこない教室を見て忍者たちは寂しくなった。そこで、隣の教室に新たな巣を構える決断をした。</p>
+<p>各々で凧を拡げ、廊下を進軍する忍者たち。</p>
+<p>間も無く隣の教室というところで、忍者たちは曼荼羅のような怪獣に襲われた。曼荼羅に飲み込まれた忍者たちは無限の世界を見た。</p>
+<p>忍術の通用しないサイケデリックな無限の世界を目の当たりにした忍者たちは、己の無力さに咽び泣いた。</p>
+<p>ゴーン、ゴーン、と鐘の音がする。</p>
+<p>曼荼羅はある一点に集約されて行く。忍者達もその一点に向かった。</p>
+<p>その先で忍者たちは、素晴らしい人々と永遠に暮らした。もう覆面は被らない。</p>
+<p>了</p></div><p class="final-line">了</p><button class="gong" id="gong" type="button">ゴーン、と鐘を鳴らす</button></div></section>
+<section class="afterword"><div class="afterword__inner"><div><p class="code">ARCHIVE COMPLETE / 32 OF 32</p><h2>ここまで読んだ人間も、<br>忍者かもしれない。</h2><p>短編小説「忍者解釈」／打猿。本文を削らず、なます市警の忍者災害対策端末として再構成した特設ページ。</p></div><div class="cta-grid"><a class="cta" href="../../"><span>本拠地へ戻る</span><small>HOME →</small></a><a class="cta" href="../../#works"><span>作品・制作依頼を見る</span><small>WORKS →</small></a></div><p class="notice">本文には架空の暴力、変死、不条理な表現が含まれます。効果音は任意で、初期状態では無音です。</p></div></section>
+</main><script>
+(()=>{
+'use strict';
+const META=[{"id":1,"name":"板垣","cause":"ナウマンゾウによる圧死／硬貨化","category":"物質変換","risk":75,"confidence":65},{"id":2,"name":"堰口","cause":"ふやけ脳症／アパート消失","category":"生体異常","risk":92,"confidence":88},{"id":3,"name":"芦原","cause":"エビゴリラ固め","category":"大型生物","risk":71,"confidence":56},{"id":4,"name":"椛島","cause":"体内蝉発生","category":"生体異常","risk":88,"confidence":79},{"id":5,"name":"浦部","cause":"急性一パチ中毒","category":"生体異常","risk":67,"confidence":47},{"id":6,"name":"駒木","cause":"忍者性ショック","category":"生体異常","risk":84,"confidence":70},{"id":7,"name":"天草","cause":"人体リモコン化","category":"物質変換","risk":63,"confidence":93},{"id":8,"name":"千々石","cause":"麦茶の飲み過ぎ","category":"分類不能","risk":80,"confidence":61},{"id":9,"name":"敷島","cause":"風呂場縮小現象","category":"物質変換","risk":59,"confidence":84},{"id":10,"name":"田所","cause":"豪族の罠","category":"対人・兵器","risk":76,"confidence":52},{"id":11,"name":"山口","cause":"宇宙空間での死亡","category":"空間災害","risk":93,"confidence":75},{"id":12,"name":"横井","cause":"ダイモス小型版による打撃","category":"対人・兵器","risk":72,"confidence":43},{"id":13,"name":"朴","cause":"竹槍の頭部刺入","category":"対人・兵器","risk":89,"confidence":66},{"id":14,"name":"西野","cause":"玄翁風邪","category":"生体異常","risk":68,"confidence":89},{"id":15,"name":"桜庭","cause":"落とし穴帝国のクーデター","category":"物質変換","risk":85,"confidence":57},{"id":16,"name":"小島","cause":"餓鬼による深海転移","category":"空間災害","risk":64,"confidence":80},{"id":17,"name":"福島","cause":"回転する巨大樽","category":"分類不能","risk":81,"confidence":48},{"id":18,"name":"竹内","cause":"レプティリアン症候群","category":"生体異常","risk":60,"confidence":71},{"id":19,"name":"三島","cause":"アテン神の火球","category":"空間災害","risk":77,"confidence":94},{"id":20,"name":"森田","cause":"赤外線によるハンバーガー融合","category":"生体異常","risk":94,"confidence":62},{"id":21,"name":"生島","cause":"襲名妨害／レイピア刺傷","category":"対人・兵器","risk":73,"confidence":85},{"id":22,"name":"筒井","cause":"菊花石製虎の吐瀉物","category":"生体異常","risk":90,"confidence":53},{"id":23,"name":"赤城","cause":"急性ピータンショック","category":"生体異常","risk":69,"confidence":76},{"id":24,"name":"岸辺","cause":"剣豪による斬殺","category":"空間災害","risk":86,"confidence":44},{"id":25,"name":"仲松","cause":"泥世界への沈降","category":"空間災害","risk":65,"confidence":67},{"id":26,"name":"根本","cause":"空腹のドローンによる分解","category":"対人・兵器","risk":82,"confidence":90},{"id":27,"name":"鬼頭","cause":"巨大脳タコ化／対脳ミサイル","category":"生体異常","risk":61,"confidence":58},{"id":28,"name":"柴崎","cause":"王水加湿／ミノムシ化","category":"生体異常","risk":78,"confidence":81},{"id":29,"name":"北村","cause":"ニセ老婆マンによる殴打","category":"生体異常","risk":95,"confidence":49},{"id":30,"name":"志田","cause":"マントル層への落下","category":"物質変換","risk":74,"confidence":72},{"id":31,"name":"秦","cause":"ぬりかべ性心不全","category":"生体異常","risk":91,"confidence":95},{"id":32,"name":"萩原","cause":"全身碁盤化","category":"物質変換","risk":70,"confidence":63}];
+const $=(s,p=document)=>p.querySelector(s), $$=(s,p=document)=>[...p.querySelectorAll(s)];
+const root=document.documentElement, body=document.body;
+const store={get(k){try{return localStorage.getItem(k)}catch(_){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(_){}}};
+let fontScale=Number(store.get('ninja-font')||1), motionOff=matchMedia('(prefers-reduced-motion: reduce)').matches, soundOn=false, current=0, category='ALL';
+root.style.setProperty('--font-scale',Math.min(1.25,Math.max(.88,fontScale)));
+
+// Boot
+const boot=$('#boot'), bootBar=$('#bootBar'), bootText=$('#bootText');
+const bootSteps=['忍者飽和率を照合','二年三組の在籍情報を復号','変死記録32件を接続','天井裏の空間を走査','解釈端末を起動'];
+let bs=0;
+function finishBoot(){boot.classList.add('is-done');setTimeout(()=>boot.remove(),700)}
+if(!motionOff){const bt=setInterval(()=>{bs++;bootBar.style.width=(bs/bootSteps.length*100)+'%';bootText.textContent=bootSteps[Math.min(bs,bootSteps.length-1)];if(bs>=bootSteps.length){clearInterval(bt);setTimeout(finishBoot,300)}},230)} else finishBoot();
+$('#skipBoot').addEventListener('click',finishBoot);
+
+// Canvas atmospheric ninja swarm
+const canvas=$('#noiseCanvas'), ctx=canvas.getContext('2d');let W=0,H=0,D=1,raf=0;let relationDraw=()=>{};
+const swarm=Array.from({length:42},(_,i)=>({x:Math.random(),y:Math.random(),s:1+Math.random()*3,v:.00008+Math.random()*.00022,a:Math.random()*6.28,p:i%3}));
+function resize(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*D;canvas.height=H*D;ctx.setTransform(D,0,0,D,0,0);relationDraw()}
+function draw(){ctx.clearRect(0,0,W,H);const c=Number(getComputedStyle(root).getPropertyValue('--contam'))||0;swarm.forEach(n=>{if(!motionOff){n.x+=n.v*(1+c/90);n.y+=Math.sin(n.x*16+n.p)*.0002;if(n.x>1.08){n.x=-.08;n.y=Math.random()}}const x=n.x*W,y=n.y*H,r=n.s*(1+c/150);ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(n.x*20)*.3);ctx.fillStyle=`rgba(236,52,41,${.025+c*.00055})`;ctx.beginPath();ctx.moveTo(0,-r*2);ctx.lineTo(r*1.5,r*1.6);ctx.lineTo(0,r*.9);ctx.lineTo(-r*1.5,r*1.6);ctx.closePath();ctx.fill();ctx.restore()});raf=requestAnimationFrame(draw)}
+addEventListener('resize',resize);resize();draw();
+
+// Enrich case files
+const cases=$$('.case-file');
+const alerts=[
+ ['監視映像が差し替えられました','映像には檻から脱出する忍者だけが記録されています。元映像の所在は不明です。'],
+ ['市役所からの通達','忍者に遭遇しても、忍者であると断定せず「忍者状の人物」と呼称してください。'],
+ ['鑑識班が帰還しません','最後の通信は「屋根裏が思ったより広い」でした。'],
+ ['県警サーバー容量不足','忍者関連資料が全記録容量の78%を占有しています。削除申請は忍者に却下されました。'],
+ ['忍者関与率の計算が破綻','分母と分子の双方が忍者化したため、統計処理を停止します。'],
+ ['学校側の見解','本校に忍者部は存在しません。非公認の忍者については把握していません。'],
+ ['天井裏より生活音','複数の足音、炊飯、手裏剣の研磨音を検出。教職員は通常授業を継続しています。']
+];
+cases.forEach((c,i)=>{
+ const m=META[i];
+ c.querySelector('.case-head').insertAdjacentHTML('beforeend',`<div class="case-stamp">忍者<br>疑義</div>`);
+ c.querySelector('.cause').insertAdjacentHTML('afterend',`<div class="case-analysis"><span class="classified">${m.category}</span><span>危険度 ${m.risk}</span><span>忍者確度 ${m.confidence}%</span><span class="danger">遺体回収：${i%5===0?'困難':'完了'}</span></div>`);
+ c.querySelector('.case-head').dataset.compactId=String(m.id).padStart(2,'0');
+ if((i+1)%4===0 && i<28){const a=alerts[(i+1)/4-1];c.insertAdjacentHTML('afterend',`<aside class="intermission reveal"><small>SYSTEM INTERRUPTION / ${String((i+1)/4).padStart(2,'0')}</small><h3>${a[0]}</h3><p>${a[1]}</p></aside>`)}
+});
+
+// Roster and filters
+const roster=$('#roster');
+META.forEach(m=>{const b=document.createElement('button');b.type='button';b.dataset.case=m.id;b.dataset.category=m.category;b.innerHTML=`<b>${String(m.id).padStart(2,'0')}</b><br>${m.name}`;b.addEventListener('click',()=>scrollToCase(m.id));roster.appendChild(b)});
+const categories=['ALL',...new Set(META.map(m=>m.category))];
+const filterBox=$('#filters');categories.forEach(cat=>{const b=document.createElement('button');b.type='button';b.textContent=cat==='ALL'?'全記録':cat;b.classList.toggle('is-active',cat==='ALL');b.addEventListener('click',()=>{category=cat;$$('button',filterBox).forEach(x=>x.classList.toggle('is-active',x===b));applyFilter()});filterBox.appendChild(b)});
+$('#caseSearch').addEventListener('input',applyFilter);
+function applyFilter(){const q=$('#caseSearch').value.trim();let shown=0;cases.forEach((c,i)=>{const m=META[i];const ok=(category==='ALL'||m.category===category)&&(!q||`${m.name} ${m.cause} ${c.textContent}`.includes(q));c.hidden=!ok;roster.children[i].hidden=!ok;if(ok)shown++});$('#resultCount').textContent=shown;$$('.intermission').forEach(a=>a.hidden=category!=='ALL'||!!q)}
+function scrollToCase(n){const c=cases[n-1];if(c.hidden){category='ALL';$('#caseSearch').value='';$$('button',filterBox).forEach((b,i)=>b.classList.toggle('is-active',i===0));applyFilter()}c.scrollIntoView({behavior:motionOff?'auto':'smooth',block:'start'});setTimeout(()=>c.focus({preventScroll:true}),500)}
+
+// Reveal and current case tracking
+const reveals=$$('.reveal');
+if('IntersectionObserver'in window){const ro=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('is-visible')}),{threshold:.07,rootMargin:'0px 0px -8%'});reveals.forEach(x=>ro.observe(x));const co=new IntersectionObserver(es=>{const v=es.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(v)setCurrent(Number(v.target.dataset.case))},{threshold:[.15,.35,.6],rootMargin:'-18% 0px -58%'});cases.forEach(c=>co.observe(c))}else reveals.forEach(x=>x.classList.add('is-visible'));
+function setCurrent(n){if(!n||n===current)return;current=n;cases.forEach((c,i)=>c.classList.toggle('is-current',i===n-1));$$('button',roster).forEach((b,i)=>{b.classList.toggle('is-current',i===n-1);b.classList.toggle('is-dead',i<n)});const m=META[n-1];$('#deathCount').textContent=String(n).padStart(2,'0');$('#currentName').innerHTML=`FILE ${String(n).padStart(2,'0')} / <b>${m.name}</b>`;updateEvidence(m);if(soundOn)tick();}
+
+// Evidence drawer
+const evidence=$('#evidence');
+function updateEvidence(m){$('#evId').textContent=`NAMASU-${String(m.id).padStart(4,'0')}`;$('#evName').textContent=m.name;$('#evCause').textContent=m.cause;$('#evCat').textContent=m.category;$('#evRisk').textContent=m.risk;$('#evRiskBar').style.width=m.risk+'%';$('#evConf').textContent=m.confidence;$('#evConfBar').style.width=m.confidence+'%';$('#copyFile').dataset.case=m.id}
+$('#evidenceToggle').addEventListener('click',()=>evidence.classList.toggle('is-open'));$('#evidenceClose').addEventListener('click',()=>evidence.classList.remove('is-open'));
+$('#copyFile').addEventListener('click',async e=>{const m=META[(Number(e.currentTarget.dataset.case)||1)-1];const text=`事件番号：NAMASU-${String(m.id).padStart(4,'0')}\n対象：${m.name}\n死因：${m.cause}\n分類：${m.category}\n忍者関与確度：${m.confidence}%`;try{await navigator.clipboard.writeText(text);e.currentTarget.textContent='記録をコピー済み';setTimeout(()=>e.currentTarget.textContent='現在の記録をコピー',1200)}catch(_){}});
+
+// Progress / contamination
+function progress(){const max=document.documentElement.scrollHeight-innerHeight,p=max>0?scrollY/max:0;$('#progressBar').style.width=(p*100)+'%';const contam=Math.min(100,Math.max(0,Math.round(p*118)));root.style.setProperty('--contam',contam);$('#contamBar').style.width=contam+'%';$('#contamValue').textContent=contam+'%';body.classList.toggle('phase-3',contam>62);body.classList.toggle('phase-final',contam>89);if(scrollY>$('#interpretation').offsetTop-300){$('#deathCount').textContent='32';$('#currentName').innerHTML='<b>解釈確定</b>'}}
+addEventListener('scroll',progress,{passive:true});addEventListener('resize',progress);progress();
+
+// View and accessibility controls
+$('#fontDown').addEventListener('click',()=>setFont(-.06));$('#fontUp').addEventListener('click',()=>setFont(.06));function setFont(d){fontScale=Math.min(1.25,Math.max(.88,fontScale+d));root.style.setProperty('--font-scale',fontScale.toFixed(2));store.set('ninja-font',fontScale)}
+$('#motionToggle').addEventListener('click',e=>{motionOff=!motionOff;body.classList.toggle('motion-off',motionOff);e.currentTarget.setAttribute('aria-pressed',motionOff);e.currentTarget.textContent=motionOff?'動':'止';if(motionOff)reveals.forEach(x=>x.classList.add('is-visible'))});
+$('#compactToggle').addEventListener('click',e=>{const on=$('#registry').classList.toggle('compact');e.currentTarget.setAttribute('aria-pressed',on);e.currentTarget.textContent=on?'読':'覧'});
+
+// Sound: only after explicit opt-in
+let ac=null;function audio(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error('Web Audio API unsupported');return ac||(ac=new AC())}function tick(){const a=audio(),o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.value=180+current*3;g.gain.setValueAtTime(.018,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.045);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+.05)}
+$('#soundToggle').addEventListener('click',e=>{soundOn=!soundOn;e.currentTarget.setAttribute('aria-pressed',soundOn);e.currentTarget.textContent=soundOn?'音':'無';if(soundOn)tick()});
+$('#gong').addEventListener('click',()=>{const a=audio(),now=a.currentTime;[82,123,164,246].forEach((f,i)=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.09/(i+1),now+.03);g.gain.exponentialRampToValueAtTime(.0001,now+3.5+i*.4);o.connect(g).connect(a.destination);o.start(now);o.stop(now+4.2)});body.classList.add('phase-final')});
+
+// Relation map
+const rc=$('#relationCanvas'), rctx=rc.getContext('2d');relationDraw=drawRelation;function drawRelation(){if(!rc)return;const d=Math.min(devicePixelRatio||1,2),rect=rc.getBoundingClientRect();if(!rect.width)return;rc.width=rect.width*d;rc.height=rect.height*d;rctx.setTransform(d,0,0,d,0,0);const w=rect.width,h=rect.height,cx=w*.52,cy=h*.48;rctx.clearRect(0,0,w,h);rctx.fillStyle='#070706';rctx.fillRect(0,0,w,h);META.forEach((m,i)=>{const ang=(i/32)*Math.PI*2-.5,rad=Math.min(w,h)*(.3+(i%3)*.018),x=cx+Math.cos(ang)*rad,y=cy+Math.sin(ang)*rad;rctx.strokeStyle=`rgba(236,52,41,${.08+m.confidence*.002})`;rctx.beginPath();rctx.moveTo(cx,cy);rctx.lineTo(x,y);rctx.stroke();rctx.fillStyle=i<current?'#ec3429':'#5a544a';rctx.beginPath();rctx.arc(x,y,i===current-1?6:3.2,0,Math.PI*2);rctx.fill();if(i===current-1){rctx.fillStyle='#c4f35b';rctx.font='11px monospace';rctx.fillText(m.name,x+9,y+3)}});rctx.strokeStyle='#c4f35b';rctx.lineWidth=2;rctx.beginPath();rctx.arc(cx,cy,18,0,Math.PI*2);rctx.stroke();rctx.fillStyle='#c4f35b';rctx.font='12px serif';rctx.textAlign='center';rctx.fillText('巣',cx,cy+4);rctx.textAlign='left'}
+setInterval(drawRelation,700);
+
+// Keyboard
+addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;if(e.key==='ArrowDown'&&current<32){e.preventDefault();scrollToCase(Math.max(1,current+1))}if(e.key==='ArrowUp'&&current>1){e.preventDefault();scrollToCase(current-1)}if(e.key.toLowerCase()==='e')evidence.classList.toggle('is-open')});
+updateEvidence(META[0]);applyFilter();drawRelation();
+})();
+</script></body></html>

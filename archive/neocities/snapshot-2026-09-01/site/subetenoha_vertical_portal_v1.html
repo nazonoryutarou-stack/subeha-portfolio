@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>すべての歯が見える｜祭祀技師・観測所</title>
+<meta name="description" content="祭祀技師『すべての歯が見える』の活動、霊視、作品、実験、診断、記録を集めた観測所。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070807;
+  --bg2:#0c0d0c;
+  --panel:#10110f;
+  --panel2:#151613;
+  --ink:#eeebe3;
+  --sub:#b6b1a7;
+  --muted:#77736a;
+  --line:#2b2a26;
+  --line2:#3a3832;
+  --blue:#7c9eb4;
+  --red:#8f2e29;
+  --green:#7b9c79;
+  --amber:#b28c55;
+  --serif:'Shippori Mincho B1',serif;
+  --latin:'Cormorant Garamond',serif;
+  --mono:'IBM Plex Mono',monospace;
+  --max:1120px;
+  --radius:2px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{
+  margin:0;
+  min-height:100%;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 16% 8%,rgba(124,158,180,.08),transparent 24rem),
+    radial-gradient(circle at 84% 24%,rgba(143,46,41,.06),transparent 22rem),
+    linear-gradient(180deg,#070807 0%,#090a09 45%,#060706 100%);
+  font-family:var(--serif);
+  font-size:16px;
+  line-height:1.9;
+  letter-spacing:.035em;
+  overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+button,input,select,textarea{font:inherit}
+a{color:inherit}
+img{max-width:100%;display:block}
+#ambient{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.52}
+.site{position:relative;z-index:1}
+.wrap{width:min(calc(100% - 32px),var(--max));margin-inline:auto}
+.skip{position:absolute;left:-9999px;top:auto}
+.skip:focus{left:16px;top:16px;z-index:100;background:var(--ink);color:#000;padding:8px 12px}
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  background:rgba(7,8,7,.88);
+  backdrop-filter:blur(16px);
+}
+.header-inner{
+  min-height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+}
+.identity{display:flex;align-items:center;gap:13px;text-decoration:none;min-width:0}
+.identity-mark{
+  width:42px;height:42px;flex:0 0 42px;
+  display:grid;place-items:center;
+  border:1px solid var(--line2);
+  background:rgba(255,255,255,.018);
+  font-size:1.25rem;
+}
+.identity strong{display:block;font-size:.95rem;letter-spacing:.14em;font-weight:600;white-space:nowrap}
+.identity small{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.13em;color:var(--muted);white-space:nowrap}
+.nav{display:flex;gap:22px;align-items:center;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-family:var(--mono);font-size:.67rem;letter-spacing:.12em;text-decoration:none;color:var(--sub);white-space:nowrap}
+.nav a:hover{color:var(--ink)}
+
+.hero{padding:clamp(72px,11vw,150px) 0 86px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:56px;align-items:end}
+.eyebrow{font-family:var(--mono);font-size:.68rem;letter-spacing:.22em;color:var(--blue);text-transform:uppercase;margin-bottom:22px}
+h1{margin:0;font-size:clamp(3rem,8vw,7.2rem);line-height:1.03;letter-spacing:.07em;font-weight:600;text-wrap:balance}
+.hero-copy{max-width:42rem}
+.hero-copy p{color:var(--sub);font-size:clamp(1rem,2vw,1.16rem);margin:28px 0 0;max-width:39rem}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.btn{
+  min-height:45px;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:10px 16px;
+  border:1px solid var(--line2);
+  background:rgba(255,255,255,.025);
+  color:var(--ink);
+  text-decoration:none;
+  font-family:var(--mono);
+  font-size:.7rem;
+  letter-spacing:.12em;
+  cursor:pointer;
+  transition:.2s ease;
+}
+.btn:hover{background:var(--ink);color:#060706;border-color:var(--ink)}
+.btn.primary{border-color:rgba(124,158,180,.55);background:rgba(124,158,180,.08)}
+.hero-index{border-top:1px solid var(--line2);padding-top:22px;display:grid;gap:14px}
+.index-row{display:grid;grid-template-columns:56px 1fr auto;gap:14px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px}
+.index-row .no{font-family:var(--mono);font-size:.65rem;color:var(--muted)}
+.index-row strong{font-size:.98rem;font-weight:500;letter-spacing:.09em}
+.index-row span:last-child{font-family:var(--latin);font-style:italic;color:var(--muted)}
+
+.section{padding:86px 0}
+.section + .section{border-top:1px solid rgba(255,255,255,.055)}
+.section-head{display:grid;grid-template-columns:minmax(220px,.55fr) minmax(0,1fr);gap:40px;align-items:end;margin-bottom:34px}
+.section-kicker{font-family:var(--mono);font-size:.65rem;letter-spacing:.2em;color:var(--blue);text-transform:uppercase;margin-bottom:9px}
+h2{margin:0;font-size:clamp(2rem,5vw,4.2rem);line-height:1.12;letter-spacing:.07em;font-weight:600}
+.section-head p{margin:0;color:var(--sub);max-width:45rem}
+
+.service-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.service{
+  grid-column:span 4;
+  min-height:260px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  padding:22px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(20,21,18,.9),rgba(11,12,10,.94));
+  text-decoration:none;
+  overflow:hidden;
+  transition:.25s ease;
+}
+.service:hover{transform:translateY(-3px);border-color:#504d45;background:linear-gradient(180deg,rgba(25,26,22,.96),rgba(12,13,11,.98))}
+.service::after{content:attr(data-index);position:absolute;right:12px;bottom:-22px;font-family:var(--latin);font-size:7rem;color:rgba(255,255,255,.025);line-height:1;pointer-events:none}
+.service .tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;color:var(--muted);margin-bottom:34px}
+.service h3{margin:0 0 10px;font-size:1.35rem;line-height:1.45;letter-spacing:.08em;font-weight:600}
+.service p{margin:0;color:var(--sub);font-size:.9rem;line-height:1.75}
+.service .go{margin-top:auto;padding-top:22px;font-family:var(--mono);font-size:.65rem;letter-spacing:.12em;color:var(--blue)}
+.service.featured{grid-column:span 8;background:linear-gradient(135deg,rgba(124,158,180,.09),rgba(20,21,18,.94) 50%,rgba(143,46,41,.05))}
+.service.featured h3{font-size:clamp(1.5rem,3vw,2.25rem)}
+.service.disabled{opacity:.64;cursor:default}
+.service.disabled:hover{transform:none;border-color:var(--line)}
+.status{display:inline-flex;align-items:center;width:max-content;margin-top:14px;padding:3px 7px;border:1px solid var(--line2);font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;color:var(--muted)}
+
+.reading-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.7fr);gap:24px;align-items:start}
+.reading-copy{padding:28px;border:1px solid var(--line);background:rgba(15,16,14,.86)}
+.reading-copy p{margin:0 0 18px;color:var(--sub)}
+.reading-copy p:last-child{margin-bottom:0}
+.reading-note{padding:24px;border:1px solid var(--line);background:rgba(255,255,255,.018)}
+.reading-note h3{margin:0 0 14px;font-size:1rem;letter-spacing:.12em}
+.reading-note ul{margin:0;padding-left:1.2em;color:var(--sub)}
+.reading-note li+li{margin-top:10px}
+
+.records-shell{border:1px solid var(--line);background:rgba(10,11,9,.74)}
+.records-tools{
+  position:sticky;top:72px;z-index:20;
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  padding:14px;
+  border-bottom:1px solid var(--line);
+  background:rgba(11,12,10,.95);
+  backdrop-filter:blur(12px);
+}
+.records-tools input,.records-tools select,.records-tools button{
+  min-height:42px;
+  border:1px solid var(--line2);
+  background:#0a0b09;
+  color:var(--ink);
+  padding:8px 11px;
+  outline:none;
+  font-family:var(--mono);
+  font-size:.68rem;
+  letter-spacing:.08em;
+}
+.records-tools input{flex:1;min-width:190px}
+.records-tools button{cursor:pointer}
+.records-tools button.active{background:var(--ink);color:#070807}
+.records-list{display:grid;gap:0}
+.record{display:grid;grid-template-columns:170px minmax(0,1fr);gap:26px;padding:30px;border-bottom:1px solid var(--line)}
+.record:last-child{border-bottom:0}
+.record-meta{font-family:var(--mono);font-size:.65rem;letter-spacing:.08em;color:var(--muted);line-height:1.7}
+.record-kind{display:inline-flex;margin-bottom:9px;color:var(--blue)}
+.record h3{margin:0 0 12px;font-size:clamp(1.2rem,2.5vw,1.65rem);line-height:1.5;letter-spacing:.07em;font-weight:600}
+.record-body{color:var(--sub);white-space:pre-wrap;word-break:break-word}
+.records-state{padding:38px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.7rem;letter-spacing:.1em}
+.load-row{padding:18px;border-top:1px solid var(--line);text-align:center}
+
+.external-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.external-card{padding:24px;border:1px solid var(--line);background:rgba(13,14,12,.76)}
+.external-card h3{margin:0 0 10px;font-size:1.1rem;letter-spacing:.1em}
+.external-card p{margin:0;color:var(--sub);font-size:.9rem}
+.wanted{display:grid;grid-template-columns:76px 1fr;gap:16px;align-items:start;margin-top:16px}
+.wanted img{width:76px;height:94px;object-fit:cover;filter:grayscale(1);border:1px solid var(--line);background:#111}
+.wanted strong{display:block;margin-bottom:6px}
+.wanted small{color:var(--muted);line-height:1.5}
+
+.footer{padding:42px 0 56px;border-top:1px solid rgba(255,255,255,.06);color:var(--muted)}
+.footer-inner{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;flex-wrap:wrap}
+.footer strong{color:var(--sub);font-weight:500;letter-spacing:.12em}
+.footer-links{display:flex;gap:16px;flex-wrap:wrap}
+.footer-links a{font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-decoration:none}
+.footer-links a:hover{color:var(--ink)}
+
+.reveal{opacity:0;transform:translateY(20px);transition:.8s ease}
+.reveal.on{opacity:1;transform:none}
+
+@media(max-width:900px){
+  .hero-grid,.section-head,.reading-grid{grid-template-columns:1fr}
+  .hero-index{max-width:36rem}
+  .service,.service.featured{grid-column:span 6}
+  .section-head{gap:18px}
+  .record{grid-template-columns:1fr;gap:10px}
+}
+@media(max-width:640px){
+  .wrap{width:min(calc(100% - 22px),var(--max))}
+  .header-inner{min-height:64px;gap:12px}
+  .identity small{display:none}
+  .nav{gap:15px}
+  .hero{padding:72px 0 64px}
+  h1{font-size:clamp(2.75rem,16vw,4.8rem)}
+  .section{padding:64px 0}
+  .service,.service.featured{grid-column:span 12;min-height:220px}
+  .records-tools{top:64px}
+  .record{padding:23px 18px}
+  .external-grid{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+<canvas id="ambient" aria-hidden="true"></canvas>
+<div class="site">
+  <header class="header">
+    <div class="wrap header-inner">
+      <a class="identity" href="#top">
+        <span class="identity-mark">視</span>
+        <span><strong>すべての歯が見える</strong><small>RITUAL TECHNICIAN / OBSERVATORY</small></span>
+      </a>
+      <nav class="nav" aria-label="主要メニュー">
+        <a href="#services">サービス</a>
+        <a href="#reading">霊視</a>
+        <a href="#records">記録</a>
+        <a href="#contact">交信</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="wrap hero-grid">
+        <div class="reveal on">
+          <div class="eyebrow">観測所　第〇九一號</div>
+          <h1>すべての歯が<br>見える</h1>
+          <div class="hero-copy">
+            <p>霊視、祭祀具、実験、作品、遊び。ここは、それぞれ別の入口へ続く観測所です。横へ迷わせるのは一度やめ、下へ読むだけで全体が分かる構造に組み直しました。</p>
+          </div>
+          <div class="hero-actions">
+            <a class="btn primary" href="#services">入口を見る</a>
+            <a class="btn" href="#records">最新の記録</a>
+          </div>
+        </div>
+        <div class="hero-index reveal on" aria-label="このサイトの内容">
+          <div class="index-row"><span class="no">01</span><strong>霊視・祭祀</strong><span>practice</span></div>
+          <div class="index-row"><span class="no">02</span><strong>診断・遊戯</strong><span>play</span></div>
+          <div class="index-row"><span class="no">03</span><strong>作品・祭祀物</strong><span>objects</span></div>
+          <div class="index-row"><span class="no">04</span><strong>観測記録</strong><span>archive</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="services">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="section-kicker">Entrances</div><h2>入口</h2></div>
+          <p>すでに公開しているものは直接開き、制作中のものはこの場所で概要だけ確認できます。カードを増やしても読みにくくならないよう、入口を一覧へ戻しました。</p>
+        </div>
+
+        <div class="service-grid">
+          <a class="service featured reveal" data-index="01" href="#reading">
+            <span class="tag">SPIRITUAL READING / TELEPHONE</span>
+            <h3>霊視鑑定</h3>
+            <p>電話で話しながら、あなたが世界をどのように捉え、解釈しているかを拝見します。運、縁、業、才能は、その像に付随して観測されます。</p>
+            <span class="go">注意事項と申込方法を見る　↓</span>
+          </a>
+          <a class="service reveal" data-index="02" href="shindan.html">
+            <span class="tag">DIAGNOSIS</span><h3>十六霊感診断</h3><p>霊感の現れ方を十六の型として観測する診断。</p><span class="go">診断を開く　↗</span>
+          </a>
+          <a class="service reveal" data-index="03" href="gyogen_rin_v1_1_1_largefile_qr.html">
+            <span class="tag">PROGRAMMING LANGUAGE</span><h3>魚言・鱗式</h3><p>魚偏の漢字だけで記述する、実際に動くプログラミング言語。</p><span class="go">実行水槽を開く　↗</span>
+          </a>
+          <a class="service reveal" data-index="04" href="bakemongo.html">
+            <span class="tag">HUNT / OBSERVATION</span><h3>バケモンGO</h3><p>街や生活の中に潜む、まだ分類されていないものを捕まえる。</p><span class="go">狩場を開く　↗</span>
+          </a>
+          <a class="service reveal" data-index="05" href="yaniv.html">
+            <span class="tag">CARD GAME</span><h3>ヤニブ</h3><p>考えすぎた頭を、一度ゲームで空にするための余興。</p><span class="go">遊び方を見る　↗</span>
+          </a>
+          <a class="service reveal" data-index="06" href="kujou.html">
+            <span class="tag">CLAIMS</span><h3>苦情受付</h3><p>不具合、違和感、苦情。異界にも窓口くらいは必要です。</p><span class="go">受付を開く　↗</span>
+          </a>
+          <article class="service disabled reveal" data-index="07" aria-label="妹字 制作中">
+            <span class="tag">PERSONAL GLYPH</span><h3>妹字</h3><p>依頼者の内側にある「妹の力」を、存在しない一字として制作します。</p><span class="status">制作中</span>
+          </article>
+          <article class="service disabled reveal" data-index="08" aria-label="抽象油絵 あなた 制作中">
+            <span class="tag">PORTRAIT / OIL</span><h3>抽象油絵「あなた」</h3><p>電話で雑談しながら霊視し、見えた姿を抽象画として描きます。</p><span class="status">制作中</span>
+          </article>
+          <article class="service disabled reveal" data-index="09" aria-label="呼び接ぎの器 制作中">
+            <span class="tag">RITUAL OBJECT</span><h3>呼び接ぎの器</h3><p>古い器の破片を接ぎ、他人の生活の時間を現在へ呼び戻す器。</p><span class="status">制作中</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reading">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="section-kicker">Reading</div><h2>霊視について</h2></div>
+          <p>占いの結果を断言する場所ではなく、依頼者が世界をどう捉えているか、その像を電話越しに観測する時間です。</p>
+        </div>
+        <div class="reading-grid">
+          <div class="reading-copy reveal">
+            <p>すべ歯は占い師ではありません。昼間は祭祀技師として、霊能者や民間宗教者の鑑定や除霊に同行し、儀式の安全性を確保する仕事をしています。</p>
+            <p>私に視えるのは、あなたがこの世界をどう捉えて、どう解釈しているのかです。付随して、あなたの運や縁、業や才能を拝見することができます。</p>
+            <p>鑑定は主に電話で行います。文章では霊視ができないこと、対面では体調を崩す方がいらっしゃるためです。</p>
+            <div class="hero-actions"><a class="btn primary" href="https://x.com/subetenoha" target="_blank" rel="noopener">Xで「鑑定希望」</a></div>
+          </div>
+          <aside class="reading-note reveal">
+            <h3>注意事項</h3>
+            <ul>
+              <li>病気や障害については、必ず医師や医療機関の判断を最優先にしてください。</li>
+              <li>法律相談、犯罪、訴訟、事件に関する判断は専門家へ相談してください。</li>
+              <li>相談時間は20〜30分程度です。内容をメモにしておくと進行が円滑です。</li>
+              <li>鑑定結果は、未来や結果を保証するものではありません。</li>
+              <li>雑談は霊能、スピリチュアル、民間信仰に関係する内容に限ります。</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="records">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="section-kicker">Archive</div><h2>観測記録</h2></div>
+          <p>スプレッドシートから取得した記録を、縦方向へ普通に読める一覧へ変更しました。検索、分類、並び替えは残しています。</p>
+        </div>
+        <div class="records-shell reveal">
+          <div class="records-tools">
+            <input id="recordQuery" type="search" placeholder="記録を検索" aria-label="記録を検索">
+            <select id="recordFilter" aria-label="分類で絞り込む"><option value="">すべての分類</option></select>
+            <button id="newestBtn" class="active" type="button">新しい順</button>
+            <button id="oldestBtn" type="button">古い順</button>
+          </div>
+          <div id="recordsList" class="records-list"><div class="records-state">記録を読み込んでいます…</div></div>
+          <div class="load-row"><button id="loadMoreBtn" class="btn" type="button" hidden>続きを読む</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div><div class="section-kicker">Signals</div><h2>交信と手記</h2></div>
+          <p>日々の交信はX、長い記録はnoteへ分けています。本体サイトは入口と保管庫に徹し、外部の流れを無理に全部飲み込まない構造です。</p>
+        </div>
+        <div class="external-grid">
+          <a class="external-card reveal" href="https://x.com/subetenoha" target="_blank" rel="noopener"><h3>交信 ／ X</h3><p>配信、短い観測、告知。最も速い通信路。</p></a>
+          <a class="external-card reveal" href="https://note.com/light_dill8112" target="_blank" rel="noopener"><h3>手記 ／ note</h3><p>研究、考察、制作記録。長い文章を収める場所。</p></a>
+          <div class="external-card reveal">
+            <h3>外部観測対象</h3>
+            <p>公開情報から一件だけ表示します。読解を邪魔しないよう、常時固定表示はやめました。</p>
+            <div class="wanted" id="wanted"><img alt=""><div><strong>通信中…</strong><small></small></div></div>
+          </div>
+          <div class="external-card reveal"><h3>次に追加する入口</h3><p>妹字、抽象油絵「あなた」、呼び接ぎの器、初心者用米粒写経、薬草栽培標本など。商品ページが完成したものから順に、この一覧へ接続できます。</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div><strong>すべての歯が見える</strong><br><small>理解されなくても成立する異界。その入口だけは読めるようにする。</small></div>
+      <div class="footer-links"><a href="#top">上へ戻る</a><a href="https://x.com/subetenoha" target="_blank" rel="noopener">X</a><a href="https://note.com/light_dill8112" target="_blank" rel="noopener">note</a></div>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRA1AuFPfz23AiuyNHirTIn8pslZOn8UHyaFzB0SaBWewcErvPV6YIMBy_6tA6MyNTMLjEY11jwDL0w/pub?output=csv';
+  const list=document.getElementById('recordsList');
+  const query=document.getElementById('recordQuery');
+  const filter=document.getElementById('recordFilter');
+  const newest=document.getElementById('newestBtn');
+  const oldest=document.getElementById('oldestBtn');
+  const more=document.getElementById('loadMoreBtn');
+  let all=[],view=[],sortDesc=true,shown=0;
+  const BATCH=10;
+
+  function esc(value){return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+  function parseCSV(text){
+    const rows=[];let row=[],cur='',quoted=false;
+    for(let i=0;i<text.length;i++){
+      const ch=text[i],next=text[i+1];
+      if(quoted){if(ch==='"'&&next==='"'){cur+='"';i++;}else if(ch==='"'){quoted=false;}else cur+=ch;}
+      else if(ch==='"')quoted=true;
+      else if(ch===','){row.push(cur);cur='';}
+      else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur='';}
+      else if(ch!=='\r')cur+=ch;
+    }
+    if(cur!==''||row.length){row.push(cur);rows.push(row);}
+    return rows;
+  }
+  function parseTime(value){
+    const m=String(value||'').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})(?:\D+(\d{1,2})\D+(\d{1,2})(?:\D+(\d{1,2}))?)?/);
+    if(!m)return 0;
+    return new Date(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0)).getTime();
+  }
+  function apply(){
+    const q=query.value.trim();
+    const kind=filter.value;
+    view=all.filter(item=>(!kind||item.kind===kind)&&(!q||(item.kind+' '+item.head+' '+item.text).includes(q)));
+    view.sort((a,b)=>sortDesc?b.time-a.time:a.time-b.time);
+    shown=0;list.innerHTML='';append();
+  }
+  function append(){
+    if(!view.length){list.innerHTML='<div class="records-state">該当する記録はありません。</div>';more.hidden=true;return;}
+    const end=Math.min(shown+BATCH,view.length);
+    for(let i=shown;i<end;i++){
+      const item=view[i];
+      const article=document.createElement('article');
+      article.className='record';
+      article.innerHTML='<div class="record-meta"><span class="record-kind">'+esc(item.kind)+'</span><br>'+esc(item.date)+'</div><div><h3>'+esc(item.head)+'</h3><div class="record-body">'+esc(item.text)+'</div></div>';
+      list.appendChild(article);
+    }
+    shown=end;
+    more.hidden=shown>=view.length;
+    if(!more.hidden)more.textContent='続きを読む　'+shown+' / '+view.length;
+  }
+  query.addEventListener('input',apply);
+  filter.addEventListener('change',apply);
+  newest.addEventListener('click',()=>{sortDesc=true;newest.classList.add('active');oldest.classList.remove('active');apply();});
+  oldest.addEventListener('click',()=>{sortDesc=false;oldest.classList.add('active');newest.classList.remove('active');apply();});
+  more.addEventListener('click',append);
+
+  fetch(CSV_URL,{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+    .then(text=>{
+      const rows=parseCSV(text);let start=0;
+      if(rows[0]&&/タイムスタンプ|日付|コンテンツ|見出し|本文/.test(rows[0].join('')))start=1;
+      for(let i=start;i<rows.length;i++){
+        const row=rows[i]||[];
+        const date=(row[0]||'').trim();
+        const kind=(row[1]||'記録').trim()||'記録';
+        const head=(row[2]||'').trim();
+        const body=(row[3]||'').trim();
+        if(!head&&!body)continue;
+        all.push({date,kind,head:head||'（無題）',text:body,time:parseTime(date)||i});
+      }
+      [...new Set(all.map(x=>x.kind))].sort().forEach(kind=>{const o=document.createElement('option');o.value=kind;o.textContent=kind;filter.appendChild(o);});
+      apply();
+    })
+    .catch(error=>{list.innerHTML='<div class="records-state">記録の取得に失敗しました。<br>'+esc(error.message)+'</div>';});
+
+  const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');observer.unobserve(e.target);}}),{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+  fetch('https://api.fbi.gov/wanted/v1/list?page='+(1+Math.floor(Math.random()*20)))
+    .then(r=>r.json())
+    .then(data=>{
+      const items=(data.items||[]).filter(it=>it.images&&it.images.length);
+      if(!items.length)throw new Error('empty');
+      const it=items[Math.floor(Math.random()*items.length)];
+      const root=document.getElementById('wanted');
+      root.querySelector('img').src=it.images[0].large||it.images[0].original||it.images[0].thumb||'';
+      root.querySelector('strong').textContent=it.title||'UNKNOWN';
+      root.querySelector('small').textContent=((it.subjects||[]).join('、')||'公開情報を観測中').slice(0,120);
+    })
+    .catch(()=>{const root=document.getElementById('wanted');root.querySelector('strong').textContent='通信途絶';root.querySelector('small').textContent='外部観測対象を取得できませんでした。';});
+})();
+
+(function(){
+  const canvas=document.getElementById('ambient'),ctx=canvas.getContext('2d');
+  let w=0,h=0,dpr=1,points=[];
+  function resize(){dpr=Math.min(devicePixelRatio||1,2);w=innerWidth;h=innerHeight;canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);points=Array.from({length:w<600?8:14},()=>({x:Math.random()*w,y:Math.random()*h,r:2+Math.random()*5,v:.08+Math.random()*.2,p:Math.random()*Math.PI*2}));}
+  function frame(){ctx.clearRect(0,0,w,h);ctx.globalCompositeOperation='lighter';for(const p of points){p.p+=.01;p.y-=p.v;p.x+=Math.sin(p.p)*.12;if(p.y<-20){p.y=h+20;p.x=Math.random()*w;}const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*5);g.addColorStop(0,'rgba(210,222,230,.18)');g.addColorStop(1,'rgba(210,222,230,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,p.r*5,0,Math.PI*2);ctx.fill();}ctx.globalCompositeOperation='source-over';requestAnimationFrame(frame);}
+  addEventListener('resize',resize);resize();frame();
+})();
+</script>
+</body>
+</html>

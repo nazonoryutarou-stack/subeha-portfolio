@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="打猿による短編小説『忍者解釈』。なます市立激怒高等学校二年三組、三十二人の変死事件記録。">
+<meta name="theme-color" content="#0b0a09">
+<meta property="og:title" content="短編小説「忍者解釈」｜打猿">
+<meta property="og:description" content="世界には忍者が飽和し、あらゆるものが忍者化するようになった。">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://assets.st-note.com/production/uploads/images/20009019/rectangle_large_type_2_25aa09c5d45b5104b30b673d8214cbbb.png?width=2000&height=2000&fit=bounds&quality=85">
+<title>短編小説「忍者解釈」｜打猿</title>
+<style>
+@charset "UTF-8";
+:root {
+  --bg:#090908;
+  --bg2:#11100e;
+  --paper:#d9d1bd;
+  --paper-dim:#9a9485;
+  --red:#d43b2f;
+  --red-dark:#611c18;
+  --green:#8aa986;
+  --line:rgba(217,209,189,.18);
+  --panel:rgba(20,19,16,.9);
+  --shadow:0 30px 100px rgba(0,0,0,.5);
+  --font-scale:1;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{
+  margin:0;color:var(--paper);background:
+  radial-gradient(circle at 80% 10%,rgba(212,59,47,.08),transparent 28rem),
+  linear-gradient(180deg,#050505,var(--bg) 30%,#080706);
+  font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",system-ui,sans-serif;
+  font-size:calc(16px * var(--font-scale));line-height:1.95;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:80;pointer-events:none;opacity:.14;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.03) 0 1px,transparent 1px 4px);
+  mix-blend-mode:screen;
+}
+a{color:inherit}
+button{font:inherit}
+.skip{position:fixed;top:8px;left:8px;z-index:200;transform:translateY(-150%);background:var(--paper);color:#111;padding:10px 14px}
+.skip:focus{transform:none}
+.topbar{
+  position:fixed;inset:0 0 auto;z-index:60;height:62px;display:grid;
+  grid-template-columns:auto 1fr auto;align-items:center;gap:18px;
+  padding:0 clamp(12px,3vw,34px);background:rgba(7,7,6,.9);
+  border-bottom:1px solid var(--line);backdrop-filter:blur(14px)
+}
+.brand{display:grid;text-decoration:none;line-height:1.1;font-family:serif}
+.brand small{font:600 .56rem ui-monospace,monospace;letter-spacing:.16em;color:var(--red)}
+.brand b{font-size:.9rem}
+.progress-track{height:2px;background:rgba(255,255,255,.1);overflow:hidden}
+.progress-bar{display:block;width:0;height:100%;background:var(--red);transform-origin:left}
+.counter{display:flex;align-items:baseline;gap:6px;font-family:ui-monospace,monospace;white-space:nowrap}
+.counter strong{font-size:1.35rem;color:var(--red)}
+.counter span{font-size:.64rem;color:var(--paper-dim)}
+.tools{position:fixed;right:12px;bottom:12px;z-index:70;display:flex;gap:6px}
+.tools button{
+  width:42px;height:42px;border:1px solid var(--line);color:var(--paper);
+  background:rgba(10,10,9,.9);cursor:pointer
+}
+.hero{position:relative;min-height:100svh;display:grid;place-items:end start;padding:100px clamp(18px,6vw,90px) 8vh;overflow:hidden}
+.hero-media{position:absolute;inset:0}
+.hero-media img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.2) brightness(.42);transform:scale(1.03)}
+.hero-media::after{content:"";position:absolute;inset:0;background:
+ linear-gradient(90deg,rgba(5,5,5,.95),rgba(5,5,5,.38) 65%,rgba(5,5,5,.72)),
+ linear-gradient(0deg,var(--bg),transparent 48%)}
+.hero-copy{position:relative;z-index:2;max-width:900px}
+.kicker,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase}
+.kicker{color:var(--red);font-size:.72rem}
+h1{margin:.2em 0 .35em;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(4rem,14vw,11rem);line-height:.85;letter-spacing:-.08em}
+.hero-sub{max-width:36rem;font-family:serif;font-size:clamp(1.15rem,2.3vw,1.55rem)}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:28px;color:var(--paper-dim);font:.7rem ui-monospace,monospace}
+.hero-credit{position:absolute;right:14px;bottom:14px;z-index:3;color:#aaa;font-size:.62rem}
+.scroll-sign{display:inline-flex;align-items:center;gap:10px;margin-top:28px;color:var(--paper-dim);font:.65rem ui-monospace,monospace}
+.scroll-sign::before{content:"";width:34px;height:1px;background:var(--red)}
+.intro{width:min(100% - 32px,880px);margin:0 auto;padding:clamp(90px,15vw,180px) 0}
+.intro-grid{display:grid;gap:40px}
+.section-code{margin:0;color:var(--red);font:.7rem ui-monospace,monospace;letter-spacing:.14em}
+.intro h2,.ending h2{font-family:"Yu Mincho",serif;font-size:clamp(2.4rem,7vw,5rem);line-height:1.05;margin:.25em 0}
+.intro-text{font-family:"Yu Mincho",serif;font-size:clamp(1.1rem,2.4vw,1.45rem)}
+.intro-text p:first-child::first-letter{float:left;font-size:4.4em;line-height:.8;padding:.08em .12em 0 0;color:var(--red)}
+.registry{width:min(100% - 24px,1120px);margin:0 auto;padding-bottom:120px}
+.registry-head{display:flex;justify-content:space-between;gap:20px;align-items:end;padding:24px 0;border-bottom:1px solid var(--line);position:sticky;top:62px;z-index:30;background:linear-gradient(var(--bg) 80%,transparent)}
+.registry-head h2{margin:0;font-family:serif;font-size:clamp(1.5rem,4vw,2.7rem)}
+.registry-status{color:var(--paper-dim);font:.68rem ui-monospace,monospace;text-align:right}
+.case-file{display:grid;grid-template-columns:72px 1fr;gap:0;border-bottom:1px solid var(--line);padding:clamp(80px,12vw,150px) 0}
+.case-rail{position:relative;border-right:1px solid var(--line)}
+.case-num{position:sticky;top:120px;display:block;color:var(--red);font:700 1.4rem ui-monospace,monospace}
+.case-mark{position:absolute;right:-.52em;top:45%;font-family:serif;font-size:4rem;color:rgba(212,59,47,.08);transform:rotate(-12deg)}
+.case-main{padding-left:clamp(22px,5vw,76px);max-width:850px}
+.case-label{margin:0;color:var(--paper-dim);font:.62rem ui-monospace,monospace;letter-spacing:.12em}
+.case-head h2{margin:.15em 0 0;font-family:"Yu Mincho",serif;font-size:clamp(2.7rem,8vw,5.8rem);line-height:1}
+.cause{margin:.5em 0 2.2em;color:var(--red);font-weight:700}
+.case-body{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(1.05rem,2vw,1.22rem)}
+.case-body p{margin:0 0 1.45em}
+.case-foot{display:flex;justify-content:space-between;gap:18px;margin-top:45px;padding-top:14px;border-top:1px dashed var(--line);color:var(--paper-dim);font:.64rem ui-monospace,monospace}
+.case-foot b{color:var(--red)}
+.reveal{opacity:.18;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+.reveal.is-visible{opacity:1;transform:none}
+.ending{position:relative;min-height:100svh;display:grid;place-items:center;padding:130px 20px;overflow:hidden;border-top:1px solid var(--line)}
+.ending::before{content:"忍";position:absolute;font:80vw/1 serif;color:rgba(212,59,47,.025);transform:rotate(8deg)}
+.ending-inner{position:relative;z-index:2;width:min(100%,780px)}
+.ending-body{font-family:"Yu Mincho",serif;font-size:clamp(1.08rem,2vw,1.26rem)}
+.ending-body p{margin:0 0 1.5em}
+.final-line{margin:3em 0;text-align:center;font-family:serif;font-size:clamp(2rem,7vw,4rem);letter-spacing:.18em}
+.afterword{padding:clamp(90px,12vw,150px) 20px;background:#d4ccb8;color:#171511}
+.after-inner{width:min(100%,900px);margin:auto;display:grid;gap:36px}
+.afterword h2{margin:0;font-family:serif;font-size:clamp(2rem,6vw,4rem)}
+.cta-grid{display:grid;gap:12px}
+.cta{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px;border:1px solid rgba(0,0,0,.25);text-decoration:none;font-weight:700}
+.cta:hover,.cta:focus-visible{background:#171511;color:#d4ccb8}
+.cta small{font-weight:400;opacity:.65}
+.notice{font-size:.78rem;opacity:.72}
+@media(min-width:800px){
+ .intro-grid{grid-template-columns:.7fr 1.3fr}
+ .cta-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+ .topbar{grid-template-columns:1fr auto}
+ .progress-track{position:absolute;left:0;right:0;bottom:0}
+ .case-file{grid-template-columns:40px 1fr}
+ .case-main{padding-left:18px}
+ .case-num{font-size:1rem}
+ .case-foot{display:grid}
+ .hero{padding-left:18px;padding-right:18px}
+}
+.motion-off .reveal{opacity:1!important;transform:none!important;transition:none!important}
+.motion-off *{transition:none!important;animation:none!important}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ *,*::before,*::after{animation:none!important;transition:none!important}
+ .reveal{opacity:1;transform:none}
+ .hero-media img{transform:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#story">本文へ移動</a>
+
+<header class="topbar">
+  <a class="brand" href="#top"><small>UCHIZARU ARCHIVE</small><b>忍者解釈</b></a>
+  <div class="progress-track" aria-hidden="true"><span class="progress-bar" id="progressBar"></span></div>
+  <div class="counter" aria-live="polite"><strong id="deathCount">00</strong><span>/ 32 DECEASED</span></div>
+</header>
+
+<div class="tools" aria-label="表示設定">
+  <button type="button" id="fontDown" aria-label="文字を小さく">A−</button>
+  <button type="button" id="fontUp" aria-label="文字を大きく">A＋</button>
+  <button type="button" id="motionToggle" aria-label="演出を停止">止</button>
+</div>
+
+<main id="top">
+<section class="hero">
+  <div class="hero-media"><img src="https://assets.st-note.com/production/uploads/images/20009019/rectangle_large_type_2_25aa09c5d45b5104b30b673d8214cbbb.png?width=2000&height=2000&fit=bounds&quality=85" alt="" referrerpolicy="no-referrer"></div>
+  <div class="hero-copy">
+    <p class="kicker">SHORT FICTION / INCIDENT DATABASE</p>
+    <h1>忍者<br>解釈</h1>
+    <p class="hero-sub">高校生が1クラス丸ごと変死した。手を下したのは忍者！！　〆切に追われた筆者による、荒唐無稽ヤケクソファンタジー物語が幕を開ける！！！</p>
+    <div class="hero-meta">
+      <span>著者：打猿</span><span>初出：2020.02.27 23:12</span><span>変死者：32名</span>
+    </div>
+    <span class="scroll-sign">事件記録を閲覧する</span>
+  </div>
+  <a class="hero-credit" href="https://note.com/ia19200102/n/n157833580f8c" target="_blank" rel="noopener noreferrer">Photo by ia19200102</a>
+</section>
+
+<section class="intro" id="story">
+  <div class="intro-grid">
+    <div>
+      <p class="section-code">FILE 00 / NINJA SATURATION</p>
+      <h2>世界には<br>忍者が飽和した。</h2>
+    </div>
+    <div class="intro-text"><p>ある日、ゴビ砂漠において、ビッグバンを人工的に発生させる実験が行われた。</p>
+<p>その結果、世界には忍者が飽和し、あらゆるものが忍者化するようになった。猫も杓子も忍者忍者。空には忍者が群れをなして飛行し、家かと思って住んでいたら実は忍者だった、という事例が頻発した。</p></div>
+  </div>
+</section>
+
+<section class="registry" aria-labelledby="registry-title">
+  <header class="registry-head">
+    <h2 id="registry-title">二年三組・変死記録</h2>
+    <p class="registry-status"><span id="currentName">閲覧開始</span><br>忍者関与率：算出不能</p>
+  </header>
+  
+    <article class="case-file reveal" id="case-01" data-case="1" data-name="板垣">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">01</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 01</p>
+          <h2>板垣</h2>
+          <p class="cause">ナウマンゾウによる圧死／硬貨化</p>
+        </header>
+        <div class="case-body">
+          <p>なます市立激怒高等学校二年三組の板垣という男が通学中に死亡した。死因はナウマンゾウに踏み潰されたことによる破裂。無論即死である。現場付近では一ヶ月前からナウマンゾウの目撃情報が相次いでおり、自治体が注意を促していた。</p>
+<p>踏み潰され、体液が全て抜け出た板垣の遺体は完全な円盤状になっており、表面には100という数字と平成23年の文字が。裏面には桜の花の図柄と日本国、そして百円という文字が刻印されており、側面はぎざぎざになっていた。</p>
+<p>事件を受け、日本政府は巨大な自動販売機の開発に着手、完成した自販機に板垣の遺体を投入したところ、見事に巨大ミルクセーキの購入に成功した。</p>
+<p>ナウマンゾウは捕獲され動物園に収容されたが、飼育員が目を離した隙に姿を消した。付近の監視カメラには檻を飛び出す忍者の姿が捉えられており、ナウマンゾウ＝忍者説に信憑性が増す結果となった。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：01/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-02" data-case="2" data-name="堰口">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">02</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 02</p>
+          <h2>堰口</h2>
+          <p class="cause">ふやけ脳症／アパート消失</p>
+        </header>
+        <div class="case-body">
+          <p>板垣の同級生である堰口という女が死亡した。十月二十八日、堰口の住む二階建てアパート「エルドリッジ荘」は消失した。数分後、アパートは再び元の場所へ戻ってきたが、住人のほとんどは全身が焼け爛れる、壁や床に溶け込む、体の一部が凍りつく、頭部が透明化する、三遊亭小遊三になる、などの変死を遂げており、堰口は水死体のように皮膚がふやけ死んでいた。死因は脳に大量の水が入ったことによるふやけ脳症であった。</p>
+<p>いくつかの部屋から、米軍人の主食である米軍まんじゅうの食べカスが発見されており、アメリカ合衆国による極秘実験が行われたのでは無いかとの見方が出る一方、大家の部屋から瓶詰めの脳が複数発見され、付近で連続した殺人事件の犯人が大家であることが判明。大家はアパートの住人に忍者では無いかとの疑いがかけられており、警察は行方不明になった大家の足取りを追っている。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：02/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-03" data-case="3" data-name="芦原">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">03</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 03</p>
+          <h2>芦原</h2>
+          <p class="cause">エビゴリラ固め</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口の同級生であり、人型のキクラゲである芦原という男は浜辺で、傷を負い異常に興奮したエビゴリラなる生物と遭遇し、死亡した。エビゴリラは、有名な製薬会社の研究員が酔って開発した、頭がゴリラで体がエビの、不気味な生物である。しかも硫黄の匂いがする。</p>
+<p>芦原は帯刀していため、エビゴリラに戦いを挑むも、エビゴリラの卑怯な毒霧や目潰しに苦戦、最終的には逆水平チョップからのエビゴリラ固めを受け、敗北した。エビゴリラ側のセコンドは忍者、芦沢側のセコンドは恋人だった。格闘経験の差が、今回の悲劇を招いたと言える。</p>
+<p>その遺体は満潮に流され、長いこと行方不明だったが、先日、小豆島で捕獲されたウミガメの腸に詰まっているところが発見された。芦原の遺体は恋人が引き取った。遺体に付着した子キクラゲを自宅で栽培し、元どおりに蘇らせる気でいるらしい。メルボルンの大学ではキクラゲの蘇生に成功した前例があり、不可能ではないと思われる。</p>
+<p>現在キクラゲは価格が非常に高騰しており、キクラゲシンジケートによる密売が横行している。芦原の遺体は日本を救う起爆剤となるだろうか。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：03/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-04" data-case="4" data-name="椛島">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">04</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 04</p>
+          <h2>椛島</h2>
+          <p class="cause">体内蝉発生</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原の同級生である椛島という女が自宅で死亡した。死因は自宅の前を通った石焼き芋売りの売り声が体内蝉発生の周波数とよく似ていたため、運の悪いことに背中から巨大な蝉の幼虫が飛び出したことによる大量出血。無論即死である。唯一の救いは、蝉が飛び出した際に、本人も気づかぬ間に背中にできた人面瘡が吹っ飛んだことである。遺体は内部が空洞化しており、蝉の幼虫に食い尽くされたものと思われる。</p>
+<p>幼虫はその場で羽化。窓ガラスを破壊して何処へと去り、遺体の傍には抜け殻のみが残された。</p>
+<p>その後、なます市内各地で巨大な蝉の目撃情報が相次いだが、羽化からちょうど七日目、神社の境内にてひっくり返っているところが見つかり、専門家の調査が行われた。その結果、ツクツクホーシの一種であることが確認された。</p>
+<p>解剖してみると、ツクツクホーシは雌だった。抱卵しており、中身を調べてみると忍者の雛が入っていた。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：04/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-05" data-case="5" data-name="浦部">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">05</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 05</p>
+          <h2>浦部</h2>
+          <p class="cause">急性一パチ中毒</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島の同級生である不良男の浦部は、パチンコ店のトイレで青い血液の付着したバタフライナイフを握りしめたまま死亡しており、遺体からは高い放射線量が確認された。死因は急性一パチ中毒と見られる。</p>
+<p>遺体発見の数分前、浦部は半透明な黒人の男と口論になっているところを店内の監視カメラに捉えられている。青い血液には銅イオンが含まれており、カブトガニのものとよく似ていた。</p>
+<p>生前、最後に打った台は、CRベテラン教師VSバテレン宣教師であり、これにより浦部は四百円ほど儲けていた。黒人の男は、半透明と言っても、広瀬すずの肌くらい透明度が高く、両目の視力が八十八の浦部以外には、よく見えていなかっただろうと考えられる。</p>
+<p>黒人の男は入店時には透けていなかったものの、CR忍者を打つうちに、だんだん透けてきたとの目撃情報があるため、なんらかの忍術にかかっていた可能性も否定できない。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：05/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-06" data-case="6" data-name="駒木">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">06</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 06</p>
+          <h2>駒木</h2>
+          <p class="cause">忍者性ショック</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部の同級生である駒木という男が死亡した。川釣りの最中、十六メートル級のデメニギスに襲撃され、飲み込まれたのである。</p>
+<p>デメニギスという魚は本来、東北地方や北海道の沖合にしか生息していないが、この日は偶々、産卵のためになます市へ南下、なます川を遡上していた。</p>
+<p>一部始終を見ていた釣り人が警察へ通報し、二十台のパトカーが出動した。しかしパトカーは、自分が陸しか走れないのを忘れており、次々と川に沈んでいった。なます川はパトカーから流れ出した汁、パト汁で汚染され、なます川から水を引いている水田の米を白黒にした。しかし美味だったという。</p>
+<p>その後、消化不良のため吐き出された駒木のしゃれこうべが川底から発見されたが、蛍光色の緑に変色しており、これはデメニギスの胃酸に原因があると見られている。</p>
+<p>しゃれこうべには無数の手裏剣が刺さっており、死因は溺死や、噛み付かれたことによる失血死ではなく、手裏剣が刺さったことによる忍者性ショックではないかと言われている。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：06/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-07" data-case="7" data-name="天草">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">07</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 07</p>
+          <h2>天草</h2>
+          <p class="cause">人体リモコン化</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木の同級生である天草という男が死亡した。アルバイト先のコンビニエンスストアにて突如身体が緑色の炎を上げ、全身が焼け崩れたのである。</p>
+<p>天草とツーオペを組んでいた店員が、焼け崩れ、灰と化した遺体の中に機械の部品らしきものを発見し、まだ熱い灰に手を突っ込み、全ての部品を回収、バックヤードにて組み立てを行ったところ、通常の三倍もある巨大なテレビ用リモコンが完成した。しかし通常の三倍サイズの単三電池が市販されていないため、動作の確認をすることはできなかった。</p>
+<p>ならばと、冷凍庫に仕舞ってあったサイズのちょうどいいデンキナマズを嵌め込んでみると、きちんとリモコンとして機能した。</p>
+<p>監視カメラには、天草に向かって吹き矢を構える覆面の男が映っており、忍者の妙薬によって天草がリモコンに変えられた可能性が高い。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：07/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-08" data-case="8" data-name="千々石">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">08</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 08</p>
+          <h2>千々石</h2>
+          <p class="cause">麦茶の飲み過ぎ</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草の同級生である千々石という男が翌檜の木の先端で死亡した。死因は麦茶の飲み過ぎである。</p>
+<p>付近には数日前から麦茶を大量に含有した隕石が降り注いでおり、千々石は隕石群を見ようと木に登ったところで、運悪く隕石を飲み込んでしまったものと思われる。胃は麦茶で大きく膨れていた。遺体を木から降ろす際も口から滝のように麦茶が溢れ出てきたほどである。</p>
+<p>翌檜の木は麦茶を吸収しすぎて自我を持ってしまった。自力で移動を始め、なます市と歯車市の市境を越えたあたりで足跡が途絶えた。しかし先日、ベーリング海で翌檜が目撃され、その写真が公開された。</p>
+<p>翌檜の細胞内に潜むレトロウイルスは、忍者のような形をしたものも少なくない。隕石の麦茶から摂取したエネルギーで、忍者性が目覚めたのだろうか。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：08/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-09" data-case="9" data-name="敷島">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">09</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 09</p>
+          <h2>敷島</h2>
+          <p class="cause">風呂場縮小現象</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石の同級生である敷島という女が死んだ。風呂に入っているところを急激な風呂場の縮小現象に巻き込まれ、潰されてしまったのである。</p>
+<p>中性子星にも匹敵する密度まで収縮した風呂場は時空の歪みを生み出し、一度は敷島家周辺が消滅の危機に瀕したが、地元消防団による必死の処置により、なんとか風呂場を元の大きさの十七分の十五サイズまで戻すことに成功した。しかし、湯船に浸かっていた敷島は助からず、親指大の遺体となって発見された。</p>
+<p>風呂は老朽化しており、いつ縮小してもおかしくなかった。現場からは、風呂場の壁と同じ色柄の布が発見されており、覗きを行なっていた忍者が関与していると見て、警察が捜査中である。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：09/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-10" data-case="10" data-name="田所">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">10</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 10</p>
+          <h2>田所</h2>
+          <p class="cause">豪族の罠</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島の同級生である田所という女はその日、脱走したペットのツノコアラを探しに市内随一の霊山と言われている猿姥韓山に立ち入り死亡した。乳王を名乗る豪族の仕掛けた罠にかかったのである。遺体は手下の毛ガニに持ち去られた。</p>
+<p>猿姥韓山には乳王の拠点があり、豪族庁のホームページには「乳王とは、兵士千二百人（うち千百人が毛ガニ）を従えるなます市では唯一の二級豪族です。オルドビス紀から猿姥韓山に拠点を置いています。」と記載されている。</p>
+<p>乳王は乳外法権に守られているため、遺体の回収はできなかったが、田所は冒険映画でおなじみ、転がる石球の罠にかかったため、紙のようにペラペラの遺体になったものと思われる。</p>
+<p>乳王は語尾がござるであるため、忍者の疑いがかけられている。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：10/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-11" data-case="11" data-name="山口">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">11</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 11</p>
+          <h2>山口</h2>
+          <p class="cause">宇宙空間での死亡</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所の同級生である山口という男が宇宙空間で死亡しているとナスダが発表した。</p>
+<p>なぜ宇宙で死んでいるのか。原因はわからないが、地球の衛星軌道を周回する山口の遺体はなぜか頭部が二つあった。</p>
+<p>山口の部屋には遺書が残されていた。「どうせ俺は宇宙空間をさまようしか能の無い男なので宇宙で死にます。どうせ俺は宇宙空間をさまようしか能の無い男なので宇宙で死にます。」という内容で、なぜ同じ文章を二度書いたのか、なぜティッシュ箱の裏にマジックペンで遺書を残したのか。真実を知る男は十一月二日午前七時現在クック諸島上空を周回中である。</p>
+<p>山口の自宅周辺では、マネキンの頭部を抱えた忍者がたびたび目撃されていた。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：11/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-12" data-case="12" data-name="横井">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">12</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 12</p>
+          <h2>横井</h2>
+          <p class="cause">ダイモス小型版による打撃</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口の同級生である横井という男はベランダに果物を起き、集まってきた陸クラゲをエアガンで狙撃するという生活をしていたのだが、その日、黄桃の缶詰に集まった陸クラゲがあまりにも巨大だったので、ベランダのエーテル管が破裂、エアコンから飛び出してきた火星の衛星ダイモス小型版で頭を強く打ち死亡した。</p>
+<p>陸クラゲ如きにエアガンを発砲し、BB弾を無駄にしたバチが当たったのである。</p>
+<p>しかし、小型ながら本物のダイモスが研究機関に回収され、ダイモス研究がさらに発展することとなった。それで判明した新事実によると、ダイモスには忍者の形をした岩があるという。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：12/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-13" data-case="13" data-name="朴">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">13</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 13</p>
+          <h2>朴</h2>
+          <p class="cause">竹槍の頭部刺入</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井の同級生である朴という女は、どこからともなく飛んできた竹槍が頭部に刺さり死亡した。</p>
+<p>竹槍は朴の頭部に根を下ろし、屋根を突き破り二百メートルの高さにまで育った。そして、大きな竹の実を一つ実らせた。実の内部には一冊の分厚いコミック本が入っていた。「舌と翡翠と我の太歳」という本である。</p>
+<p>大黒龍王作、田楽出版刊と記されているが、そのような作家も出版社も確認されていない。その内容は、中華料理店でアルバイトをする双子の少女がカエルの店長と共に摩訶不思議な冒険をする。というファンタジーだが、その展開は非常にシュールである。</p>
+<p>奇妙なのはこの本、開く度に画風が変わるのである。アメリカンコミック風の時に限り、ページからケチャップの匂いがするという現象についても未解明である。</p>
+<p>ほとんどの画風において、忍者ペンと呼ばれるペンで執筆されており、作中で忍者のキャラクターがいつもオイシイところを持って行くため、作者の大黒龍王は忍者ではないかと言われている。</p>
+<p>現在この本はなます市国会図書館に収蔵されている。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：13/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-14" data-case="14" data-name="西野">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">14</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 14</p>
+          <h2>西野</h2>
+          <p class="cause">玄翁風邪</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴の同級生である西野という女は中学生の頃から、鏡に映った自分の姿がアンキロサウルスにしか見えないという疾患を抱えていた。そのため、今年の秋頃には自分をアンキロサウルスだとすっかり思い込んでしまった。</p>
+<p>自分をアンキロサウルスだと思うプラシーボ効果で、西野の尻からは先端にハンマーのついた尻尾が生えてきた。先端のハンマーは玄翁であり、政雪の銘が入っていた。おそらく正行のパロディであると思われる。</p>
+<p>西野はその後、玄翁風邪に罹り死亡した。これは本来恐竜にしか感染しない病気であるが、尻尾がアンキロサウルスのものとなった西野の免疫系が恐竜のものと同じになっていたからである。</p>
+<p>玄翁風邪の特効薬が存在するが、忍者が買い占めたため、日本中の病院に在庫がなかった。現在、独占禁止法違反の疑いで、忍者が指名手配されている。懸賞金は二百五十万円である。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：14/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-15" data-case="15" data-name="桜庭">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">15</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 15</p>
+          <h2>桜庭</h2>
+          <p class="cause">落とし穴帝国のクーデター</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野の同級生である桜庭という男が落とし穴に落下し、死亡した。死因は落とし穴の中に人知れず存在していた封建主義的な帝国に捕獲され、帝国のクーデターに巻き込まれたことによる全身被弾である。</p>
+<p>自衛隊穴の中部隊による遺体の回収が済むと、落とし穴には熱々のゼラチンが流し込まれ、封建主義的な帝国のゼリー寄せとなった。</p>
+<p>ゼリーまみれの帝国軍は自衛隊に全面降伏。社会システムの全てが煮凝りと化した帝国は放棄され、国民の大半は工場に連行、強制的にコラーゲンを絞られ荒増山の火口に捨てられた。</p>
+<p>皇帝の一族が隠したプルンプルンの国宝「寒天玄武像曲槍」が未だ落とし穴の中に眠っているという噂もある。</p>
+<p>目撃情報によると、落とし穴を掘ったのはくノ一らしく、現在警察が情報収集をしている。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：15/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-16" data-case="16" data-name="小島">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">16</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 16</p>
+          <h2>小島</h2>
+          <p class="cause">餓鬼による深海転移</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭の同級生である小島という男が餓鬼の大群に襲われて死亡した。道端で死にかけていた白いヤタガラスをオートバイで踏み潰したバチが当たったのである。</p>
+<p>深夜、自宅でテレビを見ていた小島を餓鬼は強襲し、廃業したラーメン店の地下に置かれたテレポーテーションマシンに投じられた。</p>
+<p>騒ぎに気がついた地元暴走族「弾力」が鮫ヶ谷にて餓鬼の大群を破ったが、テレポーテーションマシンでなます湖の水深七百メートル地点に転移させられた小島は助からなかった。</p>
+<p>専門家がテレポーテーションマシンの内部構造を調べたところ、マシンの中に金運招福のお守りを詰めただけの粗末なものであった。</p>
+<p>白いヤタガラスは轢かれてもなお息があったため、通行人の通報で救急車が駆けつけた。しかし車内でドロンと叫び姿を消したという。恐らく忍者であると専門家は語る。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：16/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-17" data-case="17" data-name="福島">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">17</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 17</p>
+          <h2>福島</h2>
+          <p class="cause">回転する巨大樽</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島の同級生である福島という女は、回転する巨大な樽に潰され死亡した。</p>
+<p>帰宅ラッシュの国道百九号線を爆走する樽に五人の力自慢が挑んだが全員圧死。友人との待ち合わせ場所へ急ぐ福島の元へ迫ってきた。</p>
+<p>偶然にもなます市で大量発生した大虐殺テントウの討伐用に七千センチ砲搭載重装甲ふきながしがメンタンピンフライドチキンの駐車場に待機していたため、乗組員が自慢の装備で樽を一つ打ち破り、中身のワインをぶちまけたのであるが、第二波として襲来したふた回り大きな樽に敗北した。</p>
+<p>福島はマッハ6で走れるため、逃げ足には自信があったが、行く先を非難する車に遮られ、立ち往生したところを潰された。</p>
+<p>その後、回転のしすぎで自壊した二つ目の樽から飛び出したのは虹色に輝く生臭い小豆であった。しかし調査の結果、小豆の遺伝子に忍者の遺伝子が混ざっていることが判明した。忍者と豆の雑種だったのである。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：17/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-18" data-case="18" data-name="竹内">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">18</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 18</p>
+          <h2>竹内</h2>
+          <p class="cause">レプティリアン症候群</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島の同級生である竹内という女は腹部から鱗が生えてきて、なます市内の総合病院にて魚鱗外来を受診した。</p>
+<p>その結果、なます市を拠点とし、知育プロレスで有名な、プロレス団体「プロレスリング邪道軍」の選手、ビル・ラプターのように、全身に蛇のような鱗が現れ、非常に凶暴で大柄な人間に変わってしまう、レプティリアン症候群であると診断された。</p>
+<p>その日の夜には変身が完了し、夜行性のため竹内は街を駆け回り、脱皮を繰り返した。そして竹内は脱皮のし過ぎで玉ねぎのように縮んで行き、消滅したのである。</p>
+<p>レプティリアン症候群を引き起こす寄生虫を忍者が媒介しているという未確認情報もあり、注意が必要である。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：18/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-19" data-case="19" data-name="三島">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">19</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 19</p>
+          <h2>三島</h2>
+          <p class="cause">アテン神の火球</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内の同級生である三島という男が死亡した。ギネス世界記録に挑戦するため、世界最大の紙飛行機に乗り飛行している最中の悲劇であった。</p>
+<p>三島はあまりにも高いところを飛行したため、アテン神の怒りを買い、岩手県上空で火球に撃たれたようである。</p>
+<p>そのため、本来は北極点に着陸する予定だった紙飛行機は、近場で唯一紙飛行機専用着陸レーンのある新千歳空港に着陸したが、機体は錘としてセロハンテープで貼り付けていた一円玉周辺を残し焼失、三島は機首にて焼死していた。</p>
+<p>しかし、アテン神はエジプトを中心としたアフリカ・ヨーロッパ専門の神であり、岩手に出現した原因は不明である。成田空港の大凧専用レーンを忍者が使用したとの情報があり、実は三島を攻撃したのは、アテン神に変装した空飛ぶ忍者なのではないかとの説も有力視されている。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：19/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-20" data-case="20" data-name="森田">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">20</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 20</p>
+          <h2>森田</h2>
+          <p class="cause">赤外線によるハンバーガー融合</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島の同級生である森田という女が死亡した。</p>
+<p>ファストフード店にて赤外線通信を用い、友人と連絡先の交換を試みた際、店内の特殊な構造により赤外線が反射・増幅され、アルファケンタウリが五十万年かけようやく放つことができるほどの赤外線が森田に直撃したのである。</p>
+<p>森田はあまりにも強い赤外線を浴びてしまったため、左手に持っていたチーズバーガーと融合してしまい、ハンバーガー担当店員による診断で、人間かハンバーガーかで言うと僅かながらハンバーガーの状態であると診断され、死亡届が出された。</p>
+<p>森田の携帯に送信された連絡先は「ninjya」という名前で、これは友人の連絡先と異なる。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：20/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-21" data-case="21" data-name="生島">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">21</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 21</p>
+          <h2>生島</h2>
+          <p class="cause">襲名妨害／レイピア刺傷</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田の同級生である生島という男は超能力者であり歌舞伎役者でもあったが、十万代目海老川ドンカッチョの名を襲名する際、事件は起きた。</p>
+<p>生島に襲名されると困る謎の一党が生島を重爆撃機で襲撃したのである。生島は超能力で敵を全て撃ち落としたが、直後、背後から先輩の海老川ギバチにレイピアで刺された。ギバチも襲名を邪魔したい一党の構成員だったのである。</p>
+<p>歌舞伎役者が死ぬと地震が起きるというのは有名な話である。やはり生島が死ぬと地鳴りが始まり、裂けた地面に生島の遺体が吸い込まれていった。</p>
+<p>それから三日間、北半球には大見得を切る十万代目海老川ドンカッチョの姿をしたオーロラが出現し、世間を騒がせたが、この一件で歌舞伎の人気が爆発した。</p>
+<p>供述によると、海老川ギバチ（本名、全力睾丸助）が犯行に使ったレイピアは私物ではなく、道端で忍者にもらったものだという。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：21/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-22" data-case="22" data-name="筒井">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">22</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 22</p>
+          <h2>筒井</h2>
+          <p class="cause">菊花石製虎の吐瀉物</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島の同級生である筒井という女が山中で死亡した。死因は菊花石製の虎の吐瀉物を浴びたことによる溶死である。</p>
+<p>菊花石はもともと分子構造上虎になりやすいという性質がある。サファイア、オパール、メノウ、ラピスラズリなどは虎になりやすく、そうでない岩石も魚醤で煮込めば虎に変化するが、虎はバターにしかなれない。</p>
+<p>しかし、一度虎を経由することで、岩石をバターにするという発想を中世ヨーロッパの商人が本に載せたため、近代における錬金術の考え方に繋がったと、歴史の教科書にも載っている。</p>
+<p>それを知った筒井はバター生産で一儲けするべく、様々な岩石を鍋に入れ、魚醤で煮込み、虎に変化するのを待っていた。</p>
+<p>虎になりかけの菊花石は、石の硬さと虎の凶暴さを併せ持ち、大変危険である。杜撰な煮込みの結果、筒井は襲われた。</p>
+<p>筒井は持っていたクマ撃退スプレーを虎の目に噴射し、助かったかに見えたが、どこからともなく飛んできた手裏剣が虎の口蓋垂（通称喉ペニス）に突き刺さり、虎が嘔吐した。</p>
+<p>筒井の遺体は完全に液体化していたという。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：22/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-23" data-case="23" data-name="赤城">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">23</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 23</p>
+          <h2>赤城</h2>
+          <p class="cause">急性ピータンショック</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井の同級生である赤城という男が自宅で死亡した。死因は体内に人の頭ほどの大きさのピータンが出現し、血流が阻害されたことによる急性ピータンショックである。</p>
+<p>赤城は家庭の方針で、幼い頃から背中に某緑色大魔王の刺青が入っていた。高校の授業でプールに入る際も堂々と見せ、学校側もあの大魔王ならと許していた。</p>
+<p>赤城の遺体を調べると、口を閉じていた刺青の口が開き、卵を吐き出す図柄に変わっていた。ピータンが現れたのはちょうど卵の絵の下であった。</p>
+<p>ピータンを割ってみると、中にミニチュアのドラムやピアノやタンバリンが入っていた。</p>
+<p>しばらくは警察がミニチュアの楽器たちを保管していたが、ある日突然小さな忍者に奪われてしまった。忍者たちは見事な演奏を披露しながら、下水道に入っていったという。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：23/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-24" data-case="24" data-name="岸辺">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">24</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 24</p>
+          <h2>岸辺</h2>
+          <p class="cause">剣豪による斬殺</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城の同級生である岸辺という女が死亡した。剣豪の奇襲を受け、斬り捨てられたのである。</p>
+<p>剣豪は助兵衛と言う名の中年で、二十歳の頃旧ソ連の宇宙開発プログラムに参加、お猿のウキキチョフと共に宇宙空間における船外活動を行い、ブラックサテライトが焦げたシャケのムニエルであることを突き止めたことがあるほどの人物である。</p>
+<p>何故それほどの人物が高校生を奇襲したのか、それは定かでないが、助兵衛の各関節からテグスが上空へと伸びていたという目撃情報から察するに、雲の上から忍者が操っていたのだろう。</p>
+<p>助兵衛の刀は世界で三番目に切れるという妖刀であった。岸辺の遺体は妖刀の呪いでばらばらとチリメンジャコに変わった。そのチリメンジャコは通常よりもタツノオトシゴが多く混入していたという。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：24/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-25" data-case="25" data-name="仲松">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">25</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 25</p>
+          <h2>仲松</h2>
+          <p class="cause">泥世界への沈降</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺の同級生である仲松という男が自宅の玄関に溜まっていた泥に足を取られ、人知れずゆっくりと沈み、行方不明となった。</p>
+<p>学生にとって、泥は天敵である。どこに溜まっているか分からず、足を取られればそのまま沈み、泥の世界に住む老人に、槍で全身を突き刺され死亡する。仲松は運が悪かったのである。</p>
+<p>しかし、泥警による捜査で判明したのは、玄関に溜まっていた泥はアイルランドでしか採れない特殊な泥であるという事実であった。</p>
+<p>アイルランド泥関に問い合わせたところ、禁漁区の沼で泥をさらう忍者がたびたび目撃されており、玄関に撒かれた泥は忍者が採ってきた泥であることがほぼ確定した。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：25/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-26" data-case="26" data-name="根本">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">26</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 26</p>
+          <h2>根本</h2>
+          <p class="cause">空腹のドローンによる分解</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松の同級生である根本という女が死亡した。</p>
+<p>野良猫に盗まれたローファーを取り返すため、少々無茶な追跡を行い、ビルとフェンスの間に挟まっていたところを、腹を空かせたドローンに襲われ、全身を大小合わせ二十の破片に分解された。固まった返り血が絡み、故障したドローンは近くの畑で停止していた。</p>
+<p>「ドローン」は「ドロンッ！」と似ているため、忍者の関与が疑われている。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：26/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-27" data-case="27" data-name="鬼頭">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">27</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 27</p>
+          <h2>鬼頭</h2>
+          <p class="cause">巨大脳タコ化／対脳ミサイル</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本の同級生である鬼頭という男が死亡した。</p>
+<p>奉公先の寺で赤いUFOにキャトルミューティレーションされ、手術により取り出された脳が、緑色の粘液で満たされた水槽に浮かべられたのであるが、その粘液は脳の細胞を増殖させ、凶暴化させる培養液だったらしく、脳でできた巨大なタコとなった鬼頭はフランスのダンケルクと言う街に投下され、そのままフランス軍と交戦。</p>
+<p>翌日未明、戦車砲の砲撃によりできた傷口から、脳の中の脳に細菌が侵入、激しい炎症を起こし、悶絶しながらフランス中を蹂躙。明け方にフランス海軍の空母シャルルドゴールから対脳ミサイルが三発、発射された。</p>
+<p>対脳ミサイルは脳みその活動を停止させ、シナプスをアルプスに変えた。アルプス山脈の香り漂う遺体は防腐処理を施され、ノレーブノレ美術館に収蔵された。</p>
+<p>先日、世界的芸術家である草津彌生にペインティングを施され、全体的に水玉模様となった。</p>
+<p>後日、オカルト雑誌「ムムム！？」に、件の宇宙人が写り込んだ写真が掲載された。その宇宙人は頬っぺたがグルグルだったため、実は忍者ではないかと、宇宙人ファンの間で噂になったという。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：27/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-28" data-case="28" data-name="柴崎">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">28</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 28</p>
+          <h2>柴崎</h2>
+          <p class="cause">王水加湿／ミノムシ化</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭の同級生である柴崎という男は加湿器に冗談で王水を入れ、酸の湯気を楽しんだのであるが、一時間ほどで柴崎の体に異常事態が発生した。</p>
+<p>柴崎の体は練り飴のようになってしまった。しかし生きてはいたし、移動もできたので、助けを求めるために窓から部屋を脱出、道路へ出たところで枯葉がまとわり付き、今度は巨大なミノムシのようになってしまった。そして、本物のミノムシと勘違いしたハゲタカに襲撃され、死亡した。</p>
+<p>警察が加湿器の中を確かめると、半分ほど蒸発した王水から竹筒が飛び出していた。水遁の術である。引っ張ってみると、忍者がくっついてきたが、捕獲する寸前に逃げられてしまった。</p>
+<p>警察は忍者が柴崎になんらかの術をかけたと断じ、今も行方を追っている。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：28/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-29" data-case="29" data-name="北村">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">29</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 29</p>
+          <h2>北村</h2>
+          <p class="cause">ニセ老婆マンによる殴打</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭と柴崎の同級生である北村という女が電車の車内で老婆にタコ殴りにされ死亡した。遺体は原型をとどめていなかった。</p>
+<p>有明線の車内で北村が居合わせた老婆は特撮のヒーローが身につけているようなベルトをはめていた。老婆は突然「変身」と叫び、奇怪なポーズをとった。すると老婆は五人に増えた。五人が変身し、二十五人に、二十五人が百二十五人に、次第に数は増え、やがて七万八千百二十五人にまでなった。</p>
+<p>老婆たちは正義のヒーロー「老婆マン」と敵対する悪の組織「秘密結社好好爺」が放った「ニセ老婆マン」であった。</p>
+<p>本物の老婆マンが駆けつけた時には手遅れで、北村はニセ老婆マンに殴り殺されていた。本物の老婆マンもまた変身し、やはり七万八千百二十五人になった。</p>
+<p>関ヶ原の戦いに匹敵する大乱闘が繰り広げられ、辛くも老婆マンが勝利を収めたが、巻き込まれた一般人三十名余りが死亡した。</p>
+<p>国家の最高機密である老婆マン変身ベルトの仕組みが秘密結社好好爺に漏洩したのは、老婆マンの自宅で忍者がスパイ行為を働いたものと思われる。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：29/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-30" data-case="30" data-name="志田">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">30</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 30</p>
+          <h2>志田</h2>
+          <p class="cause">マントル層への落下</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭と柴崎と北村の同級生である志田という男が自宅の庭に深い穴を掘り、地獄への侵入を試みたところ、ユスリカの大群に襲われ、穴の中に設置したハシゴを踏み外しマントル層まで落下、死亡した。遺体は既に地球内部に溶け込んでしまい、回収は不可能であった。</p>
+<p>専門家がユスリカの一匹を捕らえ、顕微鏡でよくみてみたところ、トミー・李・御上手や、ウィル・酢味噌のようなメンインブラックを特殊な圧縮技術により小型化し、羽をつけたものであることが判明した。</p>
+<p>付近では夜な夜な網を振り回し、虫かごに何かを入れている覆面の男が目撃されており、メンインブラックを志田に差し向けたのは忍者ではないかとの見方が、捜査関係者の間で強まっている。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：30/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-31" data-case="31" data-name="秦">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">31</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 31</p>
+          <h2>秦</h2>
+          <p class="cause">ぬりかべ性心不全</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭と柴崎と北村と志田の同級生である秦という女が死亡した。目がさめるとぬりかべの着ぐるみに入っていたのである。</p>
+<p>立ち上がろうにも立ち上がれず、家族は既に出かけた後で、だんだんと着ぐるみの中も暑くなってきたので、着ぐるみの内側を爪で引っ掻き、遺書を残した。</p>
+<p>その内容は現状の説明と、家族への感謝と、「死ぬ前に、忍者になりた、かったなあ、忍者になりた、かっーーーーー（判読不能）」という辞世の句である。</p>
+<p>そして死後、自分のスマートフォンにかけられたロックが外れないと不都合があると考えたのであろうか、六桁の暗証番号が記されていた。零零零零零零という単純な暗証番号であった。</p>
+<p>ぬりかべから引っ張り出された秦は、汗だくで死んでおり、恐らく脱水によりぬりかべ性心不全を起こしたものと思われる。</p>
+<p>ホームセンターでぬりかべを購入した男がいるとの情報を受け、警察が聞き込みを行ったところ、秦は忍者になりたいあまり、忍者を尾行し、忍者の秘密を目撃してしまったという事実が判明した。秦は忍者に口封じをされた可能性が高いのだ。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：31/32</span>
+        </footer>
+      </div>
+    </article>
+    
+    <article class="case-file reveal" id="case-32" data-case="32" data-name="萩原">
+      <div class="case-rail" aria-hidden="true">
+        <span class="case-num">32</span>
+        <span class="case-mark">忍</span>
+      </div>
+      <div class="case-main">
+        <header class="case-head">
+          <p class="case-label">NAMASU MUNICIPAL POLICE / INCIDENT FILE 32</p>
+          <h2>萩原</h2>
+          <p class="cause">全身碁盤化</p>
+        </header>
+        <div class="case-body">
+          <p>板垣と堰口と芦原と椛島と浦部と駒木と天草と千々石と敷島と田所と山口と横井と朴と西野と桜庭と小島と福島と竹内と三島と森田と生島と筒井と赤城と岸辺と仲松と根本と鬼頭と柴崎と北村と志田と秦の同級生である萩原という女が死亡した。全身に線が入り、皮膚が碁盤となり、絶えず碁石が打たれまくるストレスに耐えられなかったのである。</p>
+<p>死後も遺体には碁石が現れては消えて、試合を続けていたという。囲碁の専門家によると、萩原で碁を打つ見えざるプレイヤーは相当な腕前らしく、どちらかというと白の方が勝ち星が多いようである。まれに五目並べの試合も展開され、見えざるプレイヤーが息抜きをしているのがわかる。</p>
+<p>火葬中も、窯の中から炎の音に混じり、碁石を打つ音が聞こえていたが、やがて碁石も白黒の灰となった。</p>
+<p>東京の路地裏で、エア囲碁を行う二人組の忍者が目撃された翌月の出来事であった。</p>
+        </div>
+        <footer class="case-foot">
+          <span>忍者関与：<b>疑いあり</b></span>
+          <span>死亡者累計：32/32</span>
+        </footer>
+      </div>
+    </article>
+    
+</section>
+
+<section class="ending reveal" id="interpretation">
+  <div class="ending-inner">
+    <p class="section-code">FINAL REPORT / INTERPRETATION CONFIRMED</p>
+    <h2>忍者解釈</h2>
+    <div class="ending-body"><p>なます市立激怒高等学校二年三組の生徒、三十二人全員が死亡した。</p>
+<p>二年三組の天井裏には、忍者の巣があった。</p>
+<p>昼休みの都度、生徒たちが巣にゴミや石や昆虫を投げ込むので、忍者たちは憤っていた。しかも生徒たちは網で忍者を捕らえては、肛門に爆竹を仕込んで破裂させたり、弁当の米に乗せて忍者丼をしたりするのである。</p>
+<p>ある日、浦部が巣に投げ込んだカエルに、忍者の長が食い殺されてしまったので、忍者たちは生徒を皆殺しすることにした。</p>
+<p>普段馬鹿にされていた忍者たちだが、いざ忍術を使うと無敵である。忍者たちは一人、また一人と生徒たちを始末していった。</p>
+<p>しかし、誰も登校してこない教室を見て忍者たちは寂しくなった。そこで、隣の教室に新たな巣を構える決断をした。</p>
+<p>各々で凧を拡げ、廊下を進軍する忍者たち。</p>
+<p>間も無く隣の教室というところで、忍者たちは曼荼羅のような怪獣に襲われた。曼荼羅に飲み込まれた忍者たちは無限の世界を見た。</p>
+<p>忍術の通用しないサイケデリックな無限の世界を目の当たりにした忍者たちは、己の無力さに咽び泣いた。</p>
+<p>ゴーン、ゴーン、と鐘の音がする。</p>
+<p>曼荼羅はある一点に集約されて行く。忍者達もその一点に向かった。</p>
+<p>その先で忍者たちは、素晴らしい人々と永遠に暮らした。もう覆面は被らない。</p>
+<p>了</p></div>
+    <p class="final-line">了</p>
+  </div>
+</section>
+
+<section class="afterword">
+  <div class="after-inner">
+    <div>
+      <p class="mono">ARCHIVE COMPLETE / 32 OF 32</p>
+      <h2>ここまで読んだ人間も、<br>忍者かもしれない。</h2>
+      <p>短編小説「忍者解釈」／打猿。元の文章を、なます市の変死事件データベースとして再構成した特設ページ。</p>
+    </div>
+    <div class="cta-grid">
+      <a class="cta" href="../"><span>打猿の本拠地へ戻る</span><small>HOME →</small></a>
+      <a class="cta" href="../#works"><span>作品・制作依頼を見る</span><small>WORKS →</small></a>
+    </div>
+    <p class="notice">※ このページをサイト直下に置く場合は、末尾のリンク「../」を本拠地URLへ変更してください。本文には架空の暴力・変死・不条理な表現が含まれます。</p>
+  </div>
+</section>
+</main>
+
+<script>
+(function(){
+  'use strict';
+  const root=document.documentElement;
+  const cases=[...document.querySelectorAll('.case-file')];
+  const reveals=[...document.querySelectorAll('.reveal')];
+  const deathCount=document.getElementById('deathCount');
+  const currentName=document.getElementById('currentName');
+  const progressBar=document.getElementById('progressBar');
+  let fontScale=1;
+  let motionOff=false;
+
+  function setFont(delta){
+    fontScale=Math.min(1.25,Math.max(.88,fontScale+delta));
+    root.style.setProperty('--font-scale',fontScale.toFixed(2));
+    localStorage.setItem('ninja-font',fontScale);
+  }
+  document.getElementById('fontDown').addEventListener('click',()=>setFont(-.06));
+  document.getElementById('fontUp').addEventListener('click',()=>setFont(.06));
+
+  const saved=Number(localStorage.getItem('ninja-font'));
+  if(saved>=.88&&saved<=1.25){fontScale=saved;root.style.setProperty('--font-scale',saved)}
+
+  const motionBtn=document.getElementById('motionToggle');
+  motionBtn.addEventListener('click',()=>{
+    motionOff=!motionOff;
+    document.body.classList.toggle('motion-off',motionOff);
+    reveals.forEach(el=>el.classList.toggle('is-visible',motionOff||el.classList.contains('seen')));
+    motionBtn.textContent=motionOff?'動':'止';
+    motionBtn.setAttribute('aria-label',motionOff?'演出を再開':'演出を停止');
+  });
+
+  if('IntersectionObserver' in window){
+    const revealObserver=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('seen','is-visible');
+        }
+      });
+    },{threshold:.08,rootMargin:'0px 0px -10%'});
+    reveals.forEach(el=>revealObserver.observe(el));
+
+    const caseObserver=new IntersectionObserver(entries=>{
+      const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+      if(!visible)return;
+      const n=Number(visible.target.dataset.case||0);
+      deathCount.textContent=String(n).padStart(2,'0');
+      currentName.textContent='FILE '+String(n).padStart(2,'0')+' / '+visible.target.dataset.name;
+    },{threshold:[.15,.35,.6],rootMargin:'-20% 0px -55%'});
+    cases.forEach(el=>caseObserver.observe(el));
+  }else{
+    reveals.forEach(el=>el.classList.add('is-visible'));
+  }
+
+  function updateProgress(){
+    const h=document.documentElement;
+    const max=h.scrollHeight-h.clientHeight;
+    const p=max>0?h.scrollTop/max:0;
+    progressBar.style.width=(p*100).toFixed(2)+'%';
+    if(h.scrollTop>document.getElementById('interpretation').offsetTop-300){
+      deathCount.textContent='32';
+      currentName.textContent='解釈確定';
+    }
+  }
+  addEventListener('scroll',updateProgress,{passive:true});
+  addEventListener('resize',updateProgress);
+  updateProgress();
+})();
+</script>
+</body>
+</html>

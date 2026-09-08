@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<title>業務管理システム</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#008080;font-family:'MS Gothic','Osaka-Mono',monospace;font-size:13px;color:#000;padding:14px;min-height:100vh;}
+  .window{max-width:680px;margin:0 auto;background:#c0c0c0;border:2px solid #fff;border-right-color:#404040;border-bottom-color:#404040;box-shadow:2px 2px 0 #000;}
+  .titlebar{background:linear-gradient(90deg,#000080,#1084d0);color:#fff;font-weight:bold;padding:3px 6px;display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+  .titlebar .x{background:#c0c0c0;color:#000;border:1px solid #fff;border-right-color:#404040;border-bottom-color:#404040;width:16px;height:14px;text-align:center;line-height:12px;font-size:10px;}
+  .menubar{background:#c0c0c0;border-bottom:1px solid #808080;padding:2px 6px;font-size:12px;}
+  .menubar span{margin-right:14px;}
+  .menubar u{text-decoration:underline;}
+  .inner{padding:12px;}
+  .panel{background:#fff;border:2px solid #808080;border-right-color:#fff;border-bottom-color:#fff;padding:8px;margin-bottom:10px;}
+  .sys-line{font-size:12px;color:#000080;margin:2px 0;}
+  .sys-line.red{color:#c00;}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0;background:#fff;}
+  th{background:#000080;color:#fff;text-align:left;padding:3px 5px;font-weight:normal;border:1px solid #808080;}
+  td{padding:3px 5px;border:1px solid #d0d0d0;}
+  tr:nth-child(even) td{background:#f0f0f0;}
+  .st-ok{color:#008000;}
+  .st-ng{color:#c00;}
+  .statusbar{background:#c0c0c0;border-top:2px solid #fff;padding:3px 8px;font-size:11px;display:flex;justify-content:space-between;}
+  .field-row{margin:4px 0;font-size:12px;}
+  .btn{background:#c0c0c0;border:2px solid #fff;border-right-color:#404040;border-bottom-color:#404040;padding:3px 14px;font-family:inherit;font-size:12px;cursor:pointer;margin:4px 4px 4px 0;}
+  .btn:active{border:2px solid #404040;border-right-color:#fff;border-bottom-color:#fff;}
+  a{color:#0000ff;}
+  .blink{animation:b 1s steps(1) infinite;}
+  @keyframes b{50%{opacity:0;}}
+</style>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <span>■ 相談記録管理システム Ver 2.61 ［管理者モード］</span>
+    <span class="x">×</span>
+  </div>
+  <div class="menubar">
+    <span><u>F</u>ファイル</span><span><u>E</u>編集</span><span><u>V</u>表示</span><span><u>T</u>術式</span><span><u>H</u>ヘルプ</span>
+  </div>
+  <div class="inner">
+
+    <div class="panel">
+      <div class="sys-line">&gt; ログイン認証... [PW:0292] ... 成功<span class="blink">_</span></div>
+      <div class="sys-line">&gt; 管理者として接続しました。</div>
+      <div class="sys-line red">&gt; 警告：本システムは関係者以外の使用を禁じています。</div>
+    </div>
+
+    <div class="panel">
+      <div class="field-row"><b>■ 収集記録一覧</b>　　最終更新：————/——/——　　件数：[表示上限]</div>
+      <table>
+        <tr><th>ID</th><th>仮名</th><th>経路</th><th>分類</th><th>状態</th></tr>
+        <tr><td>0001</td><td>みさき</td><td>診断</td><td>視・未・場・死</td><td class="st-ok">登録済</td></tr>
+        <tr><td>0002</td><td>のぼる</td><td>鑑定</td><td>恋愛・縁</td><td class="st-ok">登録済</td></tr>
+        <tr><td>0003</td><td>K.T</td><td>苦情</td><td>応対</td><td class="st-ng">破損</td></tr>
+        <tr><td>0004</td><td>ぬるま湯</td><td>診断</td><td>感・過・人・生</td><td class="st-ok">登録済</td></tr>
+        <tr><td>0005</td><td>(未記名)</td><td>不明</td><td>―</td><td class="st-ng">欠落</td></tr>
+        <tr><td>0006</td><td>ましろ</td><td>呪い</td><td>刷込完了</td><td class="st-ok">登録済</td></tr>
+        <tr><td>0007</td><td>あなた</td><td>—</td><td>—</td><td class="st-ng">閲覧中</td></tr>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="field-row"><b>■ 術式進行状況</b></div>
+      <div class="field-row">収集率：　▓▓▓▓▓▓░░░░░░░░░░　42%</div>
+      <div class="sys-line">&gt; 規定値まで、まだ足りません。収集を継続してください。</div>
+    </div>
+
+    <div class="panel">
+      <div class="field-row"><b>■ 操作</b></div>
+      <button class="btn" onclick="alert('権限がありません。')">記録を閲覧</button>
+      <button class="btn" onclick="alert('術式は準備段階です。')">術式を進行</button>
+      <button class="btn" onclick="location.href='index.html'">収集装置へ</button>
+      <button class="btn" onclick="location.href='shindan.html'">ログアウト</button>
+    </div>
+
+    <div class="panel">
+      <div class="sys-line red">&gt; 注意：あなたがこの画面を閲覧した記録を保存しました。（ID:0007）</div>
+      <div class="sys-line">&gt; 関係者でない場合は、速やかに退出してください。</div>
+    </div>
+
+  </div>
+  <div class="statusbar">
+    <span>準備完了</span>
+    <span>管理者：すべての歯が見える</span>
+  </div>
+</div>
+</body>
+</html>

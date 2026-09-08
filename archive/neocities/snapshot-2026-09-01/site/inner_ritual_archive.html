@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>異物標本室／祭りの前夜</title>
+  <meta name="description" content="静かな夜の異物標本室であり、同時に秘密の祭りの準備場でもある内面空間。標本、研究記録、祭りの痕跡、青く発光するGUIが重なる一頁。" />
+  <style>
+    :root{
+      --bg:#090909;
+      --bg2:#11100d;
+      --ink:#f1ede2;
+      --paper:#d9d0bc;
+      --muted:#948974;
+      --soil:#564633;
+      --line:#2f2b24;
+      --red:#731b1a;
+      --vermilion:#bb4a24;
+      --blue:#41a2ff;
+      --blue-soft:#84cbff;
+      --green:#79ff8e;
+      --pink:#ff5fd1;
+      --shadow:0 20px 80px rgba(0,0,0,.45);
+      --max:1200px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(65,162,255,.12), transparent 22%),
+        radial-gradient(circle at 82% 18%, rgba(187,74,36,.12), transparent 20%),
+        radial-gradient(circle at 60% 80%, rgba(121,255,142,.05), transparent 20%),
+        linear-gradient(180deg, #0c0b09 0%, #090909 40%, #0a0a0b 100%);
+      color:var(--ink);
+      font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+      line-height:1.7;
+      letter-spacing:.03em;
+      overflow-x:hidden;
+    }
+    body::before{
+      content:"";
+      position:fixed; inset:0; pointer-events:none; z-index:0;
+      background:
+        linear-gradient(rgba(255,255,255,.02), rgba(255,255,255,0) 20%),
+        repeating-linear-gradient(180deg, rgba(255,255,255,.02) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at center, transparent 40%, rgba(0,0,0,.6) 100%);
+      mix-blend-mode:screen;
+      opacity:.55;
+    }
+    body::after{
+      content:"";
+      position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+      opacity:.1;
+    }
+    a{color:inherit; text-decoration:none}
+    img{max-width:100%; display:block}
+    .site-shell{position:relative; z-index:1}
+
+    .topbar{
+      position:sticky; top:0; z-index:20;
+      backdrop-filter:blur(18px);
+      background:linear-gradient(180deg, rgba(10,10,10,.9), rgba(10,10,10,.48));
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .topbar-inner{
+      width:min(calc(100% - 32px), var(--max)); margin:0 auto;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:24px; padding:14px 0;
+    }
+    .brand{
+      display:flex; flex-direction:column; gap:2px;
+      min-width:0;
+    }
+    .brand small{font-size:.68rem; color:var(--blue-soft); letter-spacing:.24em; text-transform:uppercase}
+    .brand strong{font-size:1rem; font-weight:600; letter-spacing:.18em}
+    .nav{display:flex; gap:18px; flex-wrap:wrap; justify-content:flex-end; font-size:.78rem; color:var(--paper)}
+    .nav a{position:relative; opacity:.88}
+    .nav a::after{content:""; position:absolute; left:0; right:0; bottom:-5px; height:1px; background:var(--blue); transform:scaleX(0); transform-origin:left; transition:.3s ease}
+    .nav a:hover::after{transform:scaleX(1)}
+
+    .container{width:min(calc(100% - 32px), var(--max)); margin:0 auto}
+    .hero{
+      min-height:100svh;
+      display:grid;
+      grid-template-columns: 1.18fr .82fr;
+      gap:36px;
+      align-items:center;
+      padding:56px 0 84px;
+      position:relative;
+    }
+    .hero::before{
+      content:"";
+      position:absolute; left:-10vw; top:8%; width:34vw; height:64svh;
+      background:radial-gradient(circle at 30% 20%, rgba(65,162,255,.18), transparent 40%),
+                 linear-gradient(180deg, rgba(217,208,188,.07), rgba(0,0,0,0));
+      filter:blur(30px);
+      pointer-events:none;
+    }
+    .hero-copy{position:relative}
+    .eyebrow{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:8px 14px; border:1px solid rgba(132,203,255,.28);
+      background:rgba(65,162,255,.08); color:var(--blue-soft);
+      font-size:.76rem; letter-spacing:.22em; text-transform:uppercase;
+      margin-bottom:24px;
+    }
+    .eyebrow::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--blue); box-shadow:0 0 14px var(--blue)}
+    h1{
+      margin:0;
+      font-size:clamp(2.8rem,7.2vw,7rem);
+      line-height:.94;
+      font-weight:600;
+      letter-spacing:.06em;
+      text-wrap:balance;
+      text-shadow:0 0 30px rgba(65,162,255,.08);
+    }
+    .title-sub{
+      margin-top:16px; color:var(--paper); opacity:.9;
+      font-size:clamp(1rem,1.8vw,1.35rem); max-width:38rem;
+    }
+    .hero-note{
+      margin-top:28px; max-width:38rem; color:var(--muted); font-size:.96rem;
+      border-left:2px solid rgba(187,74,36,.5); padding-left:18px;
+    }
+    .hero-actions{display:flex; gap:14px; flex-wrap:wrap; margin-top:28px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:14px 18px; border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.03); color:var(--ink); font-size:.9rem;
+      transition:.28s ease; box-shadow:var(--shadow);
+    }
+    .btn:hover{transform:translateY(-2px); border-color:rgba(132,203,255,.45); background:rgba(65,162,255,.12)}
+    .btn.primary{background:linear-gradient(135deg, rgba(65,162,255,.12), rgba(255,95,209,.08)); border-color:rgba(132,203,255,.32)}
+
+    .hero-stage{
+      position:relative;
+      min-height:650px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        linear-gradient(180deg, rgba(22,22,18,.84), rgba(7,7,8,.94)),
+        radial-gradient(circle at 75% 18%, rgba(65,162,255,.16), transparent 20%),
+        radial-gradient(circle at 22% 84%, rgba(187,74,36,.18), transparent 18%);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .hero-stage::before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(90deg, transparent 0 6%, rgba(255,255,255,.03) 6% 6.4%, transparent 6.4% 30%, rgba(255,255,255,.025) 30% 30.3%, transparent 30.3% 100%),
+        linear-gradient(180deg, rgba(255,255,255,.02), transparent 15% 100%);
+      opacity:.8;
+      pointer-events:none;
+    }
+    .shelf-column{
+      position:absolute; top:0; bottom:0; width:31%;
+      border-right:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg, rgba(70,58,43,.2), rgba(0,0,0,0));
+    }
+    .shelf-column.left{left:0}
+    .shelf-column.mid{left:31%}
+    .shelf-column.right{left:62%; width:38%; border-right:none}
+    .shelf-column .bar{
+      position:absolute; left:0; right:0; height:1px; background:rgba(255,255,255,.07)
+    }
+    .shelf-column .bar:nth-child(1){top:18%}
+    .shelf-column .bar:nth-child(2){top:37%}
+    .shelf-column .bar:nth-child(3){top:56%}
+    .shelf-column .bar:nth-child(4){top:75%}
+
+    .artifact, .monitor, .paper, .footprint, .sketch, .mic, .cassette, .label-chip{
+      position:absolute;
+    }
+    .artifact{
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(18,16,14,.78);
+      box-shadow:0 12px 34px rgba(0,0,0,.35);
+    }
+    .specimen-jar{width:90px; height:150px; left:8%; top:18%; border-radius:8px 8px 18px 18px; background:linear-gradient(180deg, rgba(132,203,255,.18), rgba(24,24,22,.8));}
+    .specimen-jar::before{content:""; position:absolute; left:15%; right:15%; top:-14px; height:18px; background:#40372c; border-radius:4px 4px 0 0}
+    .specimen-jar::after{content:""; position:absolute; left:28px; top:34px; width:22px; height:66px; border:2px solid rgba(121,255,142,.4); border-radius:50% 45% 55% 40%; transform:rotate(18deg); box-shadow:0 0 18px rgba(121,255,142,.14)}
+    .box{width:112px; height:84px; left:39%; top:17%; background:linear-gradient(180deg, rgba(217,208,188,.06), rgba(0,0,0,.35))}
+    .box::before{content:""; position:absolute; inset:8px; border:1px dashed rgba(255,255,255,.18)}
+    .bookstack{width:88px; height:64px; left:68%; top:20%; background:transparent; border:none; box-shadow:none}
+    .bookstack::before,.bookstack::after{content:""; position:absolute; left:0; right:0; height:16px; background:#31281e; border:1px solid rgba(255,255,255,.06); box-shadow:0 4px 0 #62452d, 0 20px 0 #242322, 0 24px 0 #822723}
+    .bookstack::after{top:34px; left:8px; right:8px; background:#6b513b; box-shadow:none}
+
+    .monitor{
+      width:230px; height:145px; right:7%; top:16%;
+      border:1px solid rgba(132,203,255,.35);
+      background:linear-gradient(180deg, rgba(7,16,24,.96), rgba(5,10,15,.96));
+      box-shadow:0 0 32px rgba(65,162,255,.15), inset 0 0 48px rgba(65,162,255,.08);
+      overflow:hidden;
+    }
+    .monitor::before{
+      content:"ANOMALY\A STATUS: PREPARING\A STORAGE HUMIDITY 64%\A INDEX / MATSURI / 09";
+      white-space:pre; position:absolute; left:16px; top:16px;
+      color:var(--blue-soft); font-size:.72rem; line-height:1.55; font-family:"IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      opacity:.9;
+    }
+    .monitor::after{
+      content:""; position:absolute; left:0; right:0; bottom:18px; height:38px;
+      background:linear-gradient(180deg, transparent, rgba(65,162,255,.14));
+      clip-path:polygon(0 85%, 10% 60%, 22% 70%, 35% 20%, 45% 58%, 58% 40%, 70% 55%, 82% 28%, 100% 38%, 100% 100%, 0 100%);
+    }
+    .paper{
+      width:170px; min-height:120px; left:11%; top:47%;
+      padding:16px 16px 14px;
+      background:linear-gradient(180deg, rgba(217,208,188,.96), rgba(195,182,159,.9));
+      color:#231e18;
+      box-shadow:0 10px 28px rgba(0,0,0,.3);
+      transform:rotate(-4deg);
+    }
+    .paper small{display:block; font-size:.68rem; letter-spacing:.16em; color:#5b4d3f; text-transform:uppercase; margin-bottom:6px}
+    .paper p{margin:0; font-size:.82rem; line-height:1.55}
+
+    .sketch{
+      width:210px; min-height:130px; right:10%; top:43%;
+      background:linear-gradient(180deg, rgba(25,25,25,.8), rgba(8,8,8,.93));
+      border:1px solid rgba(255,255,255,.08);
+      transform:rotate(2deg);
+      padding:16px;
+    }
+    .sketch::before{
+      content:"半描の怪物スケッチ"; display:block; color:var(--paper); font-size:.78rem; letter-spacing:.18em; margin-bottom:10px
+    }
+    .sketch::after{
+      content:""; display:block; width:100%; height:82px;
+      background:
+        radial-gradient(circle at 34% 40%, transparent 0 20px, rgba(255,95,209,.18) 20px 24px, transparent 24px),
+        radial-gradient(circle at 60% 32%, transparent 0 18px, rgba(121,255,142,.18) 18px 22px, transparent 22px),
+        linear-gradient(140deg, transparent 30%, rgba(255,255,255,.55) 31% 32%, transparent 33%),
+        linear-gradient(45deg, transparent 38%, rgba(255,255,255,.35) 39% 40%, transparent 41%),
+        linear-gradient(0deg, rgba(255,255,255,.08), rgba(255,255,255,.08));
+      border:1px dashed rgba(255,255,255,.2);
+    }
+
+    .mic{width:18px; height:106px; left:44%; bottom:16%; background:linear-gradient(180deg, #2e2a26, #111); border-radius:10px}
+    .mic::before{content:""; position:absolute; top:-18px; left:-8px; width:34px; height:30px; border-radius:16px; background:linear-gradient(180deg, #4f4b48, #1d1c1c); border:1px solid rgba(255,255,255,.12)}
+    .cassette{width:122px; height:78px; left:35%; bottom:12%; background:linear-gradient(180deg, #15181a, #0b0d0f); border:1px solid rgba(132,203,255,.25); box-shadow:0 0 26px rgba(65,162,255,.12)}
+    .cassette::before,.cassette::after{content:""; position:absolute; top:22px; width:24px; height:24px; border-radius:50%; border:2px solid rgba(132,203,255,.5)}
+    .cassette::before{left:24px}.cassette::after{right:24px}
+    .cassette .glow{position:absolute; inset:10px; border:1px solid rgba(121,255,142,.2); box-shadow:inset 0 0 14px rgba(65,162,255,.08)}
+
+    .footprint{
+      width:110px; height:40px; left:58%; bottom:10%; opacity:.35;
+      background:
+        radial-gradient(circle at 10% 70%, rgba(217,208,188,.55) 0 8px, transparent 9px),
+        radial-gradient(circle at 28% 56%, rgba(217,208,188,.45) 0 10px, transparent 11px),
+        radial-gradient(circle at 50% 48%, rgba(217,208,188,.42) 0 10px, transparent 11px),
+        radial-gradient(circle at 74% 58%, rgba(217,208,188,.32) 0 8px, transparent 9px);
+      filter:blur(.6px);
+      transform:rotate(-12deg);
+    }
+
+    .label-chip{
+      padding:6px 10px; border:1px solid rgba(255,255,255,.12);
+      background:rgba(16,15,14,.84); color:var(--paper); font-size:.72rem; letter-spacing:.12em;
+    }
+    .chip-1{left:7%; top:10%}
+    .chip-2{left:39%; top:10%}
+    .chip-3{right:11%; top:11%}
+    .chip-4{left:17%; top:67%}
+    .chip-5{right:10%; top:68%}
+
+    section{padding:94px 0; position:relative}
+    .section-head{display:grid; grid-template-columns: .72fr 1.28fr; gap:24px; margin-bottom:38px; align-items:end}
+    .kicker{font-size:.72rem; color:var(--blue-soft); letter-spacing:.24em; text-transform:uppercase; margin-bottom:10px; display:block}
+    .section-head h2{margin:0; font-size:clamp(1.9rem,4.2vw,3.6rem); line-height:1.04; letter-spacing:.08em}
+    .section-head p{margin:0; color:var(--muted); max-width:42rem}
+
+    .section-card{
+      border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(180deg, rgba(18,17,16,.86), rgba(10,10,10,.96));
+      box-shadow:var(--shadow);
+    }
+
+    .specimen-grid{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:18px;
+    }
+    .specimen-card{
+      position:relative;
+      min-height:240px;
+      padding:20px;
+      overflow:hidden;
+    }
+    .specimen-card::before{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.02), transparent 22%);
+      pointer-events:none;
+    }
+    .specimen-card .id{font-family:monospace; font-size:.72rem; letter-spacing:.16em; color:var(--blue-soft)}
+    .specimen-card h3{margin:10px 0 10px; font-size:1.25rem; line-height:1.2}
+    .specimen-card p{margin:0; color:var(--muted); font-size:.92rem; max-width:30ch}
+    .caption-tag{display:inline-block; margin-top:16px; padding:6px 10px; border:1px solid rgba(255,255,255,.12); color:var(--paper); font-size:.72rem; letter-spacing:.12em}
+    .specimen-card.large{grid-column:span 7}
+    .specimen-card.mid{grid-column:span 5}
+    .specimen-card.small{grid-column:span 4}
+    .specimen-card.long{grid-column:span 8}
+    .specimen-card.tall{grid-column:span 4}
+
+    .jar-graphic, .drawer-graphic, .note-graphic, .circuit-graphic, .altar-graphic, .insect-graphic{position:absolute; pointer-events:none; opacity:.9}
+    .jar-graphic{right:20px; bottom:16px; width:90px; height:145px; border:1px solid rgba(132,203,255,.25); border-radius:10px 10px 18px 18px; background:linear-gradient(180deg, rgba(65,162,255,.16), rgba(0,0,0,.1) 30%, rgba(25,25,25,.68))}
+    .jar-graphic::before{content:""; position:absolute; left:18px; top:32px; width:20px; height:50px; border-radius:50%; border:2px solid rgba(121,255,142,.32); transform:rotate(22deg)}
+    .drawer-graphic{right:24px; bottom:22px; width:180px; height:110px; border:1px solid rgba(255,255,255,.08); background:linear-gradient(180deg, rgba(60,49,36,.4), rgba(20,19,18,.75))}
+    .drawer-graphic::before,.drawer-graphic::after{content:""; position:absolute; left:12px; right:12px; height:38px; border:1px solid rgba(255,255,255,.08)}
+    .drawer-graphic::before{top:12px}.drawer-graphic::after{bottom:12px}
+    .note-graphic{right:20px; bottom:20px; width:160px; height:130px; background:linear-gradient(180deg, rgba(217,208,188,.92), rgba(185,170,144,.92)); transform:rotate(-3deg); box-shadow:0 10px 20px rgba(0,0,0,.25)}
+    .note-graphic::before{content:"調整前夜\A 0:43 / 封緘未了\A 太鼓の代替として金属箱を使用"; white-space:pre; position:absolute; left:14px; top:14px; color:#272018; font-size:.75rem; line-height:1.6}
+    .circuit-graphic{right:16px; bottom:18px; width:165px; height:110px; border:1px solid rgba(132,203,255,.25); background:rgba(10,14,16,.85)}
+    .circuit-graphic::before{content:""; position:absolute; inset:12px; background:linear-gradient(90deg, transparent 12%, rgba(65,162,255,.55) 12% 14%, transparent 14% 32%, rgba(65,162,255,.38) 32% 34%, transparent 34% 60%, rgba(255,95,209,.35) 60% 62%, transparent 62%), linear-gradient(180deg, transparent 26%, rgba(65,162,255,.48) 26% 28%, transparent 28% 70%, rgba(121,255,142,.38) 70% 72%, transparent 72%)}
+    .altar-graphic{right:20px; bottom:20px; width:168px; height:118px; background:linear-gradient(180deg, rgba(31,20,18,.8), rgba(12,10,10,.95)); border:1px solid rgba(255,255,255,.08)}
+    .altar-graphic::before{content:""; position:absolute; left:18px; right:18px; bottom:20px; height:40px; background:linear-gradient(180deg, rgba(115,27,26,.9), rgba(86,22,22,.65)); clip-path:polygon(0 100%, 8% 18%, 18% 100%, 28% 40%, 38% 100%, 48% 18%, 58% 100%, 68% 32%, 78% 100%, 90% 12%, 100% 100%)}
+    .altar-graphic::after{content:""; position:absolute; top:12px; left:26px; width:54px; height:74px; background:linear-gradient(180deg, rgba(217,208,188,.9), rgba(175,160,130,.92)); transform:rotate(-6deg); box-shadow:72px 8px 0 -6px rgba(217,208,188,.86)}
+    .insect-graphic{right:26px; bottom:18px; width:160px; height:120px}
+    .insect-graphic::before,.insect-graphic::after{content:""; position:absolute; inset:0}
+    .insect-graphic::before{background:radial-gradient(circle at 50% 50%, rgba(121,255,142,.08), transparent 55%), linear-gradient(45deg, transparent 49%, rgba(255,255,255,.4) 50% 51%, transparent 52%), linear-gradient(-45deg, transparent 49%, rgba(255,255,255,.35) 50% 51%, transparent 52%)}
+    .insect-graphic::after{left:50%; top:50%; width:34px; height:74px; transform:translate(-50%,-50%); border:1px solid rgba(132,203,255,.5); border-radius:45% 45% 40% 40%; box-shadow:0 0 0 1px rgba(132,203,255,.1), -40px -16px 0 -14px rgba(132,203,255,.35), 40px -16px 0 -14px rgba(132,203,255,.35), -54px 8px 0 -16px rgba(132,203,255,.25), 54px 8px 0 -16px rgba(132,203,255,.25)}
+
+    .notes-layout{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:20px;
+      align-items:start;
+    }
+    .folio{padding:24px}
+    .folio-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px}
+    .folio-card{
+      padding:18px; border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.02);
+      position:relative;
+    }
+    .folio-card .meta{font-size:.72rem; color:var(--blue-soft); letter-spacing:.14em; margin-bottom:10px}
+    .folio-card h3{margin:0 0 8px; font-size:1.05rem; line-height:1.3}
+    .folio-card p{margin:0; color:var(--muted); font-size:.9rem}
+    .folio-card .side-note{margin-top:12px; color:var(--paper); font-size:.78rem; border-top:1px dashed rgba(255,255,255,.12); padding-top:12px}
+    .monitor-panel{padding:22px; overflow:hidden}
+    .monitor-head{display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; font-family:monospace; font-size:.82rem; color:var(--blue-soft)}
+    .monitor-screen{
+      min-height:430px;
+      border:1px solid rgba(132,203,255,.28);
+      background:linear-gradient(180deg, rgba(7,16,22,.96), rgba(5,10,14,.98));
+      padding:18px; position:relative; overflow:hidden;
+      box-shadow:inset 0 0 42px rgba(65,162,255,.08), 0 0 32px rgba(65,162,255,.08);
+    }
+    .monitor-screen::before{content:""; position:absolute; inset:0; background:repeating-linear-gradient(180deg, transparent, transparent 2px, rgba(255,255,255,.03) 2px, rgba(255,255,255,.03) 3px); opacity:.32}
+    .terminal-line{display:flex; justify-content:space-between; gap:10px; font-family:monospace; color:var(--blue-soft); font-size:.82rem; padding:8px 0; border-bottom:1px solid rgba(132,203,255,.12)}
+    .terminal-line strong{color:#dcf0ff; font-weight:500}
+    .pulse-row{display:grid; grid-template-columns:repeat(12,1fr); gap:6px; margin:18px 0 20px}
+    .pulse-row i{display:block; height:34px; background:linear-gradient(180deg, rgba(121,255,142,.5), rgba(65,162,255,.16)); opacity:calc(.4 + var(--i) * .05); animation:pulse calc(1.5s + var(--i)*.07s) ease-in-out infinite alternate}
+    @keyframes pulse{from{transform:scaleY(.35); transform-origin:bottom}to{transform:scaleY(1); transform-origin:bottom}}
+    .legend-block{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .legend-card{padding:14px; border:1px solid rgba(132,203,255,.14); background:rgba(255,255,255,.02)}
+    .legend-card h4{margin:0 0 8px; font-size:.82rem; color:var(--blue-soft); letter-spacing:.12em; text-transform:uppercase}
+    .legend-card p{margin:0; color:#dfe9f4; font-size:.84rem}
+
+    .traces-wrap{display:grid; grid-template-columns:repeat(12,1fr); gap:18px}
+    .trace-card{padding:20px; min-height:200px; position:relative; overflow:hidden}
+    .trace-card.large{grid-column:span 5}
+    .trace-card.medium{grid-column:span 4}
+    .trace-card.small{grid-column:span 3}
+    .trace-card h3{margin:12px 0 8px; font-size:1.2rem}
+    .trace-card p{margin:0; color:var(--muted); font-size:.9rem}
+    .trace-card .stamp{font-size:.72rem; color:var(--blue-soft); letter-spacing:.15em}
+
+    .t-footprints::after{content:""; position:absolute; right:16px; bottom:18px; width:110px; height:150px; background:
+      radial-gradient(circle at 35% 16%, rgba(217,208,188,.35) 0 7px, transparent 8px), radial-gradient(circle at 44% 28%, rgba(217,208,188,.35) 0 10px, transparent 11px), radial-gradient(circle at 54% 42%, rgba(217,208,188,.33) 0 10px, transparent 11px), radial-gradient(circle at 64% 57%, rgba(217,208,188,.26) 0 11px, transparent 12px), radial-gradient(circle at 74% 73%, rgba(217,208,188,.22) 0 10px, transparent 11px), radial-gradient(circle at 84% 88%, rgba(217,208,188,.18) 0 8px, transparent 9px);
+      transform:rotate(-8deg); opacity:.7}
+    .t-mic::after{content:""; position:absolute; right:24px; bottom:18px; width:74px; height:140px; background:linear-gradient(180deg, transparent 0 18px, #171615 18px 100%); border-radius:10px}
+    .t-mic::before{content:""; position:absolute; right:42px; bottom:132px; width:38px; height:32px; background:linear-gradient(180deg, #53504c, #1b1b1a); border-radius:16px}
+    .t-cassette::after{content:""; position:absolute; right:20px; bottom:18px; width:130px; height:82px; border:1px solid rgba(132,203,255,.24); background:linear-gradient(180deg, rgba(10,15,18,.9), rgba(8,10,12,.95)); box-shadow:0 0 26px rgba(65,162,255,.1)}
+    .t-cassette::before{content:""; position:absolute; right:48px; bottom:42px; width:20px; height:20px; border-radius:50%; border:2px solid rgba(132,203,255,.45); box-shadow:44px 0 0 0 rgba(0,0,0,0), 44px 0 0 0 transparent, 44px 0 0 0 rgba(0,0,0,0);}
+    .t-chair::after{content:""; position:absolute; right:30px; bottom:20px; width:120px; height:140px; background:
+      linear-gradient(180deg, transparent 0 20px, #292521 20px 74px, transparent 74px),
+      linear-gradient(90deg, transparent 18px, #151514 18px 24px, transparent 24px 90px, #151514 90px 96px, transparent 96px),
+      linear-gradient(180deg, transparent 0 84px, #1a1a1a 84px 92px, transparent 92px 100px, #1a1a1a 100px 108px, transparent 108px);
+      opacity:.95}
+    .t-monster::after{content:""; position:absolute; right:18px; bottom:14px; width:140px; height:110px; background:
+      radial-gradient(circle at 34% 38%, rgba(255,95,209,.18) 0 18px, transparent 19px),
+      radial-gradient(circle at 64% 32%, rgba(121,255,142,.18) 0 14px, transparent 15px),
+      linear-gradient(140deg, transparent 30%, rgba(255,255,255,.4) 31% 32%, transparent 33%),
+      linear-gradient(45deg, transparent 48%, rgba(255,255,255,.22) 49% 50%, transparent 51%);
+      border:1px dashed rgba(255,255,255,.16)}
+
+    .closing{
+      padding:110px 0 120px;
+    }
+    .closing-panel{padding:34px; position:relative; overflow:hidden}
+    .closing-panel::before{content:""; position:absolute; inset:auto -10% -35% auto; width:340px; height:340px; border-radius:50%; background:radial-gradient(circle, rgba(65,162,255,.16), transparent 62%); filter:blur(10px)}
+    .closing-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:28px; align-items:start}
+    .closing h2{margin:0 0 16px; font-size:clamp(2rem,4vw,3.8rem); line-height:1.06}
+    .closing p{margin:0 0 18px; color:var(--muted); max-width:38rem}
+    .quiet-links{display:grid; gap:12px}
+    .quiet-link{padding:16px 18px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); display:flex; justify-content:space-between; align-items:center; gap:12px}
+    .quiet-link small{display:block; color:var(--blue-soft); letter-spacing:.14em; text-transform:uppercase; margin-bottom:4px}
+    .quiet-link strong{font-size:1rem; font-weight:600}
+    .quiet-link span{color:var(--muted); font-size:.9rem}
+
+    .footnote{
+      padding:18px 0 40px; color:var(--muted); font-size:.75rem;
+      display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    }
+
+    .reveal{opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s ease}
+    .reveal.visible{opacity:1; transform:none}
+
+    @media (max-width: 980px){
+      .hero, .notes-layout, .closing-grid, .section-head{grid-template-columns:1fr}
+      .hero-stage{min-height:580px}
+      .specimen-card.large,.specimen-card.mid,.specimen-card.small,.specimen-card.long,.specimen-card.tall,
+      .trace-card.large,.trace-card.medium,.trace-card.small{grid-column:span 12}
+    }
+    @media (max-width: 680px){
+      .topbar-inner{align-items:flex-start; flex-direction:column}
+      .nav{gap:12px; justify-content:flex-start}
+      .hero{padding-top:32px; min-height:auto}
+      .hero-stage{min-height:500px}
+      .hero-actions{flex-direction:column; align-items:stretch}
+      .folio-grid, .legend-block{grid-template-columns:1fr}
+      .section-head{margin-bottom:26px}
+      .paper,.sketch{width:144px}
+      .monitor{width:190px; height:130px}
+      .cassette{width:104px; height:72px}
+    }
+  </style>
+</head>
+<body>
+  <div class="site-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a href="#top" class="brand" aria-label="異物標本室の先頭へ">
+          <small>Specimen / Archive / Preparation</small>
+          <strong>異物標本室　祭りの前夜</strong>
+        </a>
+        <nav class="nav">
+          <a href="#intro">導入</a>
+          <a href="#specimens">標本・資料</a>
+          <a href="#notes">観測記録</a>
+          <a href="#traces">祭りの痕跡</a>
+          <a href="#terminal">終端</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero container" id="intro">
+        <div class="hero-copy reveal visible">
+          <div class="eyebrow">INNER ARCHIVE / QUIET PREPARATION</div>
+          <h1>異物標本室、<br>祭りの前夜。</h1>
+          <p class="title-sub">ここは保管庫であり、準備場でもある。<br>排除されなかった異物が、分類され、注釈され、静かに点灯し、いつか踊り出すための空間。</p>
+          <p class="hero-note">孤独はここで標本箱に収まり、回復の代わりに変身の準備へ移される。人は見えない。だが、誰かがここで祭りを始めようとしている痕跡だけが、異様に整っている。</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#specimens">標本を見る</a>
+            <a class="btn" href="#notes">観測記録へ</a>
+          </div>
+        </div>
+
+        <div class="hero-stage reveal visible" aria-hidden="true">
+          <div class="shelf-column left"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+          <div class="shelf-column mid"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+          <div class="shelf-column right"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+
+          <div class="label-chip chip-1">標本番号 A-09</div>
+          <div class="label-chip chip-2">記録箱 03-B</div>
+          <div class="label-chip chip-3">起動前灯火</div>
+          <div class="label-chip chip-4">準備痕跡</div>
+          <div class="label-chip chip-5">半描資料</div>
+
+          <div class="artifact specimen-jar"></div>
+          <div class="artifact box"></div>
+          <div class="artifact bookstack"></div>
+          <div class="monitor"></div>
+          <div class="paper">
+            <small>Preparation note</small>
+            <p>紙片、糸、標本針、薄い赤土、録音機。<br>不足しているのは、開始の合図だけ。</p>
+          </div>
+          <div class="sketch"></div>
+          <div class="mic"></div>
+          <div class="cassette"><span class="glow"></span></div>
+          <div class="footprint"></div>
+        </div>
+      </section>
+
+      <section id="specimens">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <span class="kicker">Specimens / Materials</span>
+              <h2>標本・資料</h2>
+            </div>
+            <p>異物はここで、意味を与えられる前に保存される。名前は暫定のまま、番号だけが先に与えられ、紙と棚と発光する画面のあいだで所在を持ち始める。</p>
+          </div>
+
+          <div class="specimen-grid">
+            <article class="section-card specimen-card large reveal">
+              <div class="id">CAT / 01 / GLASS ORGAN</div>
+              <h3>液浸された小器官</h3>
+              <p>昆虫でも植物でもない。内部は空洞に見えるが、青い灯りにかざすと、薄い脈動の痕跡だけが浮かぶ。</p>
+              <span class="caption-tag">保管棚・左列二段目</span>
+              <div class="jar-graphic"></div>
+            </article>
+
+            <article class="section-card specimen-card mid reveal">
+              <div class="id">DRAWER / 03-B</div>
+              <h3>標本箱群</h3>
+              <p>乾いた羽片、判別不能の札、切断された配線。散乱ではなく、未解読の配列として整理されている。</p>
+              <span class="caption-tag">分類未了</span>
+              <div class="drawer-graphic"></div>
+            </article>
+
+            <article class="section-card specimen-card small reveal">
+              <div class="id">FIELD NOTE / 0:43</div>
+              <h3>準備記録</h3>
+              <p>祭りは本番よりも前夜に濃い。開始前の手順こそ、もっとも内面に近い。</p>
+              <span class="caption-tag">紙片／折れ跡あり</span>
+              <div class="note-graphic"></div>
+            </article>
+
+            <article class="section-card specimen-card long reveal">
+              <div class="id">AUXILIARY PANEL / BLUE</div>
+              <h3>青く発光する記録面</h3>
+              <p>アナログな紙資料と並んで、唯一過度に冷静な光を放つ面。温度、湿度、欠損率、起動前振幅が淡々と表示される。理解より先に、現象を記録するための窓。</p>
+              <span class="caption-tag">資料照合モード</span>
+              <div class="circuit-graphic"></div>
+            </article>
+
+            <article class="section-card specimen-card tall reveal">
+              <div class="id">RITUAL TOOL / V-07</div>
+              <h3>未命名の祭具</h3>
+              <p>角度の違う札が二枚、糸で留められている。使い方は不明だが、準備中の机から移されてきた痕跡がある。</p>
+              <span class="caption-tag">起動待機</span>
+              <div class="altar-graphic"></div>
+            </article>
+
+            <article class="section-card specimen-card mid reveal">
+              <div class="id">FRAGMENT / INSECT SIGN</div>
+              <h3>虫の気配に関する図版</h3>
+              <p>夜の静けさにだけ現れる微細な気配。物体そのものではなく、周辺に残る輪郭を記録したもの。</p>
+              <span class="caption-tag">図版／再観測要</span>
+              <div class="insect-graphic"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="notes">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <span class="kicker">Observation / Research Notes</span>
+              <h2>観測記録</h2>
+            </div>
+            <p>説明ではなく断片。論文ではなく記録。図鑑キャプション、準備手順、研究メモ、展示の注釈が、同じ厚みで積み重なる。</p>
+          </div>
+
+          <div class="notes-layout">
+            <div class="section-card folio reveal">
+              <div class="folio-grid">
+                <article class="folio-card">
+                  <div class="meta">RECORD / 09-11 / 00:17</div>
+                  <h3>孤独は欠損ではなく、保管形式のひとつである。</h3>
+                  <p>ここでは、うまく説明できないものを未熟なまま保存してよい。分類保留は、失敗ではない。</p>
+                  <div class="side-note">注記：回復を目標としない。変化の前夜として保つこと。</div>
+                </article>
+                <article class="folio-card">
+                  <div class="meta">ANNOTATION / CASE 03</div>
+                  <h3>祭りは騒音ではなく、密度の上昇として始まる。</h3>
+                  <p>音の代わりに配置が変わる。机の上の物が少しだけ前に出る。灯りが一つ増える。そこで準備は踊りに近づく。</p>
+                  <div class="side-note">参照：カセット、足跡、待機中のマイク。</div>
+                </article>
+                <article class="folio-card">
+                  <div class="meta">CATALOG / FOLK FUTURE</div>
+                  <h3>未来の民俗資料室は、壊れかけの電子機器を捨てない。</h3>
+                  <p>古い本、御札、回路基板、封筒、録音メディア。時代が違っても、祈りは一度資料化される。</p>
+                  <div class="side-note">補足：アナログと発光体を、同じ棚に置く。</div>
+                </article>
+                <article class="folio-card">
+                  <div class="meta">FIELD MEMO / SPECIMEN 07</div>
+                  <h3>怪物的であることは、知性を失うことではない。</h3>
+                  <p>異物はここで乱暴に消費されず、寸法を測られ、番号を与えられ、静かな照明のもとに展示される。</p>
+                  <div class="side-note">記録：深い赤の印、蛍光グリーンの残留、青い発光面。</div>
+                </article>
+              </div>
+            </div>
+
+            <aside class="section-card monitor-panel reveal">
+              <div class="monitor-head">
+                <span>ARCHIVE DISPLAY / BLUE PANEL</span>
+                <span>PRE-FESTIVAL MODE</span>
+              </div>
+              <div class="monitor-screen">
+                <div class="terminal-line"><span>棚内温度</span><strong>17.9°C</strong></div>
+                <div class="terminal-line"><span>異物残留率</span><strong>84%</strong></div>
+                <div class="terminal-line"><span>祭り起動閾値</span><strong>未到達 / +1.2</strong></div>
+                <div class="terminal-line"><span>人影検出</span><strong>0 / 痕跡のみ</strong></div>
+                <div class="pulse-row" aria-hidden="true">
+                  <i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i><i style="--i:5"></i><i style="--i:6"></i><i style="--i:7"></i><i style="--i:8"></i><i style="--i:9"></i><i style="--i:10"></i><i style="--i:11"></i><i style="--i:12"></i>
+                </div>
+                <div class="legend-block">
+                  <div class="legend-card">
+                    <h4>Observation</h4>
+                    <p>“人物不在だが、人の気配だけが濃く残る” 状態を維持中。</p>
+                  </div>
+                  <div class="legend-card">
+                    <h4>Classification</h4>
+                    <p>標本、紙片、回路、祭具、録音媒体。カテゴリーは交差したまま保存。</p>
+                  </div>
+                  <div class="legend-card">
+                    <h4>Margin</h4>
+                    <p>密度の高いモジュールのあいだには、呼吸のための静かな余白を残す。</p>
+                  </div>
+                  <div class="legend-card">
+                    <h4>Warning</h4>
+                    <p>過度な説明を避けること。理解の前に空間として成立させること。</p>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="traces">
+        <div class="container">
+          <div class="section-head reveal">
+            <div>
+              <span class="kicker">Traces / Before Activation</span>
+              <h2>祭りの痕跡</h2>
+            </div>
+            <p>人はまだ現れない。だが、足跡、椅子、カセット、マイク、半描の怪物、机の上の移動した紙が、すでに何かが始まることを知っている。</p>
+          </div>
+
+          <div class="traces-wrap">
+            <article class="section-card trace-card large t-footprints reveal">
+              <div class="stamp">TRACE / ENTRY</div>
+              <h3>足跡</h3>
+              <p>導線だけが先に現れる。棚の前、記録机の脇、展示ケースの手前。祭りはまず、歩行の癖として現場に残る。</p>
+            </article>
+            <article class="section-card trace-card medium t-mic reveal">
+              <div class="stamp">TRACE / VOICE</div>
+              <h3>置かれたマイク</h3>
+              <p>発声の準備。朗読か、祝詞か、報告かはまだ未定。沈黙の直後にだけ使われる道具。</p>
+            </article>
+            <article class="section-card trace-card small t-cassette reveal">
+              <div class="stamp">TRACE / SOUND</div>
+              <h3>光るカセット</h3>
+              <p>再生待機。巻き戻された磁気テープの青い呼吸。</p>
+            </article>
+            <article class="section-card trace-card medium t-chair reveal">
+              <div class="stamp">TRACE / ABSENCE</div>
+              <h3>空の椅子</h3>
+              <p>不在そのものが配置として残っている。座っていた気配だけが濃い。</p>
+            </article>
+            <article class="section-card trace-card large t-monster reveal">
+              <div class="stamp">TRACE / DRAFT</div>
+              <h3>半分だけ描かれた怪物</h3>
+              <p>完全体ではなく、変身の途中が保存される。輪郭線、補助線、塗り残し。脱皮の最中であること自体が主題になる。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing" id="terminal">
+        <div class="container">
+          <div class="section-card closing-panel reveal">
+            <div class="closing-grid">
+              <div>
+                <span class="kicker">Terminal / Quiet Exit</span>
+                <h2>この異界は、<br>すでに成立している。</h2>
+                <p>理解は遅れてやって来てもよい。ここでは異物が排除されず、分類され、保管され、ときどき静かに発光する。それだけで空間は十分に生きている。</p>
+                <p>収蔵庫はいつでも祭りへ変わりうる。誰かがその準備を続けている限り、内面は保管庫のまま終わらない。</p>
+              </div>
+              <div class="quiet-links">
+                <a href="#intro" class="quiet-link">
+                  <div>
+                    <small>Return</small>
+                    <strong>導入へ戻る</strong>
+                  </div>
+                  <span>静かな入口へ</span>
+                </a>
+                <a href="#specimens" class="quiet-link">
+                  <div>
+                    <small>Archive</small>
+                    <strong>標本と資料を再覧する</strong>
+                  </div>
+                  <span>分類保留を含む</span>
+                </a>
+                <a href="#notes" class="quiet-link">
+                  <div>
+                    <small>Records</small>
+                    <strong>観測記録を読む</strong>
+                  </div>
+                  <span>注釈、断片、準備手順</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="footnote">
+            <span>標本室記録番号：IA-QN-12</span>
+            <span>主題：理解されなくても成立する異界 ／ 収蔵庫を祭りに変える人</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('visible');
+          io.unobserve(entry.target);
+        }
+      })
+    },{threshold:0.15});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  </script>
+</body>
+</html>
