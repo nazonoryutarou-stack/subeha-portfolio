@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#22271f">
   <title>不氣屋アーケード｜すべての歯が見える</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="./arcade.css">
+  <link rel="stylesheet" href="../../arcade/arcade.css">
 </head>
 <body>
   <canvas id="c" tabindex="0" aria-label="不氣屋アーケード。WASDで移動、矢印左右で向きを変更、Eで調べる。"></canvas>
@@ -22,7 +22,7 @@
     <label><input type="checkbox" id="button-mode"> 移動を方向ボタンにする</label>
     <label><input type="checkbox" id="calm"> 点滅・設備の動きを止める</label>
     <label>描画 <select id="quality"><option value="auto">自動</option><option value="low">軽量</option><option value="high">精細</option></select></label>
-    <div class="help-actions"><button id="lock-mouse">マウス固定</button><button id="reset">入口に戻る</button><a href="../">通りを出る</a></div>
+    <div class="help-actions"><button id="lock-mouse">マウス固定</button><button id="reset">入口に戻る</button><a href="../../">通りを出る</a></div>
   </section>
   <div id="touch-controls" hidden>
     <div id="joystick" role="group" aria-label="移動スティック"><span id="stick"></span><small>移動</small></div>
@@ -31,7 +31,7 @@
   </div>
   <button id="interact" hidden><span id="target-label"></span><small>調べる / E</small></button>
   <p id="notice" role="status" hidden></p><output id="diagnostic" hidden></output>
-  <noscript><p class="fallback">この通りを歩くにはJavaScriptが必要です。<a href="../works/">作品保管庫へ</a></p></noscript>
-  <script type="module" src="./boot.js"></script>
+  <noscript><p class="fallback">この通りを歩くにはJavaScriptが必要です。<a href="../../works/">作品保管庫へ</a></p></noscript>
+  <script type="module">import {startArcade} from "../../arcade/main.js";import {CanvasSceneRenderer} from "./renderer.js";startArcade({Renderer:CanvasSceneRenderer,entryURL:new URL("../../arcade/",location.href).href,reviewLabel:"CPU検証・WebGLのfpsではありません"}).catch(e=>{document.getElementById("load-error").hidden=false;document.getElementById("load-error").textContent=e.message;console.error(e)});</script>
 </body>
 </html>

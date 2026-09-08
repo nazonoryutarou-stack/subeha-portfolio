@@ -5,6 +5,10 @@ on:
     branches:
       - main
     paths:
+      - 'arcade/**'
+      - 'scripts/stage-arcade.mjs'
+      - 'scripts/check-arcade.mjs'
+      - 'scripts/test-arcade-space.mjs'
       - 'public/**'
       - 'hitotsu-ore-choji.png'
       - '.github/workflows/neocities.yml'
@@ -29,6 +33,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node scripts/stage-arcade.mjs
+          node scripts/check-arcade.mjs
+          node scripts/test-arcade-space.mjs
           test -f hitotsu-ore-choji.png
           cp hitotsu-ore-choji.png public/hitotsu-ore-choji.png
 

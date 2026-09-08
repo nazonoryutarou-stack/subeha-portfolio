@@ -1,0 +1,11 @@
+{
+  "name": "subeha-portfolio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "arcade:stage": "node scripts/stage-arcade.mjs",
+    "arcade:check": "node scripts/check-arcade.mjs && node scripts/test-arcade-space.mjs"
+  },
+  "devDependencies": { "vite": "7.3.1" }
+}
