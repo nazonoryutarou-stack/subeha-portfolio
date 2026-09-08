@@ -26,6 +26,9 @@ jobs:
       - name: Run v21 runtime regression test
         run: node deepdream/test-v21.mjs
 
+      - name: Check v21.1 browser self-test syntax
+        run: node --check deepdream/selftest-v21.js
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
