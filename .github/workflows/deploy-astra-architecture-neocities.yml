@@ -1,0 +1,72 @@
+name: Deploy Astra Architecture candidate
+
+on:
+  push:
+    branches:
+      - feature/astra-architecture-sol
+    paths:
+      - 'public/astra-architecture/**'
+      - 'scripts/check-astra-architecture.mjs'
+      - '.github/workflows/deploy-astra-architecture-neocities.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-astra-architecture-candidate
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Astra Architecture QA
+        run: npm run astra:check
+      - name: Stage isolated candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .astra-deploy
+          mkdir -p .astra-deploy/astra-architecture .astra-deploy/arcade/vendor
+          cp -a public/astra-architecture/. .astra-deploy/astra-architecture/
+          cp public/arcade/controls.js .astra-deploy/arcade/controls.js
+          cp public/arcade/vendor/three.module.min.js .astra-deploy/arcade/vendor/three.module.min.js
+          test -f .astra-deploy/astra-architecture/index.html
+          test -f .astra-deploy/astra-architecture/world-v2.js
+          test -f .astra-deploy/arcade/controls.js
+          test -f .astra-deploy/arcade/vendor/three.module.min.js
+      - name: Deploy candidate files to Neocities
+        uses: bcomnes/deploy-to-neocities@v3
+        with:
+          api_key: ${{ secrets.NEOSITIES_API_TOKEN }}
+          dist_dir: .astra-deploy
+          cleanup: false
+          neocities_supporter: false
+          preview_before_deploy: true
+      - name: Verify public candidate
+        env:
+          NEOCITIES_TOKEN: ${{ secrets.NEOSITIES_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          info="$(curl --fail --silent --show-error -H "Authorization: Bearer ${NEOCITIES_TOKEN}" https://neocities.org/api/info)"
+          sitename="$(INFO_JSON="$info" python3 -c 'import json,os; print(json.loads(os.environ["INFO_JSON"])["info"]["sitename"])')"
+          url="https://${sitename}.neocities.org/astra-architecture/"
+          echo "Astra Architecture candidate: ${url}"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${url}" -o /tmp/astra.html
+          grep -q 'ASTRA ARCHITECTURE / 001' /tmp/astra.html
+          grep -q '祭祀技師事務所' /tmp/astra.html
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${url}main.js" -o /tmp/main.js
+          grep -q './world-v2.js' /tmp/main.js
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${url}world-v2.js" -o /tmp/world.js
+          grep -q 'sealed-inner' /tmp/world.js
+          echo "Verified public Astra Architecture candidate: ${url}"
