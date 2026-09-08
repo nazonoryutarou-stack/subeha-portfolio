@@ -33,7 +33,12 @@ const key=(x,z)=>`${Math.round(x/step)},${Math.round(z/step)}`;const queue=[star
 while(queue.length){const p=queue.shift();points.push(p);for(const [dx,dz] of [[step,0],[-step,0],[0,step],[0,-step]]){const n={x:p.x+dx,z:p.z+dz};if(n.x<PLAN.minX||n.x>PLAN.maxX||n.z<PLAN.minZ||n.z>PLAN.maxZ||!canOccupy(n.x,n.z))continue;const k=key(n.x,n.z);if(seen.has(k))continue;seen.add(k);queue.push(n);}}
 
 const countRoom=id=>{const room=ROOMS.find(r=>r.id===id);return points.filter(p=>p.x>=room.x1&&p.x<=room.x2&&p.z>=room.z1&&p.z<=room.z2).length;};
-for(const id of ['entry','reception','documents','workshop','inspection','archive','sealed-front','rear']){const count=countRoom(id);if(count<18)fail(`room ${id} is not meaningfully reachable (${count} grid points)`);else console.log(`ASTRA QA: ${id} reachable at ${count} sampled points`);}
+const minimums={entry:18,reception:18,documents:18,workshop:18,inspection:18,archive:8,'sealed-front':18,rear:18};
+for(const [id,min] of Object.entries(minimums)){const count=countRoom(id);if(count<min)fail(`room ${id} is not meaningfully reachable (${count} grid points; min ${min})`);else console.log(`ASTRA QA: ${id} reachable at ${count} sampled points`);}
+
+const approachTargets={ledger:{x:-3.88,z:7.28,max:2.35},terminal:{x:3.75,z:5.32,max:2.35},archive:{x:-2.90,z:-5.02,max:1.55},sealed:{x:4.35,z:-5.59,max:2.35},exit:{x:0,z:10.55,max:1.2}};
+for(const [id,t] of Object.entries(approachTargets)){const nearest=Math.min(...points.map(p=>Math.hypot(p.x-t.x,p.z-t.z)));if(nearest>t.max)fail(`target ${id} has no usable approach point (${nearest.toFixed(2)}m)`);else console.log(`ASTRA QA: target ${id} approach ${nearest.toFixed(2)}m`);}
+
 const sealedInner=countRoom('sealed-inner');if(sealedInner!==0)fail(`sealed inner room is reachable (${sealedInner} points)`);
 if(points.length<1400)fail(`walkable area suspiciously small (${points.length} points)`);
 console.log(`ASTRA QA: ${points.length} reachable points; sealed-inner=${sealedInner}`);
