@@ -1,0 +1,53 @@
+name: Fly Brain BTC Paper
+
+on:
+  push:
+    branches:
+      - experiment/fly-brain-btc-paper
+    paths:
+      - 'experiments/fly-brain-btc/**'
+      - '.github/workflows/fly-brain-btc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  paper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout experiment branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fetch pinned fly-brain
+        run: |
+          git clone https://github.com/Lulzx/fly-brain.git fly-brain
+          cd fly-brain
+          git checkout 7cd56e16b782a584f26ff3a9f63151c63d4db31b
+          npm install --no-audit --no-fund
+
+      - name: Run BTC paper experiment through fly connectome
+        env:
+          FLY_BRAIN_DIR: ${{ github.workspace }}/fly-brain
+        run: node experiments/fly-brain-btc/run.mjs
+
+      - name: Print result
+        if: always()
+        run: |
+          if [ -f experiments/fly-brain-btc/out/summary.md ]; then
+            cat experiments/fly-brain-btc/out/summary.md
+          fi
+
+      - name: Upload experiment artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fly-brain-btc-paper
+          path: experiments/fly-brain-btc/out/
+          if-no-files-found: warn
