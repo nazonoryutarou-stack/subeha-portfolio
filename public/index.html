@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="すべての歯が見える。一般向け・同業者向けの商品と理論への入口。">
+  <meta name="description" content="すべての歯が見える。商品、理論、歩けるアーケードへの入口。">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="theme-color" content="#f5f2ea">
   <title>すべての歯が見える</title>
@@ -14,19 +14,20 @@
     html,body{margin:0;min-height:100%;background:var(--paper);color:var(--ink)}
     body{font-family:"Yu Mincho","Hiragino Mincho ProN","Hiragino Mincho Pro","Noto Serif JP",serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-feature-settings:"palt" 1}
     main{min-height:100svh;display:flex;justify-content:center;padding:30px 24px 72px}
-    .shell{width:min(100%,560px)}
+    .shell{width:min(100%,640px)}
     .hero{text-align:center;padding-top:7svh}
     .mark{display:block;width:min(34vw,146px);height:auto;margin:0 auto 36px;filter:grayscale(1) contrast(1.35)}
     .motto{margin:0;font-size:clamp(13px,3.2vw,16px);font-weight:500;letter-spacing:.3em;text-indent:.3em}
-    .greeting{margin:13svh 0 11svh;padding-top:20px;border-top:.75px solid var(--hair)}
+    .greeting{margin:13svh 0 10svh;padding-top:20px;border-top:.75px solid var(--hair)}
     .greeting h2{margin:0 0 26px;text-align:center;font-size:12px;font-weight:500;letter-spacing:.42em;text-indent:.42em}
     .greeting p{margin:0;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-size:11.5px;font-weight:400;line-height:2.15;letter-spacing:.045em;text-align:left;color:#2f2b25}
     .section-title{margin:0 0 23px;text-align:center;font-size:12px;font-weight:500;letter-spacing:.46em;text-indent:.46em;scroll-margin-top:30px}
-    .split{position:relative;display:grid;grid-template-columns:1fr 1fr;border-top:.75px solid var(--hair)}
-    .split::after{content:"";position:absolute;left:50%;top:0;width:.75px;height:20px;background:var(--hair)}
-    .split a{display:block;padding:31px 12px 17px;color:var(--ink);text-align:center;text-decoration:none;font-size:14px;font-weight:500;letter-spacing:.34em;text-indent:.34em;transition:opacity .45s ease}
-    .split a:hover,.split a:focus-visible{opacity:.52}
-    @media(max-width:420px){main{padding:22px 24px 56px}.hero{padding-top:6svh}.greeting{margin-top:12svh;margin-bottom:10svh}.greeting p{font-size:11px;line-height:2.05}.split a{font-size:13px;letter-spacing:.27em;text-indent:.27em}}
+    .routes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:.75px solid var(--hair);border-bottom:.75px solid var(--hair)}
+    .routes a{display:flex;min-height:128px;align-items:center;justify-content:center;padding:24px 10px;color:var(--ink);text-align:center;text-decoration:none;font-size:14px;font-weight:500;letter-spacing:.22em;text-indent:.22em;transition:background .25s ease,opacity .25s ease}
+    .routes a+a{border-left:.75px solid var(--hair)}
+    .routes a:hover,.routes a:focus-visible{background:rgba(24,22,18,.06)}
+    .route-note{margin:20px 0 0;text-align:center;font:400 10.5px/1.8 system-ui,-apple-system,"Yu Gothic",sans-serif;color:var(--muted)}
+    @media(max-width:520px){main{padding:22px 20px 56px}.hero{padding-top:6svh}.greeting{margin-top:12svh;margin-bottom:9svh}.greeting p{font-size:11px;line-height:2.05}.routes{grid-template-columns:1fr}.routes a{min-height:74px}.routes a+a{border-left:0;border-top:.75px solid var(--hair)}}
   </style>
 </head>
 <body>
@@ -35,8 +36,9 @@
       <nav class="global-nav" aria-label="主要メニュー">
         <a class="brand" href="./">すべての歯が見える</a>
         <div class="nav-links">
-          <a href="#products">商品</a>
+          <a href="./products/">商品</a>
           <a href="./theory/">理論</a>
+          <a href="/arcade/">アーケード</a>
         </div>
       </nav>
 
@@ -48,16 +50,18 @@
         <h2 id="greeting-title">ごあいさつ</h2>
         <p>
           いつもお世話になっております。<br>
-          バレたので作り直しました。一般の方も利用できるようになっております。同業各位におかれましては、一般向け商品の大量購入をご遠慮ください。<br>
+          バレたので作り直しました。一般の方も利用できるようになっております。<br>
           引き続き、ジジイには内緒でお願いいたします。<br>
           なお、サイトの仮設にともないTelegram（テレグラム）での販売は終了いたしました。
         </p>
       </section>
-      <h1 class="section-title" id="products">商品</h1>
-      <nav class="split" aria-label="商品区分">
-        <a href="./trade/">同業者</a>
-        <a href="./general/">一般</a>
+      <h1 class="section-title" id="products">入口</h1>
+      <nav class="routes" aria-label="主要コンテンツ">
+        <a href="./products/">商品</a>
+        <a href="./theory/">理論</a>
+        <a href="/arcade/">歩く</a>
       </nav>
+      <p class="route-note">商品は現在公開中の取扱だけを掲載。アーケードは不氣屋界隈を歩いて各公開コンテンツへ進む実験空間です。</p>
     </div>
   </main>
 </body>
