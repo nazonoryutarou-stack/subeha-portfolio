@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'public/**'
-      - 'arcade/**'
       - 'hitotsu-ore-choji.png'
       - '.github/workflows/neocities.yml'
   workflow_dispatch:
@@ -35,22 +34,6 @@ jobs:
           test -f hitotsu-ore-choji.png
           cp hitotsu-ore-choji.png public/hitotsu-ore-choji.png
 
-      - name: Stage Astra arcade for Neocities
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --depth=1 origin feature/arcade-permanent-space
-          rm -rf public/arcade
-          git checkout FETCH_HEAD -- public/arcade
-          test -f public/arcade/index.html
-          test -f public/arcade/arcade.css
-          test -f public/arcade/boot.js
-          test -f public/arcade/main.js
-          test -f public/arcade/world.js
-          test -f public/arcade/shops.js
-          test -f public/arcade/vendor/three.module.min.js
-          grep -q '不氣屋界隈の、歩けるアーケード' public/arcade/index.html
-
       - name: Validate public site
         shell: bash
         run: |
@@ -62,7 +45,8 @@ jobs:
           test -f public/data/general.json
           test -f public/hitotsu-ore-choji.png
           test -f public/arcade/index.html
-          test -f public/arcade/boot.js
+          grep -q 'アーケードは未完成のため、現在は公開していません。' public/arcade/index.html
+          ! grep -q '/arcade/' public/index.html
 
       - name: Deploy public directory to Neocities
         uses: bcomnes/deploy-to-neocities@v3
@@ -73,7 +57,37 @@ jobs:
           neocities_supporter: false
           preview_before_deploy: true
 
-      - name: Verify public Astra arcade URL
+      - name: Remove stale arcade implementation files
+        env:
+          NEOCITIES_TOKEN: ${{ secrets.NEOSITIES_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          listing="$(curl --fail --silent --show-error -H "Authorization: Bearer ${NEOCITIES_TOKEN}" https://neocities.org/api/list)"
+          mapfile -t stale < <(LISTING_JSON="$listing" python3 - <<'PY'
+          import json, os
+          data = json.loads(os.environ['LISTING_JSON'])
+          for item in data.get('files', []):
+              path = item.get('path', '')
+              if path.startswith('arcade/') and path != 'arcade/index.html' and not item.get('is_directory', False):
+                  print(path)
+          PY
+          )
+          if ((${#stale[@]})); then
+            args=()
+            for path in "${stale[@]}"; do
+              args+=(--data-urlencode "filenames[]=${path}")
+            done
+            curl --fail --silent --show-error -X POST \
+              -H "Authorization: Bearer ${NEOCITIES_TOKEN}" \
+              "${args[@]}" \
+              https://neocities.org/api/delete >/tmp/delete-arcade.json
+            cat /tmp/delete-arcade.json
+          else
+            echo 'No stale arcade files remain.'
+          fi
+
+      - name: Verify arcade is not public
         env:
           NEOCITIES_TOKEN: ${{ secrets.NEOSITIES_API_TOKEN }}
         shell: bash
@@ -81,11 +95,10 @@ jobs:
           set -euo pipefail
           info="$(curl --fail --silent --show-error -H "Authorization: Bearer ${NEOCITIES_TOKEN}" https://neocities.org/api/info)"
           sitename="$(INFO_JSON="$info" python3 -c 'import json,os; print(json.loads(os.environ["INFO_JSON"])["info"]["sitename"])')"
+          root_url="https://${sitename}.neocities.org/"
           arcade_url="https://${sitename}.neocities.org/arcade/"
-          echo "Public Astra arcade URL: ${arcade_url}"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${root_url}" -o /tmp/root.html
           curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${arcade_url}" -o /tmp/arcade.html
-          grep -q '不氣屋界隈の、歩けるアーケード' /tmp/arcade.html
-          grep -q './boot.js' /tmp/arcade.html
-          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "${arcade_url}boot.js" -o /tmp/boot.js
-          grep -q 'main.js' /tmp/boot.js
-          echo "Verified Astra arcade page and module boot: ${arcade_url}"
+          ! grep -q '/arcade/' /tmp/root.html
+          grep -q 'アーケードは未完成のため、現在は公開していません。' /tmp/arcade.html
+          echo "Verified unpublished arcade placeholder: ${arcade_url}"
