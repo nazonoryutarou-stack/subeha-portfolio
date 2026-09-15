@@ -1,0 +1,52 @@
+name: Temporary Whisper Small Runtime Pack
+
+on:
+  push:
+    branches:
+      - tmp/whisper-small-runtime-20260916
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout trigger branch
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y build-essential git curl ca-certificates
+
+      - name: Build whisper.cpp v1.5.5
+        run: |
+          git clone https://github.com/ggml-org/whisper.cpp.git whisper.cpp
+          cd whisper.cpp
+          git checkout 7395c70a748753e3800b63e3422a2b558a097c80
+          make -j2
+          ./main --help >/dev/null
+
+      - name: Download multilingual small q5_1 model
+        run: |
+          cd whisper.cpp
+          bash ./models/download-ggml-model.sh small-q5_1
+          test -s models/ggml-small-q5_1.bin
+          sha256sum models/ggml-small-q5_1.bin
+
+      - name: Stage runtime
+        run: |
+          mkdir -p whisper-runtime/models
+          cp whisper.cpp/main whisper-runtime/main
+          cp whisper.cpp/models/ggml-small-q5_1.bin whisper-runtime/models/
+          chmod +x whisper-runtime/main
+          sha256sum whisper-runtime/main whisper-runtime/models/ggml-small-q5_1.bin > whisper-runtime/SHA256SUMS.txt
+
+      - name: Upload runtime artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whisper-cpp-v1.5.5-small-q5_1-linux
+          path: whisper-runtime/
+          retention-days: 1
+          compression-level: 0
