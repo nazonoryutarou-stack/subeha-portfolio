@@ -18,8 +18,12 @@ const ymd = d => `${d.getUTCFullYear()}${String(d.getUTCMonth()+1).padStart(2,'0
 const jstNow = new Date(Date.now() + 9*3600_000);
 const dates = [0,1,2,3].map(k => { const d = new Date(jstNow); d.setUTCDate(d.getUTCDate()-k); return ymd(d); }).reverse();
 
-async function getJson(url){
+async function getJson(url, allowMissingToday = false){
   const r = await fetch(url, {headers:{'user-agent':'fly-brain-btc-paper/0.2'}});
+  if(r.status===404 && allowMissingToday){
+    console.warn(`Current trading-day candles are not published yet: ${url}`);
+    return {status:0,data:[]};
+  }
   if(!r.ok) throw new Error(`${r.status} ${url}`);
   return r.json();
 }
@@ -27,11 +31,11 @@ async function getJson(url){
 async function loadCandles(){
   const all=[];
   for(const date of dates){
-    const j=await getJson(`https://api.coin.z.com/public/v1/klines?symbol=BTC&interval=5min&date=${date}`);
+    const j=await getJson(`https://api.coin.z.com/public/v1/klines?symbol=BTC&interval=5min&date=${date}`, date===ymd(jstNow));
     if(j.status===0 && Array.isArray(j.data)) all.push(...j.data);
   }
   return all.map(x=>({t:+x.openTime,o:+x.open,h:+x.high,l:+x.low,c:+x.close,v:+x.volume}))
-    .sort((a,b)=>a.t-b.t).filter((x,i,a)=>!i || x.t!==a[i-1].t);
+    .filter(x=>x.t+5*60_000<=Date.now()).sort((a,b)=>a.t-b.t).filter((x,i,a)=>!i || x.t!==a[i-1].t);
 }
 
 async function loadFee(){

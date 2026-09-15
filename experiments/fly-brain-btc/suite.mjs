@@ -10,8 +10,12 @@ const feeFallback=0.0005, alloc=0.80, histBars=20, calibrationBars=240, evalBars
 const ymd=d=>`${d.getUTCFullYear()}${String(d.getUTCMonth()+1).padStart(2,'0')}${String(d.getUTCDate()).padStart(2,'0')}`;
 const jstNow=new Date(Date.now()+9*3600_000);
 const dates=[0,1,2,3,4,5,6,7].map(k=>{const d=new Date(jstNow);d.setUTCDate(d.getUTCDate()-k);return ymd(d)}).reverse();
-async function getJson(url){const r=await fetch(url,{headers:{'user-agent':'fly-brain-btc-suite/0.3'}});if(!r.ok)throw new Error(`${r.status} ${url}`);return r.json()}
-async function loadCandles(){const all=[];for(const date of dates){const j=await getJson(`https://api.coin.z.com/public/v1/klines?symbol=BTC&interval=5min&date=${date}`);if(j.status===0&&Array.isArray(j.data))all.push(...j.data)}return all.map(x=>({t:+x.openTime,o:+x.open,h:+x.high,l:+x.low,c:+x.close,v:+x.volume})).sort((a,b)=>a.t-b.t).filter((x,i,a)=>!i||x.t!==a[i-1].t)}
+async function getJson(url, allowMissingToday = false){const r=await fetch(url,{headers:{'user-agent':'fly-brain-btc-suite/0.3'}});if(r.status===404 && allowMissingToday){
+    console.warn(`Current trading-day candles are not published yet: ${url}`);
+    return {status:0,data:[]};
+  }
+  if(!r.ok)throw new Error(`${r.status} ${url}`);return r.json()}
+async function loadCandles(){const all=[];for(const date of dates){const j=await getJson(`https://api.coin.z.com/public/v1/klines?symbol=BTC&interval=5min&date=${date}`, date===ymd(jstNow));if(j.status===0&&Array.isArray(j.data))all.push(...j.data)}return all.map(x=>({t:+x.openTime,o:+x.open,h:+x.high,l:+x.low,c:+x.close,v:+x.volume})).filter(x=>x.t+5*60_000<=Date.now()).sort((a,b)=>a.t-b.t).filter((x,i,a)=>!i||x.t!==a[i-1].t)}
 async function loadFee(){try{const j=await getJson('https://api.coin.z.com/public/v1/symbols');const s=(j.data||[]).find(x=>x.symbol==='BTC');const f=Number(s?.takerFee);return Number.isFinite(f)?f:feeFallback}catch{return feeFallback}}
 function stats(xs){const c=xs.map(x=>x.c),ret=(c.at(-1)/c[0]-1)*100,rs=[];for(let i=1;i<c.length;i++)rs.push(Math.log(c[i]/c[i-1]));const m=rs.reduce((a,b)=>a+b,0)/(rs.length||1),vol=Math.sqrt(rs.reduce((a,b)=>a+(b-m)**2,0)/(rs.length||1))*100;return{retPct:ret,volPct:vol}}
 function quantile(xs,q){const a=[...xs].sort((x,y)=>x-y);if(!a.length)return 0;const p=(a.length-1)*q,l=Math.floor(p),h=Math.ceil(p),f=p-l;return a[l]*(1-f)+a[h]*f}
