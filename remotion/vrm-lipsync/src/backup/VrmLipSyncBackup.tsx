@@ -11,13 +11,6 @@ const W=720,H=1280,FPS=30;
 
 const clamp=(v:number,a=0,b=1)=>Math.max(a,Math.min(b,v));
 
-const mouthAt=(ms:number)=>{
-  if(!mouthFrames.length) return {open:0,voiced:false};
-  const hop=mouthFrames.length>1?Math.max(1,mouthFrames[1].tMs-mouthFrames[0].tMs):10;
-  const i=clamp(Math.round(ms/hop),0,mouthFrames.length-1);
-  return mouthFrames[Math.floor(i)]??{open:0,voiced:false};
-};
-
 const activePartAt=(ms:number)=>{
   let lo=0,hi=timingParts.length-1,best=-1;
   while(lo<=hi){
@@ -71,7 +64,9 @@ export const VrmLipSyncBackup:React.FC=()=>{
   const state=useRef<any>(null);
   const [ready,setReady]=useState(false);
 
-  const mouth=mouthAt(ms);
+  const mouth=mouthFrames.length
+    ? (mouthFrames[Math.min(frame,mouthFrames.length-1)] ?? {open:0,voiced:false})
+    : {open:0,voiced:false};
   const active=activePartAt(ms);
   const progress=active?clamp((ms-active.startMs)/Math.max(1,active.endMs-active.startMs)):0;
   const viseme=active?visemeForTimedText(active.text,progress):null;
