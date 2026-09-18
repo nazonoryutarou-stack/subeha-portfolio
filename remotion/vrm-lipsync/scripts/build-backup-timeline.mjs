@@ -46,7 +46,7 @@ const parts=wordRows.map((r,i)=>({
   confidence:Number.isFinite(Number(r.confidence_level))?Number(r.confidence_level):undefined,
 }));
 
-const mouths=mouthRows.map(r=>({
+const rawMouths=mouthRows.map(r=>({
   tMs:Math.round(Number(r.t_ms)),
   open:Math.max(0,Math.min(1,Number(r.open)||0)),
   voiced:Boolean(r.voiced_hint),
@@ -54,16 +54,37 @@ const mouths=mouthRows.map(r=>({
 
 const durationMs=Math.max(
   parts.at(-1)?.endMs??0,
-  mouths.at(-1)?.tMs??0
+  rawMouths.at(-1)?.tMs??0
 );
+
+// Analysis stays at ~10 ms, but the rendered video is 30 fps.
+// Collapse each video-frame bucket to its maximum mouth opening so articulation
+// peaks survive without embedding hundreds of thousands of unnecessary samples.
+const renderFps=30;
+const frameMs=1000/renderFps;
+const renderFrames=Math.max(1,Math.ceil(durationMs/frameMs));
+const mouths=[];
+let cursor=0;
+for(let frame=0;frame<renderFrames;frame++){
+  const start=frame*frameMs;
+  const end=(frame+1)*frameMs;
+  while(cursor<rawMouths.length && rawMouths[cursor].tMs<start) cursor++;
+  let j=cursor, open=0, voiced=false;
+  while(j<rawMouths.length && rawMouths[j].tMs<end){
+    open=Math.max(open,rawMouths[j].open);
+    voiced=voiced||rawMouths[j].voiced;
+    j++;
+  }
+  mouths.push({tMs:Math.round(start),open,voiced});
+}
 
 const src=`// AUTO-GENERATED. Do not hand-edit.
 export type TimingPart={text:string;startMs:number;endMs:number;confidence?:number};
 export type MouthFrame={tMs:number;open:number;voiced:boolean};
-export const backupMeta=${JSON.stringify({schema:'subeha-vtuber-backup-v1',source:'android-speech+waveform-rms',durationMs},null,2)} as const;
+export const backupMeta=${JSON.stringify({schema:'subeha-vtuber-backup-v1',source:'android-speech+waveform-rms',durationMs,renderFps},null,2)} as const;
 export const timingParts:TimingPart[]=${JSON.stringify(parts)};
 export const mouthFrames:MouthFrame[]=${JSON.stringify(mouths)};
 `;
 fs.mkdirSync(path.dirname(outPath),{recursive:true});
 fs.writeFileSync(outPath,src);
-console.log(JSON.stringify({parts:parts.length,mouthFrames:mouths.length,durationMs,outPath}));
+console.log(JSON.stringify({parts:parts.length,mouthSourceFrames:rawMouths.length,mouthFrames:mouths.length,durationMs,renderFps,outPath}));
