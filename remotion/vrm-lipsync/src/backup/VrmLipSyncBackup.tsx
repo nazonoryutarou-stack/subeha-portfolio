@@ -201,6 +201,14 @@ export const VrmLipSyncBackup:React.FC=()=>{
     const head=vrm.humanoid?.getNormalizedBoneNode('head');
     const neck=vrm.humanoid?.getNormalizedBoneNode('neck');
     const chest=vrm.humanoid?.getNormalizedBoneNode('chest');
+    const ls=vrm.humanoid?.getNormalizedBoneNode('leftShoulder');
+    const rs=vrm.humanoid?.getNormalizedBoneNode('rightShoulder');
+    const la=vrm.humanoid?.getNormalizedBoneNode('leftUpperArm');
+    const ra=vrm.humanoid?.getNormalizedBoneNode('rightUpperArm');
+    const lla=vrm.humanoid?.getNormalizedBoneNode('leftLowerArm');
+    const rla=vrm.humanoid?.getNormalizedBoneNode('rightLowerArm');
+    const lh=vrm.humanoid?.getNormalizedBoneNode('leftHand');
+    const rh=vrm.humanoid?.getNormalizedBoneNode('rightHand');
 
     if(head){
       head.rotation.x=Math.sin(frame*.055)*.019-speech*.045;
@@ -210,8 +218,37 @@ export const VrmLipSyncBackup:React.FC=()=>{
     if(neck)neck.rotation.y=Math.sin(frame*.019)*.020;
     if(chest){
       chest.rotation.x=Math.sin(frame*.032)*.008+speech*.015;
-      chest.rotation.z=Math.sin(frame*.017)*.010;
+      chest.rotation.z=-.010+Math.sin(frame*.017)*.010;
+      chest.rotation.y=.024+Math.sin(frame*.011)*.006;
     }
+
+    // Keep the limbs alive without looking like a looped gesture.
+    // Motion stays below the level where the hands become distracting.
+    const breath=Math.sin(frame*.016);
+    const counter=Math.sin(frame*.013+.9);
+    if(ls)ls.rotation.z=-.055+breath*.004;
+    if(rs)rs.rotation.z=.045-breath*.003;
+    if(la){
+      la.rotation.z=-Math.PI*.405+counter*.006;
+      la.rotation.x=-.085+breath*.004;
+      la.rotation.y=-.045;
+    }
+    if(ra){
+      ra.rotation.z=Math.PI*.392-counter*.005;
+      ra.rotation.x=-.055-breath*.003;
+      ra.rotation.y=.028;
+    }
+    if(lla){
+      lla.rotation.y=-.26+breath*.006;
+      lla.rotation.z=.055+counter*.004;
+    }
+    if(rla){
+      rla.rotation.y=.22-breath*.005;
+      rla.rotation.z=-.075-counter*.004;
+    }
+    if(lh)lh.rotation.z=.065+Math.sin(frame*.010+.5)*.004;
+    if(rh)rh.rotation.z=-.045+Math.sin(frame*.012+1.1)*.003;
+
     vrm.scene.position.y=Math.sin(frame*.025)*.005;
 
     vrm.update(1/FPS);
