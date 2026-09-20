@@ -5,7 +5,8 @@
   "scripts": {
     "render": "remotion render VrmLipSync out/vrm-lipsync.mp4 --codec=h264 --crf=20",
     "build:backup-timeline": "node scripts/build-backup-timeline.mjs",
-    "render:backup": "remotion render VrmLipSyncBackup out/vrm-lipsync-backup.mp4 --codec=h264 --crf=20"
+    "render:backup": "remotion render VrmLipSyncBackup out/vrm-lipsync-backup.mp4 --codec=h264 --crf=20",
+    "render:backup:landscape": "remotion render VrmLipSyncBackupLandscape out/vrm-lipsync-backup-landscape.mp4 --codec=h264 --crf=20"
   },
   "dependencies": {
     "@pixiv/three-vrm": "^3.4.2",
