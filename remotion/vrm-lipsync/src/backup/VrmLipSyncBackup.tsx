@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {AbsoluteFill,staticFile,useCurrentFrame} from 'remotion';
+import {AbsoluteFill,staticFile,useCurrentFrame,useDelayRender} from 'remotion';
 import {Audio} from '@remotion/media';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -63,6 +63,8 @@ export const VrmLipSyncBackup:React.FC=()=>{
   const canvas=useRef<HTMLCanvasElement>(null);
   const state=useRef<any>(null);
   const [ready,setReady]=useState(false);
+  const {delayRender,continueRender,cancelRender}=useDelayRender();
+  const [vrmLoadHandle]=useState(()=>delayRender('Loading Subeha.vrm for backup render'));
 
   const mouth=mouthFrames.length
     ? (mouthFrames[Math.min(frame,mouthFrames.length-1)] ?? {open:0,voiced:false})
@@ -92,10 +94,12 @@ export const VrmLipSyncBackup:React.FC=()=>{
       vrm.scene.scale.setScalar(2.35/(size.y||1));
       const box2=new THREE.Box3().setFromObject(vrm.scene),c2=new THREE.Vector3();box2.getCenter(c2);
       vrm.scene.position.x-=c2.x;vrm.scene.position.z-=c2.z;
-      state.current={renderer,scene,camera,vrm};setReady(true);
+      state.current={renderer,scene,camera,vrm};setReady(true);continueRender(vrmLoadHandle);
+    },undefined,(err)=>{
+      cancelRender(err instanceof Error?err:new Error(String(err)));
     });
     return()=>{renderer.dispose();state.current=null};
-  },[]);
+  },[cancelRender,continueRender,vrmLoadHandle]);
 
   useEffect(()=>{
     const s=state.current;if(!s?.vrm)return;
