@@ -6,6 +6,7 @@ const root=process.cwd();
 const wordPath=process.argv[2] ?? path.join(root,'input','word-timing.jsonl');
 const mouthPath=process.argv[3] ?? path.join(root,'input','mouth.jsonl');
 const outPath=process.argv[4] ?? path.join(root,'src','backup','generatedTimeline.ts');
+const captionPath=process.argv[5] ?? path.join(root,'input','display-captions.jsonl');
 
 const lines=(p)=>fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean).map((line,n)=>{
   try{return JSON.parse(line)}catch(e){throw new Error(`${p}:${n+1}: invalid JSON`)}
@@ -13,12 +14,16 @@ const lines=(p)=>fs.readFileSync(p,'utf8').split(/\r?\n/).filter(Boolean).map((l
 
 const wordRows=lines(wordPath).filter(x=>x.type==='part');
 const mouthRows=lines(mouthPath).filter(x=>x.type==='mouth');
+const captionRows=fs.existsSync(captionPath)
+  ? lines(captionPath).filter(x=>x.type==='caption')
+  : [];
 
 if(!wordRows.length) throw new Error('word timing contains no type=part rows');
 if(!mouthRows.length) throw new Error('mouth curve contains no type=mouth rows');
 
 wordRows.sort((a,b)=>Number(a.start_ms)-Number(b.start_ms));
 mouthRows.sort((a,b)=>Number(a.t_ms)-Number(b.t_ms));
+captionRows.sort((a,b)=>Number(a.start_ms)-Number(b.start_ms));
 
 for(let i=0;i<wordRows.length;i++){
   const start=Number(wordRows[i].start_ms);
@@ -51,6 +56,16 @@ const parts=wordRows.map((r,i)=>({
   segmentIndex:Number.isFinite(Number(r.segment_index))?Number(r.segment_index):undefined,
 }));
 
+const displayCaptions=captionRows.map((r,i)=>{
+  const startMs=Math.round(Number(r.start_ms));
+  const endMs=Math.round(Number(r.end_ms));
+  if(!Number.isFinite(startMs)||!Number.isFinite(endMs)||startMs<0||endMs<=startMs)
+    throw new Error('invalid display caption row '+i);
+  if(i && startMs<Math.round(Number(captionRows[i-1].start_ms)))
+    throw new Error('display captions not monotonic');
+  return {text:String(r.text??''),startMs,endMs};
+});
+
 const rawMouths=mouthRows.map(r=>({
   tMs:Math.round(Number(r.t_ms)),
   open:Math.max(0,Math.min(1,Number(r.open)||0)),
@@ -59,7 +74,8 @@ const rawMouths=mouthRows.map(r=>({
 
 const durationMs=Math.max(
   parts.at(-1)?.endMs??0,
-  rawMouths.at(-1)?.tMs??0
+  rawMouths.at(-1)?.tMs??0,
+  displayCaptions.at(-1)?.endMs??0
 );
 
 // Analysis stays at ~10 ms, but the rendered video is 30 fps.
@@ -87,10 +103,12 @@ const timingSource=String(wordRows[0]?.source??'unknown-timing');
 const src=`// AUTO-GENERATED. Do not hand-edit.
 export type TimingPart={text:string;startMs:number;endMs:number;confidence?:number;timingMode?:string;segmentIndex?:number};
 export type MouthFrame={tMs:number;open:number;voiced:boolean};
+export type DisplayCaption={text:string;startMs:number;endMs:number};
 export const backupMeta=${JSON.stringify({schema:'subeha-vtuber-backup-v1',source:timingSource+'+waveform-rms',durationMs,renderFps},null,2)} as const;
 export const timingParts:TimingPart[]=${JSON.stringify(parts)};
+export const displayCaptions:DisplayCaption[]=${JSON.stringify(displayCaptions)};
 export const mouthFrames:MouthFrame[]=${JSON.stringify(mouths)};
 `;
 fs.mkdirSync(path.dirname(outPath),{recursive:true});
 fs.writeFileSync(outPath,src);
-console.log(JSON.stringify({parts:parts.length,mouthSourceFrames:rawMouths.length,mouthFrames:mouths.length,durationMs,renderFps,outPath}));
+console.log(JSON.stringify({parts:parts.length,displayCaptions:displayCaptions.length,mouthSourceFrames:rawMouths.length,mouthFrames:mouths.length,durationMs,renderFps,outPath}));
