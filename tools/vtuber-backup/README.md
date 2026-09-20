@@ -1,24 +1,42 @@
 # VTuber Backup tools
 
-Whisperに依存しない予備経路のTermux側ツール。
+無料・端末内完結を優先する予備VTuber経路。
 
-## Prepare
+現在の字幕タイミング本命は **whisper.cpp token timing**。
+Android SpeechRecognizer / APK / ADB 経路は実験停止。アーカイブ正本用の歴史的 whisper.cpp v1.5.5 は変更しない。
 
-Android word timing JSONLが取れたあと:
+## 1. Termuxでtoken timing
+
+```bash
+bash tools/vtuber-backup/run-whisper-token-termux.sh ~/storage/downloads/配信165.m4a
+```
+
+出力:
+`~/storage/downloads/SubehaWhisperToken/word-timing.jsonl`
+
+固定条件:
+- latest whisper.cpp を端末上でビルド
+- model: small-q5_1
+- language: ja
+- full JSON (`-ojf`) のtoken offsets
+- processors=1
+- VAD OFF
+- DTW OFF（まず基準測定）
+
+## 2. Remotion入力を準備
 
 ```bash
 bash tools/vtuber-backup/prepare-termux.sh \
   ~/storage/downloads/配信165.m4a \
-  ~/storage/downloads/SubehaWordTiming/subeha-word-timing-XXXXXXXX.jsonl \
+  ~/storage/downloads/SubehaWhisperToken/word-timing.jsonl \
   ~/subeha-portfolio
 ```
 
-処理内容:
-
+処理:
 1. 原音を16kHz mono PCM16LEへ変換
 2. 10ms口開閉curve生成
-3. Android word timingをRemotion入力へ配置
-4. voice.m4aをRemotion publicへ配置
+3. token timingをRemotion入力へ配置
+4. voice.m4a配置
 5. timeline TypeScript生成
 
 その後:
@@ -27,8 +45,5 @@ bash tools/vtuber-backup/prepare-termux.sh \
 cd ~/subeha-portfolio/remotion/vrm-lipsync
 npm run render:backup
 ```
-
-出力:
-`out/vrm-lipsync-backup.mp4`
 
 相談音声・JSONL・PCMはcommitしない。
