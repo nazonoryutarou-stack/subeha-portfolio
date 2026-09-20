@@ -31,7 +31,9 @@ def main():
             start=num(off.get("from")) if isinstance(off,dict) else None
             end=num(off.get("to")) if isinstance(off,dict) else None
             if start is None or end is None or end<=start or start<0:
-                if rows: rows[-1]["text"]+=text; attached+=1
+                # whisper.cpp full JSON emits control/timestamp tokens too.
+                # They do not carry real token offsets and must never become subtitle text.
+                skipped += 1
                 continue
             start_ms=int(round(start)); end_ms=int(round(end)); p=num(tok.get("p"))
             if rows and is_punctuation(text) and start_ms<=rows[-1]["end_ms"]+250:
@@ -48,6 +50,6 @@ def main():
     with a.output.open("w",encoding="utf-8") as f:
         for r in rows: f.write(json.dumps(r,ensure_ascii=False,separators=(",",":"))+"\\n")
     print(json.dumps({"parts":len(rows),"duration_ms":max(r["end_ms"] for r in rows),
-                      "skipped_special":skipped,"untimed_attached":attached,
+                      "skipped_special":skipped,"untimed_skipped":skipped,
                       "output":str(a.output)},ensure_ascii=False))
 if __name__=="__main__": main()
