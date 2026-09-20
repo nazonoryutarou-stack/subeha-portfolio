@@ -59,19 +59,52 @@ const blinkWeight=(f:number)=>{
 };
 
 const applyNaturalPose=(vrm:VRM)=>{
+  // Golden baseline idle pose.
+  // Keep the shoulders down, bend the elbows slightly toward the body,
+  // add a small torso bias and avoid the mannequin-perfect left/right symmetry.
+  const hips=vrm.humanoid?.getNormalizedBoneNode('hips');
+  const spine=vrm.humanoid?.getNormalizedBoneNode('spine');
+  const chest=vrm.humanoid?.getNormalizedBoneNode('chest');
+  const upperChest=vrm.humanoid?.getNormalizedBoneNode('upperChest');
   const ls=vrm.humanoid?.getNormalizedBoneNode('leftShoulder');
   const rs=vrm.humanoid?.getNormalizedBoneNode('rightShoulder');
   const la=vrm.humanoid?.getNormalizedBoneNode('leftUpperArm');
   const ra=vrm.humanoid?.getNormalizedBoneNode('rightUpperArm');
   const lla=vrm.humanoid?.getNormalizedBoneNode('leftLowerArm');
   const rla=vrm.humanoid?.getNormalizedBoneNode('rightLowerArm');
+  const lh=vrm.humanoid?.getNormalizedBoneNode('leftHand');
+  const rh=vrm.humanoid?.getNormalizedBoneNode('rightHand');
 
-  if(ls)ls.rotation.z=-0.04;
-  if(rs)rs.rotation.z=0.04;
-  if(la){la.rotation.z=-Math.PI*.46;la.rotation.x=-.04}
-  if(ra){ra.rotation.z=Math.PI*.46;ra.rotation.x=-.04}
-  if(lla)lla.rotation.y=-.10;
-  if(rla)rla.rotation.y=.10;
+  if(hips){hips.rotation.y=-.018;hips.rotation.z=.006}
+  if(spine){spine.rotation.y=.018;spine.rotation.z=-.006}
+  if(chest){chest.rotation.y=.024;chest.rotation.z=-.010}
+  if(upperChest){upperChest.rotation.x=-.012;upperChest.rotation.y=-.018}
+
+  if(ls){ls.rotation.z=-.055;ls.rotation.y=-.018}
+  if(rs){rs.rotation.z=.045;rs.rotation.y=.014}
+
+  if(la){
+    la.rotation.z=-Math.PI*.405;
+    la.rotation.x=-.085;
+    la.rotation.y=-.045;
+  }
+  if(ra){
+    ra.rotation.z=Math.PI*.392;
+    ra.rotation.x=-.055;
+    ra.rotation.y=.028;
+  }
+
+  if(lla){
+    lla.rotation.y=-.26;
+    lla.rotation.z=.055;
+  }
+  if(rla){
+    rla.rotation.y=.22;
+    rla.rotation.z=-.075;
+  }
+
+  if(lh){lh.rotation.z=.065;lh.rotation.y=-.025}
+  if(rh){rh.rotation.z=-.045;rh.rotation.y=.018}
 };
 
 export const VrmLipSyncBackup:React.FC=()=>{
