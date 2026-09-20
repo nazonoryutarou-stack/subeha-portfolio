@@ -47,6 +47,8 @@ const parts=wordRows.map((r,i)=>({
   endMs:Math.max(Math.round(Number(r.start_ms))+1,Math.round(inferredEnd(i))),
   confidence:Number.isFinite(Number(r.confidence_level))?Number(r.confidence_level):
     (Number.isFinite(Number(r.probability))?Number(r.probability):undefined),
+  timingMode:String(r.timing_mode??'token'),
+  segmentIndex:Number.isFinite(Number(r.segment_index))?Number(r.segment_index):undefined,
 }));
 
 const rawMouths=mouthRows.map(r=>({
@@ -83,7 +85,7 @@ for(let frame=0;frame<renderFrames;frame++){
 
 const timingSource=String(wordRows[0]?.source??'unknown-timing');
 const src=`// AUTO-GENERATED. Do not hand-edit.
-export type TimingPart={text:string;startMs:number;endMs:number;confidence?:number};
+export type TimingPart={text:string;startMs:number;endMs:number;confidence?:number;timingMode?:string;segmentIndex?:number};
 export type MouthFrame={tMs:number;open:number;voiced:boolean};
 export const backupMeta=${JSON.stringify({schema:'subeha-vtuber-backup-v1',source:timingSource+'+waveform-rms',durationMs,renderFps},null,2)} as const;
 export const timingParts:TimingPart[]=${JSON.stringify(parts)};
