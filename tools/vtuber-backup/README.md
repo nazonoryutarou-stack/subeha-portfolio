@@ -47,3 +47,33 @@ npm run render:backup
 ```
 
 相談音声・JSONL・PCMはcommitしない。
+
+
+## 3. 表示字幕は timing と分離
+
+口パク・viseme は `word-timing.jsonl` を使う。
+画面に見せる字幕は、clean transcript を matching timed clock に載せた
+`display-captions.jsonl` を使う。
+
+形式:
+
+```json
+{"type":"caption","start_ms":13000,"end_ms":18000,"text":"よし、じゃあ始まったということにしましょう。"}
+```
+
+準備:
+
+```bash
+bash tools/vtuber-backup/prepare-termux.sh \
+  ~/storage/downloads/配信165.m4a \
+  ~/storage/downloads/SubehaWhisperToken/word-timing.jsonl \
+  ~/subeha-portfolio \
+  ~/storage/downloads/display-captions.jsonl
+```
+
+production rule:
+- timed/raw text = internal clock / lip-sync source
+- clean text = display subtitle
+- clean がある回で raw ASR をそのまま字幕に出さない
+- 字幕は golden UI の固定下部カード以外に焼かない
+- landscape avatar は右側、両腕が見える距離を維持する
