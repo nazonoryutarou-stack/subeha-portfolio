@@ -33,6 +33,8 @@ for(let i=0;i<mouthRows.length;i++){
 
 const inferredEnd=(i)=>{
   const row=wordRows[i];
+  const explicit=Number(row.end_ms);
+  if(Number.isFinite(explicit)&&explicit>Number(row.start_ms)) return explicit;
   const next=Number(row.next_start_ms);
   if(Number.isFinite(next)&&next>Number(row.start_ms)) return next;
   if(i+1<wordRows.length) return Number(wordRows[i+1].start_ms);
@@ -43,7 +45,8 @@ const parts=wordRows.map((r,i)=>({
   text:String(r.text??''),
   startMs:Math.round(Number(r.start_ms)),
   endMs:Math.max(Math.round(Number(r.start_ms))+1,Math.round(inferredEnd(i))),
-  confidence:Number.isFinite(Number(r.confidence_level))?Number(r.confidence_level):undefined,
+  confidence:Number.isFinite(Number(r.confidence_level))?Number(r.confidence_level):
+    (Number.isFinite(Number(r.probability))?Number(r.probability):undefined),
 }));
 
 const rawMouths=mouthRows.map(r=>({
@@ -78,10 +81,11 @@ for(let frame=0;frame<renderFrames;frame++){
   mouths.push({tMs:Math.round(start),open,voiced});
 }
 
+const timingSource=String(wordRows[0]?.source??'unknown-timing');
 const src=`// AUTO-GENERATED. Do not hand-edit.
 export type TimingPart={text:string;startMs:number;endMs:number;confidence?:number};
 export type MouthFrame={tMs:number;open:number;voiced:boolean};
-export const backupMeta=${JSON.stringify({schema:'subeha-vtuber-backup-v1',source:'android-speech+waveform-rms',durationMs,renderFps},null,2)} as const;
+export const backupMeta=${JSON.stringify({schema:'subeha-vtuber-backup-v1',source:timingSource+'+waveform-rms',durationMs,renderFps},null,2)} as const;
 export const timingParts:TimingPart[]=${JSON.stringify(parts)};
 export const mouthFrames:MouthFrame[]=${JSON.stringify(mouths)};
 `;
