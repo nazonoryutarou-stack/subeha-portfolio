@@ -38,5 +38,5 @@ echo "[6/7] token timestamps (no VAD, processors=1)"
 test -s "$BASE.json"
 
 echo "[7/7] full JSON -> parts"
-python "$HERE/whisper-json-to-parts.py" "$BASE.json" "$PARTS"
+python "$HERE/whisper-json-to-parts.py" "$BASE.json" "$PARTS" --audio "$WAV"
 echo "DONE: $PARTS"
