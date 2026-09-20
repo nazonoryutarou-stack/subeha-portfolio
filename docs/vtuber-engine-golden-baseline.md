@@ -116,3 +116,19 @@ Initial cross-episode reproduction set:
 - episode 169: large silence gaps + speech
 
 The purpose is to verify that the same frozen UI, mouth-drive rules, timing conversion and QC process survive different audio structures without per-episode layout tuning.
+
+
+## Caption and avatar visibility invariants
+
+These are part of the frozen golden baseline, not episode-specific choices.
+
+- Display caption text comes from the episode `clean` transcript.
+- Caption timing comes from the matching `timed` / rescued clock.
+- Raw ASR text must not be shown directly when a clean transcript exists.
+- Captions render only in the fixed bottom golden card.
+- Do not burn a second ASS subtitle line below or outside that card.
+- The observation panel must not duplicate raw transcript snippets as pseudo-captions.
+- Both arms must remain visibly present in the avatar zone.
+- Cropping a T-pose until the arms disappear is not a pose fix.
+- The production renderer must pose the skeleton; sandbox reference renders may use a clearly documented 2D arm rig only for layout/QC validation.
+
