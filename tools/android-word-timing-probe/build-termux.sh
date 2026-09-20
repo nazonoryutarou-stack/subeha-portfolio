@@ -9,6 +9,7 @@ ANDROID_JAR="$SDK/platforms/android-35/android.jar"
 D8_JAR="$SDK/build-tools/$BUILD_TOOLS/lib/d8.jar"
 APKSIGNER_JAR="$SDK/build-tools/$BUILD_TOOLS/lib/apksigner.jar"
 APK_UNSIGNED="$WORK/SubehaWordTimingProbe-unsigned.apk"
+APK_ALIGNED="$WORK/SubehaWordTimingProbe-aligned.apk"
 APK_SIGNED="$WORK/SubehaWordTimingProbe.apk"
 KEYSTORE="$HOME/.android/debug.keystore"
 
@@ -55,7 +56,54 @@ test -f "$WORK/dex/classes.dex"
   zip -q -u "$APK_UNSIGNED" classes.dex
 )
 
-echo "[4/5] debug signing"
+echo "[4/6] 4-byte APK alignment"
+APK_UNSIGNED="$APK_UNSIGNED" APK_ALIGNED="$APK_ALIGNED" python - <<'PY'
+import os, struct, zipfile
+
+src=os.environ["APK_UNSIGNED"]
+dst=os.environ["APK_ALIGNED"]
+
+with zipfile.ZipFile(src, "r") as zin, zipfile.ZipFile(dst, "w", allowZip64=True) as zout:
+    for old in zin.infolist():
+        data=zin.read(old.filename)
+        zi=zipfile.ZipInfo(old.filename, date_time=old.date_time)
+        zi.comment=old.comment
+        zi.external_attr=old.external_attr
+        zi.internal_attr=old.internal_attr
+        zi.create_system=old.create_system
+        zi.flag_bits=old.flag_bits
+
+        # Android 11+ requires resources.arsc to be stored uncompressed.
+        zi.compress_type = zipfile.ZIP_STORED if old.filename == "resources.arsc" else old.compress_type
+
+        # Align every STORED entry to a 4-byte data boundary using a padding
+        # extra field. This is the relevant zipalign behavior for this APK,
+        # which contains no native .so libraries.
+        if zi.compress_type == zipfile.ZIP_STORED:
+            name_bytes=zi.filename.encode("utf-8")
+            local_header=zout.fp.tell()
+            base=local_header + 30 + len(name_bytes)
+            pad=(-base) % 4
+            if pad:
+                zi.extra=struct.pack("<HH", 0xFFFF, pad) + (b"\0" * pad)
+
+        zout.writestr(zi, data)
+
+# Self-check resources.arsc.
+with open(dst, "rb") as fp, zipfile.ZipFile(fp) as z:
+    info=z.getinfo("resources.arsc")
+    fp.seek(info.header_offset)
+    hdr=fp.read(30)
+    name_len, extra_len=struct.unpack_from("<HH", hdr, 26)
+    data_offset=info.header_offset + 30 + name_len + extra_len
+    if info.compress_type != zipfile.ZIP_STORED:
+        raise SystemExit("resources.arsc is compressed")
+    if data_offset % 4:
+        raise SystemExit(f"resources.arsc is not 4-byte aligned: offset={data_offset}")
+    print(f"resources.arsc OK: stored, offset={data_offset}, mod4={data_offset%4}")
+PY
+
+echo "[5/6] debug signing"
 mkdir -p "$(dirname "$KEYSTORE")"
 if [ ! -f "$KEYSTORE" ]; then
   keytool -genkeypair     -keystore "$KEYSTORE"     -storepass android     -alias androiddebugkey     -keypass android     -dname "CN=Android Debug,O=Android,C=US"     -keyalg RSA     -keysize 2048     -validity 10000     -noprompt
@@ -65,10 +113,10 @@ java -jar "$APKSIGNER_JAR" sign   --ks "$KEYSTORE"   --ks-pass pass:android   --
 
 java -jar "$APKSIGNER_JAR" verify --verbose "$APK_SIGNED"
 
-echo "[5/5] copy"
+echo "[6/6] copy"
 termux-setup-storage >/dev/null 2>&1 || true
 cp "$APK_SIGNED" "$HOME/storage/downloads/SubehaWordTimingProbe.apk"
 
 echo
 echo "BUILT: $HOME/storage/downloads/SubehaWordTimingProbe.apk"
-echo "zipalign is intentionally not used; this APK has no native libraries and is signed after packaging."
+echo "APK resources were 4-byte aligned before signing."
