@@ -107,6 +107,34 @@ The production Remotion composition remains 30 fps and uses the actual VRM skele
 
 ## Status
 
-UI reproducibility: PASS (3/3).
+Initial quick-render verdict: INVALIDATED.\n\nThe first quick renders incorrectly hid the arms with a bust mask and displayed raw/timed ASR directly as captions. Those outputs are not valid golden-baseline references.\n\nCorrected reference renders now use clean display captions, rescued timing, the fixed bottom caption card, and visible lowered arms. Corrected UI reproduction: PASS (3/3).
 
 Next validation target: render the same three samples through the production 30 fps Remotion/three-vrm path when that runtime is available, then compare pose and mouth motion against this sandbox reference.
+
+
+## Correction after visual QC
+
+The initial 164 / 166 / 169 quick renders exposed two implementation errors:
+
+1. the sandbox bust mask removed the horizontal arm extensions instead of actually posing the arms;
+2. raw/timed ASR text was burned as the visible subtitle at the bottom edge, bypassing the golden caption card and clean transcript.
+
+Those renders are superseded.
+
+Corrected test rule:
+
+```text
+clean transcript text
+        +
+rescued/timed segment clock
+        ↓
+fixed golden caption card
+
+VRM / reference avatar
+        ↓
+arms remain visible
+        ↓
+natural lowered idle pose
+```
+
+The corrected sandbox references use a 2D arm rig only to prove composition and visibility while the production Remotion path retains skeletal posing.
