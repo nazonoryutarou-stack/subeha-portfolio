@@ -2,12 +2,12 @@
 set -euo pipefail
 
 if [ "$#" -lt 2 ]; then
-  echo "usage: $0 <audio.m4a> <android-word-timing.jsonl> [portfolio-root]"
+  echo "usage: $0 <audio.m4a> <timing.jsonl> [portfolio-root]"
   exit 2
 fi
 
 AUDIO="$(realpath "$1")"
-WORDS="$(realpath "$2")"
+TIMING="$(realpath "$2")"
 ROOT="${3:-$HOME/subeha-portfolio}"
 ROOT="$(realpath "$ROOT")"
 
@@ -28,7 +28,7 @@ python -c 'import numpy' >/dev/null 2>&1 || {
 }
 
 test -f "$AUDIO"
-test -f "$WORDS"
+test -f "$TIMING"
 test -d "$REMOTION"
 
 mkdir -p "$WORK" "$REMOTION/input" "$REMOTION/public"
