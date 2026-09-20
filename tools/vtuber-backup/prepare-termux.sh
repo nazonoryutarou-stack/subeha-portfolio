@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [ "$#" -lt 2 ]; then
-  echo "usage: $0 <audio.m4a> <timing.jsonl> [portfolio-root]"
+  echo "usage: $0 <audio.m4a> <timing.jsonl> [portfolio-root] [display-captions.jsonl]"
   exit 2
 fi
 
@@ -10,12 +10,14 @@ AUDIO="$(realpath "$1")"
 TIMING="$(realpath "$2")"
 ROOT="${3:-$HOME/subeha-portfolio}"
 ROOT="$(realpath "$ROOT")"
+CAPTIONS="${4:-}"
 
 REMOTION="$ROOT/remotion/vrm-lipsync"
 WORK="$ROOT/.work/vtuber-backup"
 PCM="$WORK/voice-16k-mono.pcm"
 MOUTH="$REMOTION/input/mouth.jsonl"
 WORD_DEST="$REMOTION/input/word-timing.jsonl"
+CAPTION_DEST="$REMOTION/input/display-captions.jsonl"
 
 command -v ffmpeg >/dev/null || {
   echo "ffmpeg missing; installing"
@@ -40,7 +42,16 @@ echo "[2/5] mouth curve"
 python "$ROOT/tools/vtuber-backup/make_mouth_curve.py" "$PCM" --out "$MOUTH"
 
 echo "[3/5] word timing"
-cp "$WORDS" "$WORD_DEST"
+cp "$TIMING" "$WORD_DEST"
+
+if [ -n "$CAPTIONS" ]; then
+  CAPTIONS="$(realpath "$CAPTIONS")"
+  test -f "$CAPTIONS"
+  echo "[3b/5] clean display captions"
+  cp "$CAPTIONS" "$CAPTION_DEST"
+else
+  rm -f "$CAPTION_DEST"
+fi
 
 echo "[4/5] render audio asset"
 ffmpeg -hide_banner -loglevel error -y -i "$AUDIO" -vn -c:a aac -b:a 192k "$REMOTION/public/voice.m4a"
@@ -56,7 +67,8 @@ npm run build:backup-timeline
 
 echo
 echo "READY"
-echo "  words: $WORD_DEST"
+echo "  timing: $WORD_DEST"
+echo "  captions: ${CAPTIONS:-<timing fallback>}"
 echo "  mouth: $MOUTH"
 echo "  audio: $REMOTION/public/voice.m4a"
 echo "next:"
