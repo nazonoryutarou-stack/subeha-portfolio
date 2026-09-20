@@ -14,6 +14,12 @@ export type MouthFrame = {
   voiced: boolean;
 };
 
+export type DisplayCaption = {
+  text: string;
+  startMs: number;
+  endMs: number;
+};
+
 export const backupMeta = {
   schema: 'subeha-vtuber-backup-v1',
   source: 'placeholder',
@@ -21,4 +27,5 @@ export const backupMeta = {
 } as const;
 
 export const timingParts: TimingPart[] = [];
+export const displayCaptions: DisplayCaption[] = [];
 export const mouthFrames: MouthFrame[] = [];
