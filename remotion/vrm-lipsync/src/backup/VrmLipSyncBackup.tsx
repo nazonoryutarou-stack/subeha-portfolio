@@ -4,7 +4,7 @@ import {Audio} from '@remotion/media';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {VRM,VRMLoaderPlugin,VRMUtils} from '@pixiv/three-vrm';
-import {backupMeta,mouthFrames,timingParts} from './generatedTimeline';
+import {backupMeta,displayCaptions,mouthFrames,timingParts} from './generatedTimeline';
 import {Viseme,visemeForTimedText} from './viseme';
 
 const FPS=30;
@@ -22,6 +22,11 @@ const activePartAt=(ms:number)=>{
   if(best<0) return null;
   const p=timingParts[best];
   return ms<p.endMs?p:null;
+};
+
+const activeDisplayCaptionAt=(ms:number)=>{
+  const p=displayCaptions.find(c=>c.startMs<=ms&&c.endMs>ms);
+  return p??null;
 };
 
 const visemeWeights=(v:Viseme|null,open:number)=>{
@@ -163,15 +168,15 @@ export const VrmLipSyncBackup:React.FC=()=>{
         vrm.scene.position.x-=center.x;vrm.scene.position.z-=center.z;
 
         const framed=new THREE.Box3().setFromObject(vrm.scene),fs=new THREE.Vector3();framed.getSize(fs);
-        const targetHeight=fs.y*(landscape?.47:.84);
+        const targetHeight=fs.y*(landscape?.62:.84);
         const targetCenterY=framed.max.y-targetHeight*(landscape?.53:.56)-fs.y*.01;
         const halfFov=THREE.MathUtils.degToRad(camera.fov/2);
         const cameraDistance=(targetHeight/2)/Math.tan(halfFov)*(landscape?1.04:1.10);
 
         if(landscape){
           const horizontalSpan=2*cameraDistance*Math.tan(halfFov)*(width/height);
-          const leftZoneCenter=.45/2;
-          vrm.scene.position.x+=(leftZoneCenter-.5)*horizontalSpan;
+          const avatarZoneCenter=.79;
+          vrm.scene.position.x+=(avatarZoneCenter-.5)*horizontalSpan;
         }
 
         camera.position.set(0,targetCenterY,cameraDistance);
@@ -257,6 +262,9 @@ export const VrmLipSyncBackup:React.FC=()=>{
 
   const titleOpacity=interpolate(frame,[0,9,92,108],[0,1,1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
   const activeRetimed=Boolean((active as any)?.timingMode==='segment-retimed');
+  const displayCaption=activeDisplayCaptionAt(ms);
+  const fallbackSubtitle=subs.map(p=>p.text).join('');
+  const subtitleText=displayCaption?.text||fallbackSubtitle;
 
   return <AbsoluteFill style={{background:'#0b0e13',overflow:'hidden'}}>
     <Audio src={staticFile('voice.m4a')} volume={1}/>
@@ -272,9 +280,34 @@ export const VrmLipSyncBackup:React.FC=()=>{
 
     {!ready?<AbsoluteFill style={{alignItems:'center',justifyContent:'center',color:'#ddd',fontFamily:sans}}>VRM LOADING</AbsoluteFill>:null}
 
-    <div style={{position:'absolute',left:landscape?48:28,right:landscape?48:28,bottom:landscape?34:120,display:'flex',justifyContent:'center',pointerEvents:'none'}}>
-      <div style={{maxWidth:landscape?1040:width-56,padding:landscape?'12px 24px 13px':'16px 22px',border:'1px solid rgba(210,170,98,.28)',borderRadius:14,background:'linear-gradient(180deg,rgba(15,17,22,.78),rgba(9,11,15,.91))',boxShadow:'0 12px 38px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.035)',color:'#f8f7f4',fontFamily:sans,fontWeight:750,fontSize:landscape?38:46,lineHeight:1.32,textAlign:'center',textShadow:'0 2px 9px rgba(0,0,0,.72)',whiteSpace:'pre-wrap'}}>
-        {subs.length?subs.map((p,i)=><React.Fragment key={p.startMs+'-'+i}><span style={{color:active===p?'#fff':'rgba(255,255,255,.52)',fontWeight:active===p?800:600}}>{p.text}</span></React.Fragment>):<span style={{opacity:.35}}>字幕タイムライン未投入</span>}
+    <div style={{
+      position:'absolute',
+      left:landscape?48:28,
+      right:landscape?48:28,
+      bottom:landscape?30:120,
+      minHeight:landscape?74:84,
+      display:'flex',
+      alignItems:'center',
+      justifyContent:'center',
+      padding:landscape?'8px 28px':'12px 22px',
+      border:'1px solid rgba(210,170,98,.28)',
+      borderRadius:16,
+      background:'linear-gradient(180deg,rgba(15,17,22,.88),rgba(9,11,15,.94))',
+      boxShadow:'0 12px 38px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.035)',
+      pointerEvents:'none'
+    }}>
+      <div style={{
+        maxWidth:landscape?1120:width-72,
+        color:'#f8f7f4',
+        fontFamily:sans,
+        fontWeight:760,
+        fontSize:landscape?36:44,
+        lineHeight:1.28,
+        textAlign:'center',
+        textShadow:'0 2px 9px rgba(0,0,0,.72)',
+        whiteSpace:'pre-wrap'
+      }}>
+        {subtitleText}
       </div>
     </div>
 
