@@ -107,7 +107,11 @@ The production Remotion composition remains 30 fps and uses the actual VRM skele
 
 ## Status
 
-Initial quick-render verdict: INVALIDATED.\n\nThe first quick renders incorrectly hid the arms with a bust mask and displayed raw/timed ASR directly as captions. Those outputs are not valid golden-baseline references.\n\nCorrected reference renders now use clean display captions, rescued timing, the fixed bottom caption card, and visible lowered arms. Corrected UI reproduction: PASS (3/3).
+Initial quick-render verdict: INVALIDATED.
+
+The first quick renders incorrectly hid the arms with a bust mask and displayed raw/timed ASR directly as captions. Those outputs are not valid golden-baseline references.
+
+Corrected reference renders now use clean display captions, rescued timing, the fixed bottom caption card, and visible lowered arms. Corrected UI reproduction: PASS (3/3).
 
 Next validation target: render the same three samples through the production 30 fps Remotion/three-vrm path when that runtime is available, then compare pose and mouth motion against this sandbox reference.
 
