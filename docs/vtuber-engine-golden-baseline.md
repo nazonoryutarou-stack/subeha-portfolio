@@ -87,3 +87,32 @@ Check:
 - no old/debug overlays
 - no accidental T-pose visibility
 - A/V duration and stream validity
+
+
+## UI freeze
+
+As of 2026-09-20, `vtuber-landscape-v1 / golden` is the fixed production UI baseline.
+
+Do not redesign the shell per episode. Keep these stable:
+
+- 1280x720 landscape
+- dark graphite background with restrained gold accents
+- visual / observation zone on the left
+- VRM bust zone on the right
+- bottom subtitle card
+- compact archive/source labels
+- no debug meters or validation labels in finished output
+
+Episode-specific content may change inside the visual zone, but the shell, spacing, typography hierarchy, avatar zone and subtitle position are treated as frozen.
+
+A UI change requires an explicit new baseline decision; timing, ASR, pose or visual-reference work must not silently restyle the composition.
+
+## Reproducibility set
+
+Initial cross-episode reproduction set:
+
+- episode 164: music + sparse short speech
+- episode 166: longer continuous speech
+- episode 169: large silence gaps + speech
+
+The purpose is to verify that the same frozen UI, mouth-drive rules, timing conversion and QC process survive different audio structures without per-episode layout tuning.
