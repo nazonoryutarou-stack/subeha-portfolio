@@ -24,5 +24,13 @@ export const Root: React.FC = () => (
       width={720}
       height={1280}
     />
+    <Composition
+      id="VrmLipSyncBackupLandscape"
+      component={VrmLipSyncBackup}
+      durationInFrames={Math.max(1,Math.ceil(backupMeta.durationMs/1000*FPS))}
+      fps={FPS}
+      width={1280}
+      height={720}
+    />
   </>
 );
