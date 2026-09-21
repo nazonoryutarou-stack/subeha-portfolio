@@ -132,3 +132,31 @@ These are part of the frozen golden baseline, not episode-specific choices.
 - Cropping a T-pose until the arms disappear is not a pose fix.
 - The production renderer must pose the skeleton; sandbox reference renders may use a clearly documented 2D arm rig only for layout/QC validation.
 
+
+
+## Subtitle and avatar safe-area rules
+
+Locked after the episode 164 / 169 highlight render pass:
+
+- `timed` supplies **time only**. Do not use raw ASR wording as finished display captions.
+- Finished display captions must be checked against the episode `clean` transcript.
+- If `clean` contains `[聞き取り不明]`, preserve the uncertainty instead of inventing a confident word.
+- Long captions must be split into readable 2–3 line chunks inside the fixed subtitle card.
+- The subtitle card is a reserved safe area. The VRM body, tail, arms, reference cards and debug UI must not enter it.
+- The avatar framing must retain visible shoulders and arms. Do not solve T-pose or pose problems by cropping the arms out.
+- Preferred avatar crop is natural upper-body / waist-up framing that ends above the subtitle card.
+- The golden shell remains fixed; pose and crop adapt inside the avatar zone, never by moving the subtitle card.
+
+Canonical pipeline:
+
+```text
+original audio
+  + rescued/hybrid timed  -> caption timing
+  + clean transcript      -> caption wording
+  + waveform RMS          -> mouth opening
+  + natural upper-body VRM pose
+            ↓
+      fixed golden UI
+            ↓
+      QC at multiple frames
+```
