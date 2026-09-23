@@ -160,3 +160,32 @@ original audio
             ↓
       QC at multiple frames
 ```
+
+
+## Processing boundary: phone vs VTuber engine
+
+The Nothing Phone / Termux path is **ASR-only**.
+
+Phone responsibilities:
+
+- run whisper.cpp
+- produce transcript text
+- produce token / segment timestamps
+- emit full JSON / timing JSONL
+- no video rendering
+- no VRM posing
+- no UI composition
+- no final subtitle layout
+- no production mouth animation render
+
+VTuber engine responsibilities:
+
+- map clean transcript text onto timing data
+- generate waveform-driven mouth motion
+- drive VRM visemes / expressions
+- apply natural 3D pose and idle motion
+- use the frozen `vtuber-landscape-v1 / golden` UI
+- place visual references
+- render final video
+
+Do not move rendering work onto the phone merely because ASR is executed there. The phone is a transcription/timing appliance, not the video renderer.
