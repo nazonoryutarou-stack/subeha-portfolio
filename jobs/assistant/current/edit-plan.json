@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "sourceLabel": "Gravity 第151回 / 02:20:07.880–02:20:39.880",
+  "selection": {
+    "reason": "『守護霊が馬』から『前半分しかない』へ急に絵面が壊れる。今回は自然立ちのバストアップ、音質、字幕同期、資料演出を同時に再検証する。",
+    "hook": "",
+    "summary": "彼氏の守護霊を確認すると馬だったが、腰から後ろが存在しない前半分だけの馬だった、という32秒のテスト。"
+  },
+  "clip": {"startMs": 0, "endMs": 32000},
+  "layout": {"width": 1280, "height": 720, "captionBottomPx": 34, "background": "#0b0e13"},
+  "text": {"title": "守護霊が『前半分だけの馬』だった", "telop": ""},
+  "captions": [
+    {"startMs":0,"endMs":4360,"speaker":"HOST","text":"彼氏さんの方、守護霊いるんですけど。大したことない動物なんで。","speakerConfidence":0.88,"speakerReason":"32秒原音をwhisper.cppで再解析した区間境界にClean本文を合わせた"},
+    {"startMs":4360,"endMs":8660,"speaker":"HOST","text":"まあ、見てみますか。","speakerConfidence":0.78,"speakerReason":"32秒原音のASR境界 + Cleanで意味補正"},
+    {"startMs":8660,"endMs":14040,"speaker":"HOST","text":"何の動物かだけ見ますけども。","speakerConfidence":0.96},
+    {"startMs":14800,"endMs":16200,"speaker":"HOST","text":"馬ですね。","speakerConfidence":0.90,"speakerReason":"波形上のHOST発話バーストへ再配置"},
+    {"startMs":17920,"endMs":18700,"speaker":"GUEST","text":"馬？","speakerConfidence":0.82,"speakerReason":"波形上の別話者短発話バースト + Clean文脈"},
+    {"startMs":19940,"endMs":27560,"speaker":"HOST","text":"馬っつっても、前半しかないですよ。","speakerConfidence":0.96},
+    {"startMs":28640,"endMs":31640,"speaker":"HOST","text":"腰のあたりから切り落とされたみたいに、前の方しかないですよ。","speakerConfidence":0.96}
+  ],
+  "visualReferences": [
+    {"startMs":14800,"endMs":22800,"kind":"repo","title":"守護霊：馬","renderFile":"visuals/horse151-full.svg"},
+    {"startMs":22800,"endMs":32000,"kind":"repo","title":"前半分しかない馬","renderFile":"visuals/horse151-half.svg"}
+  ],
+  "motion": {"profile":"normal","notes":"自然立ちのバストアップを画面左45%に配置。口は実音声envelopeの振幅だけで開閉し、GUEST 17.92〜18.70秒では話者ゲートで閉じる。資料は『馬』で通常馬、『前半』の発話位置で半分馬へ切替。"}
+}

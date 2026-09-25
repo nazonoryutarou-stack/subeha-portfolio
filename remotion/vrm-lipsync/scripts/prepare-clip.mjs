@@ -18,6 +18,12 @@ if (!job.sourceAudio || !fs.existsSync(sourceAudio)) {
   throw new Error(`sourceAudio が見つかりません: ${sourceAudio}`);
 }
 
+// このスクリプトを直接実行しても、必ず動画用VRMを検品してから進む。
+// 口モーフの無い subeha-web-site.vrm へのフォールバックは許可しない。
+const ensureModel = spawnSync(process.execPath, [path.join(projectRoot, 'scripts/ensure-video-vrm.mjs')], {stdio: 'inherit'});
+if (ensureModel.error) throw ensureModel.error;
+if (ensureModel.status !== 0) throw new Error('動画用VRMの準備・検品に失敗しました。');
+
 const normalize = (text) => String(text ?? '')
   .normalize('NFKC')
   .toLowerCase()
@@ -109,21 +115,9 @@ if (!sourceCaptions && (!Array.isArray(job.captions) || job.captions.length === 
 
 const publicDir = path.join(projectRoot, 'public');
 fs.mkdirSync(publicDir, {recursive: true});
-
-// リポジトリ直下にある実VRMを、Remotionのpublicへ自動配置する。
-// 手作業でSubeha.vrmを置き忘れて別モデルや静止画へ逃げないための安全策。
 const modelTarget = path.join(publicDir, 'Subeha.vrm');
 if (!fs.existsSync(modelTarget)) {
-  const modelCandidates = [
-    path.resolve(projectRoot, '../../subeha-web-site.vrm'),
-    path.resolve(projectRoot, '../../assets/vrm/subeha-web-site.vrm'),
-  ];
-  const modelSource = modelCandidates.find((candidate) => fs.existsSync(candidate));
-  if (!modelSource) {
-    throw new Error('Subeha.vrm がありません。リポジトリ直下の subeha-web-site.vrm も見つかりません。');
-  }
-  fs.copyFileSync(modelSource, modelTarget);
-  console.log(`VRM copied: ${path.relative(projectRoot, modelSource)} -> public/Subeha.vrm`);
+  throw new Error('検品済み動画用 public/Subeha.vrm がありません。ensure-video-vrm.mjs の実行結果を確認してください。');
 }
 
 // 中間AACのencoder delayや二重seekで字幕と音声をずらさない。

@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "source": {
+    "name": "配信158.m4a",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "durationMs": 9000000
+  },
+  "clip": {"startMs": 7640000, "endMs": 7685000},
+  "avatar": {"speaker": "HOST", "model": "Subeha.vrm"},
+  "text": {
+    "title": "遺影をAIでカード化したら",
+    "telop": ""
+  },
+  "captions": [
+    {"text": "遺影をAIでカードみたいにしたんですよ", "startMs": 7651000, "endMs": 7654200, "speaker": "HOST", "confidence": 0.96}
+  ],
+  "speakerTurns": [
+    {"speaker": "HOST", "startMs": 7640000, "endMs": 7660000},
+    {"speaker": "CHUNK_015_SPEAKER_00", "startMs": 7660000, "endMs": 7662400},
+    {"speaker": "HOST", "startMs": 7662400, "endMs": 7685000}
+  ],
+  "visualCues": [
+    {
+      "id": "cue-1",
+      "startIndex": 0,
+      "endIndex": 0,
+      "startMs": 7651000,
+      "endMs": 7654200,
+      "mode": "search",
+      "query": "古い日本の遺影 写真館",
+      "prompt": null,
+      "reason": "発話内の実在資料を見せると内容が即座に伝わる"
+    }
+  ],
+  "visualReferences": [
+    {
+      "id": "placement-1",
+      "assetId": "openverse-example-image",
+      "kind": "search",
+      "provider": "openverse",
+      "startMs": 7651000,
+      "endMs": 7654200,
+      "query": "古い日本の遺影 写真館",
+      "prompt": null,
+      "url": "data:image/jpeg;base64,EXAMPLE_ONLY",
+      "thumbnailUrl": "data:image/jpeg;base64,EXAMPLE_ONLY",
+      "originalUrl": "https://example.invalid/reference.jpg",
+      "sourceUrl": "https://example.invalid/source",
+      "creator": "example creator",
+      "license": "example-only",
+      "title": "参考画像"
+    }
+  ],
+  "layout": {
+    "width": 720,
+    "height": 1280,
+    "captionBottomPx": 290,
+    "showSafeArea": true,
+    "background": null
+  }
+}

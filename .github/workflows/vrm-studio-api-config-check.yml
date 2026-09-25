@@ -1,0 +1,31 @@
+name: Optional Openverse Proxy Config Check
+
+on:
+  pull_request:
+    paths:
+      - 'workers/vrm-studio-api/**'
+      - '.github/workflows/deploy-vrm-studio-api.yml'
+      - '.github/workflows/vrm-studio-api-config-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  optional-proxy-readiness:
+    runs-on: ubuntu-latest
+    env:
+      HAS_CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+      HAS_CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+    steps:
+      - name: Report optional proxy readiness without exposing secrets
+        shell: bash
+        run: |
+          echo "CLOUDFLARE_API_TOKEN configured: $HAS_CF_TOKEN"
+          echo "CLOUDFLARE_ACCOUNT_ID configured: $HAS_CF_ACCOUNT"
+          echo 'OPENAI_API_KEY is not used by this architecture.'
+          if [ "$HAS_CF_TOKEN" != "true" ] || [ "$HAS_CF_ACCOUNT" != "true" ]; then
+            echo '::notice::Optional Openverse proxy is not deployable yet. This does NOT block ChatGPT edit-plan → GitHub/Remotion video rendering.'
+            exit 0
+          fi
+          echo 'Optional Openverse proxy deployment secrets are configured.'

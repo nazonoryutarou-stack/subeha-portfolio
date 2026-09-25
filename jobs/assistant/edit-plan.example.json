@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "sourceLabel": "GRAVITY #158",
+  "clip": {
+    "startMs": 0,
+    "endMs": 45000
+  },
+  "selection": {
+    "hook": "遺影をAIでカードにした",
+    "reason": "異常な行動の説明から破門のオチまで短尺で閉じる",
+    "summary": "遺影をAIでカード化して師匠に破門された話"
+  },
+  "text": {
+    "title": "遺影をAIでカード化したら\n師匠に破門された",
+    "telop": ""
+  },
+  "captions": [
+    {
+      "startMs": 200,
+      "endMs": 3100,
+      "speaker": "HOST",
+      "speakerConfidence": 0.98,
+      "speakerReason": "配信者が自分の行動を一人称で説明している",
+      "text": "遺影をAIに入れてカードにしたんですよ"
+    },
+    {
+      "startMs": 3200,
+      "endMs": 4100,
+      "speaker": "GUEST",
+      "speakerConfidence": 0.93,
+      "speakerReason": "直前のHOST発話への短い反応",
+      "text": "え？"
+    },
+    {
+      "startMs": 4300,
+      "endMs": 7900,
+      "speaker": "HOST",
+      "speakerConfidence": 0.97,
+      "speakerReason": "反応に対して経緯を続けて説明している",
+      "text": "それで師匠に見せたら破門されました"
+    }
+  ],
+  "visualReferences": [],
+  "motion": {
+    "profile": "deadpan",
+    "notes": "基本は静か。オチ直前だけ少し前傾。"
+  },
+  "layout": {
+    "width": 720,
+    "height": 1280,
+    "captionBottomPx": 290,
+    "background": null
+  }
+}

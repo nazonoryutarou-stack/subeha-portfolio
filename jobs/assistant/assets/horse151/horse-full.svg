@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" rx="34" fill="#0d1016"/>
+  <rect x="24" y="24" width="912" height="492" rx="26" fill="none" stroke="#d9b763" stroke-width="2" opacity=".65"/>
+  <text x="58" y="78" fill="#d9b763" font-family="Noto Sans JP,sans-serif" font-size="24" letter-spacing="5">OBSERVATION 151</text>
+  <text x="58" y="132" fill="#f4f1e8" font-family="Noto Sans JP,sans-serif" font-size="43" font-weight="700">守護霊：馬</text>
+  <g transform="translate(130 155)" fill="#d7b15b" stroke="#f5ddb0" stroke-width="5" stroke-linejoin="round">
+    <ellipse cx="360" cy="150" rx="195" ry="85"/>
+    <path d="M205 120 L150 58 L178 18 L238 92 Z"/>
+    <path d="M175 45 L142 13 L151 74 Z"/>
+    <circle cx="171" cy="52" r="8" fill="#131821" stroke="none"/>
+    <path d="M538 113 C590 85 624 98 660 68 C646 120 620 143 550 155 Z"/>
+    <path d="M248 200 L228 340 L272 340 L300 214 Z"/>
+    <path d="M430 214 L456 340 L500 340 L482 200 Z"/>
+    <path d="M505 202 L532 338 L575 338 L553 184 Z"/>
+    <path d="M330 210 L320 340 L362 340 L384 214 Z"/>
+  </g>
+  <text x="58" y="472" fill="#a9b0bd" font-family="Noto Sans JP,sans-serif" font-size="23">まずは普通の「馬」として認識される。</text>
+</svg>
