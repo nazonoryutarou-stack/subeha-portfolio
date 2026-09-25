@@ -1,0 +1,254 @@
+name: Secure VTuber Montage 2026-09-25
+
+on:
+  push:
+    branches:
+      - feature/vrm-studio-webapp
+    paths:
+      - '.github/workflows/vtuber-montage-secure-20260925.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/vrm-studio-webapp
+          fetch-depth: 0
+
+      - name: Publish one-time public key
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p jobs/assistant/handoff
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out /tmp/vtuber-handoff-private.pem
+          openssl pkey -in /tmp/vtuber-handoff-private.pem -pubout -out jobs/assistant/handoff/public.pem
+          printf '%s\n' "$GITHUB_RUN_ID" > jobs/assistant/handoff/run-id.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add jobs/assistant/handoff/public.pem jobs/assistant/handoff/run-id.txt
+          git commit -m "Publish one-time VTuber montage handoff key"
+          git push origin HEAD:feature/vrm-studio-webapp
+
+      - name: Wait for encrypted Dropbox handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f /tmp/payload.enc.b64 /tmp/key.enc.b64 /tmp/iv.txt
+          for i in $(seq 1 90); do
+            git fetch -q origin feature/vrm-studio-webapp
+            ok=1
+            for p in payload.enc.b64 key.enc.b64 iv.txt; do
+              if ! git show "origin/feature/vrm-studio-webapp:jobs/assistant/handoff/$p" > "/tmp/$p" 2>/dev/null; then
+                ok=0
+                break
+              fi
+            done
+            if [ "$ok" = 1 ]; then
+              echo "Encrypted payload received."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Timed out waiting for encrypted handoff." >&2
+          exit 1
+
+      - name: Decrypt handoff in runner memory
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d /tmp/key.enc.b64 > /tmp/key.enc
+          base64 -d /tmp/payload.enc.b64 > /tmp/payload.enc
+          openssl pkeyutl -decrypt             -inkey /tmp/vtuber-handoff-private.pem             -in /tmp/key.enc             -out /tmp/aes.key             -pkeyopt rsa_padding_mode:oaep             -pkeyopt rsa_oaep_md:sha256
+          KEYHEX="$(xxd -p -c 256 /tmp/aes.key)"
+          IVHEX="$(tr -d '\r\n ' < /tmp/iv.txt)"
+          openssl enc -d -aes-256-cbc             -K "$KEYHEX" -iv "$IVHEX"             -in /tmp/payload.enc -out /tmp/payload.json
+          python3 - <<'PY'
+          import json
+          p=json.load(open('/tmp/payload.json',encoding='utf-8'))
+          need={str(x) for x in [165,169,170,171,172]}
+          assert set(p['audio'])==need
+          assert set(p['segments'])==need
+          for group in ('audio','segments'):
+              for v in p[group].values():
+                  assert isinstance(v,str) and v.startswith('https://')
+          print('handoff schema ok')
+          PY
+
+      - name: Install media dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          fc-cache -f
+
+      - name: Download exact Dropbox sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/vtuber-work/audio /tmp/vtuber-work/segs /tmp/vtuber-work/cuts /tmp/vtuber-work/cards
+          python3 - <<'PY'
+          import json, subprocess
+          p=json.load(open('/tmp/payload.json',encoding='utf-8'))
+          for ep,url in p['audio'].items():
+              subprocess.run(['curl','-fL','--retry','2','--connect-timeout','30','--max-time','900',url,'-o',f'/tmp/vtuber-work/audio/{ep}.m4a'],check=True)
+          for ep,url in p['segments'].items():
+              subprocess.run(['curl','-fL','--retry','2','--connect-timeout','30','--max-time','120',url,'-o',f'/tmp/vtuber-work/segs/{ep}.jsonl'],check=True)
+          PY
+          for f in /tmp/vtuber-work/audio/* /tmp/vtuber-work/segs/*; do test -s "$f"; done
+          rm -f /tmp/payload.json /tmp/payload.enc /tmp/payload.enc.b64 /tmp/key.enc /tmp/key.enc.b64 /tmp/aes.key /tmp/iv.txt
+
+      - name: Cut and stitch 10-minute montage audio
+        shell: bash
+        run: |
+          set -euo pipefail
+          W=/tmp/vtuber-work
+          ffmpeg -hide_banner -loglevel error -y -ss 1457.580 -t 82.680 -i "$W/audio/165.m4a" -vn -ac 1 -ar 48000 -c:a pcm_s16le "$W/cuts/01.wav"
+          ffmpeg -hide_banner -loglevel error -y -ss 2099.000 -t 78.000 -i "$W/audio/169.m4a" -vn -ac 1 -ar 48000 -c:a pcm_s16le "$W/cuts/02.wav"
+          ffmpeg -hide_banner -loglevel error -y -ss 626.000 -t 82.000 -i "$W/audio/170.m4a" -vn -ac 1 -ar 48000 -c:a pcm_s16le "$W/cuts/03.wav"
+          ffmpeg -hide_banner -loglevel error -y -ss 2607.360 -t 140.640 -i "$W/audio/171.m4a" -vn -ac 1 -ar 48000 -c:a pcm_s16le "$W/cuts/04.wav"
+          ffmpeg -hide_banner -loglevel error -y -ss 2590.920 -t 123.600 -i "$W/audio/172.m4a" -vn -ac 1 -ar 48000 -c:a pcm_s16le "$W/cuts/05.wav"
+          ffmpeg -hide_banner -loglevel error -y -ss 3263.960 -t 106.520 -i "$W/audio/172.m4a" -vn -ac 1 -ar 48000 -c:a pcm_s16le "$W/cuts/06.wav"
+          : > "$W/cuts.txt"
+          for n in 01 02 03 04 05 06; do printf "file '%s'\n" "$W/cuts/$n.wav" >> "$W/cuts.txt"; done
+          ffmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i "$W/cuts.txt" -c copy "$W/source.wav"
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 "$W/source.wav"
+
+      - name: Generate golden-layout observation cards
+        shell: bash
+        run: |
+          set -euo pipefail
+          W=/tmp/vtuber-work
+          FONT="$(fc-match -f '%{file}' 'Noto Sans CJK JP:style=Bold' | head -n1)"
+          test -n "$FONT"
+          make_card() {
+            title="$1"; sub="$2"; out="$3"
+            ffmpeg -hide_banner -loglevel error -y -f lavfi -i color=c=0x11151b:s=1200x700:d=1               -vf "drawbox=x=30:y=30:w=1140:h=640:color=0xd2aa62@0.20:t=3,drawtext=fontfile='$FONT':text='$title':fontcolor=0xf3f0e8:fontsize=64:x=(w-text_w)/2:y=180,drawtext=fontfile='$FONT':text='$sub':fontcolor=0xd2aa62:fontsize=32:x=(w-text_w)/2:y=310,drawtext=fontfile='$FONT':text='SUBEHA ARCHIVE / OBSERVATION':fontcolor=0x8f98a8:fontsize=20:x=(w-text_w)/2:y=560"               -frames:v 1 "$out"
+          }
+          make_card '靴下で運転' '完璧さより、環境の話' "$W/cards/01.png"
+          make_card '除霊と消防署' '火を使うなら申請書' "$W/cards/02.png"
+          make_card 'サルの毛づくろい' '悪口と仲間意識' "$W/cards/03.png"
+          make_card 'しょっぱいお化け屋敷' '廃校への招待状' "$W/cards/04.png"
+          make_card '72時間・食塩水' '未来予知にも限界はある' "$W/cards/05.png"
+          make_card '霊能者生命保険' '呪いで死亡 1500万円？' "$W/cards/06.png"
+
+      - name: Build exact assistant edit-plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,base64,subprocess
+          from pathlib import Path
+          W=Path('/tmp/vtuber-work')
+          specs=[
+            dict(ep=165,start=1457580,end=1540260,title='靴下で運転',card='01.png'),
+            dict(ep=169,start=2099000,end=2177000,title='除霊と消防署',card='02.png'),
+            dict(ep=170,start=626000,end=708000,title='サルの毛づくろい',card='03.png'),
+            dict(ep=171,start=2607360,end=2748000,title='しょっぱいお化け屋敷',card='04.png'),
+            dict(ep=172,start=2590920,end=2714520,title='ツボと72時間食塩水',card='05.png'),
+            dict(ep=172,start=3263960,end=3370480,title='霊能者生命保険',card='06.png'),
+          ]
+          repl=[
+            ('霊農','霊能'),('例能者','霊能者'),('例能','霊能'),('女霊','除霊'),
+            ('助礼','除霊'),('徐励','除霊'),('お化け屋式','お化け屋敷'),
+            ('本備使用申請','火気使用申請'),('先祖代代','先祖代々'),
+            ('性感できる','生還できる'),('缶水できる','完遂できる'),
+            ('言わさ','噂'),('観測用の党','観測用の塔'),('三ついグリーンランド','三井グリーンランド'),
+            ('間接','関節'),('廃坑への招待状','廃校への招待状'),
+          ]
+          def clean(t):
+            t=str(t).strip().strip('「」')
+            for a,b in repl:t=t.replace(a,b)
+            if t in {'ご視聴ありがとうございました','♪~',',','(音楽)'}:return ''
+            return t
+
+          captions=[]; visuals=[]; offset=0
+          for sp in specs:
+            rows=[]
+            for line in (W/'segs'/f"{sp['ep']}.jsonl").read_text(encoding='utf-8').splitlines():
+              try:r=json.loads(line)
+              except:continue
+              if r['end_ms'] < sp['start'] or r['start_ms'] > sp['end']:continue
+              txt=clean(r.get('raw',''))
+              if not txt:continue
+              st=max(r['start_ms'],sp['start'])-sp['start']+offset
+              en=min(r['end_ms'],sp['end'])-sp['start']+offset
+              if en<=st:continue
+              rows.append(dict(startMs=int(st),endMs=int(en),speaker='HOST',text=txt,speakerConfidence=.99,speakerReason='selected solo host monologue'))
+            merged=[]
+            for r in rows:
+              if merged:
+                p=merged[-1];gap=r['startMs']-p['endMs'];dur=r['endMs']-p['startMs']
+                if gap<=650 and dur<=5200 and len(p['text'])+len(r['text'])<=46:
+                  p['text']+=' '+r['text'];p['endMs']=r['endMs'];continue
+              merged.append(dict(r))
+            captions.extend(merged)
+            b64=base64.b64encode((W/'cards'/sp['card']).read_bytes()).decode()
+            visuals.append({
+              'startMs':offset,'endMs':offset+(sp['end']-sp['start']),'kind':'generated',
+              'title':sp['title'],'prompt':sp['title'],'url':'data:image/png;base64,'+b64,
+              'creator':'ChatGPT / Subeha VTuber Engine','license':'generated'
+            })
+            offset+=sp['end']-sp['start']
+
+          actual=round(float(subprocess.check_output([
+            'ffprobe','-v','error','-show_entries','format=duration',
+            '-of','default=noprint_wrappers=1:nokey=1',str(W/'source.wav')
+          ],text=True).strip())*1000)
+          end=min(offset,actual)
+          captions=[c for c in captions if c['startMs']<end]
+          for c in captions:c['endMs']=min(c['endMs'],end)
+          visuals[-1]['endMs']=end
+          plan={
+            'version':1,
+            'sourceLabel':'配信165・169・170・171・172 面白雑談モンタージュ',
+            'selection':{
+              'reason':'相談者の個人情報を避け、配信者本人の雑談からキャラクター性とオチが強い区間を横断選定。',
+              'hook':'霊能業界の話なのに、靴下・消防署・税金・生命保険の話ばかりする。',
+              'summary':'霊能と日常実務が衝突する約10分の雑談集。'
+            },
+            'clip':{'startMs':0,'endMs':end},
+            'layout':{'width':1280,'height':720,'captionBottomPx':56,'background':None},
+            'text':{'title':'霊能者、だいたい事務仕事。','telop':'配信165 / 169 / 170 / 171 / 172'},
+            'captions':captions,'visualReferences':visuals,
+            'motion':{'profile':'normal','notes':'deadpan寄り。怪談部分だけ少し抑えめ。'}
+          }
+          (W/'edit-plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'planned_ms':offset,'actual_ms':actual,'end_ms':end,'captions':len(captions),'visuals':len(visuals)},ensure_ascii=False))
+          PY
+
+      - name: Install VTuber engine
+        working-directory: remotion/vrm-lipsync
+        run: npm install --no-audit --no-fund
+
+      - name: Render canonical Assistant pipeline
+        working-directory: remotion/vrm-lipsync
+        env:
+          VIDEO_VRM_PATH: ../../Subeha.vrm
+          WHISPER_CPP_VERSION: '1.5.5'
+          WHISPER_MODEL: small
+          WHISPER_LANGUAGE: ja
+        run: |
+          npm run render:assistant --             --plan=/tmp/vtuber-work/edit-plan.json             --audio=/tmp/vtuber-work/source.wav             --asr-output=out/timed-asr             --output=out/assistant-montage.mp4
+
+      - name: Verify final MP4
+        run: |
+          set -euo pipefail
+          test -s remotion/vrm-lipsync/out/assistant-montage.mp4
+          ffprobe -v error             -show_entries stream=codec_type,codec_name,width,height             -show_entries format=duration,size             -of json remotion/vrm-lipsync/out/assistant-montage.mp4
+
+      - name: Upload video and QC
+        uses: actions/upload-artifact@v4
+        with:
+          name: vtuber-montage-10min-20260925
+          path: |
+            remotion/vrm-lipsync/out/assistant-montage.mp4
+            remotion/vrm-lipsync/out/timed-asr/**
+            remotion/vrm-lipsync/out/qc/**
+            remotion/vrm-lipsync/out/qc-frames/**
+            remotion/vrm-lipsync/jobs/.generated/assistant-project.json
+            /tmp/vtuber-work/edit-plan.json
+          retention-days: 14
