@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">翻刻本文を出典確認できる資料だけを公開する。未翻刻・機械翻刻だけの資料は表に出さず、内部バックログに残す。蔵書数より「ここで読める」を優先する。</div>
+    <div class="hero-note">翻刻本文を取得でき、出典と利用条件を確認できる資料だけを公開する。未翻刻・機械OCRだけの資料は内部バックログに残す。蔵書数より「ここで読める」を優先する。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -93,9 +93,9 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>公開一覧に出す条件は「翻刻本文があり、出典確認できること」。未翻刻や機械OCRだけの資料は内部バックログに留め、読める状態になった時点で初めて公開する。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>公開一覧に出す条件は「翻刻本文があり、出典と利用条件を確認できること」。未翻刻や機械OCRだけの資料は内部バックログに留める。</p></div>
   </section>
-  <footer>Source metadata: 京都大学貴重資料デジタルアーカイブ / 画像・二次利用条件は各所蔵元の規定に従う。</footer>
+  <footer>Source metadata: 各所蔵機関 / 翻刻: みんなで翻刻ほか / 画像・二次利用条件は各提供元の規定に従う。</footer>
 </main>
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
@@ -154,7 +154,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     document.querySelectorAll("[data-id]").forEach(function(el){el.onclick=function(){openDoc(el.getAttribute("data-id"))}});
   }
   function manifestUrl(d){
-    return "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/"+encodeURIComponent(d.recordId)+"/manifest.json";
+    return d.manifestUrl || ("https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/"+encodeURIComponent(d.recordId)+"/manifest.json");
   }
   function imageFromBody(body){
     if(!body)return null;
@@ -333,11 +333,12 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       '<div class="kv"><b>所蔵</b><span>'+esc(d.sourceInstitution)+'</span></div>'+
       '<div class="kv"><b>コレクション</b><span>'+esc(d.collection)+'</span></div>'+
       '<div class="kv"><b>レコードID</b><span>'+esc(d.recordId)+'</span></div>'+
+      (d.transcriptionLicense?'<div class="kv"><b>翻刻ライセンス</b><span>'+esc(d.transcriptionLicense)+'</span></div>':'')+
       '<div class="layers">'+
         '<div class="layer"><h3>読み下し</h3><p>'+(d.kundoku?esc(d.kundoku):'未収録。翻刻の校訂後に追加する。')+'</p></div>'+
         '<div class="layer"><h3>現代語</h3><p>'+(d.modern?esc(d.modern):'未収録。')+'</p></div>'+
       '</div>'+
-      '<div class="sourcebox"><strong>出典・校合先</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.sourceViewerUrl||manifestUrl(d))+'" style="margin-left:6px">京大Mirador</a>'+(d.externalTranscriptionUrl?'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.externalTranscriptionUrl)+'" style="margin-left:6px">共同事業の翻刻</a>':'')+'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">原画像は京都大学IIIFを参照。本文欄はこのリポジトリに固定保存した翻刻だけを表示する。</div></div>';
+      '<div class="sourcebox"><strong>出典・校合先</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">出典ページ</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.sourceViewerUrl||manifestUrl(d))+'" style="margin-left:6px">IIIF</a>'+(d.externalTranscriptionUrl?'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.externalTranscriptionUrl)+'" style="margin-left:6px">共同事業の翻刻</a>':'')+'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">原画像は京都大学IIIFを参照。本文欄はこのリポジトリに固定保存した翻刻だけを表示する。</div></div>';
     document.getElementById("drawer").classList.add("open");
     history.replaceState(null,"","#"+encodeURIComponent(d.id));
     wireReader(d);
