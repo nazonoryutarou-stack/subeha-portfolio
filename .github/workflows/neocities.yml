@@ -8,6 +8,7 @@ on:
       - 'public/**'
       - 'hitotsu-ore-choji.png'
       - '.github/workflows/neocities.yml'
+      - 'scripts/build-komonjo.mjs'
   workflow_dispatch:
 
 permissions:
@@ -33,6 +34,12 @@ jobs:
           set -euo pipefail
           test -f hitotsu-ore-choji.png
           cp hitotsu-ore-choji.png public/hitotsu-ore-choji.png
+
+      - name: Build komonjo transcriptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/build-komonjo.mjs public/komonjo/data.json
 
       - name: Validate public site
         shell: bash
