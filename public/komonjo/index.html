@@ -82,7 +82,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>まだβ版</h2><p>現時点では目録と概要が中心。翻刻欄は空で構わない。信頼できるテキストが確認できた資料から埋め、原文・読み下し・現代語が横並びになるところまで育てる。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>デプロイ時に所蔵元のIIIF Manifestから翻刻メタデータを取得し、本文として収録する。原資料画像と翻刻を同じ画面で読み、読み下し・現代語はその次の層として積み上げる。</p></div>
   </section>
   <footer>Source metadata: 京都大学貴重資料デジタルアーカイブ / 画像・二次利用条件は各所蔵元の規定に従う。</footer>
 </main>
@@ -122,7 +122,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       ["収蔵",docs.length+"点"],
       ["年代",min+"–"+max],
       ["人物",people+"名"],
-      ["翻刻","準備中"]
+      ["翻刻",docs.filter(function(d){return !!d.transcription}).length+"/"+docs.length]
     ].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
   }
   function render(){
@@ -134,7 +134,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         '<h3>'+esc(d.title)+'</h3>'+
         '<div class="reading">'+esc(d.reading)+'</div>'+
         '<div class="summary">'+esc(d.summary)+'</div>'+
-        '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill wait">翻刻準備中</span></div>'+
+        '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill '+(d.transcription?'':'wait')+'">'+(d.transcription?'翻刻あり':'翻刻なし')+'</span></div>'+
         '<div class="card-footer"><span>'+esc(d.collection)+'</span><span>この場で読む →</span></div>'+
       '</article>';
     }).join(""):'<div class="empty">該当する資料がない。</div>';
