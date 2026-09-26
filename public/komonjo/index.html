@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">翻刻本文を取得でき、出典と利用条件を確認できる資料だけを公開する。未翻刻・機械OCRだけの資料は内部バックログに残す。蔵書数より「ここで読める」を優先する。</div>
+    <div class="hero-note">翻刻本文が読める資料だけを公開する。年代はIIIFメタデータから表示された資料順に取得し、確定・範囲・未詳を分ける。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -93,19 +93,170 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>公開一覧に出す条件は「翻刻本文があり、出典と利用条件を確認できること」。未翻刻や機械OCRだけの資料は内部バックログに留める。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開し、年代は所蔵元IIIFのメタデータを優先して自動整理する。根拠が取れない資料は年代未詳のままにする。</p></div>
   </section>
   <footer>Source metadata: 各所蔵機関 / 翻刻: みんなで翻刻ほか / 画像・二次利用条件は各提供元の規定に従う。</footer>
 </main>
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
 (function(){
-  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200;
+  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200, dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null;
   function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true}).concat(remoteDocs)}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
   function dateCertaintyLabel(d){var m={source:"出典確認",range:"範囲",partial:"年未詳",inferred:"推定",unknown:"未詳"};return m[d.dateCertainty]||"未詳"}
   function dateDisplaySafe(d){return (d.dateDisplay||"年代未詳")+(d.dateCertainty==="inferred"?"（推定）":"")}
+  function loadDateCache(){
+    try{dateCache=JSON.parse(localStorage.getItem("komonjo-date-cache-v2")||"{}")||{}}catch(e){dateCache={}}
+  }
+  function scheduleDateCacheSave(){
+    clearTimeout(dateSaveTimer);
+    dateSaveTimer=setTimeout(function(){
+      try{localStorage.setItem("komonjo-date-cache-v2",JSON.stringify(dateCache))}catch(e){}
+    },700);
+  }
+  function kanjiNum(s){
+    s=String(s||"").trim();
+    if(!s)return null;
+    if(/^\d+$/.test(s))return Number(s);
+    if(s==="元")return 1;
+    var dig={"〇":0,"零":0,"一":1,"二":2,"三":3,"四":4,"五":5,"六":6,"七":7,"八":8,"九":9};
+    if(s==="十")return 10;
+    if(s==="廿")return 20;
+    if(s==="卅")return 30;
+    var n=0,m=s.match(/^([一二三四五六七八九])?十([一二三四五六七八九])?$/);
+    if(m)return (m[1]?dig[m[1]]:1)*10+(m[2]?dig[m[2]]:0);
+    if(s[0]==="廿")return 20+(s[1]?dig[s[1]]||0:0);
+    if(s[0]==="卅")return 30+(s[1]?dig[s[1]]||0:0);
+    for(var i=0;i<s.length;i++){if(dig[s[i]]==null)return null;n=n*10+dig[s[i]]}
+    return n||null;
+  }
+  function periodFromYear(y){
+    if(!y)return "年代未整理";
+    if(y<794)return "古代";
+    if(y<1185)return "平安";
+    if(y<1333)return "鎌倉";
+    if(y<1467)return "南北朝・室町";
+    if(y<1573)return "戦国";
+    if(y<1603)return "安土桃山";
+    if(y<1853)return "江戸";
+    if(y<1868)return "幕末";
+    if(y<1912)return "明治";
+    if(y<1926)return "大正";
+    if(y<1989)return "昭和";
+    if(y<2019)return "平成";
+    return "令和";
+  }
+  function periodFromText(s){
+    s=String(s||"");
+    var rules=[
+      [/令和/,"令和"],[/平成/,"平成"],[/昭和/,"昭和"],[/大正/,"大正"],[/明治/,"明治"],
+      [/幕末/,"幕末"],[/江戸/,"江戸"],[/安土桃山|桃山/,"安土桃山"],[/戦国/,"戦国"],
+      [/室町/,"室町"],[/南北朝/,"南北朝"],[/鎌倉/,"鎌倉"],[/平安/,"平安"],[/奈良/,"奈良"],[/古代/,"古代"]
+    ];
+    for(var i=0;i<rules.length;i++)if(rules[i][0].test(s))return rules[i][1];
+    return "";
+  }
+  function parseHistoricalDate(raw){
+    raw=String(raw||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim();
+    if(!raw)return null;
+    var m=raw.match(/(^|[^0-9])((?:1[0-9]{3}|20[0-2][0-9]))(?:年|[-/.]|[^0-9]|$)/);
+    if(m){
+      var y=Number(m[2]);
+      var full=raw.match(new RegExp(y+"年(?:\\s*)?([0-9]{1,2})月(?:\\s*)?([0-9]{1,2})日"));
+      return {year:y,dateDisplay:full?full[0]:(raw.length<=60?raw:y+"年"),dateCertainty:"source",period:periodFromYear(y)};
+    }
+    var eras={
+      "令和":2019,"平成":1989,"昭和":1926,"大正":1912,"明治":1868,"慶応":1865,"元治":1864,"文久":1861,"万延":1860,
+      "安政":1854,"嘉永":1848,"弘化":1844,"天保":1830,"文政":1818,"文化":1804,"享和":1801,"寛政":1789,"天明":1781,
+      "安永":1772,"明和":1764,"宝暦":1751,"寛延":1748,"延享":1744,"寛保":1741,"元文":1736,"享保":1716,"正徳":1711,
+      "宝永":1704,"元禄":1688,"貞享":1684,"天和":1681,"延宝":1673,"寛文":1661,"万治":1658,"明暦":1655,"承応":1652,
+      "慶安":1648,"正保":1644,"寛永":1624,"元和":1615,"慶長":1596,"文禄":1592,"天正":1573,"元亀":1570,"永禄":1558,
+      "弘治":1555,"天文":1532,"享禄":1528,"大永":1521,"永正":1504,"文亀":1501,"明応":1492,"延徳":1489,"長享":1487,
+      "文明":1469,"応仁":1467,"文正":1466,"寛正":1460,"長禄":1457,"康正":1455,"享徳":1452,"宝徳":1449,"文安":1444,
+      "嘉吉":1441,"永享":1429,"正長":1428,"応永":1394,"明徳":1390,"康応":1389,"嘉慶":1387,"至徳":1384,"永徳":1381,
+      "康暦":1379,"永和":1375,"応安":1368,"貞治":1362,"康安":1361,"延文":1356,"文和":1352,"観応":1350,"貞和":1345,
+      "康永":1342,"暦応":1338,"建武":1334,"元弘":1331
+    };
+    var keys=Object.keys(eras).sort(function(a,b){return b.length-a.length});
+    for(var i=0;i<keys.length;i++){
+      var e=keys[i], re=new RegExp(e+"([元0-9〇零一二三四五六七八九十廿卅]+)年"), mm=raw.match(re);
+      if(mm){
+        var n=kanjiNum(mm[1]); if(!n)continue;
+        var yy=eras[e]+n-1;
+        return {year:yy,dateDisplay:raw.length<=60?raw:(e+mm[1]+"年"),dateCertainty:"source",period:periodFromYear(yy)};
+      }
+    }
+    var p=periodFromText(raw);
+    if(p)return {year:null,dateDisplay:raw.length<=40?raw:p,dateCertainty:"range",period:p};
+    var century=raw.match(/(1[0-9]|20)世紀(?:前半|後半|中頃|頃)?/);
+    if(century)return {year:null,dateDisplay:century[0],dateCertainty:"range",period:"年代未整理"};
+    return null;
+  }
+  function extractManifestDate(m){
+    var candidates=[];
+    if(m&&m.navDate)candidates.push({label:"navDate",value:valueText(m.navDate)});
+    (m&&m.metadata?m.metadata:[]).forEach(function(row){
+      var label=valueText(row.label||row.Label||"");
+      var value=valueText(row.value||row.Value||"");
+      if(/年代|年次|年月|日付|成立|書写|刊行|出版|発行|制作|作成|時代|date|created|issued|period/i.test(label)){
+        candidates.push({label:label,value:value});
+      }
+    });
+    for(var i=0;i<candidates.length;i++){
+      var hit=parseHistoricalDate(candidates[i].value);
+      if(hit){
+        hit.dateSource=candidates[i].label;
+        hit.dateRaw=candidates[i].value;
+        return hit;
+      }
+    }
+    var broad=[];
+    (m&&m.metadata?m.metadata:[]).forEach(function(row){broad.push(valueText(row.value||row.Value||""))});
+    var p=periodFromText(broad.join(" "));
+    if(p)return {year:null,dateDisplay:p,dateCertainty:"range",period:p,dateSource:"IIIF metadata",dateRaw:p};
+    return null;
+  }
+  function applyDateMeta(d,meta){
+    if(!d||!meta)return;
+    if(meta.year!=null)d.year=meta.year;
+    if(meta.dateDisplay)d.dateDisplay=meta.dateDisplay;
+    if(meta.dateCertainty)d.dateCertainty=meta.dateCertainty;
+    if(meta.period)d.period=meta.period;
+    d.dateSource=meta.dateSource||"IIIF metadata";
+    d.dateRaw=meta.dateRaw||meta.dateDisplay||"";
+    d._dateFetched=true;
+  }
+  function queueDateEnrichment(docs){
+    docs.forEach(function(d){
+      if(!d.remoteReadable||!d.manifestUrl||d._dateFetched||d._dateQueued)return;
+      var cached=dateCache[d.honkokuEntryId||d.recordId];
+      if(cached){applyDateMeta(d,cached);return}
+      d._dateQueued=true;dateQueue.push(d);
+    });
+    pumpDateQueue();
+  }
+  function pumpDateQueue(){
+    while(dateWorkers<4&&dateQueue.length){
+      var d=dateQueue.shift(); dateWorkers++;
+      fetch(d.manifestUrl,{cache:"force-cache"})
+        .then(function(r){if(!r.ok)throw Error("manifest");return r.json()})
+        .then(function(m){
+          var hit=extractManifestDate(m);
+          if(hit){
+            applyDateMeta(d,hit);
+            dateCache[d.honkokuEntryId||d.recordId]=hit;
+            scheduleDateCacheSave();
+          }else d._dateFetched=true;
+        })
+        .catch(function(){d._dateFetched=true})
+        .finally(function(){
+          dateWorkers--;
+          if(dateQueue.length)pumpDateQueue();
+          if(dateWorkers===0){fillFilters();renderStats();render();}
+        });
+    }
+  }
   function sortDocs(a,b){
     var ay=a.year==null?999999:a.year, by=b.year==null?999999:b.year;
     if(ay!==by)return ay-by;
@@ -155,6 +306,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     }).join("")+(docs.length>shown.length?'<div class="empty" style="grid-column:1/-1"><button class="btn dark" id="moreBtn">さらに200点表示（残り '+(docs.length-shown.length)+'）</button></div>':''):'<div class="empty">該当する資料がない。</div>';
     document.querySelectorAll("[data-id]").forEach(function(el){el.onclick=function(){openDoc(el.getAttribute("data-id"))}});
     var more=document.getElementById("moreBtn"); if(more)more.onclick=function(){visibleLimit+=200;render()};
+    queueDateEnrichment(shown);
   }
   function manifestUrl(d){
     return d.manifestUrl || ("https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/"+encodeURIComponent(d.recordId)+"/manifest.json");
@@ -317,7 +469,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       var a=line.split("\t"), size=Number(a[idx.size]), progress=Number(a[idx.progress]);
       var id=a[idx.id]||"", title=a[idx.label]||"";
       if(!id||!title||title==="Unknown"||!Number.isFinite(size)||size<1||progress!==size||localIds.has(id))return null;
-      return {
+      var cached=dateCache[id];
+      var doc={
         id:"remote-"+project+"-"+id,
         honkokuEntryId:id,
         title:title,
@@ -349,6 +502,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         transcriptionLicense:"CC BY-SA 4.0",
         transcriptionAttribution:"みんなで翻刻 contributors"
       };
+      if(cached)applyDateMeta(doc,cached);
+      return doc;
     }).filter(Boolean);
   }
   function loadRemoteCatalog(){
@@ -440,7 +595,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   document.getElementById("randomBtn").onclick=function(){if(!data)return;var docs=filtered();if(!docs.length)docs=publicDocs();openDoc(docs[Math.floor(Math.random()*docs.length)].id)};
   document.getElementById("close").onclick=document.getElementById("shade").onclick=function(){document.getElementById("drawer").classList.remove("open");history.replaceState(null,"",location.pathname)};
   fetch("data.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error("data");return r.json()}).then(function(x){
-    data=x;fillFilters();renderStats();render();loadRemoteCatalog().then(function(){if(location.hash){var id=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id}))openDoc(id)}});
+    data=x;loadDateCache();fillFilters();renderStats();render();loadRemoteCatalog().then(function(){if(location.hash){var id=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id}))openDoc(id)}});
     if(location.hash){var id0=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id0}))openDoc(id0)}
   }).catch(function(){document.getElementById("grid").innerHTML='<div class="empty">資料データを読み込めなかった。</div>'});
 })();
