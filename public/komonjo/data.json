@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-09-27T00:35:00+09:00",
+  "updatedAt": "2026-09-27T00:31:00+09:00",
   "title": "古文書文庫 β",
   "description": "翻刻本文を取得でき、出典と利用条件を確認できる資料だけ公開する古文書デジタル文庫。",
   "policy": {
@@ -1416,7 +1416,13 @@
       "yasasiihentaigana",
       "zisin",
       "zukan"
-    ]
+    ],
+    "dateEnrichment": {
+      "mode": "client-manifest-lazy",
+      "source": "IIIF Manifest metadata",
+      "rule": "表示された資料から順に年代メタデータを取得し、ブラウザへキャッシュ。根拠のない推定はしない。",
+      "cacheKey": "komonjo-date-cache-v2"
+    }
   },
   "datePolicy": {
     "source": "所蔵元メタデータまたは本文に明記された年代のみ確定表示する。",
