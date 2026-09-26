@@ -48,6 +48,17 @@ a{color:inherit}button,input,select{font:inherit}
 .iiif-loading{color:#d8d0c3;padding:40px 20px;text-align:center;width:100%}
 .iiif-error{background:#2a2621;color:#ddd3c4;padding:18px;line-height:1.7;font-size:12px}
 .iiif-error a{color:#fff}
+.reading-workspace{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);gap:12px;margin:18px 0 20px}
+.reading-workspace .reader{margin:0}
+.source-transcription{border:1px solid var(--line);border-radius:14px;background:#fffdf8;min-height:320px;overflow:hidden}
+.source-transcription-head{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#eee8da;border-bottom:1px solid var(--line);padding:10px 12px}
+.source-transcription-head strong{font-size:13px;letter-spacing:.08em}
+.source-state{font-size:10px;padding:4px 7px;border-radius:999px;background:#fff;border:1px solid var(--line);color:#716a60}
+.source-state.ok{background:#eaf5ef;color:#287a52;border-color:#cbe4d5}
+.source-state.none{background:#fff3df;color:#99620b;border-color:#ecd5a8}
+.transcription-text{margin:0;padding:16px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:15px;line-height:2;max-height:min(68vh,760px);overflow:auto}
+.transcription-note{padding:11px 14px;border-top:1px solid var(--line);font-size:10px;line-height:1.7;color:#7c7468;background:#f8f5ed}
+@media(max-width:900px){.reading-workspace{grid-template-columns:1fr}}
 footer{padding:30px 0;color:#837b6f;font-size:11px}
 @media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr 1fr 1fr}.toolbar input{grid-column:1/-1}.hero{grid-template-columns:1fr}.hero-note{border-left:0;border-top:1px solid var(--line);padding:14px 0 0}}
 @media(max-width:650px){.wrap{padding:14px}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.toolbar{top:54px;grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.toolbar .wide{grid-column:1/-1}.about{grid-template-columns:1fr}.brand small{display:none}}
@@ -68,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">初版は京都大学貴重資料デジタルアーカイブの公開資料から選定。IIIF画像をこのサイト内で直接めくって読める。翻刻、読み下し、現代語は順次追加。</div>
+    <div class="hero-note">20点すべてを所蔵元IIIFへ接続。原資料と翻刻テキストを同じ画面で読む。失敗OCRは本文から排除し、所蔵元テキストを優先する。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -82,14 +93,14 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>デプロイ時に所蔵元のIIIF Manifestから翻刻メタデータを取得し、本文として収録する。原資料画像と翻刻を同じ画面で読み、読み下し・現代語はその次の層として積み上げる。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>GitHub Actionsは使わず、20点すべてについて閲覧時に所蔵元IIIF Manifestを直接照会する。失敗OCRは捨て、原画像と所蔵元テキストを左右に並べる。所蔵元に全文翻刻がない資料だけ、人工翻刻を追加していく。</p></div>
   </section>
   <footer>Source metadata: 京都大学貴重資料デジタルアーカイブ / 画像・二次利用条件は各所蔵元の規定に従う。</footer>
 </main>
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
 (function(){
-  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100;
+  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={};
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
   function sortDocs(a,b){
@@ -122,7 +133,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       ["収蔵",docs.length+"点"],
       ["年代",min+"–"+max],
       ["人物",people+"名"],
-      ["翻刻",docs.filter(function(d){return !!d.transcription}).length+"/"+docs.length]
+      ["翻刻","20点照会"]
     ].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
   }
   function render(){
@@ -134,7 +145,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         '<h3>'+esc(d.title)+'</h3>'+
         '<div class="reading">'+esc(d.reading)+'</div>'+
         '<div class="summary">'+esc(d.summary)+'</div>'+
-        '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill '+(d.transcription?'':'wait')+'">'+(d.transcription?'翻刻あり':'翻刻なし')+'</span></div>'+
+        '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill" data-trans-badge="'+esc(d.id)+'">所蔵元翻刻</span></div>'+
         '<div class="card-footer"><span>'+esc(d.collection)+'</span><span>この場で読む →</span></div>'+
       '</article>';
     }).join(""):'<div class="empty">該当する資料がない。</div>';
@@ -178,6 +189,60 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     img.style.width=iiifZoom+"%";
     stage.scrollTop=0;stage.scrollLeft=0;
   }
+  function valueText(v){
+    if(v==null)return "";
+    if(typeof v==="string")return v;
+    if(Array.isArray(v))return v.map(valueText).filter(Boolean).join("\n");
+    if(typeof v==="object"){
+      if(v["@value"])return String(v["@value"]);
+      if(v.value)return valueText(v.value);
+      var langs=["ja","none","en"];
+      for(var i=0;i<langs.length;i++){if(v[langs[i]])return valueText(v[langs[i]])}
+      return Object.keys(v).map(function(k){return valueText(v[k])}).filter(Boolean).join("\n");
+    }
+    return String(v);
+  }
+  function htmlToText(s){
+    if(!s)return "";
+    var t=String(s).replace(/<br\s*\/?\s*>/gi,"\n").replace(/<\/p\s*>/gi,"\n");
+    var box=document.createElement("textarea");
+    box.innerHTML=t.replace(/<[^>]+>/g,"");
+    return box.value.replace(/\r/g,"").replace(/\n{3,}/g,"\n\n").trim();
+  }
+  function extractSourceTranscription(m){
+    var md=m&&m.metadata?m.metadata:[];
+    var strong=[];
+    md.forEach(function(row){
+      var label=valueText(row.label||row.Label||"");
+      var value=valueText(row.value||row.Value||"");
+      if(/翻刻|本文|全文|transcription|transcript/i.test(label)&&value) strong.push(value);
+    });
+    if(strong.length)return {text:htmlToText(strong.join("\n\n")),kind:"metadata"};
+    var desc=valueText(m&&m.description);
+    if(desc&&desc.trim().length>8)return {text:htmlToText(desc),kind:"description"};
+    return {text:"",kind:"none"};
+  }
+  function showSourceTranscription(d,m){
+    var out=extractSourceTranscription(m);
+    sourceTextCache[d.id]=out;
+    var pre=document.getElementById("sourceTranscriptionText");
+    var state=document.getElementById("sourceTranscriptionState");
+    var note=document.getElementById("sourceTranscriptionNote");
+    if(!pre||!state)return;
+    if(out.text){
+      pre.textContent=out.text;
+      state.textContent=out.kind==="metadata"?"所蔵元翻刻":"所蔵元記述";
+      state.className="source-state ok";
+      note.textContent=out.kind==="metadata"
+        ?"京都大学IIIF Manifestの翻刻/本文メタデータを表示しています。"
+        :"京都大学IIIF Manifestのdescriptionを表示しています。説明文を含む場合があるため、全文翻刻としての校訂は今後行います。";
+    }else{
+      pre.textContent="このManifestには機械的に抽出できる翻刻テキストがありません。原画像を左で読み、人工翻刻を追加する対象です。";
+      state.textContent="原画像のみ";
+      state.className="source-state none";
+      note.textContent="存在しない翻刻を捏造しないため、空欄をOCRのゴミで埋めることはしません。";
+    }
+  }
   function wireReader(d){
     document.getElementById("iiifPrev").onclick=function(){if(iiifIndex>0){iiifIndex--;renderIiif()}};
     document.getElementById("iiifNext").onclick=function(){if(iiifIndex<iiifPages.length-1){iiifIndex++;renderIiif()}};
@@ -185,11 +250,15 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     document.getElementById("iiifZoomIn").onclick=function(){iiifZoom=Math.min(300,iiifZoom+25);renderIiif()};
     fetch(manifestUrl(d),{cache:"force-cache"}).then(function(r){if(!r.ok)throw Error("manifest");return r.json()}).then(function(m){
       iiifPages=parseManifest(m);iiifIndex=0;iiifZoom=100;
+      showSourceTranscription(d,m);
       if(!iiifPages.length)throw Error("no images");
       renderIiif();
     }).catch(function(){
       var stage=document.getElementById("iiifStage");
-      if(stage)stage.innerHTML='<div class="iiif-error">この資料のIIIF画像をブラウザから取得できなかった。<br><a target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元で開く</a> / <a target="_blank" rel="noopener" href="'+esc(manifestUrl(d))+'">IIIF manifest</a></div>';
+      if(stage)stage.innerHTML='<div class="iiif-error">この資料のIIIFを取得できなかった。<br><a target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元で開く</a> / <a target="_blank" rel="noopener" href="'+esc(manifestUrl(d))+'">IIIF manifest</a></div>';
+      var pre=document.getElementById("sourceTranscriptionText"), state=document.getElementById("sourceTranscriptionState");
+      if(pre)pre.textContent="所蔵元IIIFへの接続に失敗しました。";
+      if(state){state.textContent="取得失敗";state.className="source-state none";}
     });
   }
   function openDoc(id){
@@ -199,15 +268,14 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       '<div class="eyebrow">'+esc(d.period)+' / '+esc(d.type)+'</div>'+
       '<h2>'+esc(d.title)+'</h2><div class="reading">'+esc(d.reading)+'</div>'+
       '<p class="lead">'+esc(d.summary)+'</p>'+
-      '<div class="reader"><div class="reader-head"><div class="reader-title">原資料を読む</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div>'+
+      '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻</strong><span id="sourceTranscriptionState" class="source-state">読込中</span></div><pre id="sourceTranscriptionText" class="transcription-text">京都大学IIIF Manifestから所蔵元テキストを読み込んでいます…</pre><div id="sourceTranscriptionNote" class="transcription-note">原画像と翻刻を突き合わせて読めるようにしています。</div></div></div>'+
       '<div class="kv"><b>年代</b><span>'+esc(d.dateDisplay)+'</span></div>'+
       '<div class="kv"><b>作成者</b><span>'+esc(d.author)+'</span></div>'+
       '<div class="kv"><b>所蔵</b><span>'+esc(d.sourceInstitution)+'</span></div>'+
       '<div class="kv"><b>コレクション</b><span>'+esc(d.collection)+'</span></div>'+
       '<div class="kv"><b>レコードID</b><span>'+esc(d.recordId)+'</span></div>'+
       '<div class="layers">'+
-        '<div class="layer"><h3>翻刻</h3><p>'+(d.transcription?esc(d.transcription):'未収録。原資料を確認し、信頼できる本文から順次追加する。')+'</p></div>'+
-        '<div class="layer"><h3>読み下し</h3><p>'+(d.kundoku?esc(d.kundoku):'未収録。')+'</p></div>'+
+        '<div class="layer"><h3>読み下し</h3><p>'+(d.kundoku?esc(d.kundoku):'未収録。翻刻の校訂後に追加する。')+'</p></div>'+
         '<div class="layer"><h3>現代語</h3><p>'+(d.modern?esc(d.modern):'未収録。')+'</p></div>'+
       '</div>'+
       '<div class="sourcebox"><strong>出典</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元で開く</a><a class="btn" target="_blank" rel="noopener" href="'+esc(manifestUrl(d))+'" style="margin-left:6px">IIIF</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">表示画像は所蔵元のIIIF配信をこのページ上で参照している。画像そのものをこのサイトへ複製保存しているわけではない。</div></div>';
