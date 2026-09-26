@@ -100,7 +100,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
 (function(){
-  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false;
+  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200;
   function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true}).concat(remoteDocs)}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
@@ -141,7 +141,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   function render(){
     var docs=filtered();
     document.getElementById("count").textContent=docs.length+"点公開";
-    document.getElementById("grid").innerHTML=docs.length?docs.map(function(d){
+    var shown=docs.slice(0,visibleLimit);
+    document.getElementById("grid").innerHTML=docs.length?shown.map(function(d){
       return '<article class="card" data-id="'+esc(d.id)+'">'+
         '<div class="kicker">'+esc(d.period)+' · '+esc(d.dateDisplay)+'</div>'+
         '<h3>'+esc(d.title)+'</h3>'+
@@ -150,8 +151,9 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill '+(((d.transcription||"").trim()||d.remoteReadable)?'':'wait')+'">'+(((d.transcription||"").trim()||d.remoteReadable)?'翻刻済':'未翻刻')+'</span></div>'+
         '<div class="card-footer"><span>'+esc(d.collection)+'</span><span>この場で読む →</span></div>'+
       '</article>';
-    }).join(""):'<div class="empty">該当する資料がない。</div>';
+    }).join("")+(docs.length>shown.length?'<div class="empty" style="grid-column:1/-1"><button class="btn dark" id="moreBtn">さらに200点表示（残り '+(docs.length-shown.length)+'）</button></div>':''):'<div class="empty">該当する資料がない。</div>';
     document.querySelectorAll("[data-id]").forEach(function(el){el.onclick=function(){openDoc(el.getAttribute("data-id"))}});
+    var more=document.getElementById("moreBtn"); if(more)more.onclick=function(){visibleLimit+=200;render()};
   }
   function manifestUrl(d){
     return d.manifestUrl || ("https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/"+encodeURIComponent(d.recordId)+"/manifest.json");
@@ -399,9 +401,9 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     }).catch(function(){
       var stage=document.getElementById("iiifStage");
       if(stage)stage.innerHTML='<div class="iiif-error">この資料のIIIFを取得できなかった。<br><a target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元で開く</a> / <a target="_blank" rel="noopener" href="'+esc(manifestUrl(d))+'">IIIF manifest</a></div>';
-      var pre=document.getElementById("sourceTranscriptionText"), state=document.getElementById("sourceTranscriptionState");
+      if(!d.remoteReadable){var pre=document.getElementById("sourceTranscriptionText"), state=document.getElementById("sourceTranscriptionState");
       if(pre)pre.textContent="所蔵元IIIFへの接続に失敗しました。";
-      if(state){state.textContent="取得失敗";state.className="source-state none";}
+      if(state){state.textContent="取得失敗";state.className="source-state none";}}
     });
   }
   function openDoc(id){
@@ -428,11 +430,11 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     history.replaceState(null,"","#"+encodeURIComponent(d.id));
     wireReader(d);
   }
-  document.getElementById("search").oninput=function(e){q=e.target.value;render()};
-  document.getElementById("period").onchange=function(e){period=e.target.value;render()};
-  document.getElementById("type").onchange=function(e){type=e.target.value;render()};
-  document.getElementById("author").onchange=function(e){author=e.target.value;render()};
-  document.getElementById("clearBtn").onclick=function(){q=period=type=author="";document.getElementById("search").value="";fillFilters();render()};
+  document.getElementById("search").oninput=function(e){q=e.target.value;visibleLimit=200;render()};
+  document.getElementById("period").onchange=function(e){period=e.target.value;visibleLimit=200;render()};
+  document.getElementById("type").onchange=function(e){type=e.target.value;visibleLimit=200;render()};
+  document.getElementById("author").onchange=function(e){author=e.target.value;visibleLimit=200;render()};
+  document.getElementById("clearBtn").onclick=function(){q=period=type=author="";visibleLimit=200;document.getElementById("search").value="";fillFilters();render()};
   document.getElementById("randomBtn").onclick=function(){if(!data)return;var docs=filtered();if(!docs.length)docs=publicDocs();openDoc(docs[Math.floor(Math.random()*docs.length)].id)};
   document.getElementById("close").onclick=document.getElementById("shade").onclick=function(){document.getElementById("drawer").classList.remove("open");history.replaceState(null,"",location.pathname)};
   fetch("data.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error("data");return r.json()}).then(function(x){
