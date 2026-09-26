@@ -1,11 +1,11 @@
 {
-  "version": 1,
-  "updatedAt": "2026-09-26T10:21:17Z",
+  "version": 2,
+  "updatedAt": "2026-09-26T20:10:00+09:00",
   "title": "古文書文庫 β",
-  "description": "原資料への導線と、将来の翻刻・読み下し・現代語を一つにまとめる古文書ライブラリ。",
+  "description": "原資料画像と、所蔵元IIIF Manifestの翻刻テキストを同じ画面で読む古文書ライブラリ。",
   "policy": {
     "image": "画像は原所蔵機関の公開ページへリンクし、無断複製しない。",
-    "text": "翻刻・読み下し・現代語は出典と権利を確認したうえで順次追加する。",
+    "text": "翻刻は京都大学のIIIF Manifestに収録された所蔵元テキストを優先してライブ取得する。失敗したOCRや未校正AI文字列は本文として表示しない。",
     "metadata": "初版は京都大学貴重資料デジタルアーカイブの公開メタデータをもとに整理。"
   },
   "documents": [
@@ -29,8 +29,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00034891/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00034891/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034891/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "ashikaga-1351-rank",
@@ -52,8 +54,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00033788/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00033788/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00033788/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "date-kagemune-1351",
@@ -75,8 +79,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00033779/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00033779/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00033779/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "ashikaga-1352-mobilization",
@@ -98,8 +104,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00033789/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00033789/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00033789/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "yoshiakira-1352-order",
@@ -121,8 +129,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00029829/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00029829/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00029829/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "yoshimochi-1418-order",
@@ -144,8 +154,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00034892/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00034892/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034892/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "kennaiki-1428",
@@ -167,8 +179,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00036246/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00036246/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00036246/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "hosokawa-letter",
@@ -190,8 +204,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00034895/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00034895/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034895/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "ouchi-letter",
@@ -213,8 +229,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00034900/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00034900/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034900/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "hideyoshi-letter",
@@ -236,8 +254,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00022998/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00022998/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00022998/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "konoe-letter",
@@ -259,8 +279,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00022993/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00022993/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00022993/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "hidetada-letter",
@@ -282,8 +304,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00022992/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00022992/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00022992/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "date-masamune-letter",
@@ -305,8 +329,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "Command '['/opt/hostedtoolcache/Python/3.11.16/x64/bin/python', '/tmp/ndlkotenocr-lite/src/ocr.py', '--sourceimg', '/tmp/komonjo-ocr/RB00034938/images/001.jpg', '--output', '/tmp/komonjo-ocr/RB00034938/ocr-001']' returned non-zero exit status 1."
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034938/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "sho-zan-1854",
@@ -324,14 +350,14 @@
       "sourceInstitution": "京都大学",
       "archive": "京都大学貴重資料デジタルアーカイブ",
       "rightsUrl": "https://rmda.kulib.kyoto-u.ac.jp/reuse",
-      "transcription": "【1】\n0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n日曜日-918 - - - - - - - - - - - - - - - - - - - - - - ---------------------------------------------------\n\n【2】\n一他工間家山先生蔵壱通\n右品正ニ御讓渡申上代金をして\n金六拾円銀収以支確実也\n今日亥早ニ付如何様之故障故\n来とも拙者引請御速\n或へ相懸申候処為後日譲渡証書\n依而如件\n明治廿一年五月間\n麹町区筋売始四ヶ月十二間地\n倉持百喜\n\n【3】\n尊攘堂\n此度の職ゟ可監退出一高よらす入手請御用\n損候とお折り候様無之上候\nしよし店敷は副石川出瀧にて御座候諸高之\nるゝきよし夜ひは浮海の風にいかけるにし近す堺も\n故ニ御座候但被何わかし天当年廿五日\nとそへしも元来江古州藩兵家の由漂書もも達\n者ニ至りて泥力も有之候をよらく難苦ニ傳へ\nならはき得も得ては海軍の事には決し早く思ひまし\n一新築物の事にて深く買へれ存候前の賃金壱\n之外へ申出候にも無之有之家門下候事も元々売\nを以てをてのたし然る段一以年申進暦の事に付\n落座有之知行ニス難被遊候鞍御城下江戸御帰殿へ廻\nの事ハ免許有之十一月の家業潰有候由之外其後\n定し改書館候郎は遠年米利借の事出来日本ニ於願\nの時より未曾有の難なく見習す事及ふ事なり\nにも手のへて一ぎ様無之差出亡斗の痛ニ近年の文也\n当合にても廻済之急弊釈置をよく切るゟ先あらす\n彼の近邦の高鬼一人もを撰む沖の地方に遣し御\n勢事情をまのあたみ探索としめ火兵と流水気の\n公助方留候掛付受礼候義も書付はかり先ツ仕らせ\n細きおたしさゝ死を隔て痒を怪しの類を免れす\n右ニ角を遣を懸けされもの道を開きて開きて懸り\n御留任を以奉願の得なくものもたし瀬川駅を堀\nいかんとかねへ庵へ参り候こ述ておき\nりかれたるの様にも破念ニ付し内鎌勇節\n一駄御召出御普請役ニ御屋主御座候て土州借手を受候\n領具御邑見御主の国へ津流にも別国へ津津にたたし\n十一月十日の祭潤十月九日入清兵衛\n得共流津方ニたも少しく書物をも読ニ好を以候もの事\nにてひしゆ人をは酒剤の地にも目を猟聞早く\n所潰の文字をも為す殊に山ときにおもの子とも\n書用説さくゐらきに候よし候由此而已ニ仕候\n大事御入用には立申またせら子此間迄にて\nをしるを借地ニ漂流し其形合事の跡心をうけ\nき焼然れ共航海の数とも学山にして\n一端風はゝ今辺のの主実ニいかす直たへく州へく\n見の取用に無之にも\n皇国一流利益井子に至る時度と称し被為聞候委細見\n此節遺憾ニ居候侭ニ相伺候迄御伺候等の願叶ひ候様堅\n罷在候事数所之御見込即弟及拝語候に人\n\n【4】\n見の相用に無之にも\n皇国一流利益廿一月封度と押し被為聞候委細生\n此節遺憾ニ居候様ニ相伺候意御伺被為願聞の候様堅\n罷在候事遊候得恐込可被下候得及拝讃候に付\n労解ニ囲いかにも候様子被仰付候事を買\n思聞処よし申候に付弁やとい三命角可被成候ハ\n事故に付聞流と申候無之には公通のへ法及\n有ハ叶ひたし間敷不然厚源の事\n難ニて天と人とも余り申と存し、志本才ある人ニ\n無之もハあらひ漂流せしても世の烈ニハ成り不申候由\n得てと申候ハ此故にも有志有之人有之事も凡と驚く\nれしにあらさん此鐘の小舟を以て狂論を奉りけり\n見かれと其容んに留らすへりといんことを忘れし\n居も長事すへからす夫々殊にみ申は此役にてか作りし\nも此日聞前文民有国ニ押し始て理玉小兄弟\n起り被頼聞儀も六方可申国島辺ニては風聞の浦\n是の隠ん此方へする事も此方の漁んかしことわた\n事と可至と且六度ハ有之事之承り此節普請\n天徳の乱も彼是の風聞かゝへともつまる事よりかぼ\nむかし元の恐国親志を拝へ我々頂戴有之\n広山家は龍ハ我国ニ甚しく回路も高し候へハ是又\nるゝなき御察しる旨差山地まとたゝ雲着候へ聞の\n地高くは木利堅等の船の往来多き可有之有れ候\nししかう花ニヤワシントンのねり候事し暑烈するへ\n但し但し公廻門法もへはいかれとも予察に勤ひ候事を\nしんニよと申所当人はかにも心得候とて現死と申上\n裾なねを整へ少しの雄費を覚候ニ付問達し\nずつよく存候は此御死一との亡齢の義下当時の人あめ\nと存し候へは込てよく小決て聞心いたし候げかける\nわり奉仕候てニも御座之逢候程も調ニ浮む藤\n二ツヽハ筆の志を賞し一ツニハ皆の心によくいとし\n人為ニ金六十一ニ限遣し候候得水の過々ニ\n之子有置官殿献罷殿後足三十郎依被為廻\n道心なし雇人誰判未供以往度或有困相違\n長野村ゟ鶴植社美濃海御籠候五階自為御\n同徒完弐帋一開超百間智資林機ヲ解す\n存居不意様常功及身説能実\n是は既に当昼の夜の時あしに冷き其楽通すひ無之\n御門話被成候前様御用候由ニて隣海ゟ熱為致申て彼\nなた少しを仕度千は来帰須波辰は三斗の後\n若細からする事なるに出る\n荒押潰候即死しか聞か聞方別ニはひして不潔にしか\nは問わと申嘆し候所に向わはし候民には何事と心得は\nまゝミ上長地屋敷よりを浦賀辺御関馬家家なみはし\n申候へハ其者にて向き力を尽し取もらんと称しか\n明のまて尋く思ひすゝ見と存しとも山其もあり\n在ニ遣し候四人宛を持のまゝ返し返し其後七昼\n二十八軒ニルナ玉掛らしテホウラサカニ当手山共八葉作ニ相\n出候其元ニハ如何し平大夫とハし人に真田主計を\nニ付へ共之両人も四節柄の可自由無之致し宜さく存\n釣品消いたしものし事へへ承満壱国残し只今\n申事とも菊川そもにはあらん\n\n【5】\nおもふはるゝのをたる蓋しももはんと存し\n何のいて暫く思ひすゝんし返しして山其の相用\n王は遣しは四国の歌を持の申し返したし、其後先に\n御礼ニ付御礼ニ而」之分等たラサルニ当手山共御案外御\nすゝ其えてふつき大ろといし人にもにしつわれを\nなんなしる人も四節野の義は此みりはしるしくくさく\n酒忽用いたしものし両人へ家満そ囲致し御定合\nと申事之犀川ハ野崎立り大抱ニもの人より致奔走へ\nしこしたはけく向き来山風気を用ひ申し心を用ひ申候\n新橋御屋敷の普請方やささしと同ひ申候\n半山降蹴行強く御受如何何人申とも相示し上候以後\n法度ニは難能とも達而致候得共義文武武政ニ而諸軍\n明治御之候事如し然も尋ぬ貴様開仕用の事を\nことも壱匁之節ノ助ひ御坐候事之砂合ハ不苦ニ居候処\n一夜ニ致し居候三月六日ゟ夜復御聴渡御聴あへ候御御帰事\n之誰心得のため二波の船も追寄其形状一見致し而危致候\nいと申候ゟ神原川水へ通さへ玉舟玉へいらす\n御座浦賀用心申候事候昼夜いたの相得ゆし然る\nすとて内に出通を認め相渡し候其趣意にはつき\nも其義なとし二も温髪故其人足ニ此上候計上候事\nこの事にし一も温髪故にて人足に出立候事も六ケ敷\nこの事に候へは不存及此者は門人中有志の前にゝ某く\n藩中之間程有之候は勿る其多方処之体\nの馬場屋と待合のあへして此子通しと云へと申そす\n川山賢二一江戸ませわ仕果と申書あしはみつとき\n名名其上其先意ハ我故中ニ離し東を立百里南北三百七\nなの有を誰なけし事在見聞ニ於て交輪望の\nを以て金地球を潰るの如卦に困回するを承り候に雖有之\n泥足者をハ益々ゟ慥有申候由とことせ也此船ニ乗せ本\n国々御尋捨て千万一ヶ所滞無国人外国へ渡り候は一冊な候哉\n届事発覚候時は刎断之程ともよふへく候へは極程不残\nたし候るしの遊色にい座候其文申内事へ出来かむき無事\n此様御講証致沢山ニ有之候へハ更ニ焼しミ放亡付且去年の実ハ状\n上り候と申事候二は後来見得高生の稽古共之為ニ認め候\n深きの文と成しいたじをかへせしふるゝ岩ならんや其\nある友人はかしたへ松平の士谷一にはな合と\nおも両人へ遣し遂に発覚と此御第にても仰座候\nの人より爰る家が弟いたし手を以て御国禁を犯し無\nニ付一切御證等致し候事も之間々と等の義ニハ曽て\n無之たしも寺鶴八ツ過御座候由ニ奉存可昨日御手出し\n節吉田も一同罷出御継手得三ケ所ニ而興力不可申候哉\nし等売分不申所ニ相違無之御触候方左衛門\n申教訓を捧き候を覚出し申置候如し申立候に付\n大火の通ともし専にを以て此上の御目絶偏々\n中心やし最初ゟ此頃迄も第二十卯年ゟ\n盡し其間の門為めを致し前屯地事ひしに百\nして此禍環には又弟をして此身を唱へしめ天朝為\n障の何まし候当今早急勝りの人をを撰ひは御地ニ遣されは\nより外の義あらましき事をよく其心に道さし候\nとての計にも可有之之事を励まし男の時は何迄\nとくぞいかれ申云も聞かりますますメの滞船の省に\nなしは悪のはさも見込候さんひきかわらず寒にて\n非すを聞くう生の長おきあらんすへをも知らさりし\n勢事情を採らんともやはさか如慥に沈ミ望を受むし\nニ候ニ而ハ世浦ニも成り可申候ニ付ニて早々\n\n【6】\n節去卯もに高座今年五月廿一日ニ奉存候つ半前\n節吉田も一同罷出の徒自由其人卅四十四日に極富の方\nし等費い処に相違無之御礼有之候儀はし候処\n教戒を暫きとも見て御触候間を\n大火の事に候たし専にを以て此上の御目進有之\nはけしかま初ゟ此頃とも第二十卯ニ至し前冠之事ニ止\n尽し其間の御為めを残しらす地中にひしに百\nして此論理らは天草をして此を唱へし候天明る\n洩の何方之御当今日急勝りの人をも撰ひ彼地ニ遣さんと\nより外の義あらましとき事をよく其心に御さし候\nとての事とも可有之とも急には一助まし尋の噂は何れ\nしてぞいかぬ申そも彼かりかには多かせが船の間には\nなしハ悪所見をも見逃てさんひるかわらせきとを見て\n肥つてはするうけるこの長かを一四らんすへをも切らさまの\n勢事情を探らんともやわれ候ハ如何に成々望を進む\nさし候聊は世の神にも成りすして同上の名を出しなり候\nき誠ニ多く哉高くの老女もさそかし其念にも\nこうさらめた子持あんし致し候組分に候へハハくう心配\nまし元と玉の貫きはぬ物の致し書候へは王体にて留る\nよく損しとも此情有之の施磨可被下候此様の事仕候様\nより過候計極堅誠ニのも候尤此儀中御座候得たる\n之通ニ当ケ候御附し可被仰聞候事可被成候委細ハ委\n皆ニ働く食流合困之抜宝を探り帰り帰りへハ当時の事\nなき文卯折されたとして\nよきこの外に払流れたりたりよしと真田生其志替へ\nなしける事に金子返し采はさに思へ有之\n迷惑ニも御手事故名物ハ遂迄も不申不申不\nほされは其度し留よと申證人召出し可申候\nせしふを尽く厳記となし請て大笑迄ハ楽真奥へ\n翌日夕夜ニ御座候趣ニて苦しくらす達別之致ハ六日之\n門後にて津田氏へ預け候懐中に聞候内ニ態々入答奉\n夫を御賢よ下候趣ニても又当夜安世へ参し候さらん\n御家老少有之候にても安有御坐間敷奉存候尚今\n天下の長閑は彼の二のみ見手の一かたのはせを見事によし\n示す之義ハ和郡より但しと申候と申所ゟ国繁子\n中しかへけれは吉田を以きものを除の地方へ被遣候様ニとし\n事水店老母とおのへ御諭宿出来仕度其頃ハ御村\n節柄の義ニは皇国の為ニ不死を犯し候節御初而立候\nさんし心難し置候者誠之わらをう笑つない事なく\n一樽壱文\n同所之一得は潰損しとも申候へは立格御用意\nを述て憲典くつらひけるかくさぬしともなし\n一宜敷御周旋之程等懸願候所\n四月廿七日\n十九\n懼豈老監甚\n楽真老監査に",
+      "transcription": "",
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "ai-draft",
-      "transcriptionMethod": "NDLOCR-Lite",
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013819/manifest.json",
-      "transcriptionReview": "unreviewed"
+      "transcriptionReview": "source-live"
     },
     {
       "id": "shoin-1858",
@@ -353,8 +379,10 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "failed",
-      "transcriptionError": "400 Client Error: Bad Request for url: https://rmda.kulib.kyoto-u.ac.jp/iiif/3/RB00014110%2FRB00014110_00001_0.ptif/full/2400,/0/default.jpg"
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
+      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00014110/manifest.json",
+      "transcriptionReview": "source-live"
     },
     {
       "id": "kusaka-1860",
@@ -372,14 +400,14 @@
       "sourceInstitution": "京都大学",
       "archive": "京都大学貴重資料デジタルアーカイブ",
       "rightsUrl": "https://rmda.kulib.kyoto-u.ac.jp/reuse",
-      "transcription": "【1】\n巻307\n\n【2】\n此番不\n「再読大に\n誤字も\nりず椎\n読書し\n清蔵清末ノ人\n井田御越前送予至官市老人農事太切片度\n書を東行染心源もアレは誹誹謗聴スへしと約し立\n候得は甚敷然ハ御送可被下候故此義有之\n別後起居如何不堪相守縁除去九日着府\n道中も百多川張され込み、富士川ニ而\n公駕を拝申御帰城御刀社中定良儀\n候而も可有とと存候穢士も時勢大に宜し\n大老一夫首領幕府之権帰水野士州安\n藤泉町様ニ之者候安藤大竹前狼渡場\n不阿修堂前月廿八日彦根跡式無相違\n條と仰出党委員面少し応せす水譲も\n格別揺動少致粛悲額より居ひ水戸時\n遂も此節之大に論謐候内相馬談参府之\n處會等も平口よりは却白速に差出候内芳野\nゟ聞く何中も爾然先日桂小島武田修理\nニ相訴へ候 御随分鷹野も致候由彼等\n事採案、不得得共吉梁勉理、非諸藩\n行政此内十七合義士之事益務山千円\n就中齋藤監助讀書人ニ而大に農園事\n戊午上敷小金原へも出シ由沈黙致候し之や質ゟ\n其帰国畔唯四河れ是ニ而ハ富まいとかれし自由\n度貞深手細川郡多陳田甫語推倒一世之替\n勇開拓篇古之、富と申談を書拂約勇\n十七歳生服\n坂之書\n住人悲憎拒\n蛇んきより\n見られ\n俱五橋／楽ト\nはゝ\n仝と書了投業百宛実葬病五六郎世\n一才先軍掃部頭へ鉄砲打掛且不申合度心願\n届災大概之由黒澤忠三郎深井幸せども顔色\n揚々加平山県邸内来珍則平脈也大関和三郎\n越後監物高島之由水デ久急郡太田郷馬訪村\n宮田瀬兵衛三月十一日細川郡へ自訴致候故吟\n壬中菅沼新八郎家来へ預置ニ相成候実に此\n枇杷節會之事御開闢以来未曾有之事ニ而支\n非人も事実等を見違候得は是を新聞紙ニ載する\n候宜しし尾中民帰国故委細御承知を恐し\n\n【3】\n之付御注意被下候写真被為上候写真写真写\n被礼節會之事御開闢以来未曾有之事ニ而支\n非人も事実こそ間違候得は是を新聞紙に載する\n候とら候尾中民帰国故委細ハ御承知ならし\n信州之処も今之模様ニ而は北州御矢張者\n且少なるへし十寸彦根より午を此事ハ不の来不申、\n此度派式の可満候得ハ為之臣子度風童面目可\n惜○薩摩立花宇和島なり今に参府無之\n肥後侯死去仙臺校點可怪去年無首の灰\n之按義盛進饗應無苦羨之書簡と被\n其上氏日壁に掛け楽師硯態可足肥前侯先\n達而ハ米市兵衛と追々借用是旧ニ而帰国\nセシ由肥前素より鈍評とも藩とは非たる成事之\n志ハ有之様と考・因州此内帰国僕保土岩\nニ而行逢し岡藩水戸之公義と不縁致セシ由\n風雲翻護御整護柔也越老公今日霊\n岸島之部ニ凹居被為在候無留侯之役ニ被聞\n召惶築毒之事￣ト一語被仰候由山畔善格\n可相心南部侯随分賢明之由楠中松山奥\n沙相馬尚海上山等小藩犬相とも却而軍事\n多しの横濱吏への業竊と相成深過金川\n胡腐横行土価視不怪此間沢山馬ニ貴\n白米不売候得共蕎麦小麦粟粥粉等\n領物なれハ書買込於是議至價直騰貴\n民大困窮仕居候横浜町会利之博夷人之\n與らるに其人程猶於利於中々近来の難欺様\n御座候貿易単利乱必拾此英初開横濱立昌\n揚刻刈青麦未熟若干農民大悲之云如す\nキ貿易不止則無頼渺漫倫商賈取轉深\n大利、怒農者益大国矣又々御殿山へ商館集\n創之面沙汰有之候不堪杞憂ニし○本月七日\n成臨丸暖氣一隻帰自米利幹此船は華益頓\n都府兵不参カリホルニヤンポナマト申ス處迄参る\n帰来及者ニ御座候芳野ハ田佐殿帰候者ニ聞\nには彼皇波国観者地情音其属接頗美\n麗蓋憂富家之抱ニ而乞食非人蓮見受\n不申由左すれ御貧院病院等之設有之必然\n之事ニ而夷狄実可深慮彼人海外ニ而風説承\n候得は支那国時量民七十萬兆之由餘\nり訛言之様ニ候得共伊達支那乱事有之候\nWENT OFIRICEFILEFTLLES\n\n【4】\n之事ニ而委員役人演州ニ而御例ニ而風説承\n候得は支那国明遺民七十万歳より越之由録\nり訛言之様ニ候得共伊連支那乱事有之候と\n主張申し○僕麻布御屋形ニ罷在候毎暁\n舩驛より小河町裏書調査放授方掘辰之助\n爪府小沼町最高調処放挽方振形之助\n方ニ通ひらし英学・未開宗閣宗園も立敷候得共少々\n困難ニ准候此度帰白米利幹勢之咄ニも外\n国大極英文行シ候由御座し褒書之渡サラシテバ\n英孛便利ニ依之考ニ今時可思慮者若生利也暢\n又銃船觧纜と存し蛋当多少不順ニ而来目\n中共ニ御着谷有之之待居申候實郷山口作舟\nなるへし新之帰国滋多死毎ニハ那蛮\n往過紛敷事となく無邊既釋官之志遂り\n候と奉存候予大子徳黒甫、危強なる処\n作院に朝蟄宿居候故團大興源太郎方へ\n同志中時々往過て宮浦岡浦三右衛門相訪\n可申大ニ血と深可申候仮令先生と祭等往而\n執行致度事御座候七ノ日之會家を新工根中\nも疎に御座候翌日本久保尾寺奉登山末塾\n有之候例之圓法塾嶄業帰国後国\n益等御見様ニ相成可申と致慨察候\n戦争候得は国活なと前国を構倒する論\n之主とする由前国御好善人先生が知行已に候得\nは除草も今迄議論あれは以前御前回ゟ\n後魚亦先々皆圓治之比に非す何才\n彼風説不行ワレズハ大にハ善ト存し当地ニ付\n起而も同志寥々来嶋とも今に諸国有佳\nとは三遍駿河、長井尚不取過候報\n夫々来て相伴申候是より書触参候得は桂\n小五郎之森カ工は吉松淳蔵ト申んし許迄参\n之潤は早速相達申候明日より飛脚帰ると\n修行出て芝装不覚媒に夜既正時集\n庚申十九日\n日下い義質為否\n佐世谷へ申す深発午前は短刀之事ニ而彼\n是以御施大に傾下候北樺海のけ全快祈祷とす\n佐去八十五壬下\n入江子遠兄\n諸君へ到着ナシ是書處終ニ而小怒に従",
+      "transcription": "",
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "ai-draft",
-      "transcriptionMethod": "NDLOCR-Lite",
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013769/manifest.json",
-      "transcriptionReview": "unreviewed"
+      "transcriptionReview": "source-live"
     },
     {
       "id": "irie-1862",
@@ -397,14 +425,14 @@
       "sourceInstitution": "京都大学",
       "archive": "京都大学貴重資料デジタルアーカイブ",
       "rightsUrl": "https://rmda.kulib.kyoto-u.ac.jp/reuse",
-      "transcription": "【1】\n0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000}}\n\n【2】\n金銭拾円\n益御壮健奉拝承し候輩も廿七日\n一山口跡夕出勤一昨十二日帰仕候\n御留守様江も罷出御馳走ニ相成候\n執様参安御降意奉存候如今\n帰着其後之事も大略承知仕候\n嶋田一作ニ妙狂言と仕出し申候扨萩\nも物議少々有之由候得共畢竟従吏\n世界え彼古セネハナラヌ抔或ハ両弁駁\n書皆政府間ニて調ヘナドツマラズ\n事ノシ何事も仰山ナル評判行ハレ\n覇城人心之険悪込入候事にて候\n高松君支州ゟ帰来近々御上京\n仕事\nニ候間ニ而ハ生等取可被成候軽亦親類領之\n御沙汰を承り謂正人云嗚呼有カク処事乃チ\n割腹被仰付事と思シニと申たる由也此第首筋\nとセラハ瘤出来浅本師之見合ニ相成居候由\n此上之御沙汰如何相成候事之為\n按シラレ之事共ニ候\n一大島甲冑一件ハ何卒偽之助之始合\n精々御励鞭奉祈り帰国仕候而も\n半達之事故毎々今本意申候大坂\n人足賃銭之事被留料申上置候処\n相進り候哉御屋敷如門前之人屋也\n申上候得もまた落着又位取不能\n会議員会委員会委員官一事務\n\n【3】\n人足賃銭之事被為料申上置候処\n相進候哉御屋敷御門前之人屋也\n申上候得もまた落着又位取不能\n委曲り致着御練演第一奉存候\n首浪也\n九郎殿\n有之\n二條大塚之義江候伝警奉行ノ\n大賀未行致期候哉\n松合吉けん\n兄等勇悍奉仕候も\n昨日打加村差越候敬念\n奉願候\n不違見え申ス過候暫夜\n山により一筆美賀御役手\n相成候様実ハ宿馬仕組子\n木押開キ竹西鳴る馬\nたき間八郎義相候両\n近日何夜御得御行候段\n物例致し春ニ機嫌\n不取敢申上候次處少し\n手渡れ故如何相成哉\n千束奥も御伺機事と\n奉存候僕も御知母奥の世\n頼りとして出発左衛門\n\n【4】\n頼まれは出廃左案し\n既ニ県中此事と屡\n暮えん何身よりきを取\n奉存候\n君公ニも専旨御発駕\n相勤候地帯取中\n如何ニ而御用留済ニ而北\n祭君奉行延引の事\nたり五事始翌も帰る\n可快為慨北条殆ん矣と\n如何し此地も御賃\n江や弓ニ而泥肌ニ着際の\n同書相残り不申候間\n□□□□□□\n御右兄は晦日三里筑啓\n永嶋外次郎繁船之頃\n岡本桜国ニ而承り申候\n桜田江は直訳ニ而相振\n再寄之期し局様仕大\n東江の書状も恨ニ御咎\n其外可申上候事山続\n御座候処皆此陣陣\n\n【5】\n山本\n御座候処皆此陣侍\n事ニ而常便有之委\n付候任此申上候事\n字は後便と申候\n11\n十月十三日朝寒絶\n小竹君か登如何ハ\n御勘弁方得共別紙\n多か頼り、その例奉伺\n此段よろと尋言\nを指く\n子弟両兄え\n今般非常之御触\n恩を以難有旨被仰\n付段奉恐締元来\n朝渡り京沢季助\n於一条は其罪不軽く\n一軒寛大之御処\n置を蒙り平常\n罷在候新御国内\n動揺之節も出候\n\n【6】\n置を蒙り平常\n罷在候新御国内\n動揺之節も存\n大崩罷在候然此度\n已下之御沙汰被\n仰付候て奉存\n君上万と奉上入共\n且出鬼神可も許\n顔之義ニ罷在候書集\n去秋前田銭平之\n砌ハ漸くノ日帰\n陣府被仰付事ニ而\n実以現場之儀\n更ニ覚無御座敷へ\n乍恐御恩賞御受\n仕候処一点之道無御\n座ニ奉存候得共\n仰出候得共一日御差\n留相成候て此往来\n分之へも奉報候はゝ\n其節之御聴詞願候\n戦争も本段ニ御沙\n清御見合被繕共様\n遍と被歎願候左して\n\n【7】\n乍恐御意書\n仕候乍恐一点之道座候\n座ニ奉存候間被仰付候\n仰出候得共一中老御差\n留相成して此往来\n人日之へも奉報候ハヽ\n其節之御聴詞被\n戦争も本段ニ御沙\n御見合被仰共様\n偏に奉歎願候左して\n於前田頭場抜群\n働き仕亦ハ討死候\n者も御座候間其者とも\n書捨之御詮儀被仰\n野様奉願上候ケ様\n重々申上候段在入候得共\n無功之私御受仕候様\n不堪給士之情ニ候\n御奉書御歴上仕共\n評定\n四四 時山直、",
+      "transcription": "",
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "ai-draft",
-      "transcriptionMethod": "NDLOCR-Lite",
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013689/manifest.json",
-      "transcriptionReview": "unreviewed"
+      "transcriptionReview": "source-live"
     },
     {
       "id": "ryoma-1865",
@@ -422,14 +450,14 @@
       "sourceInstitution": "京都大学",
       "archive": "京都大学貴重資料デジタルアーカイブ",
       "rightsUrl": "https://rmda.kulib.kyoto-u.ac.jp/reuse",
-      "transcription": "【1】\nbillot ando\nM[IOL asvodo\n慶応元年馬英滞在中、下藤津(豊永長𠮷ニ贈リシ出続漸夜両迄\n昨日山口ゟ中辺\n答はあり申候\n昨夜道路中\n四郎之代流百合程\n一橋\n原三義外要路\nうかしいえ事許\n候処 有之義ハ\nの人山田宇右衛門も\n可申人被参候ハ\nニ相成ハあへりて南居\nまた悲命も不七候\nの十品道に可被進候\n所なられとも案す\n何を付ても共に\nルニ今日中之事\nすみも相成可申候\n国意をうれへ候\n山川や小木幸小太\n所より松太郎論\nゟも少々敷手紙手紙\n東半日も早く\nなれは南方の辺\n上京を可なかなかせし\n味の道を通して\nト然レ共此度の上\n南方から 白融して\n京和一人外当時\n其よろしき迄も\n始の乗諷文位の\nみけ者よろしく\n事なら〳〵たれか\nそれなけれは両方\n京ニ候出之右ハ\n装はたつかふ\nより道也義也\n悲しかたし\nと論を吹命心するに\n一山口○交入藩判人\nかへりてあいて生し\n奥田了介と申へ参\n近く詮笑中ニ\n居候故此人ももと\n桂氏ハ先に上京も\nともに宜を\n知りよし其桂々\n求めらとよふ君\n諸隊の者人物\nしかへ し、とい\nbA|101 agtodo\n\n【2】\n候へく詮幾中ニ\n居り故山人之ともと\n桂氏ハ先に上京も\nともに宜を\n知りたし其桂々\n求めとよふ君\n諸隊の者人納\nとよは金弐人も七\nにとても大成は\n八名氏同行久守\nなりもとくときち\nよしめし来はす\n何御恊應手義\n和しの船は青二日\n三日頃あしも可\n一中と奉存候\n仕可仕候よ〳〵不弁明\n右御越縣縣送\nなり\nSh\n十二日\n右よふ成行に候\n頃ハ其心積\n伊藤大兄\n送り\n七月五日講話\n殊けふは船の事\n大ニ以上流罷在ナル\n聞礼千円御座候\nつへかなる\n「六七何助先も\n准令 如何計\n仕様ニて御帰り\n被成本朝ど\n11\n伊藤秀雄\n印当様櫨紙は\n慶応二度丙寅二月京師二本堂（相国寺）薩摩屋敷ヨリ在長府\n豊永氏共存ニ贈リシ此続\n三巻之ニ七後ニ同すニて居\n\n【3】\nPAIIOL ONVOND\n●さほぼり\n乍令御時代\n口朝ニ候て御帰り事\n被成\n11\n厚藤善寺案下\n印象授献上\nMIIOL ONVOdp\n慶応二年丙寅二月京崎二本盛（相国寺）薩摩屋敷ヨリ在長府\n豊永氏共存ニ贈リシ北続\n三吉兄ハ此頃御同行ニて薩\n聊レ入候而乍安心可被遣候然々\n去月伏見船宿等役宅ニ\n一宿仕候節は太布を以又県も\n一戦争仕候其敗ハ此旨参え\n寺田裕右衛門参ル間御聞\nも聢し余は拝領の上面\n二月六日\n十七日\n印応役\n下の件ハ馬英滞在中豊永拝ニ贈リシモノ\n近白先日病気もて引籠合え厚し\n出付として足しぬ\n下の許は長々の御事\n可とり申上候ハ通常\n御手紙ニしてハ何分別而\n可とく候へに不変ニハ一ツ出の\n右かよりしかたして申上\n当れハ元分不致のミ代\n第八四\n元より断然船借入申上\nハ自然其儀ハ可在之候時\nとも同心の人をつのることいふ\nハ三大まな君立の止ルと不止ト\nを此頃早々承り候たし其故\nハ御止メニなれハ又以前より伯定\npPCAADAb\n\n【4】\nbijiol asvodo\n二ノ麦\n十七日\nを一\nMAR\nみも\n印應役\nFA|101 08VOdp\n第八四\n元より断然船借入申上\nハ自然其儀ハ可在之候得\nとも同切の人もつのる事を\nハ三大夫及君立の止ルと不止ト\nを此頃早々承り候まし其段\nハ御止メニなれハ又以前より勘定\nせし兼而御聞ニ達せし\nつのらばやと存候但て金の\nつかふ事に付て写りまし候\n自由に出てならすとも御同\n心の故を以て其刻ニ当ル\n金御出被遊れハ外ニ人前\nつの事に及八丈\n下の件ハ馬災滞在中豊永拝ニ贈リシモノ\n近白先日の病気をもて引籠宅え厚し\n式付として呈しぬ\n下の許ハ長々の御意\n可とり申上候ハ通常\n御手紙ニしてハ何分別ケ\nからく候へに不交ニハ一ツ出の\n右のよりしにたして申上\nなつれは元より不敬の夢状\n御覧同事之匆々候へ\n同盟\n一先日中三丈夫卿の交替の手へ御伺\nりの時分なりと思ふ内同院\nの者より板竊ニ於テ当タ申候\n隊の者大夫の身上を大ニ論し\n財多者可能なるよし猶竊ニ\n其故を補シ大夫ハ尤海軍ニ\n者を促され陸軍に御世話無之\nもの故のよし生余の事は不分明\n小弟長山ニ三太大夫が陸軍を\n如き真之時ハ桜中一同\n皆朝国の毒なり振返し大夫\nの賢なるをかんじ是候よしゆ\nされハ今此此の事を聞くハ\n定めて小人共私の頭上に\n庄賢大夫のあらぬをうれてゐ\n内ハ内る南面してせい事\nれは北方うらむの儀ならんの\n第二帖\n今日不計も三言老翁の義杖\n事も諸君の無異平安水を\n待聞相決し申候三大夫九日\n大兄ニも三日中ニニハ出興トシテ\n御侍申候\n第二四\n上一昨二段の事ともつら〳〵策するか\n本ノ\n彼竹島行の事ハ兼而出す\nへ置候通り三大丈ニ御聞ク入レ\n申セーニ随分出同処ニハ何レ\n近日二度ニ関スルニ決定ニ可致候\n事なりし其後ハなどニ御めニ\n可と事も通しを不得不ナリ\n第九條\n三丈夫もと見立なく君\n立にも御出なる僕 身を見て\n此外ニ及ヒと成事ハ又\n金が入べし候手を\n少々ハ孰れとも成事\nなれハ四民金十ケ月の\n期限ニて借成多し申只今\n力相叶候へ共生荷の大\n十章 右のフ宜野入る\n第十明\n仕頼申上候事ハ三大夫官\n君御君立がともなはす\n山に登りてハ材木を\n見本の名を正し土地を\n見ては稲なむき山にては\nおこれ合いて\nくれの来はせの来其地\nニ応し候也否を見る\npPCACAD 1010\n\n【5】\n第二帖\n今日不計も三言老翁の義杖\n事て諸君の無異平故を\n傳聞奉賀し申候三大夫及\n大兄ニも立公中ニニハ出張しニ至リ\n御得申候\n第二四\n上一段二段の事ともつら〳〵案するか\n彼竹鳥行の事ハ兼而可申\nへ置候通り三大丈ニ御聞スレ\n申セしニ随分出同処ニ候。何レ\n近日二度ニ関ニ出シテ決定ヲ致候\n事なりしき後ハなどニ御めに\n可申事も返しを不得成ナリ\n然レ尚今世上の人情目前、\nの事計でなけれは相談は\nならぬ事故ニ諸人ハ竹自由\n行の事共ハ皆被用の\n事として大夫が逐火の\n策には随ふましく可\n然レハ其事ハ行ハ水ヲ\nく残念の成ル相成候\n第四條\n美アイ 1\n力相叶候ハヽ生前の大\nナキヿ右モヿ宣預之\n第十明\n仕頼申上候事ハ三大夫殿\n君御君立がともなはす\n山に登りて我木を\n見本の名を正し土地を\n見ては稲なむき山まては\n□□□\nくれの来はせの木其地\nニ応し候也否を見え\n上げて出きなきとそれを招いて\n一人海ニ入リ貝類魚\n十五\n申上\nきは\n叛海軍大臣と見たる\n山椒\n上降小身々一生の\n四百\n十一\nとひずとし良林友\n海中の品類さきものも\nをは人をうつし義もの\n時を得るとよろこひ\n諸国張出るを命して\nめかれを強かねたる事\n其余六千才才ナリ\n此上種等百拝ス\n三月二旬ねられ\n.J.\nぬまし菊をする\nはくりぬ\n節ハヱゾに激らんとせし\n頃ゟ新聞を開きとハ積動\nの思ひ一巻の思ひ出と候間同\n卒一人でなともやり付きへく\nと存居申候其中助太夫\n事別に小きの志を保納取\n且抜手の思ひもそ之不届\nして竊ニしを粧ひにてそし\n然レハ先頃長渡ニて大川\n英朝ハ三月十七日より\n四月朔近の間に借るの定\n仏ハ相定め置きの\n近日其期限も来たし\n第五四\n先日如年ニ入レー時内ニ治セリト\nニ三慎ニあられハ自ラ歩行\n致し多しも小義惜し幸也\n然るに上洛の時勢なれハ君\n等此地を是を抜事は\nとふもむかしかたし\n第六化\n十月の初よりて昼にから大川\n印先生者\n猶生る中ハ人丸赤人\nなと時々前集り爰上\nついに寒とはなして\nある翁ちとたのみ其一二\nをつけしに飯立\n市もありなり車ニ\nやつかれのうるにことは\nなりぬ其事\n野野\n何からみとても聞るなり\nならと愛けなからね\n春とて\nPppary an\nMITIOIOND\n\n【6】\nめつるといふる\nニ三項ニ於ケれハ自ラ竹氏\n致し候得候も小労情ニ幸也\n然るニ上段の時勢なれハ君\n等此地を是を抜事は\nとふもむかしかたし\n為六化\n此月の初より長崎差出大州\nの船の東ら〳〵となすやし\nと思ふ内ニ不及先日中\n過げにて床ニ至り以来\nから心ニまかせす\n内ニ大刻の船え共そ長島\nに廻るよりになんかと思ひ\nおり候\n第七條\n土州の如石炭費用\n一益麻々一万五千斤数に二万斤\n油一昼夜ニちて計\n伴竹ハ他国を以て術算\nすレハ九十里計なり\n先頃井上政太伯の辺ニ帰り\nし者ニ同しニ百里ナリ\nとおふかた同し事なり\n其急ニ附与者の出しと\n押相よと似てありしもの\n廣くハ駄木在之其外\n壱里余より弐里もあらん\n平地ありしと也辺の流レ\nハ十里計なりし小義暮而\n長崎ニも聞しニ同ひも\n所似たる咄也是外一般\nより出たる咄しなんかも\nうちよ〳〵いの深ヨリ行ランの関ニ帰ル\nよる通ニ行て慥なへれハ三日\nのひまとにふし何をその間\n十一日之ル飯立\n領主\n市もなりたり幸ニ\nやつがれかうるめとは\nなりぬ其音を\n何あらみとてもなふな\n□□□□□□□□□□□□□□□□□\nならとともなからのからね\n春食元\nよかなり\n家主なしきり\n女子人ハ書状にはしの\n右とよし申候にも仕ひまあれ\nハ先によりてひましまの\n置候得其諸君\nかな代知の支りにこり〳〵もなり\nこと見へやつかれ\n何に三十一字を算出し\nとも〳楽ニ申候候故\nしてをさしおかへとして\n変意何共別ヲ移\nしか者肩の心とて\n十七日共下につれハ\n曇る\n春の床を\n500\nともイラ\n人はなれ\n先達而も近時の上作\n何乍申御こし御座候也先年\n候作は家の至がは一番の内らはい\nし候とも見へ申候かしと\nE WIIOL anodo\n明治三十二年十二月廿七日の夜飯本龍高宿の\n大陸本端書引捨りて或する事のあけれ\n水くき給ふかきこゝろを久支て甚しま\nbA|101 asvodo\n\n【7】\n義方に\n土州の如石炭費用\n一昼麻ニ一万五千斤数ニ二百斤\n油一昼夜ニ壱斗\n伴竹ハ他国を以て側集\nすレハ九十里計なり\n先頃井上聞太海辺ニ渡り\nし者ニ問しニ百里ナリ\nとおふかた何し事なり\n其急ニ潜与者の出しと\n抑否よと似てありしもの\n廣くハ駄木在之其外\n壱里余より弐里もあらん\n平地ありしと也多山の流レ\n八十里計なりし不残差出\n長崎ニも聞しニ同ひも\n所似たる咄也是本一般\nより出たる咄しなんかも\nうたく〳〵いトの聞ヨリ分ラす写ニ帰ル\nよる通に行て凡千八百八三匁\nのひまとまたへし組を下の関\nMAN Y INT \n村々三十一字をも幾出候\nともに案レ申候は夜\nしてをさしおかへとした\nける\n変意何共別ヲ致\nしか者肩の心にて\nせと共につつれは\n曇る\n春の床を\n50日\nともしても\n先達而も御近時の被始\n何乍申御座候\nにては家の至がは一番の内にはいた\nし候と相見へ申候かしと\n] Mjtol ando\n明治三十二年十二月廿七日の夜飯本龍高宿の\n大陸本瑞書川橋りて歳する事のあられ\n水くき歟ふかきこゝろを久支て甚しる\nころ赤谷のあかきすゝ路遠\n父法久歳はよし絶るとも大丈先通\nたてしこゝろの枝明石碑\n一高焼留すわ候へ\n\n【8】\n巻290",
+      "transcription": "",
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "ai-draft",
-      "transcriptionMethod": "NDLOCR-Lite",
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013814/manifest.json",
-      "transcriptionReview": "unreviewed"
+      "transcriptionReview": "source-live"
     },
     {
       "id": "satto-1867",
@@ -447,14 +475,14 @@
       "sourceInstitution": "京都大学",
       "archive": "京都大学貴重資料デジタルアーカイブ",
       "rightsUrl": "https://rmda.kulib.kyoto-u.ac.jp/reuse",
-      "transcription": "【1】\n巻306\n\n【2】\n尊攘堂\n謹好宜手依頼候様\n益生生造国党\n慎布令承申出候間御趣候\n相願候昨日御意重之\n趣難相仕仕事\n五月六日 弥七郎\n同断御意\n方今\n皇國ノ務国体制度\nヲ糺正シ万国ニ臨テ不\n\n【3】\n同断御意\n方今\n皇國ノ務国躰制度\nヲ糺正シ万国ニ臨テ不\n恥是第一義トス其要\n王制度古宇内形\n勢ヲ参酌シ天下後世ニ\n至テ猶其遺憾ナキノ大\n條理ヲ以テ處セン\n國ニ二王ナシ家ニニ主\nナシ政権一君ニ帰ス\n是は大條理我\n皇家綿、一系義古\n不易然ニ古郡縣ノ\nノ政変シテ今封建ノ\n体ト成ル大政遂ニ幕\n府ニ帰ス上\n\n【4】\nノ政変シテ今封建ノ\n體ト成ル大政遂ニ幕\n府ニ帰ス上\n皇帝在ヲ不知是ヲ\n地球上ニ考フルニ其国\n體制度如茲者アラン\n歟就則制度一新改\n権利\n朝ニ帰シ諸侯會議人\n武昔和祐後廉幾以\nテ萬国ニ臨テ不恥是\nヲ以テ初テ我\n皇国ノ国體特立スル\n者ト云ヘシ若ニ三ノ事ル\nヲ執リ蝶、曲直ヲ杭論\nシン\n朝幕諸侯倶ニ相辨\n難技葉ニ馳セ小篠理\nニ止ル却テ\n皇国ノ大基本ヲ失ス\n豈本志ナランヤ爾後\n\n【5】\nニ止ル却テ\n皇国ノ大基本ヲ失ス\n豈本志ナランヤ爾後\n執心公平所見萬国\nニ存ス此大條理ヲ以テ\n此大基本ヲ立ツ今日\n堂ニ諸侯ノ責ノミ成否\n顧ルニ所アラス艶ニ而後\n己ン\n今般東昭一新我\n皇國之興復ヲ謀リ奸\n邪ヲ除キ明良ヲ挙ケ\n治平ヲ求メ天下万義\n之為メニ寛仁明恕ノ\n政ヲ為ントテ以法則\nヲ定ヿ左ノ如シ\n一天下ノ大政ヲ議定\nスル全權ハ\n朝廷ニ在リ我\n皇國之制度法則一\n切之万様京師之議\n\n【6】\n車ヨンキ\n皇國之制度法則一\n切之万様京師之議\n事堂ヨリ出ヲ要ス\n一議事堂ヲ建立スルハ\n宜ク諸藩ヨリ其入費\nヲ貢献スヘシ\n一議事院上下ヲ分チ議\n事官ハ上公卿ヨリ下陪\n臣庶民ニ至ルマテ正義\n純粹ノ者ヲ撰挙シ尚\n且諸侯モ自ラ其職掌\nニ因テ上院ノ任ニ充ツ\n一将軍職ヲ以テ天下ノ\n万機ヲ掌握スルノ理ナシ\n自今宜ク其職ヲ辞シ\nテ諸侯ノ列ニ帰順シ\n政権ヲ\n朝廷ニ帰スベキハ勿論也\n一各港外國ノ條約ハ兵\n庫港ニ於テ新ニ\n朝廷ノ大臣侯ノ士大夫\n\n【7】\n朝廷ノ大臣諸侯ノ士大夫\nト衆合シ道理明白ニ\n新約定ヲ定テ誠実\nノ商法ヲ行フベシ\n一朝廷ノ制度法則ハ\n(6)\n往昔ヨリ之律制アリト\n当今ノ時勢ニ\n参シ或当ラサル者アリ\n宜ク其弊風ヲ一新\n改革シテ地球上ニ塊サ\nルノ国本ヲ建ン\n一此\n□□\n皇国興廃ノ議事ニ\n感保スル士大夫ハ私意\nヲ去リ公平ニ基キ術\n策ヲ設ケス正実ヲ貴\nヒ既往是非曲直ヲ\n不問人心一和ヲ主ト\nシテ此議論ヲ定ムベシ\nトロト議定セル盟約ハ\n\n【8】\n改革シテ地球上ニ伴フ\nルノ国本ヲ建ン\n一昨\n一冊\n皇国興廃ノ議事ニ\n感保スル士大夫ハ私意\nヲ去リ公平ニ基キ術\n策ヲ設ケス正実ヲ貴\nヒ既往是非曲直ヲ\n不問人心一和ヲ主ト\nシテ此議論ヲ定ムベシ\n右ニ議定セル盟約ハ\n方今ノ急務天下ノ\n大事之ニ如ク者\nナシ故ニ一旦盟約\n决議ノ上ハ何ソ其\n事ノ成敗利鈍\nヲ視ンヤ唯一心恨\nカ永ク貫徹セン\nヿヲ要ス\n慶応丁卯六月",
+      "transcription": "",
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "ai-draft",
-      "transcriptionMethod": "NDLOCR-Lite",
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013750/manifest.json",
-      "transcriptionReview": "unreviewed"
+      "transcriptionReview": "source-live"
     },
     {
       "id": "kido-1877",
@@ -472,21 +500,21 @@
       "sourceInstitution": "京都大学",
       "archive": "京都大学貴重資料デジタルアーカイブ",
       "rightsUrl": "https://rmda.kulib.kyoto-u.ac.jp/reuse",
-      "transcription": "【1】\n}\n\n【2】\n明治十年\n差至候推談わかし植物\n中にのあるに置は黴毒\n土焔発灯就而、早々\n御出張之由承知候所\n一丁\n弥切乏し形勢ニ\n立至り終ニ御籠城\n之由前後之已配\n神不容易実ニ\n、オ\n致遥発し一城一心\n時ニ奮闘之疏感激\n之至ニ御座候不同間聞\n御城下に進戦可致候\n其而已日夜希望\n罷在候当日之御苦心\nも不能尽筆頭事\nと相考へ速ニ御出城\n不愉快之期を義機\n仕候弟も兼而此一般\n症ハ枉憂罷在し一大\n遊ニ付此時已を別奉存候\n之宿志聊相尽候度\n一念不似案是非\n砲烟中ニ従事ニ以後ニ而\n\n【3】\n症ハ根憂罷在候又\n然ニ付此時已を別奉存\n之宿志聊相尽候度\n一念不似禁是非\n砲烟中に従事に心得に而\nるオ熟願候へ共終ニ\n貫徹不致空処景\n摂間ニ奔走終生之\n遺憾御事ニ御坐候御推\n飛玉て先は覚翁\n申進候不同面役之時\nを尽相待し前に\n三月廿二日夜早\n麻崎寿丸松蘭\n11\n尊攘堂\n過る十七日と十九日之\n宇届相届相見\n吟味御仕側ニ引\nつゝき日尽力と運\n禁せし其起ては実\nに歴史にも直れぬ郷\n泣みつまらぬ事\nニ而数万人死溺\n政味第三部之成産\n\n【4】\nに歴史にも直れぬ門\n泣みつまらぬ事\nニ而数万人死溺\n朝中方区義之財産\nを鳥有候御法釈\n之至ニ御座候一席\n之上ニ黒白を訪\n一九\nし候へは五善人之\n認判にて相済候事\nに御坐候乍去いづれ\n摧クねバならぬ一塊\n十一\nハ益々御内話申\n通に付実に衆は\n行政上之條理\nを推察候而終ニ\n着手不致尚ハ不\n相互ニ行可申候\n覚悟候事ニ御座候然\n時ハ如此多尠\n朦昧ニ陥り候事ニ\n有之習処歟誠\nニ至懸之候様ハ可\n両国方ニ付候\n100、100、少し\n\n【5】\nニ而懸之候事ハ可\n両国方に付候\n此度ハどふどふぞ兼\n而之一念聊相尽\nし度と僅ニアカリ\n候得共少も狂ひ\n候丈ケ之功触知\n之恥入じ○青木\n有之も志願本願\n重畳せ御直障\n之度ごとに糟粕\nして御功能位は可\n有之事は夫と引\nかへリコト可言と相\n方へ胸痛遣掛\nへ居候処此節\n武国苦鬱々\n満日之日雨気\nも一向相変り候事\n無之いつもかわら\n国てよゐ候哉は水光\n山色骨を埋むる\nには此処之如きハ\n御座御坐し○東京\nも甚容貌よし\n\n【6】\nいうの\nにハ此処之如きハ\n御座候乍恐\nも甚寂寥なし\n直絡後少し余\n相応り候上申候以上\n医路前諸方之\n人心実に偏之哉\nも危き處ニ而御座候\n其故候義は不苦之\n一方ニ向ひ御用意\n有之歟と題に建\n意々了ニ御座候尚\nとなれは内家近分\n算用は違ひだら\nけに而御座候分\nゐ太郎殿を相\n安政\n近情は甘質翁\n外御承知罷出候\nなりおし\n四月廿七日\n以来中認證\n金音の\n尚々豊砲楼\nも常視楼なりにて\n随分醤硯楼中\nニ兼るき姿を\n\n【7】\nとなれは活歩進分\n・六\n17\n算用の違ひだら\nけに而御座候勿論\n為太之期を相\n同断米三拾八\n近情は甘質翁\n義御承知罷出候\n当時\n四月廿七日\n以平申認め\n金香めん\n尚候昔硯楼\nも常視楼なりにて\n随分等配楼中\nニ至日き憂を\n1.\n不絶見候だしと\n御察し候ひ其故\n此節は精福は少しい\n□□□□□□□□□□□□□□□□□□\n無之との詠判也\n相増之書状御慎\n且従小人事\n商師者見城如\n御内々",
+      "transcription": "",
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "ai-draft",
-      "transcriptionMethod": "NDLOCR-Lite",
+      "transcriptionStatus": "source-live",
+      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013755/manifest.json",
-      "transcriptionReview": "unreviewed"
+      "transcriptionReview": "source-live"
     }
   ],
   "transcriptionBuild": {
-    "sourceOrVerified": 0,
-    "aiDraft": 6,
-    "failed": 14,
+    "mode": "source-live",
+    "sourceLookup": 20,
     "total": 20,
-    "note": "AI draft is machine-generated and must not be treated as a scholarly verified transcription."
+    "embeddedAiDraft": 0,
+    "note": "GitHub Actionsに依存せず、閲覧時に各20資料の所蔵元IIIF Manifestから翻刻候補を取得する。"
   }
 }
