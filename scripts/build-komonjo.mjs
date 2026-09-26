@@ -92,3 +92,12 @@ try {
   const p=h.toLowerCase().indexOf("trans");
   console.log("PRINCETON_DIAG", r.status, h.length, h.slice(Math.max(0,p-1200), p>=0?p+4000:4000).replace(/\s+/g," "));
 } catch(e) { console.log("PRINCETON_DIAG_ERR", String(e)); }
+
+// DATASET_DIAG
+for (const base of ["https://komonjo.princeton.edu/suruga-date/","https://komonjo.princeton.edu/tannowa/","https://komonjo.princeton.edu/madarajima/"]) {
+  try {
+    const r=await fetch(base+"newdata.json",{headers:{"user-agent":"Mozilla/5.0"}});
+    const txt=await r.text();
+    console.log("DATASET_DIAG",base,r.status,txt.length,txt.slice(0,900).replace(/\s+/g," "));
+  } catch(e){ console.log("DATASET_DIAG_ERR",base,String(e)); }
+}
