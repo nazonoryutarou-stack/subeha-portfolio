@@ -104,6 +104,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true}).concat(remoteDocs)}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
+  function dateCertaintyLabel(d){var m={source:"出典確認",range:"範囲",partial:"年未詳",inferred:"推定",unknown:"未詳"};return m[d.dateCertainty]||"未詳"}
+  function dateDisplaySafe(d){return (d.dateDisplay||"年代未詳")+(d.dateCertainty==="inferred"?"（推定）":"")}
   function sortDocs(a,b){
     var ay=a.year==null?999999:a.year, by=b.year==null?999999:b.year;
     if(ay!==by)return ay-by;
@@ -144,7 +146,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     var shown=docs.slice(0,visibleLimit);
     document.getElementById("grid").innerHTML=docs.length?shown.map(function(d){
       return '<article class="card" data-id="'+esc(d.id)+'">'+
-        '<div class="kicker">'+esc(d.period)+' · '+esc(d.dateDisplay)+'</div>'+
+        '<div class="kicker">'+esc(d.period)+' · '+esc(dateDisplaySafe(d))+' · '+esc(dateCertaintyLabel(d))+'</div>'+
         '<h3>'+esc(d.title)+'</h3>'+
         '<div class="reading">'+esc(d.reading)+'</div>'+
         '<div class="summary">'+esc(d.summary)+'</div>'+
@@ -323,7 +325,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         reading:"",
         year:null,
         dateDisplay:"年代未詳",
-        period:"未分類",
+        dateCertainty:"unknown",
+        period:"年代未整理",
         type:"翻刻資料",
         author:"不詳",
         summary:"「みんなで翻刻」で全文翻刻済みの公開資料。",
@@ -414,7 +417,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       '<h2>'+esc(d.title)+'</h2><div class="reading">'+esc(d.reading)+'</div>'+
       '<p class="lead">'+esc(d.summary)+'</p>'+
       '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻本文</strong><span id="sourceTranscriptionState" class="source-state '+(((d.transcription||"").trim()||d.remoteReadable)?'ok':'none')+'">'+(d.remoteReadable?'読込中':((d.transcription||"").trim()?'翻刻済':'未翻刻'))+'</span></div><pre id="sourceTranscriptionText" class="transcription-text">'+(d.remoteReadable?'翻刻本文を読み込んでいます…':((d.transcription||"").trim()?esc(d.transcription):'この資料の翻刻本文は、まだ収録されていません。'))+'</pre><div id="sourceTranscriptionNote" class="transcription-note">'+(d.remoteReadable?'みんなで翻刻 V3 / CC BY-SA 4.0':'固定保存した翻刻本文を表示。')+'</div></div></div>'+
-      '<div class="kv"><b>年代</b><span>'+esc(d.dateDisplay)+'</span></div>'+
+      '<div class="kv"><b>年代</b><span>'+esc(dateDisplaySafe(d))+'</span></div>'+\n      '<div class="kv"><b>年代精度</b><span>'+esc(dateCertaintyLabel(d))+'</span></div>'+
       '<div class="kv"><b>作成者</b><span>'+esc(d.author)+'</span></div>'+
       '<div class="kv"><b>所蔵</b><span>'+esc(d.sourceInstitution)+'</span></div>'+
       '<div class="kv"><b>コレクション</b><span>'+esc(d.collection)+'</span></div>'+
