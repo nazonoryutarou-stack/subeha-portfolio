@@ -1,0 +1,749 @@
+{
+  "version": 2,
+  "updatedAt": "2026-09-26T18:00:00+09:00",
+  "note": "過去会話から復元した企画史の初版。日付や状態は後から修正可能。",
+  "projects": [
+    {
+      "id": "subeha",
+      "title": "すべての歯が見える",
+      "category": "事業",
+      "status": "active",
+      "progress": 62,
+      "started": "2026-06-27",
+      "updated": "2026-09-26",
+      "summary": "祭祀技師・作品・商品・理論をまとめる中心ブランド。現在は『ごあいさつ・商品・理論』へ絞る。",
+      "next": [
+        "商品体系を絞る",
+        "理論ページの語彙整理",
+        "公開サイトの導線を再設計"
+      ],
+      "tags": [
+        "Web",
+        "祭祀技師",
+        "商品"
+      ],
+      "note": "全部乗せではなく、細く強い。"
+    },
+    {
+      "id": "amulet-sales",
+      "title": "護符販売実験",
+      "category": "事業",
+      "status": "done",
+      "progress": 100,
+      "started": "2026-06-05",
+      "updated": "2026-08-01",
+      "summary": "悩みに応じた護符を商品として販売する初期実験。",
+      "next": [],
+      "tags": [
+        "護符",
+        "販売"
+      ],
+      "note": "現在の商品設計へ吸収。"
+    },
+    {
+      "id": "warashibe",
+      "title": "わらしべ通運",
+      "category": "企画",
+      "status": "active",
+      "progress": 28,
+      "started": "2026-07-24",
+      "updated": "2026-09-26",
+      "summary": "1000円スタートの交換企画。追跡・物語記録・QR受渡を物流会社風に扱う。",
+      "next": [
+        "今週の一手を決める"
+      ],
+      "tags": [
+        "物流",
+        "週次",
+        "物語"
+      ],
+      "note": "深夜物流の雰囲気を維持。"
+    },
+    {
+      "id": "ninja-terminal",
+      "title": "忍者災害対策端末",
+      "category": "創作",
+      "status": "hold",
+      "progress": 35,
+      "started": "2026-07-27",
+      "updated": "2026-07-31",
+      "summary": "忍者を災害・汚染・変死事例としてUIで扱う企画。",
+      "next": [
+        "再利用する場合は現在のサイト思想へ接続"
+      ],
+      "tags": [
+        "UI",
+        "忍者",
+        "モキュメンタリー"
+      ],
+      "note": "制度と怪異を同じ画面で扱う系譜の原型。"
+    },
+    {
+      "id": "shikigami-shipping",
+      "title": "カモノハシ型式神40体 海上輸送作戦",
+      "category": "作品",
+      "status": "done",
+      "progress": 100,
+      "started": "2026-07-28",
+      "updated": "2026-07-28",
+      "summary": "巨大式神40体の大阪→横浜輸送を作戦記録として構成。",
+      "next": [],
+      "tags": [
+        "式神",
+        "輸送",
+        "記録"
+      ],
+      "note": "完了作品。"
+    },
+    {
+      "id": "site12",
+      "title": "12ページ総合サイト",
+      "category": "Web",
+      "status": "done",
+      "progress": 100,
+      "started": "2026-07-31",
+      "updated": "2026-08-02",
+      "summary": "製品、妹字、式神、術式、研究記録、制作者、私室などを統合した初期総合サイト。",
+      "next": [],
+      "tags": [
+        "Web",
+        "アーカイブ"
+      ],
+      "note": "後の全部乗せ構想の祖先。"
+    },
+    {
+      "id": "religion",
+      "title": "宗教法人 / ばりレベチ様",
+      "category": "構想",
+      "status": "hold",
+      "progress": 18,
+      "started": "2026-08-29",
+      "updated": "2026-08-29",
+      "summary": "世界を誰かのアイデアと捉え、より良いアイデアを提案し続ける宗教モデル。",
+      "next": [
+        "教義と団体設計を分離して再検討"
+      ],
+      "tags": [
+        "宗教",
+        "教義",
+        "制度"
+      ],
+      "note": "キリスト教型モデルは採用しない方向。"
+    },
+    {
+      "id": "career",
+      "title": "仕事そのものを作る",
+      "category": "仕事",
+      "status": "active",
+      "progress": 40,
+      "started": "2026-08-31",
+      "updated": "2026-09-08",
+      "summary": "物流業の年収上限から離れ、自分の技能と資格を組み合わせた仕事を作る長期テーマ。",
+      "next": [
+        "行政書士合格",
+        "探偵との業務境界を整理"
+      ],
+      "tags": [
+        "仕事",
+        "独立"
+      ],
+      "note": "複数企画の上位テーマ。"
+    },
+    {
+      "id": "whisper",
+      "title": "配信音声 文字起こし",
+      "category": "システム",
+      "status": "active",
+      "progress": 40,
+      "started": "2026-09-01",
+      "updated": "2026-09-26",
+      "summary": "Nothing Phone / Termux / whisper.cppで配信音声を継続文字起こし。150〜161完了、162処理中。",
+      "next": [
+        "162完了確認",
+        "追加音声をwhisper-inへ投入",
+        "後工程で誤認識補正"
+      ],
+      "tags": [
+        "Whisper",
+        "Termux",
+        "配信"
+      ],
+      "note": "small-q5_1 / -t 1。速度より継続性。"
+    },
+    {
+      "id": "arcade",
+      "title": "不氣屋アーケード",
+      "category": "Web",
+      "status": "hold",
+      "progress": 55,
+      "started": "2026-09-05",
+      "updated": "2026-09-17",
+      "summary": "不氣屋界隈そのものを歩ける常設3D空間。",
+      "next": [
+        "公開目的を再定義してから復帰"
+      ],
+      "tags": [
+        "Three.js",
+        "3D",
+        "Web"
+      ],
+      "note": "実装資産あり。現在は主サイトから分離。"
+    },
+    {
+      "id": "vtuber",
+      "title": "Vチューバーエンジン",
+      "category": "システム",
+      "status": "hold",
+      "progress": 44,
+      "started": "2026-09-05",
+      "updated": "2026-09-23",
+      "summary": "配信音声を入力し、字幕・画像・リップシンクを自動構成する装置。",
+      "next": [
+        "文字起こし資産を蓄積",
+        "10分雑談で再検証"
+      ],
+      "tags": [
+        "映像",
+        "自動化",
+        "配信"
+      ],
+      "note": "文字起こし基盤待ち。"
+    },
+    {
+      "id": "gyosei",
+      "title": "行政書士 2027",
+      "category": "資格",
+      "status": "active",
+      "progress": 20,
+      "started": "2026-09-07",
+      "updated": "2026-09-26",
+      "summary": "2027年11月合格を目標に、統治・民法・行政法を中心に学習。",
+      "next": [
+        "2027年版教材到着後に体系学習へ移行"
+      ],
+      "tags": [
+        "行政書士",
+        "勉強"
+      ],
+      "note": "仕事中の聞き流し＋朝・休憩の学習。"
+    },
+    {
+      "id": "gyosei-detective",
+      "title": "行政書士 × 探偵",
+      "category": "仕事",
+      "status": "next",
+      "progress": 10,
+      "started": "2026-09-08",
+      "updated": "2026-09-08",
+      "summary": "調査・事実整理・文書化・制度処理を一体で扱う将来の事業像。",
+      "next": [
+        "資格取得後に業務範囲と法的境界を設計"
+      ],
+      "tags": [
+        "行政書士",
+        "探偵"
+      ],
+      "note": "怪しいのは世界観だけ、仕事はまともに。"
+    },
+    {
+      "id": "fx",
+      "title": "1000円AI FX",
+      "category": "システム",
+      "status": "hold",
+      "progress": 52,
+      "started": "2026-09-12",
+      "updated": "2026-09-13",
+      "summary": "Nothing Phone上で初期1000円・追加資金なしの自動売買実験。",
+      "next": [
+        "BTC版との位置付けを整理"
+      ],
+      "tags": [
+        "FX",
+        "AI",
+        "自動売買"
+      ],
+      "note": "BTC版へ展開。"
+    },
+    {
+      "id": "btc",
+      "title": "1000円AI CRYPTO / BTC自動売買",
+      "category": "システム",
+      "status": "hold",
+      "progress": 54,
+      "started": "2026-09-13",
+      "updated": "2026-09-17",
+      "summary": "BTCスポットlong-only、自動資金管理・履歴・ローカルAIを組み合わせた実験。",
+      "next": [
+        "現行実績の再評価",
+        "期待値改善の検証"
+      ],
+      "tags": [
+        "BTC",
+        "Termux",
+        "自動売買"
+      ],
+      "note": "目標は初期1000円からの複利成長。"
+    },
+    {
+      "id": "phrasebook",
+      "title": "語録アーカイブ",
+      "category": "創作",
+      "status": "active",
+      "progress": 30,
+      "started": "2026-09-20",
+      "updated": "2026-09-20",
+      "summary": "配信や会話から固有フレーズを重複なしで蓄積する資産。",
+      "next": [
+        "文字起こし完了後に自動抽出へ接続"
+      ],
+      "tags": [
+        "語録",
+        "配信"
+      ],
+      "note": "作品・サイト・企画名の原料。"
+    },
+    {
+      "id": "yuuyu",
+      "title": "夕夕家族",
+      "category": "創作",
+      "status": "hold",
+      "progress": 16,
+      "started": "2026-09-25",
+      "updated": "2026-09-25",
+      "summary": "巨大な家に銭湯や洋食屋が同居し、家族の誰かが常に起きている一日小説。",
+      "next": [
+        "24時間の章立て",
+        "家族構成を固定"
+      ],
+      "tags": [
+        "小説",
+        "家族"
+      ],
+      "note": "事件より妙な生活。"
+    },
+    {
+      "id": "nft",
+      "title": "大学時代NFT / 旧作再発",
+      "category": "作品",
+      "status": "hold",
+      "progress": 12,
+      "started": "2026-09-25",
+      "updated": "2026-09-25",
+      "summary": "大学時代のデジタル作品を選別し、NFT・プリント・証書商品として再構成。",
+      "next": [
+        "旧作画像を収集",
+        "販売形式を作品ごとに判断"
+      ],
+      "tags": [
+        "NFT",
+        "旧作",
+        "アーカイブ"
+      ],
+      "note": "NFT自体を主役にしない。"
+    },
+    {
+      "id": "virtual-land",
+      "title": "架空区画 / 月の土地型商品",
+      "category": "商品",
+      "status": "next",
+      "progress": 5,
+      "started": "2026-09-25",
+      "updated": "2026-09-25",
+      "summary": "法的な不動産ではない架空の場所・区画・証書を売る商品案。",
+      "next": [
+        "地図ルール決定",
+        "証書試作",
+        "誤認を避ける表示"
+      ],
+      "tags": [
+        "証書",
+        "世界観",
+        "商品"
+      ],
+      "note": "所有感と物語性を商品にする。"
+    },
+    {
+      "id": "allin",
+      "title": "サイト全部乗せ構想",
+      "category": "Web",
+      "status": "dropped",
+      "progress": 100,
+      "started": "2026-09-24",
+      "updated": "2026-09-25",
+      "summary": "アーケード、人物名鑑、夢日記、作品などを全て主サイトへ載せる案。",
+      "next": [],
+      "tags": [
+        "Web",
+        "ボツ"
+      ],
+      "note": "情報過多になるため不採用。"
+    },
+    {
+      "id": "horror-copy",
+      "title": "怪談的な商品コピー路線",
+      "category": "商品",
+      "status": "dropped",
+      "progress": 100,
+      "started": "2026-09-25",
+      "updated": "2026-09-25",
+      "summary": "『三度目に呼ばれたら』型の明示的な怪談商品コピー。",
+      "next": [],
+      "tags": [
+        "商品",
+        "ボツ",
+        "ホラー"
+      ],
+      "note": "求める怖さと違うため廃棄。"
+    },
+    {
+      "id": "tarot-jp",
+      "title": "日本版タロット",
+      "category": "商品",
+      "status": "next",
+      "progress": 8,
+      "started": "2026-09-26",
+      "updated": "2026-09-26",
+      "summary": "西洋文化依存の象徴を、日本人が直感で読める象徴体系へローカライズするカード企画。",
+      "next": [
+        "大アルカナ22枚の対応表",
+        "試作3枚",
+        "実際のリーディングで検証"
+      ],
+      "tags": [
+        "タロット",
+        "カード",
+        "占い"
+      ],
+      "note": "和風コスプレではなく、象徴そのものを読み替える。"
+    },
+    {
+      "id": "workboard",
+      "title": "打猿 Workboard",
+      "category": "システム",
+      "status": "active",
+      "progress": 45,
+      "started": "2026-09-26",
+      "updated": "2026-09-26",
+      "summary": "企画の生死、進捗、企画史、変更履歴を一画面で管理するサイト。",
+      "next": [
+        "企画史タイムライン実装",
+        "変更履歴の蓄積",
+        "GitHubを正本にする"
+      ],
+      "tags": [
+        "管理",
+        "GitHub",
+        "企画史"
+      ],
+      "note": "このサイト自身も管理対象。"
+    }
+  ],
+  "events": [
+    {
+      "id": "e001",
+      "date": "2026-06-05",
+      "projectId": "amulet-sales",
+      "type": "start",
+      "title": "護符販売実験を開始",
+      "detail": "ココナラで悩みに応じた護符を販売。商品化された祭祀の初期形。",
+      "confidence": "medium"
+    },
+    {
+      "id": "e002",
+      "date": "2026-06-27",
+      "projectId": "subeha",
+      "type": "start",
+      "title": "『すべての歯が見える』始動",
+      "detail": "個人活動を一つの名義へ集約し始める。",
+      "confidence": "medium"
+    },
+    {
+      "id": "e003",
+      "date": "2026-06-29",
+      "projectId": "subeha",
+      "type": "milestone",
+      "title": "文章・作品を公開する名義へ拡張",
+      "detail": "単なる霊能サービスではなく、世界観と制作活動を公開する器になる。",
+      "confidence": "medium"
+    },
+    {
+      "id": "e004",
+      "date": "2026-07-24",
+      "projectId": "warashibe",
+      "type": "start",
+      "title": "『わらしべ通運』命名",
+      "detail": "交換の履歴を物流追跡のように残す企画として固まる。",
+      "confidence": "high"
+    },
+    {
+      "id": "e005",
+      "date": "2026-07-27",
+      "projectId": "ninja-terminal",
+      "type": "pivot",
+      "title": "忍者短編から災害対策端末へ",
+      "detail": "人物や変死を物語ではなくUI・記録として扱う方向へ転換。",
+      "confidence": "medium"
+    },
+    {
+      "id": "e006",
+      "date": "2026-07-28",
+      "projectId": "shikigami-shipping",
+      "type": "done",
+      "title": "式神40体海上輸送作戦",
+      "detail": "巨大な式神の輸送を作戦記録として構成。",
+      "confidence": "medium"
+    },
+    {
+      "id": "e007",
+      "date": "2026-07-31",
+      "projectId": "site12",
+      "type": "milestone",
+      "title": "12ページ総合サイト",
+      "detail": "製品・妹字・式神・研究記録などを統合。",
+      "confidence": "medium"
+    },
+    {
+      "id": "e008",
+      "date": "2026-08-02",
+      "projectId": "subeha",
+      "type": "pivot",
+      "title": "制作者像を再定義",
+      "detail": "霊能者・祭祀技師・映像制作者として活動全体を見せる方向へ。",
+      "confidence": "medium"
+    },
+    {
+      "id": "e009",
+      "date": "2026-08-29",
+      "projectId": "religion",
+      "type": "start",
+      "title": "宗教法人構想",
+      "detail": "世界をアイデアと捉え、より良いアイデアを提案する4命題を設計。",
+      "confidence": "high"
+    },
+    {
+      "id": "e010",
+      "date": "2026-08-29",
+      "projectId": "religion",
+      "type": "milestone",
+      "title": "『ばりレベチ様』",
+      "detail": "宇宙を発明した誰かの便宜上の呼称として設定。",
+      "confidence": "high"
+    },
+    {
+      "id": "e011",
+      "date": "2026-08-31",
+      "projectId": "career",
+      "type": "start",
+      "title": "仕事を自作する方向へ",
+      "detail": "倉庫作業員の年収ルートへの問題意識から、自分の仕事を作るテーマが前面化。",
+      "confidence": "high"
+    },
+    {
+      "id": "e012",
+      "date": "2026-09-01",
+      "projectId": "whisper",
+      "type": "start",
+      "title": "配信アーカイブ文字起こし",
+      "detail": "150以降の音声をタイムスタンプ付きで蓄積する運用へ。",
+      "confidence": "medium"
+    },
+    {
+      "id": "e013",
+      "date": "2026-09-03",
+      "projectId": "warashibe",
+      "type": "milestone",
+      "title": "週次運用へ",
+      "detail": "毎週一手ずつ交換・追跡・物語・QRのいずれかを前進させる。",
+      "confidence": "high"
+    },
+    {
+      "id": "e014",
+      "date": "2026-09-05",
+      "projectId": "arcade",
+      "type": "start",
+      "title": "不氣屋アーケード",
+      "detail": "『界隈そのものを歩ける常設空間』として3D空間を実装。",
+      "confidence": "high"
+    },
+    {
+      "id": "e015",
+      "date": "2026-09-05",
+      "projectId": "vtuber",
+      "type": "start",
+      "title": "Vチューバーエンジン再定義",
+      "detail": "配信音声を入力すると内容に合わせて映像を組み立てる装置と定義。",
+      "confidence": "high"
+    },
+    {
+      "id": "e016",
+      "date": "2026-09-07",
+      "projectId": "gyosei",
+      "type": "start",
+      "title": "行政書士2027",
+      "detail": "2027年11月合格を目標に学習開始。",
+      "confidence": "high"
+    },
+    {
+      "id": "e017",
+      "date": "2026-09-08",
+      "projectId": "gyosei-detective",
+      "type": "start",
+      "title": "行政書士×探偵",
+      "detail": "調査、事実整理、文書化、制度処理を組み合わせる事業像。",
+      "confidence": "high"
+    },
+    {
+      "id": "e018",
+      "date": "2026-09-09",
+      "projectId": "subeha",
+      "type": "milestone",
+      "title": "『祭祀技師』の自己定義",
+      "detail": "儀式現場の安全、許可、道具、金銭受渡を担う実務職として整理。",
+      "confidence": "high"
+    },
+    {
+      "id": "e019",
+      "date": "2026-09-12",
+      "projectId": "fx",
+      "type": "start",
+      "title": "1000円AI FX LAB",
+      "detail": "Nothing Phone / Termuxで自動売買実験を開始。",
+      "confidence": "high"
+    },
+    {
+      "id": "e020",
+      "date": "2026-09-13",
+      "projectId": "btc",
+      "type": "pivot",
+      "title": "FXからBTCスポットへ展開",
+      "detail": "現金/BTC保有判断をAIにさせる方向へ。",
+      "confidence": "high"
+    },
+    {
+      "id": "e021",
+      "date": "2026-09-17",
+      "projectId": "subeha",
+      "type": "pivot",
+      "title": "丁子方代表へ",
+      "detail": "新名義と一つ折れ丁字の印へ切り替え。守り神・法の体系も整う。",
+      "confidence": "high"
+    },
+    {
+      "id": "e022",
+      "date": "2026-09-20",
+      "projectId": "phrasebook",
+      "type": "start",
+      "title": "語録アーカイブ",
+      "detail": "固有フレーズを作品資産として大量に蓄積。",
+      "confidence": "high"
+    },
+    {
+      "id": "e023",
+      "date": "2026-09-23",
+      "projectId": "whisper",
+      "type": "milestone",
+      "title": "省電力バッチ実運用",
+      "detail": "Termux / whisper.cppで長時間自動処理が動く状態へ。",
+      "confidence": "high"
+    },
+    {
+      "id": "e024",
+      "date": "2026-09-25",
+      "projectId": "allin",
+      "type": "drop",
+      "title": "全部乗せを捨てる",
+      "detail": "主サイトへ何でも載せる構想を明確に不採用。",
+      "confidence": "high"
+    },
+    {
+      "id": "e025",
+      "date": "2026-09-25",
+      "projectId": "subeha",
+      "type": "pivot",
+      "title": "『ごあいさつ・商品・理論』へ絞る",
+      "detail": "ページ数ではなく体験密度を優先する方針に。",
+      "confidence": "high"
+    },
+    {
+      "id": "e026",
+      "date": "2026-09-25",
+      "projectId": "horror-copy",
+      "type": "drop",
+      "title": "怪談っぽい怖さを否定",
+      "detail": "禁止事項や『三回目』のようなホラー記号ではなく、生活に普通に組み込まれた妙さを求めると明確化。",
+      "confidence": "high"
+    },
+    {
+      "id": "e027",
+      "date": "2026-09-25",
+      "projectId": "nft",
+      "type": "start",
+      "title": "大学時代NFTを再評価",
+      "detail": "旧作をNFT・プリント・証書として再編集できるか検討。",
+      "confidence": "high"
+    },
+    {
+      "id": "e028",
+      "date": "2026-09-25",
+      "projectId": "virtual-land",
+      "type": "start",
+      "title": "架空区画商品案",
+      "detail": "月の土地のような『所有感を買う商品』を検討。",
+      "confidence": "high"
+    },
+    {
+      "id": "e029",
+      "date": "2026-09-25",
+      "projectId": "yuuyu",
+      "type": "start",
+      "title": "『夕夕家族』",
+      "detail": "家族の誰かが常に起きている巨大な家を一日追う小説案。",
+      "confidence": "high"
+    },
+    {
+      "id": "e030",
+      "date": "2026-09-26",
+      "projectId": "whisper",
+      "type": "milestone",
+      "title": "150〜161完了",
+      "detail": "162を省電力1スレッドで処理中。",
+      "confidence": "high"
+    },
+    {
+      "id": "e031",
+      "date": "2026-09-26",
+      "projectId": "tarot-jp",
+      "type": "start",
+      "title": "日本版タロット",
+      "detail": "西洋文化依存の象徴を、日本人が直感で読める体系へ置換する案が生まれる。",
+      "confidence": "high"
+    },
+    {
+      "id": "e032",
+      "date": "2026-09-26",
+      "projectId": "workboard",
+      "type": "start",
+      "title": "Workboard誕生",
+      "detail": "企画の生死と進捗を単一画面で管理するサイトを作成。",
+      "confidence": "high"
+    },
+    {
+      "id": "e033",
+      "date": "2026-09-26",
+      "projectId": "workboard",
+      "type": "milestone",
+      "title": "GitHub Pages公開",
+      "detail": "public/workboard/として常設公開。",
+      "confidence": "high"
+    },
+    {
+      "id": "e034",
+      "date": "2026-09-26",
+      "projectId": "workboard",
+      "type": "pivot",
+      "title": "企画史そのものを管理対象へ",
+      "detail": "現在値だけでなく、誕生・転換・保留・ボツ・復活まで残す方針へ。",
+      "confidence": "high"
+    }
+  ]
+}
