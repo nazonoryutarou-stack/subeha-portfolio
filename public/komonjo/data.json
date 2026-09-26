@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-09-27T00:31:00+09:00",
+  "updatedAt": "2026-09-27T00:41:00+09:00",
   "title": "古文書文庫 β",
   "description": "翻刻本文を取得でき、出典と利用条件を確認できる資料だけ公開する古文書デジタル文庫。",
   "policy": {
@@ -1429,5 +1429,19 @@
     "range": "世紀・時期しか分からない資料は範囲表示し、単年へ丸めない。",
     "inferred": "人物・事件・プロジェクト文脈からの推定は『推定』と明示する。",
     "unknown": "根拠が取れない資料は年代未詳のまま公開する。"
+  },
+  "fulltextSearch": {
+    "enabled": true,
+    "provider": "みんなで翻刻サーチ",
+    "endpoint": "https://honkoku.dhii.jp/search/",
+    "mode": "ngram",
+    "queryParams": {
+      "variant": "1",
+      "project": "すべて",
+      "collection": "すべて",
+      "format": "json"
+    },
+    "fallback": "https://honkoku.dhii.jp/",
+    "note": "みんなで翻刻テキストのn-gram全文索引を検索し、結果から当文庫または原翻刻画面へ遷移する。"
   }
-}
+}\n
