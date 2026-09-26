@@ -100,8 +100,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
 (function(){
-  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={};
-  function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true})}
+  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false;
+  function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true}).concat(remoteDocs)}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
   function sortDocs(a,b){
@@ -127,13 +127,13 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     fill("author",uniq(docs.map(function(d){return d.author})),"すべての人物");
   }
   function renderStats(){
-    var docs=publicDocs(), all=data.documents;
+    var docs=publicDocs(), allCount=data.documents.length+remoteDocs.length;
     var yearDocs=docs.filter(function(d){return d.year!=null}).map(function(d){return d.year});
     var min=Math.min.apply(null,yearDocs), max=Math.max.apply(null,yearDocs);
     var people=uniq(docs.map(function(d){return d.author})).length;
     document.getElementById("stats").innerHTML=[
       ["公開",docs.length+"点"],
-      ["収集済",all.length+"点"],
+      ["収集済",allCount+"点"],
       ["年代",yearDocs.length?min+"–"+max:"—"],
       ["本文","全点翻刻あり"]
     ].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
@@ -147,7 +147,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         '<h3>'+esc(d.title)+'</h3>'+
         '<div class="reading">'+esc(d.reading)+'</div>'+
         '<div class="summary">'+esc(d.summary)+'</div>'+
-        '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill '+((d.transcription||"").trim()?'':'wait')+'">'+((d.transcription||"").trim()?'翻刻済':'未翻刻')+'</span></div>'+
+        '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill '+(((d.transcription||"").trim()||d.remoteReadable)?'':'wait')+'">'+(((d.transcription||"").trim()||d.remoteReadable)?'翻刻済':'未翻刻')+'</span></div>'+
         '<div class="card-footer"><span>'+esc(d.collection)+'</span><span>この場で読む →</span></div>'+
       '</article>';
     }).join(""):'<div class="empty">該当する資料がない。</div>';
@@ -190,6 +190,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     var img=document.getElementById("iiifImg");
     img.style.width=iiifZoom+"%";
     stage.scrollTop=0;stage.scrollLeft=0;
+    if(currentDoc&&currentDoc.remoteReadable)loadRemoteTextPage(currentDoc,iiifIndex);
   }
   function valueText(v){
     if(v==null)return "";
@@ -303,7 +304,90 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       note.textContent="存在しない翻刻を捏造しないため、空欄をOCRのゴミで埋めることはしません。";
     }
   }
+
+  function parseRemoteTsv(tsv,project){
+    var lines=String(tsv||"").trim().split(/\r?\n/); if(lines.length<2)return [];
+    var head=lines.shift().split("\t");
+    var idx={}; head.forEach(function(x,i){idx[x]=i});
+    var localIds=new Set(data.documents.map(function(d){return d.honkokuEntryId||d.recordId||d.id}));
+    return lines.map(function(line){
+      var a=line.split("\t"), size=Number(a[idx.size]), progress=Number(a[idx.progress]);
+      var id=a[idx.id]||"", title=a[idx.label]||"";
+      if(!id||!title||title==="Unknown"||!Number.isFinite(size)||size<1||progress!==size||localIds.has(id))return null;
+      return {
+        id:"remote-"+project+"-"+id,
+        honkokuEntryId:id,
+        title:title,
+        reading:"",
+        year:null,
+        dateDisplay:"年代未詳",
+        period:"未分類",
+        type:"翻刻資料",
+        author:"不詳",
+        summary:"「みんなで翻刻」で全文翻刻済みの公開資料。",
+        recordId:id,
+        collection:"みんなで翻刻 / "+project,
+        sourceUrl:"https://app.honkoku.org/transcription/"+encodeURIComponent(id)+"/1",
+        sourceInstitution:(a[idx.attribution]||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim()||"原所蔵機関",
+        archive:"みんなで翻刻",
+        rightsUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+        manifestUrl:a[idx.manifestUrl]||"",
+        sourceViewerUrl:a[idx.manifestUrl]||"",
+        transcription:"",
+        kundoku:"",
+        modern:"",
+        publicReadable:true,
+        remoteReadable:true,
+        pageCount:size,
+        projectId:project,
+        remoteTextBase:"https://raw.githubusercontent.com/yuta1984/honkoku-data/master/v3/"+encodeURIComponent(project)+"/"+encodeURIComponent(id)+"/",
+        transcriptionStatus:"crowdsourced",
+        transcriptionLicense:"CC BY-SA 4.0",
+        transcriptionAttribution:"みんなで翻刻 contributors"
+      };
+    }).filter(Boolean);
+  }
+  function loadRemoteCatalog(){
+    var projects=(data.remoteSource&&data.remoteSource.projects)||[];
+    if(!projects.length){remoteLoaded=true;return Promise.resolve([])}
+    var raw="https://raw.githubusercontent.com/yuta1984/honkoku-data/master/v3/";
+    var cursor=0, workers=[], found=[];
+    function worker(){
+      if(cursor>=projects.length)return Promise.resolve();
+      var p=projects[cursor++];
+      return fetch(raw+encodeURIComponent(p)+"/info.tsv",{cache:"force-cache"})
+        .then(function(r){if(!r.ok)throw Error("info");return r.text()})
+        .then(function(t){found=found.concat(parseRemoteTsv(t,p))})
+        .catch(function(){})
+        .then(worker);
+    }
+    for(var i=0;i<6;i++)workers.push(worker());
+    return Promise.all(workers).then(function(){
+      remoteDocs=found;remoteLoaded=true;fillFilters();renderStats();render();return found;
+    });
+  }
+  function remotePageName(index){return String(index+1).padStart(3,"0")+".txt"}
+  function loadRemoteTextPage(d,index){
+    if(!d||!d.remoteReadable)return;
+    var pre=document.getElementById("sourceTranscriptionText");
+    var state=document.getElementById("sourceTranscriptionState");
+    var note=document.getElementById("sourceTranscriptionNote");
+    if(pre)pre.textContent="翻刻本文を読み込んでいます…";
+    if(state){state.textContent=(index+1)+" / "+d.pageCount+"頁";state.className="source-state ok";}
+    fetch(d.remoteTextBase+remotePageName(index),{cache:"force-cache"})
+      .then(function(r){if(!r.ok)throw Error("text");return r.text()})
+      .then(function(t){
+        if(pre)pre.textContent=t.trim()||"（空ページ）";
+        if(note)note.textContent="みんなで翻刻 V3 / CC BY-SA 4.0。市民参加型翻刻のため誤刻・表記揺れを含む可能性があります。";
+      })
+      .catch(function(){
+        if(pre)pre.textContent="このページの翻刻本文を取得できませんでした。";
+        if(state){state.textContent="取得失敗";state.className="source-state none";}
+      });
+  }
   function wireReader(d){
+    currentDoc=d;
+    if(d.remoteReadable)loadRemoteTextPage(d,0);
     document.getElementById("iiifPrev").onclick=function(){if(iiifIndex>0){iiifIndex--;renderIiif()}};
     document.getElementById("iiifNext").onclick=function(){if(iiifIndex<iiifPages.length-1){iiifIndex++;renderIiif()}};
     document.getElementById("iiifZoomOut").onclick=function(){iiifZoom=Math.max(60,iiifZoom-25);renderIiif()};
@@ -327,18 +411,19 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       '<div class="eyebrow">'+esc(d.period)+' / '+esc(d.type)+'</div>'+
       '<h2>'+esc(d.title)+'</h2><div class="reading">'+esc(d.reading)+'</div>'+
       '<p class="lead">'+esc(d.summary)+'</p>'+
-      '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻本文</strong><span class="source-state '+((d.transcription||"").trim()?'ok':'none')+'">'+((d.transcription||"").trim()?'翻刻済':'未翻刻')+'</span></div><pre class="transcription-text">'+((d.transcription||"").trim()?esc(d.transcription):'この資料の翻刻本文は、まだリポジトリに収録されていません。')+'</pre><div class="transcription-note">本文はdata.jsonへ固定保存した文字列だけを表示します。外部取得や未校正OCRは「翻刻済」に数えません。</div></div></div>'+
+      '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻本文</strong><span id="sourceTranscriptionState" class="source-state '+(((d.transcription||"").trim()||d.remoteReadable)?'ok':'none')+'">'+(d.remoteReadable?'読込中':((d.transcription||"").trim()?'翻刻済':'未翻刻'))+'</span></div><pre id="sourceTranscriptionText" class="transcription-text">'+(d.remoteReadable?'翻刻本文を読み込んでいます…':((d.transcription||"").trim()?esc(d.transcription):'この資料の翻刻本文は、まだ収録されていません。'))+'</pre><div id="sourceTranscriptionNote" class="transcription-note">'+(d.remoteReadable?'みんなで翻刻 V3 / CC BY-SA 4.0':'固定保存した翻刻本文を表示。')+'</div></div></div>'+
       '<div class="kv"><b>年代</b><span>'+esc(d.dateDisplay)+'</span></div>'+
       '<div class="kv"><b>作成者</b><span>'+esc(d.author)+'</span></div>'+
       '<div class="kv"><b>所蔵</b><span>'+esc(d.sourceInstitution)+'</span></div>'+
       '<div class="kv"><b>コレクション</b><span>'+esc(d.collection)+'</span></div>'+
       '<div class="kv"><b>レコードID</b><span>'+esc(d.recordId)+'</span></div>'+
       (d.transcriptionLicense?'<div class="kv"><b>翻刻ライセンス</b><span>'+esc(d.transcriptionLicense)+'</span></div>':'')+
+      (d.transcriptionLicense?'<div class="kv"><b>翻刻ライセンス</b><span>'+esc(d.transcriptionLicense)+'</span></div>':'')+
       '<div class="layers">'+
         '<div class="layer"><h3>読み下し</h3><p>'+(d.kundoku?esc(d.kundoku):'未収録。翻刻の校訂後に追加する。')+'</p></div>'+
         '<div class="layer"><h3>現代語</h3><p>'+(d.modern?esc(d.modern):'未収録。')+'</p></div>'+
       '</div>'+
-      '<div class="sourcebox"><strong>出典・校合先</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">出典ページ</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.sourceViewerUrl||manifestUrl(d))+'" style="margin-left:6px">IIIF</a>'+(d.externalTranscriptionUrl?'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.externalTranscriptionUrl)+'" style="margin-left:6px">共同事業の翻刻</a>':'')+'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">原画像は京都大学IIIFを参照。本文欄はこのリポジトリに固定保存した翻刻だけを表示する。</div></div>';
+      '<div class="sourcebox"><strong>出典・校合先</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">出典ページ</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.sourceViewerUrl||manifestUrl(d))+'" style="margin-left:6px">IIIF</a>'+(d.externalTranscriptionUrl?'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.externalTranscriptionUrl)+'" style="margin-left:6px">共同事業の翻刻</a>':'')+'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">原画像は各所蔵機関のIIIFを参照。みんなで翻刻資料はCC BY-SA 4.0の公開翻刻をページ単位で直接表示する。</div></div>';
     document.getElementById("drawer").classList.add("open");
     history.replaceState(null,"","#"+encodeURIComponent(d.id));
     wireReader(d);
@@ -351,8 +436,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   document.getElementById("randomBtn").onclick=function(){if(!data)return;var docs=filtered();if(!docs.length)docs=publicDocs();openDoc(docs[Math.floor(Math.random()*docs.length)].id)};
   document.getElementById("close").onclick=document.getElementById("shade").onclick=function(){document.getElementById("drawer").classList.remove("open");history.replaceState(null,"",location.pathname)};
   fetch("data.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error("data");return r.json()}).then(function(x){
-    data=x;fillFilters();renderStats();render();
-    if(location.hash){var id=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id}))openDoc(id)}
+    data=x;fillFilters();renderStats();render();loadRemoteCatalog().then(function(){if(location.hash){var id=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id}))openDoc(id)}});
+    if(location.hash){var id0=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id0}))openDoc(id0)}
   }).catch(function(){document.getElementById("grid").innerHTML='<div class="empty">資料データを読み込めなかった。</div>'});
 })();
 </script>
