@@ -83,3 +83,12 @@ data.updatedAt = new Date().toISOString();
 data.transcriptionBuild = {ok, missing, failed, total:data.documents.length};
 await fs.writeFile(target, JSON.stringify(data, null, 2) + "\n", "utf8");
 console.log(`komonjo transcription build: ok=${ok} missing=${missing} failed=${failed} total=${data.documents.length}`);
+
+// PRINCETON_DIAG temporary diagnostic
+try {
+  const u="https://komonjo.princeton.edu/suruga-date/view.html?d=14";
+  const r=await fetch(u,{headers:{"user-agent":"Mozilla/5.0"}});
+  const h=await r.text();
+  const p=h.toLowerCase().indexOf("trans");
+  console.log("PRINCETON_DIAG", r.status, h.length, h.slice(Math.max(0,p-1200), p>=0?p+4000:4000).replace(/\s+/g," "));
+} catch(e) { console.log("PRINCETON_DIAG_ERR", String(e)); }
