@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="日本の古文書を、時代・人物・文書種別から探して読める小さなデジタル文庫。原資料、翻刻、読み下し、現代語を一つにまとめていく。">
+<title>古文書文庫 β</title>
+<style>
+:root{
+  --paper:#f3f0e8;--paper2:#ebe6d9;--ink:#191714;--muted:#746f66;--line:#d6cfbf;
+  --card:#fbfaf6;--accent:#7d2f27;--accent2:#203b2c;--shadow:0 12px 30px rgba(48,42,31,.08)
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif}
+a{color:inherit}button,input,select{font:inherit}
+.top{position:sticky;top:0;z-index:20;background:rgba(243,240,232,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:11px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-weight:900;letter-spacing:.08em}.brand small{font-weight:400;color:var(--muted);letter-spacing:0;margin-left:8px}
+.nav{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:var(--card);padding:8px 11px;border-radius:999px;text-decoration:none;cursor:pointer}.btn:hover{border-color:#b9ae9c}.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.wrap{max-width:1280px;margin:auto;padding:22px}
+.hero{padding:38px 0 24px;display:grid;grid-template-columns:1.35fr .65fr;gap:28px;align-items:end}
+.eyebrow{font-size:12px;color:var(--accent);letter-spacing:.18em;font-weight:800}.hero h1{font-size:clamp(40px,7vw,78px);line-height:.95;letter-spacing:-.06em;margin:8px 0 14px}.hero p{max-width:720px;color:#625d55;line-height:1.9;margin:0}
+.hero-note{border-left:1px solid var(--line);padding-left:20px;color:var(--muted);font-size:13px;line-height:1.8}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 20px}.stat{background:var(--card);border:1px solid var(--line);padding:13px 15px;border-radius:14px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:28px;margin-top:4px}
+.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;margin-bottom:14px;position:sticky;top:58px;z-index:10;background:var(--paper);padding:10px 0}
+.toolbar input,.toolbar select{width:100%;border:1px solid var(--line);background:var(--card);padding:11px 12px;border-radius:10px;color:var(--ink)}.toolbar button{white-space:nowrap}
+.library-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0 12px}.library-head h2{font-size:18px;margin:0}.count{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:260px;cursor:pointer;transition:.16s transform,.16s box-shadow}
+.card:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(48,42,31,.12)}
+.kicker{font-size:11px;color:var(--accent);letter-spacing:.08em}.card h3{font-size:20px;line-height:1.5;margin:7px 0 4px}.reading{font-size:11px;color:#9a9287;margin-bottom:11px}.summary{font-size:13px;color:#655f57;line-height:1.75;flex:1}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.pill{font-size:10px;padding:4px 7px;border-radius:999px;border:1px solid var(--line);background:#f6f3eb;color:#6b655c}.pill.wait{color:#8a5b14;background:#fff6df}
+.card-footer{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #e7e0d4;font-size:11px;color:var(--muted)}
+.empty{border:1px dashed #bdb4a4;border-radius:14px;padding:34px;text-align:center;color:var(--muted);grid-column:1/-1}
+.about{margin:34px 0 10px;border-top:1px solid var(--line);padding-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px}.about h2{margin:0 0 8px}.about p{color:#655f57;line-height:1.8;font-size:13px}
+.drawer{position:fixed;inset:0;z-index:40;pointer-events:none}.shade{position:absolute;inset:0;background:rgba(22,18,14,.48);opacity:0;transition:.2s}.panel{position:absolute;right:0;top:0;width:min(680px,100%);height:100%;background:#fbfaf6;overflow:auto;transform:translateX(100%);transition:.24s;padding:24px}.drawer.open{pointer-events:auto}.drawer.open .shade{opacity:1}.drawer.open .panel{transform:none}.close{float:right;border:1px solid var(--line);background:#f1ede4;width:38px;height:38px;border-radius:50%;cursor:pointer}
+.detail .eyebrow{margin-top:10px}.detail h2{font-size:34px;line-height:1.35;margin:9px 0 4px}.detail .reading{font-size:12px}.detail .lead{font-size:15px;line-height:1.9;color:#5f594f}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:10px;border-bottom:1px solid #e6dfd2;padding:10px 0;font-size:13px}.kv b{color:#5f594f}
+.layers{display:grid;gap:10px;margin-top:20px}.layer{border:1px solid var(--line);border-radius:12px;padding:13px}.layer h3{font-size:14px;margin:0 0 7px}.layer p{margin:0;color:#777064;font-size:12px;line-height:1.7}
+.sourcebox{margin-top:18px;padding:15px;border-radius:12px;background:#efeadf;border:1px solid var(--line)}.sourcebox a{display:inline-block;margin-top:9px}
+.notice{font-size:11px;color:#857d70;margin-top:12px;line-height:1.7}
+footer{padding:30px 0;color:#837b6f;font-size:11px}
+@media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr 1fr 1fr}.toolbar input{grid-column:1/-1}.hero{grid-template-columns:1fr}.hero-note{border-left:0;border-top:1px solid var(--line);padding:14px 0 0}}
+@media(max-width:650px){.wrap{padding:14px}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.toolbar{top:54px;grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.toolbar .wide{grid-column:1/-1}.about{grid-template-columns:1fr}.brand small{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">古文書文庫 <small>β</small></div>
+  <div class="nav">
+    <a class="btn" href="../workboard/history.html">企画史</a>
+    <button class="btn" id="randomBtn">一冊引く</button>
+  </div>
+</header>
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">KOMONJO LIBRARY</div>
+      <h1>昔の人の<br>生の記録。</h1>
+      <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
+    </div>
+    <div class="hero-note">初版は京都大学貴重資料デジタルアーカイブの公開資料から選定。画像は所蔵元で閲覧し、このサイトでは検索・分類・読みの入口を整える。翻刻、読み下し、現代語は順次追加。</div>
+  </section>
+  <section class="stats" id="stats"></section>
+  <section class="toolbar">
+    <input id="search" placeholder="人物、文書名、内容を検索">
+    <select id="period"><option value="">すべての時代</option></select>
+    <select id="type"><option value="">すべての文書</option></select>
+    <select id="author"><option value="">すべての人物</option></select>
+    <button class="btn dark wide" id="clearBtn">絞込解除</button>
+  </section>
+  <div class="library-head"><h2>収蔵資料</h2><div class="count" id="count"></div></div>
+  <section class="grid" id="grid"></section>
+  <section class="about">
+    <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
+    <div><h2>まだβ版</h2><p>現時点では目録と概要が中心。翻刻欄は空で構わない。信頼できるテキストが確認できた資料から埋め、原文・読み下し・現代語が横並びになるところまで育てる。</p></div>
+  </section>
+  <footer>Source metadata: 京都大学貴重資料デジタルアーカイブ / 画像・二次利用条件は各所蔵元の規定に従う。</footer>
+</main>
+<div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
+<script>
+(function(){
+  var data=null, q="", period="", type="", author="";
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
+  function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
+  function sortDocs(a,b){
+    var ay=a.year==null?999999:a.year, by=b.year==null?999999:b.year;
+    if(ay!==by)return ay-by;
+    return a.title.localeCompare(b.title,"ja");
+  }
+  function filtered(){
+    return data.documents.filter(function(d){
+      var text=[d.title,d.reading,d.author,d.summary,d.type,d.period,d.collection].join(" ").toLowerCase();
+      return (!q||text.indexOf(q.toLowerCase())!==-1)&&(!period||d.period===period)&&(!type||d.type===type)&&(!author||d.author===author);
+    }).sort(sortDocs);
+  }
+  function fillFilters(){
+    function fill(id,vals,label){
+      var e=document.getElementById(id), current=e.value;
+      e.innerHTML='<option value="">'+label+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join("");
+      e.value=current;
+    }
+    fill("period",uniq(data.documents.map(function(d){return d.period})),"すべての時代");
+    fill("type",uniq(data.documents.map(function(d){return d.type})),"すべての文書");
+    fill("author",uniq(data.documents.map(function(d){return d.author})),"すべての人物");
+  }
+  function renderStats(){
+    var docs=data.documents;
+    var yearDocs=docs.filter(function(d){return d.year!=null}).map(function(d){return d.year});
+    var min=Math.min.apply(null,yearDocs), max=Math.max.apply(null,yearDocs);
+    var people=uniq(docs.map(function(d){return d.author})).length;
+    document.getElementById("stats").innerHTML=[
+      ["収蔵",docs.length+"点"],
+      ["年代",min+"–"+max],
+      ["人物",people+"名"],
+      ["翻刻","準備中"]
+    ].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
+  }
+  function render(){
+    var docs=filtered();
+    document.getElementById("count").textContent=docs.length+" / "+data.documents.length+"点";
+    document.getElementById("grid").innerHTML=docs.length?docs.map(function(d){
+      return '<article class="card" data-id="'+esc(d.id)+'">'+
+        '<div class="kicker">'+esc(d.period)+' · '+esc(d.dateDisplay)+'</div>'+
+        '<h3>'+esc(d.title)+'</h3>'+
+        '<div class="reading">'+esc(d.reading)+'</div>'+
+        '<div class="summary">'+esc(d.summary)+'</div>'+
+        '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill wait">翻刻準備中</span></div>'+
+        '<div class="card-footer"><span>'+esc(d.collection)+'</span><span>資料を見る →</span></div>'+
+      '</article>';
+    }).join(""):'<div class="empty">該当する資料がない。</div>';
+    document.querySelectorAll("[data-id]").forEach(function(el){el.onclick=function(){openDoc(el.getAttribute("data-id"))}});
+  }
+  function openDoc(id){
+    var d=data.documents.find(function(x){return x.id===id});if(!d)return;
+    document.getElementById("detail").innerHTML=
+      '<div class="eyebrow">'+esc(d.period)+' / '+esc(d.type)+'</div>'+
+      '<h2>'+esc(d.title)+'</h2><div class="reading">'+esc(d.reading)+'</div>'+
+      '<p class="lead">'+esc(d.summary)+'</p>'+
+      '<div class="kv"><b>年代</b><span>'+esc(d.dateDisplay)+'</span></div>'+
+      '<div class="kv"><b>作成者</b><span>'+esc(d.author)+'</span></div>'+
+      '<div class="kv"><b>所蔵</b><span>'+esc(d.sourceInstitution)+'</span></div>'+
+      '<div class="kv"><b>コレクション</b><span>'+esc(d.collection)+'</span></div>'+
+      '<div class="kv"><b>レコードID</b><span>'+esc(d.recordId)+'</span></div>'+
+      '<div class="layers">'+
+        '<div class="layer"><h3>翻刻</h3><p>'+(d.transcription?esc(d.transcription):'未収録。原資料を確認し、信頼できる本文から順次追加する。')+'</p></div>'+
+        '<div class="layer"><h3>読み下し</h3><p>'+(d.kundoku?esc(d.kundoku):'未収録。')+'</p></div>'+
+        '<div class="layer"><h3>現代語</h3><p>'+(d.modern?esc(d.modern):'未収録。')+'</p></div>'+
+      '</div>'+
+      '<div class="sourcebox"><strong>原資料</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元で画像を見る</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">画像・メタデータの利用条件は所蔵元の案内を優先する。このサイトは現時点で画像を再配布しない。</div></div>';
+    document.getElementById("drawer").classList.add("open");
+    history.replaceState(null,"","#"+encodeURIComponent(d.id));
+  }
+  document.getElementById("search").oninput=function(e){q=e.target.value;render()};
+  document.getElementById("period").onchange=function(e){period=e.target.value;render()};
+  document.getElementById("type").onchange=function(e){type=e.target.value;render()};
+  document.getElementById("author").onchange=function(e){author=e.target.value;render()};
+  document.getElementById("clearBtn").onclick=function(){q=period=type=author="";document.getElementById("search").value="";fillFilters();render()};
+  document.getElementById("randomBtn").onclick=function(){if(!data)return;var docs=filtered();if(!docs.length)docs=data.documents;openDoc(docs[Math.floor(Math.random()*docs.length)].id)};
+  document.getElementById("close").onclick=document.getElementById("shade").onclick=function(){document.getElementById("drawer").classList.remove("open");history.replaceState(null,"",location.pathname)};
+  fetch("data.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error("data");return r.json()}).then(function(x){
+    data=x;fillFilters();renderStats();render();
+    if(location.hash){var id=decodeURIComponent(location.hash.slice(1));if(data.documents.some(function(d){return d.id===id}))openDoc(id)}
+  }).catch(function(){document.getElementById("grid").innerHTML='<div class="empty">資料データを読み込めなかった。</div>'});
+})();
+</script>
+</body>
+</html>
