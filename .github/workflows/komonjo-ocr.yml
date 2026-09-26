@@ -1,0 +1,66 @@
+name: Build all komonjo transcriptions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/komonjo-ocr.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: komonjo-ocr
+  cancel-in-progress: false
+
+jobs:
+  ocr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install OCR engines
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ndl-lab/ndlkotenocr-lite.git /tmp/ndlkotenocr-lite
+          git clone --depth 1 https://github.com/ndl-lab/ndlocr-lite.git /tmp/ndlocr-lite
+          python -m pip install --upgrade pip
+          python -m pip install requests
+          python -m pip install -r /tmp/ndlkotenocr-lite/requirements.txt
+          python -m pip install -r /tmp/ndlocr-lite/requirements.txt
+
+      - name: OCR all 20 catalogued documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/ocr-komonjo.py \
+            --data public/komonjo/data.json \
+            --koten-root /tmp/ndlkotenocr-lite \
+            --modern-root /tmp/ndlocr-lite \
+            --work /tmp/komonjo-ocr
+
+      - name: Commit transcription results
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/komonjo/data.json
+          if git diff --cached --quiet; then
+            echo "No transcription changes."
+            exit 0
+          fi
+          git commit -m "Add machine/source transcriptions for komonjo library"
+          git push
