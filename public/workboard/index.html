@@ -16,7 +16,7 @@ button,input,textarea{font:inherit}.top{position:sticky;top:0;z-index:10;backgro
 @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:repeat(5,82vw)}.wrap{padding:12px}}
 </style>
 </head><body>
-<header class="top"><div class="brand">打猿 Workboard</div><div class="acts"><button class="btn" id="export">JSON</button><button class="btn primary" id="edit">データ編集</button></div></header>
+<header class="top"><div class="brand">打猿 Workboard</div><div class="acts"><a class="btn" href="history.html">企画史</a><button class="btn" id="export">JSON</button><button class="btn primary" id="edit">データ編集</button></div></header>
 <main class="wrap">
 <section class="hero"><div><h1>企画の生死を、画面で見る。</h1><p>進行中・次・保留・ボツ・完了。データはあとからJSONで差し替え。</p></div><input class="search" id="search" placeholder="企画名・タグ・メモを検索"></section>
 <section class="stats" id="stats"></section><div class="filters" id="filters"></div><section class="board" id="board"></section>
@@ -53,5 +53,5 @@ document.getElementById("search").oninput=e=>{q=e.target.value;renderBoard()};do
 const modal=document.getElementById("modal"),ed=document.getElementById("editor");document.getElementById("edit").onclick=()=>{ed.value=JSON.stringify(data,null,2);modal.classList.add("open")};document.getElementById("cancel").onclick=()=>modal.classList.remove("open");
 document.getElementById("save").onclick=()=>{try{let x=JSON.parse(ed.value);if(!Array.isArray(x.projects))throw Error("projects配列がない");data=x;localStorage.setItem("dauen-board",JSON.stringify(data));modal.classList.remove("open");render()}catch(e){alert(e.message)}};
 document.getElementById("reset").onclick=()=>{localStorage.removeItem("dauen-board");data=structuredClone(seed);ed.value=JSON.stringify(data,null,2);render()};
-document.getElementById("export").onclick=()=>{let b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="workboard-data.json";a.click()};render();
+document.getElementById("export").onclick=()=>{let b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="workboard-data.json";a.click()};render();if(!localStorage.getItem("dauen-board")){fetch("data.json",{cache:"no-store"}).then(r=>r.json()).then(remote=>{data=remote;render()}).catch(()=>{})}
 </script></body></html>
