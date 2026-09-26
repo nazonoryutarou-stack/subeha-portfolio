@@ -93,7 +93,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>GitHub Actionsは使わず、20点すべてについて閲覧時に所蔵元IIIF Manifestを直接照会する。失敗OCRは捨て、原画像と所蔵元テキストを左右に並べる。所蔵元に全文翻刻がない資料だけ、人工翻刻を追加していく。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>GitHub Actionsは使わず、20点すべてについて閲覧時に所蔵元IIIF Manifestと画像別アノテーションを直接照会する。失敗OCRは捨て、原画像と所蔵元翻刻を左右に並べる。所蔵元に全文翻刻がない資料だけ、人工翻刻を追加していく。</p></div>
   </section>
   <footer>Source metadata: 京都大学貴重資料デジタルアーカイブ / 画像・二次利用条件は各所蔵元の規定に従う。</footer>
 </main>
@@ -222,6 +222,64 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     if(desc&&desc.trim().length>8)return {text:htmlToText(desc),kind:"description"};
     return {text:"",kind:"none"};
   }
+  function annotationUrlsFromManifest(m){
+    var out=[];
+    function add(v){
+      if(!v)return;
+      if(Array.isArray(v)){v.forEach(add);return}
+      if(typeof v==="string"){out.push(v);return}
+      if(typeof v==="object"){
+        if(v["@id"])out.push(v["@id"]);
+        else if(v.id)out.push(v.id);
+      }
+    }
+    if(m&&m.sequences&&m.sequences[0]&&m.sequences[0].canvases){
+      m.sequences[0].canvases.forEach(function(c){add(c.otherContent)});
+    }
+    if(m&&m.items){
+      m.items.forEach(function(c){add(c.annotations)});
+    }
+    return Array.from(new Set(out));
+  }
+  function annotationTextFromObject(obj){
+    var texts=[];
+    function push(v){
+      var s=htmlToText(valueText(v));
+      if(s&&s.length>1&&!/^https?:\/\//i.test(s)) texts.push(s);
+    }
+    function walk(x){
+      if(!x)return;
+      if(Array.isArray(x)){x.forEach(walk);return}
+      if(typeof x!=="object")return;
+      if(x.resource){
+        var r=x.resource;
+        if(r&&typeof r==="object"&&(r.chars||r["@value"]||r.value)) push(r.chars||r["@value"]||r.value);
+      }
+      if(x.body){
+        var b=x.body;
+        if(Array.isArray(b)) b.forEach(function(v){if(v&&typeof v==="object"&&(v.value||v["@value"]))push(v.value||v["@value"]);});
+        else if(b&&typeof b==="object"&&(b.value||b["@value"]))push(b.value||b["@value"]);
+      }
+      if(x.chars)push(x.chars);
+      if(x.items)walk(x.items);
+      if(x.resources)walk(x.resources);
+    }
+    walk(obj);
+    return texts;
+  }
+  function fetchAnnotationTranscription(m){
+    var urls=annotationUrlsFromManifest(m);
+    if(!urls.length)return Promise.resolve({text:"",kind:"none",pages:0});
+    return Promise.all(urls.map(function(url,i){
+      return fetch(url,{cache:"force-cache"}).then(function(r){if(!r.ok)throw Error("annotation");return r.json()}).then(function(obj){
+        var arr=annotationTextFromObject(obj);
+        return arr.length?"【"+(i+1)+"】\n"+arr.join("\n"):"";
+      }).catch(function(){return ""});
+    })).then(function(parts){
+      var text=parts.filter(Boolean).join("\n\n").trim();
+      return {text:text,kind:text?"annotation":"none",pages:urls.length};
+    });
+  }
   function showSourceTranscription(d,m){
     var out=extractSourceTranscription(m);
     sourceTextCache[d.id]=out;
@@ -251,6 +309,16 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     fetch(manifestUrl(d),{cache:"force-cache"}).then(function(r){if(!r.ok)throw Error("manifest");return r.json()}).then(function(m){
       iiifPages=parseManifest(m);iiifIndex=0;iiifZoom=100;
       showSourceTranscription(d,m);
+      fetchAnnotationTranscription(m).then(function(a){
+        if(!a.text)return;
+        sourceTextCache[d.id]=a;
+        var pre=document.getElementById("sourceTranscriptionText");
+        var state=document.getElementById("sourceTranscriptionState");
+        var note=document.getElementById("sourceTranscriptionNote");
+        if(pre)pre.textContent=a.text;
+        if(state){state.textContent="所蔵元翻刻";state.className="source-state ok";}
+        if(note)note.textContent="京都大学IIIFの画像別アノテーションから翻刻テキストを取得しています。全"+a.pages+"画像分をまとめて表示。";
+      });
       if(!iiifPages.length)throw Error("no images");
       renderIiif();
     }).catch(function(){
@@ -268,7 +336,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       '<div class="eyebrow">'+esc(d.period)+' / '+esc(d.type)+'</div>'+
       '<h2>'+esc(d.title)+'</h2><div class="reading">'+esc(d.reading)+'</div>'+
       '<p class="lead">'+esc(d.summary)+'</p>'+
-      '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻</strong><span id="sourceTranscriptionState" class="source-state">読込中</span></div><pre id="sourceTranscriptionText" class="transcription-text">京都大学IIIF Manifestから所蔵元テキストを読み込んでいます…</pre><div id="sourceTranscriptionNote" class="transcription-note">原画像と翻刻を突き合わせて読めるようにしています。</div></div></div>'+
+      '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻</strong><span id="sourceTranscriptionState" class="source-state">読込中</span></div><pre id="sourceTranscriptionText" class="transcription-text">京都大学IIIFのManifest／画像別アノテーションから翻刻を読み込んでいます…</pre><div id="sourceTranscriptionNote" class="transcription-note">原画像と画像別アノテーションの翻刻を突き合わせて読めるようにしています。</div></div></div>'+
       '<div class="kv"><b>年代</b><span>'+esc(d.dateDisplay)+'</span></div>'+
       '<div class="kv"><b>作成者</b><span>'+esc(d.author)+'</span></div>'+
       '<div class="kv"><b>所蔵</b><span>'+esc(d.sourceInstitution)+'</span></div>'+
