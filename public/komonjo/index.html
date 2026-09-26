@@ -37,6 +37,17 @@ a{color:inherit}button,input,select{font:inherit}
 .layers{display:grid;gap:10px;margin-top:20px}.layer{border:1px solid var(--line);border-radius:12px;padding:13px}.layer h3{font-size:14px;margin:0 0 7px}.layer p{margin:0;color:#777064;font-size:12px;line-height:1.7}
 .sourcebox{margin-top:18px;padding:15px;border-radius:12px;background:#efeadf;border:1px solid var(--line)}.sourcebox a{display:inline-block;margin-top:9px}
 .notice{font-size:11px;color:#857d70;margin-top:12px;line-height:1.7}
+.reader{margin:18px 0 20px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#201d19}
+.reader-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:#2a2621;color:#f8f3e7}
+.reader-title{font-size:13px;font-weight:800;letter-spacing:.08em}
+.reader-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.reader-tools button{border:1px solid #5b5349;background:#373129;color:#fff;border-radius:8px;padding:6px 9px;cursor:pointer}
+.reader-tools span{font-size:11px;color:#d5cdbf;min-width:58px;text-align:center}
+.iiif-stage{height:min(68vh,760px);overflow:auto;display:grid;place-items:start center;background:#171512;padding:12px;overscroll-behavior:contain}
+.iiif-stage img{display:block;width:100%;height:auto;max-width:none;transform-origin:top center;transition:width .12s ease}
+.iiif-loading{color:#d8d0c3;padding:40px 20px;text-align:center;width:100%}
+.iiif-error{background:#2a2621;color:#ddd3c4;padding:18px;line-height:1.7;font-size:12px}
+.iiif-error a{color:#fff}
 footer{padding:30px 0;color:#837b6f;font-size:11px}
 @media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr 1fr 1fr}.toolbar input{grid-column:1/-1}.hero{grid-template-columns:1fr}.hero-note{border-left:0;border-top:1px solid var(--line);padding:14px 0 0}}
 @media(max-width:650px){.wrap{padding:14px}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.toolbar{top:54px;grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.toolbar .wide{grid-column:1/-1}.about{grid-template-columns:1fr}.brand small{display:none}}
@@ -57,7 +68,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">初版は京都大学貴重資料デジタルアーカイブの公開資料から選定。画像は所蔵元で閲覧し、このサイトでは検索・分類・読みの入口を整える。翻刻、読み下し、現代語は順次追加。</div>
+    <div class="hero-note">初版は京都大学貴重資料デジタルアーカイブの公開資料から選定。IIIF画像をこのサイト内で直接めくって読める。翻刻、読み下し、現代語は順次追加。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -78,7 +89,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
 (function(){
-  var data=null, q="", period="", type="", author="";
+  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100;
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
   function sortDocs(a,b){
@@ -124,17 +135,71 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         '<div class="reading">'+esc(d.reading)+'</div>'+
         '<div class="summary">'+esc(d.summary)+'</div>'+
         '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill wait">翻刻準備中</span></div>'+
-        '<div class="card-footer"><span>'+esc(d.collection)+'</span><span>資料を見る →</span></div>'+
+        '<div class="card-footer"><span>'+esc(d.collection)+'</span><span>この場で読む →</span></div>'+
       '</article>';
     }).join(""):'<div class="empty">該当する資料がない。</div>';
     document.querySelectorAll("[data-id]").forEach(function(el){el.onclick=function(){openDoc(el.getAttribute("data-id"))}});
   }
+  function manifestUrl(d){
+    return "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/"+encodeURIComponent(d.recordId)+"/manifest.json";
+  }
+  function imageFromBody(body){
+    if(!body)return null;
+    var service=body.service||body.services;
+    if(Array.isArray(service))service=service[0];
+    var sid=service&&(service["@id"]||service.id);
+    if(sid)return sid.replace(/\/$/,"")+"/full/1600,/0/default.jpg";
+    return body["@id"]||body.id||null;
+  }
+  function parseManifest(m){
+    var out=[];
+    if(m.sequences&&m.sequences[0]&&m.sequences[0].canvases){
+      m.sequences[0].canvases.forEach(function(canvas,i){
+        var img=canvas.images&&canvas.images[0]&&canvas.images[0].resource;
+        var url=imageFromBody(img);
+        if(url)out.push({url:url,label:canvas.label||String(i+1)});
+      });
+    }else if(m.items){
+      m.items.forEach(function(canvas,i){
+        var page=canvas.items&&canvas.items[0], anno=page&&page.items&&page.items[0], body=anno&&anno.body;
+        var url=imageFromBody(body);
+        if(url)out.push({url:url,label:(canvas.label&&((canvas.label.ja&&canvas.label.ja[0])||(canvas.label.en&&canvas.label.en[0])))||String(i+1)});
+      });
+    }
+    return out;
+  }
+  function renderIiif(){
+    var stage=document.getElementById("iiifStage"), counter=document.getElementById("iiifCounter");
+    if(!stage||!iiifPages.length)return;
+    var p=iiifPages[iiifIndex];
+    counter.textContent=(iiifIndex+1)+" / "+iiifPages.length;
+    stage.innerHTML='<img id="iiifImg" src="'+esc(p.url)+'" alt="古文書画像 '+(iiifIndex+1)+'ページ">';
+    var img=document.getElementById("iiifImg");
+    img.style.width=iiifZoom+"%";
+    stage.scrollTop=0;stage.scrollLeft=0;
+  }
+  function wireReader(d){
+    document.getElementById("iiifPrev").onclick=function(){if(iiifIndex>0){iiifIndex--;renderIiif()}};
+    document.getElementById("iiifNext").onclick=function(){if(iiifIndex<iiifPages.length-1){iiifIndex++;renderIiif()}};
+    document.getElementById("iiifZoomOut").onclick=function(){iiifZoom=Math.max(60,iiifZoom-25);renderIiif()};
+    document.getElementById("iiifZoomIn").onclick=function(){iiifZoom=Math.min(300,iiifZoom+25);renderIiif()};
+    fetch(manifestUrl(d),{cache:"force-cache"}).then(function(r){if(!r.ok)throw Error("manifest");return r.json()}).then(function(m){
+      iiifPages=parseManifest(m);iiifIndex=0;iiifZoom=100;
+      if(!iiifPages.length)throw Error("no images");
+      renderIiif();
+    }).catch(function(){
+      var stage=document.getElementById("iiifStage");
+      if(stage)stage.innerHTML='<div class="iiif-error">この資料のIIIF画像をブラウザから取得できなかった。<br><a target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元で開く</a> / <a target="_blank" rel="noopener" href="'+esc(manifestUrl(d))+'">IIIF manifest</a></div>';
+    });
+  }
   function openDoc(id){
     var d=data.documents.find(function(x){return x.id===id});if(!d)return;
+    iiifPages=[];iiifIndex=0;iiifZoom=100;
     document.getElementById("detail").innerHTML=
       '<div class="eyebrow">'+esc(d.period)+' / '+esc(d.type)+'</div>'+
       '<h2>'+esc(d.title)+'</h2><div class="reading">'+esc(d.reading)+'</div>'+
       '<p class="lead">'+esc(d.summary)+'</p>'+
+      '<div class="reader"><div class="reader-head"><div class="reader-title">原資料を読む</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div>'+
       '<div class="kv"><b>年代</b><span>'+esc(d.dateDisplay)+'</span></div>'+
       '<div class="kv"><b>作成者</b><span>'+esc(d.author)+'</span></div>'+
       '<div class="kv"><b>所蔵</b><span>'+esc(d.sourceInstitution)+'</span></div>'+
@@ -145,9 +210,10 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         '<div class="layer"><h3>読み下し</h3><p>'+(d.kundoku?esc(d.kundoku):'未収録。')+'</p></div>'+
         '<div class="layer"><h3>現代語</h3><p>'+(d.modern?esc(d.modern):'未収録。')+'</p></div>'+
       '</div>'+
-      '<div class="sourcebox"><strong>原資料</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元で画像を見る</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">画像・メタデータの利用条件は所蔵元の案内を優先する。このサイトは現時点で画像を再配布しない。</div></div>';
+      '<div class="sourcebox"><strong>出典</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元で開く</a><a class="btn" target="_blank" rel="noopener" href="'+esc(manifestUrl(d))+'" style="margin-left:6px">IIIF</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">表示画像は所蔵元のIIIF配信をこのページ上で参照している。画像そのものをこのサイトへ複製保存しているわけではない。</div></div>';
     document.getElementById("drawer").classList.add("open");
     history.replaceState(null,"","#"+encodeURIComponent(d.id));
+    wireReader(d);
   }
   document.getElementById("search").oninput=function(e){q=e.target.value;render()};
   document.getElementById("period").onchange=function(e){period=e.target.value;render()};
