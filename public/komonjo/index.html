@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">20点すべてを所蔵元IIIFへ接続。原資料と翻刻テキストを同じ画面で読む。失敗OCRは本文から排除し、所蔵元テキストを優先する。</div>
+    <div class="hero-note">原資料20点を収蔵。本文欄にはdata.jsonへ固定保存した翻刻だけを表示する。現在の実翻刻は0/20。外部取得に成功したふりはしない。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -93,7 +93,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>GitHub Actionsは使わず、20点すべてについて閲覧時に所蔵元IIIF Manifestと画像別アノテーションを直接照会する。失敗OCRは捨て、原画像と所蔵元翻刻を左右に並べる。所蔵元に全文翻刻がない資料だけ、人工翻刻を追加していく。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>本文は外部サービスからのライブ取得ではなく、このリポジトリに固定保存する。20点の原画像はそのまま参照し、翻刻は一件ずつ校訂してdata.jsonへ積む。</p></div>
   </section>
   <footer>Source metadata: 京都大学貴重資料デジタルアーカイブ / 画像・二次利用条件は各所蔵元の規定に従う。</footer>
 </main>
@@ -133,7 +133,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       ["収蔵",docs.length+"点"],
       ["年代",min+"–"+max],
       ["人物",people+"名"],
-      ["翻刻","20点照会"]
+      ["翻刻済",docs.filter(function(d){return !!(d.transcription||"").trim()}).length+"/"+docs.length]
     ].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
   }
   function render(){
@@ -145,7 +145,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         '<h3>'+esc(d.title)+'</h3>'+
         '<div class="reading">'+esc(d.reading)+'</div>'+
         '<div class="summary">'+esc(d.summary)+'</div>'+
-        '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill" data-trans-badge="'+esc(d.id)+'">所蔵元翻刻</span></div>'+
+        '<div class="meta"><span class="pill">'+esc(d.type)+'</span><span class="pill">'+esc(d.author)+'</span><span class="pill '+((d.transcription||"").trim()?'':'wait')+'">'+((d.transcription||"").trim()?'翻刻済':'未翻刻')+'</span></div>'+
         '<div class="card-footer"><span>'+esc(d.collection)+'</span><span>この場で読む →</span></div>'+
       '</article>';
     }).join(""):'<div class="empty">該当する資料がない。</div>';
@@ -308,17 +308,6 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     document.getElementById("iiifZoomIn").onclick=function(){iiifZoom=Math.min(300,iiifZoom+25);renderIiif()};
     fetch(manifestUrl(d),{cache:"force-cache"}).then(function(r){if(!r.ok)throw Error("manifest");return r.json()}).then(function(m){
       iiifPages=parseManifest(m);iiifIndex=0;iiifZoom=100;
-      showSourceTranscription(d,m);
-      fetchAnnotationTranscription(m).then(function(a){
-        if(!a.text)return;
-        sourceTextCache[d.id]=a;
-        var pre=document.getElementById("sourceTranscriptionText");
-        var state=document.getElementById("sourceTranscriptionState");
-        var note=document.getElementById("sourceTranscriptionNote");
-        if(pre)pre.textContent=a.text;
-        if(state){state.textContent="所蔵元翻刻";state.className="source-state ok";}
-        if(note)note.textContent="京都大学IIIFの画像別アノテーションから翻刻テキストを取得しています。全"+a.pages+"画像分をまとめて表示。";
-      });
       if(!iiifPages.length)throw Error("no images");
       renderIiif();
     }).catch(function(){
@@ -336,7 +325,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       '<div class="eyebrow">'+esc(d.period)+' / '+esc(d.type)+'</div>'+
       '<h2>'+esc(d.title)+'</h2><div class="reading">'+esc(d.reading)+'</div>'+
       '<p class="lead">'+esc(d.summary)+'</p>'+
-      '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻</strong><span id="sourceTranscriptionState" class="source-state">読込中</span></div><pre id="sourceTranscriptionText" class="transcription-text">京都大学IIIFのManifest／画像別アノテーションから翻刻を読み込んでいます…</pre><div id="sourceTranscriptionNote" class="transcription-note">原画像と画像別アノテーションの翻刻を突き合わせて読めるようにしています。</div></div></div>'+
+      '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻本文</strong><span class="source-state '+((d.transcription||"").trim()?'ok':'none')+'">'+((d.transcription||"").trim()?'翻刻済':'未翻刻')+'</span></div><pre class="transcription-text">'+((d.transcription||"").trim()?esc(d.transcription):'この資料の翻刻本文は、まだリポジトリに収録されていません。')+'</pre><div class="transcription-note">本文はdata.jsonへ固定保存した文字列だけを表示します。外部取得や未校正OCRは「翻刻済」に数えません。</div></div></div>'+
       '<div class="kv"><b>年代</b><span>'+esc(d.dateDisplay)+'</span></div>'+
       '<div class="kv"><b>作成者</b><span>'+esc(d.author)+'</span></div>'+
       '<div class="kv"><b>所蔵</b><span>'+esc(d.sourceInstitution)+'</span></div>'+
@@ -346,7 +335,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         '<div class="layer"><h3>読み下し</h3><p>'+(d.kundoku?esc(d.kundoku):'未収録。翻刻の校訂後に追加する。')+'</p></div>'+
         '<div class="layer"><h3>現代語</h3><p>'+(d.modern?esc(d.modern):'未収録。')+'</p></div>'+
       '</div>'+
-      '<div class="sourcebox"><strong>出典</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元で開く</a><a class="btn" target="_blank" rel="noopener" href="'+esc(manifestUrl(d))+'" style="margin-left:6px">IIIF</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">表示画像は所蔵元のIIIF配信をこのページ上で参照している。画像そのものをこのサイトへ複製保存しているわけではない。</div></div>';
+      '<div class="sourcebox"><strong>出典・校合先</strong><br><span>'+esc(d.archive)+'</span><br><a class="btn dark" target="_blank" rel="noopener" href="'+esc(d.sourceUrl)+'">所蔵元</a><a class="btn" target="_blank" rel="noopener" href="'+esc(d.sourceViewerUrl||manifestUrl(d))+'" style="margin-left:6px">京大Mirador</a>'+(d.externalTranscriptionUrl?'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.externalTranscriptionUrl)+'" style="margin-left:6px">共同事業の翻刻</a>':'')+'<a class="btn" target="_blank" rel="noopener" href="'+esc(d.rightsUrl)+'" style="margin-left:6px">二次利用条件</a><div class="notice">原画像は京都大学IIIFを参照。本文欄はこのリポジトリに固定保存した翻刻だけを表示する。</div></div>';
     document.getElementById("drawer").classList.add("open");
     history.replaceState(null,"","#"+encodeURIComponent(d.id));
     wireReader(d);
