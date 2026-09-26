@@ -1,11 +1,11 @@
 {
-  "version": 2,
-  "updatedAt": "2026-09-26T20:10:00+09:00",
+  "version": 3,
+  "updatedAt": "2026-09-26T20:35:00+09:00",
   "title": "古文書文庫 β",
-  "description": "原資料画像と、所蔵元IIIF Manifestの翻刻テキストを同じ画面で読む古文書ライブラリ。",
+  "description": "古文書20点の原画像を閲覧し、実際に固定保存した翻刻だけを本文として表示するデジタル文庫。",
   "policy": {
     "image": "画像は原所蔵機関の公開ページへリンクし、無断複製しない。",
-    "text": "翻刻は京都大学のIIIF Manifestに収録された所蔵元テキストを優先してライブ取得する。失敗したOCRや未校正AI文字列は本文として表示しない。",
+    "text": "翻刻本文はdata.jsonに固定保存されたものだけを表示する。外部IIIFの取得成功を翻刻済みとは数えない。",
     "metadata": "初版は京都大学貴重資料デジタルアーカイブの公開メタデータをもとに整理。"
   },
   "documents": [
@@ -29,10 +29,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034891/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034891%2Fmanifest.json"
     },
     {
       "id": "ashikaga-1351-rank",
@@ -54,10 +55,12 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00033788/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00033788%2Fmanifest.json",
+      "externalTranscriptionUrl": "https://komonjo.princeton.edu/suruga-date/view.html?d=14"
     },
     {
       "id": "date-kagemune-1351",
@@ -79,10 +82,12 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00033779/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00033779%2Fmanifest.json",
+      "externalTranscriptionUrl": "https://komonjo.princeton.edu/suruga-date/view.html?d=5"
     },
     {
       "id": "ashikaga-1352-mobilization",
@@ -104,10 +109,12 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00033789/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00033789%2Fmanifest.json",
+      "externalTranscriptionUrl": "https://komonjo.princeton.edu/suruga-date/view.html?d=15"
     },
     {
       "id": "yoshiakira-1352-order",
@@ -129,10 +136,12 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00029829/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00029829%2Fmanifest.json",
+      "externalTranscriptionUrl": "https://komonjo.princeton.edu/tannowa/view.html?t=3-3"
     },
     {
       "id": "yoshimochi-1418-order",
@@ -154,10 +163,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034892/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034892%2Fmanifest.json"
     },
     {
       "id": "kennaiki-1428",
@@ -179,10 +189,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00036246/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00036246%2Fmanifest.json"
     },
     {
       "id": "hosokawa-letter",
@@ -204,10 +215,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034895/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034895%2Fmanifest.json"
     },
     {
       "id": "ouchi-letter",
@@ -229,10 +241,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034900/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034900%2Fmanifest.json"
     },
     {
       "id": "hideyoshi-letter",
@@ -254,10 +267,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00022998/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00022998%2Fmanifest.json"
     },
     {
       "id": "konoe-letter",
@@ -279,10 +293,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00022993/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00022993%2Fmanifest.json"
     },
     {
       "id": "hidetada-letter",
@@ -304,10 +319,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00022992/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00022992%2Fmanifest.json"
     },
     {
       "id": "date-masamune-letter",
@@ -329,10 +345,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00034938/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034938%2Fmanifest.json"
     },
     {
       "id": "sho-zan-1854",
@@ -354,10 +371,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013819/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013819%2Fmanifest.json"
     },
     {
       "id": "shoin-1858",
@@ -379,10 +397,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00014110/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00014110%2Fmanifest.json"
     },
     {
       "id": "kusaka-1860",
@@ -404,10 +423,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013769/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013769%2Fmanifest.json"
     },
     {
       "id": "irie-1862",
@@ -429,10 +449,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013689/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013689%2Fmanifest.json"
     },
     {
       "id": "ryoma-1865",
@@ -454,10 +475,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013814/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013814%2Fmanifest.json"
     },
     {
       "id": "satto-1867",
@@ -479,10 +501,11 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013750/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013750%2Fmanifest.json"
     },
     {
       "id": "kido-1877",
@@ -504,17 +527,17 @@
       "kundoku": "",
       "modern": "",
       "status": "catalogued",
-      "transcriptionStatus": "source-live",
-      "transcriptionMethod": "Kyoto University IIIF manifest metadata",
-      "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013755/manifest.json",
-      "transcriptionReview": "source-live"
+      "transcriptionStatus": "missing",
+      "transcriptionMethod": "none",
+      "transcriptionSource": "",
+      "transcriptionReview": "not-started",
+      "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013755%2Fmanifest.json"
     }
   ],
   "transcriptionBuild": {
-    "mode": "source-live",
-    "sourceLookup": 20,
+    "embedded": 0,
+    "missing": 20,
     "total": 20,
-    "embeddedAiDraft": 0,
-    "note": "GitHub Actionsに依存せず、閲覧時に各20資料の所蔵元IIIF Manifestから翻刻候補を取得する。"
+    "note": "現時点では20点すべて未翻刻。過去の失敗OCRとsource-live表示は撤回。"
   }
 }
