@@ -20,7 +20,7 @@ a{color:inherit}button,input,select{font:inherit}
 .eyebrow{font-size:12px;color:var(--accent);letter-spacing:.18em;font-weight:800}.hero h1{font-size:clamp(40px,7vw,78px);line-height:.95;letter-spacing:-.06em;margin:8px 0 14px}.hero p{max-width:720px;color:#625d55;line-height:1.9;margin:0}
 .hero-note{border-left:1px solid var(--line);padding-left:20px;color:var(--muted);font-size:13px;line-height:1.8}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 20px}.stat{background:var(--card);border:1px solid var(--line);padding:13px 15px;border-radius:14px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:28px;margin-top:4px}
-.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;margin-bottom:14px;position:sticky;top:58px;z-index:10;background:var(--paper);padding:10px 0}
+.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr 1fr .72fr .72fr auto;gap:9px;margin-bottom:14px;position:sticky;top:58px;z-index:10;background:var(--paper);padding:10px 0}
 .toolbar input,.toolbar select{width:100%;border:1px solid var(--line);background:var(--card);padding:11px 12px;border-radius:10px;color:var(--ink)}.toolbar button{white-space:nowrap}
 .library-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0 12px}.library-head h2{font-size:18px;margin:0}.count{font-size:12px;color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">翻刻本文が読める資料だけを公開する。年代はIIIFメタデータから表示された資料順に取得し、確定・範囲・未詳を分ける。</div>
+    <div class="hero-note">翻刻本文が読める資料だけを公開する。年代索引は閲覧順ではなく、全文翻刻済み資料を読み込んだ時点で全件をバックグラウンド整理する。検索は資料名・人物・年代・所蔵・タグを横断する。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -93,14 +93,14 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開し、年代は所蔵元IIIFのメタデータを優先して自動整理する。根拠が取れない資料は年代未詳のままにする。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開し、年代索引は全件に対して作る。所蔵元IIIFに根拠がない資料だけを年代未詳として残す。</p></div>
   </section>
   <footer>Source metadata: 各所蔵機関 / 翻刻: みんなで翻刻ほか / 画像・二次利用条件は各提供元の規定に従う。</footer>
 </main>
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
 (function(){
-  var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200, dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null;
+  var data=null, q="", period="", type="", author="", yearFrom="", yearTo="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200, dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null;
   function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true}).concat(remoteDocs)}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
@@ -231,7 +231,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     docs.forEach(function(d){
       if(!d.remoteReadable||!d.manifestUrl||d._dateFetched||d._dateQueued)return;
       var cached=dateCache[d.honkokuEntryId||d.recordId];
-      if(cached){applyDateMeta(d,cached);return}
+      if(cached){if(cached.noDate)d._dateFetched=true;else applyDateMeta(d,cached);return}
       d._dateQueued=true;dateQueue.push(d);
     });
     pumpDateQueue();
@@ -247,7 +247,11 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
             applyDateMeta(d,hit);
             dateCache[d.honkokuEntryId||d.recordId]=hit;
             scheduleDateCacheSave();
-          }else d._dateFetched=true;
+          }else{
+            d._dateFetched=true;
+            dateCache[d.honkokuEntryId||d.recordId]={noDate:true};
+            scheduleDateCacheSave();
+          }
         })
         .catch(function(){d._dateFetched=true})
         .finally(function(){
@@ -263,9 +267,11 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     return a.title.localeCompare(b.title,"ja");
   }
   function filtered(){
+    var yf=yearFrom?Number(yearFrom):null, yt=yearTo?Number(yearTo):null;
     return publicDocs().filter(function(d){
-      var text=[d.title,d.reading,d.author,d.summary,d.type,d.period,d.collection,d.transcription].join(" ").toLowerCase();
-      return (!q||text.indexOf(q.toLowerCase())!==-1)&&(!period||d.period===period)&&(!type||d.type===type)&&(!author||d.author===author);
+      var text=[d.title,d.reading,d.author,d.summary,d.type,d.period,d.collection,d.transcription,d.dateDisplay,d.dateRaw,d.sourceInstitution,(d.tags||[]).join(" "),d.projectId].join(" ").toLowerCase();
+      var yearOk=(!yf||d.year!=null&&d.year>=yf)&&(!yt||d.year!=null&&d.year<=yt);
+      return (!q||text.indexOf(q.toLowerCase())!==-1)&&(!period||d.period===period)&&(!type||d.type===type)&&(!author||d.author===author)&&yearOk;
     }).sort(sortDocs);
   }
   function fillFilters(){
@@ -282,11 +288,12 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   function renderStats(){
     var docs=publicDocs(), allCount=data.documents.length+remoteDocs.length;
     var dated=docs.filter(function(d){return d.dateCertainty&&d.dateCertainty!=="unknown"}).length;
+    var processed=docs.filter(function(d){return !d.remoteReadable||d._dateFetched||dateCache[d.honkokuEntryId||d.recordId]}).length;
     var unknown=docs.length-dated;
     document.getElementById("stats").innerHTML=[
       ["公開",docs.length+"点"],
       ["収集済",allCount+"点"],
-      ["年代整理",dated+"/"+docs.length],
+      ["年代索引",processed+"/"+docs.length],
       ["年代未詳",unknown+"点"]
     ].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
   }
@@ -306,7 +313,6 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     }).join("")+(docs.length>shown.length?'<div class="empty" style="grid-column:1/-1"><button class="btn dark" id="moreBtn">さらに200点表示（残り '+(docs.length-shown.length)+'）</button></div>':''):'<div class="empty">該当する資料がない。</div>';
     document.querySelectorAll("[data-id]").forEach(function(el){el.onclick=function(){openDoc(el.getAttribute("data-id"))}});
     var more=document.getElementById("moreBtn"); if(more)more.onclick=function(){visibleLimit+=200;render()};
-    queueDateEnrichment(shown);
   }
   function manifestUrl(d){
     return d.manifestUrl || ("https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/"+encodeURIComponent(d.recordId)+"/manifest.json");
@@ -522,7 +528,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     }
     for(var i=0;i<6;i++)workers.push(worker());
     return Promise.all(workers).then(function(){
-      remoteDocs=found;remoteLoaded=true;fillFilters();renderStats();render();return found;
+      remoteDocs=found;remoteLoaded=true;queueDateEnrichment(remoteDocs);fillFilters();renderStats();render();return found;
     });
   }
   function remotePageName(index){return String(index+1).padStart(3,"0")+".txt"}
