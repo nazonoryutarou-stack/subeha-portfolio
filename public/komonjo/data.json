@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-09-27T00:20:00+09:00",
+  "updatedAt": "2026-09-27T00:35:00+09:00",
   "title": "古文書文庫 β",
   "description": "翻刻本文を取得でき、出典と利用条件を確認できる資料だけ公開する古文書デジタル文庫。",
   "policy": {
@@ -34,7 +34,8 @@
       "transcriptionSource": "",
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034891%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "ashikaga-1351-rank",
@@ -62,7 +63,8 @@
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00033788%2Fmanifest.json",
       "externalTranscriptionUrl": "https://komonjo.princeton.edu/suruga-date/view.html?d=14",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "date-kagemune-1351",
@@ -90,7 +92,8 @@
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00033779%2Fmanifest.json",
       "externalTranscriptionUrl": "https://komonjo.princeton.edu/suruga-date/view.html?d=5",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "ashikaga-1352-mobilization",
@@ -118,7 +121,8 @@
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00033789%2Fmanifest.json",
       "externalTranscriptionUrl": "https://komonjo.princeton.edu/suruga-date/view.html?d=15",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "yoshiakira-1352-order",
@@ -146,7 +150,8 @@
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00029829%2Fmanifest.json",
       "externalTranscriptionUrl": "https://komonjo.princeton.edu/tannowa/view.html?t=3-3",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "yoshimochi-1418-order",
@@ -173,7 +178,8 @@
       "transcriptionSource": "",
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034892%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "kennaiki-1428",
@@ -200,7 +206,8 @@
       "transcriptionSource": "",
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00036246%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "hosokawa-letter",
@@ -227,7 +234,8 @@
       "transcriptionSource": "",
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034895%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "partial"
     },
     {
       "id": "ouchi-letter",
@@ -254,13 +262,14 @@
       "transcriptionSource": "",
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034900%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "partial"
     },
     {
       "id": "hideyoshi-letter",
       "title": "豊臣秀吉書状",
       "reading": "とよとみひでよし しょじょう",
-      "year": 1590,
+      "year": null,
       "dateDisplay": "16世紀後半",
       "period": "安土桃山",
       "type": "書状",
@@ -281,13 +290,14 @@
       "transcriptionSource": "",
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00022998%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "range"
     },
     {
       "id": "konoe-letter",
       "title": "近衛信尹書状",
       "reading": "このえのぶただ しょじょう",
-      "year": 1605,
+      "year": null,
       "dateDisplay": "17世紀初頭",
       "period": "江戸初期",
       "type": "書状",
@@ -308,13 +318,14 @@
       "transcriptionSource": "",
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00022993%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "range"
     },
     {
       "id": "hidetada-letter",
       "title": "徳川秀忠書状",
       "reading": "とくがわひでただ しょじょう",
-      "year": 1620,
+      "year": null,
       "dateDisplay": "17世紀前半",
       "period": "江戸初期",
       "type": "書状",
@@ -335,7 +346,8 @@
       "transcriptionSource": "",
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00022992%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "range"
     },
     {
       "id": "date-masamune-letter",
@@ -362,7 +374,8 @@
       "transcriptionSource": "",
       "transcriptionReview": "not-started",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00034938%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "partial"
     },
     {
       "id": "sho-zan-1854",
@@ -389,7 +402,8 @@
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013819/manifest.json",
       "transcriptionReview": "unreviewed",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013819%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "shoin-1858",
@@ -416,7 +430,8 @@
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/item/rb00014110",
       "transcriptionReview": "source",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00014110%2Fmanifest.json",
-      "publicReadable": true
+      "publicReadable": true,
+      "dateCertainty": "source"
     },
     {
       "id": "kusaka-1860",
@@ -443,7 +458,8 @@
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013769/manifest.json",
       "transcriptionReview": "unreviewed",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013769%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "irie-1862",
@@ -470,7 +486,8 @@
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013689/manifest.json",
       "transcriptionReview": "unreviewed",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013689%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "ryoma-1865",
@@ -497,7 +514,8 @@
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013814/manifest.json",
       "transcriptionReview": "unreviewed",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013814%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "satto-1867",
@@ -525,7 +543,8 @@
       "transcriptionReview": "normalized",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013750%2Fmanifest.json",
       "note": "原本の異体字・表記差は今後画像照合で校訂する。",
-      "publicReadable": true
+      "publicReadable": true,
+      "dateCertainty": "source"
     },
     {
       "id": "kido-1877",
@@ -552,7 +571,8 @@
       "transcriptionSource": "https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/RB00013755/manifest.json",
       "transcriptionReview": "unreviewed",
       "sourceViewerUrl": "https://rmda.kulib.kyoto-u.ac.jp/libraries/mirador/mirador.html?manifest=%2Fiiif%2Fmetadata_manifest%2FRB00013755%2Fmanifest.json",
-      "publicReadable": false
+      "publicReadable": false,
+      "dateCertainty": "source"
     },
     {
       "id": "minhon-031aa82826dc",
@@ -588,7 +608,8 @@
         "疫病",
         "薬",
         "触書"
-      ]
+      ],
+      "dateCertainty": "range"
     },
     {
       "id": "minhon-038fe6f62940",
@@ -624,7 +645,8 @@
         "麻疹",
         "養生",
         "一枚刷"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-2d87700329f2",
@@ -660,7 +682,8 @@
         "種痘",
         "天然痘",
         "医学"
-      ]
+      ],
+      "dateCertainty": "source"
     },
     {
       "id": "minhon-907aa7f3e02d",
@@ -696,7 +719,8 @@
         "疱瘡",
         "祭祀",
         "民間信仰"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-b022f40a514c",
@@ -732,7 +756,8 @@
         "麻疹",
         "まじない",
         "錦絵"
-      ]
+      ],
+      "dateCertainty": "source"
     },
     {
       "id": "minhon-77016888ae0b",
@@ -769,7 +794,8 @@
         "厄除",
         "蟹",
         "民間信仰"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-2c088c7ab4e9",
@@ -804,7 +830,8 @@
       "tags": [
         "疫病",
         "錦絵"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-46863d45b3f1",
@@ -840,7 +867,8 @@
         "麻疹",
         "養生",
         "民間信仰"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-811aa6e2e2ed",
@@ -876,7 +904,8 @@
         "梅毒",
         "広告",
         "医療"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-b2e0c31fb5e6",
@@ -912,7 +941,8 @@
         "麻疹",
         "役者",
         "錦絵"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-b8142df5da08",
@@ -948,14 +978,15 @@
         "コレラ",
         "明治",
         "施薬"
-      ]
+      ],
+      "dateCertainty": "source"
     },
     {
       "id": "minhon-0301c6c8ad0b",
       "honkokuEntryId": "0301C6C8AD0BEDD4317A906C4E5EFD76",
       "title": "（地震鯰の取り調べ）",
       "reading": "",
-      "year": 1855,
+      "year": null,
       "dateDisplay": "安政2（1855）年頃",
       "period": "幕末",
       "type": "鯰絵",
@@ -984,7 +1015,8 @@
         "地震",
         "鯰絵",
         "安政江戸地震"
-      ]
+      ],
+      "dateCertainty": "inferred"
     },
     {
       "id": "minhon-064adf4697fa",
@@ -1020,7 +1052,8 @@
         "地震",
         "火事",
         "風刺"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-056ecd8590e2",
@@ -1056,7 +1089,8 @@
         "地震",
         "鯰絵",
         "風刺"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-16ed9c2ac6b4",
@@ -1092,7 +1126,8 @@
         "地震",
         "俗謡",
         "風刺"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-1f7112407bbd",
@@ -1128,7 +1163,8 @@
         "地震",
         "職人",
         "風刺"
-      ]
+      ],
+      "dateCertainty": "unknown"
     },
     {
       "id": "minhon-1947d531b426",
@@ -1164,7 +1200,8 @@
         "琉球",
         "書状",
         "島津家"
-      ]
+      ],
+      "dateCertainty": "inferred"
     },
     {
       "id": "minhon-270c2fac6121",
@@ -1200,7 +1237,8 @@
         "琉球",
         "書状",
         "島津家"
-      ]
+      ],
+      "dateCertainty": "inferred"
     },
     {
       "id": "minhon-6658ed62042c",
@@ -1236,7 +1274,8 @@
         "琉球",
         "王府",
         "書状"
-      ]
+      ],
+      "dateCertainty": "inferred"
     },
     {
       "id": "minhon-f75a793c4680",
@@ -1272,7 +1311,8 @@
         "琉球",
         "王府",
         "島津家"
-      ]
+      ],
+      "dateCertainty": "inferred"
     }
   ],
   "transcriptionBuild": {
@@ -1377,5 +1417,11 @@
       "zisin",
       "zukan"
     ]
+  },
+  "datePolicy": {
+    "source": "所蔵元メタデータまたは本文に明記された年代のみ確定表示する。",
+    "range": "世紀・時期しか分からない資料は範囲表示し、単年へ丸めない。",
+    "inferred": "人物・事件・プロジェクト文脈からの推定は『推定』と明示する。",
+    "unknown": "根拠が取れない資料は年代未詳のまま公開する。"
   }
 }
