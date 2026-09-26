@@ -22,7 +22,7 @@ a{color:inherit}button,input,select{font:inherit}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 20px}.stat{background:var(--card);border:1px solid var(--line);padding:13px 15px;border-radius:14px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:28px;margin-top:4px}
 .toolbar{display:grid;grid-template-columns:2fr 1fr 1fr 1fr .72fr .72fr auto;gap:9px;margin-bottom:14px;position:sticky;top:58px;z-index:10;background:var(--paper);padding:10px 0}
 .toolbar input,.toolbar select{width:100%;border:1px solid var(--line);background:var(--card);padding:11px 12px;border-radius:10px;color:var(--ink)}.toolbar button{white-space:nowrap}
-.library-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0 12px}.library-head h2{font-size:18px;margin:0}.count{font-size:12px;color:var(--muted)}
+.fulltext-box{margin:0 0 18px;border:1px solid var(--line);background:var(--card);border-radius:16px;padding:14px}.fulltext-row{display:grid;grid-template-columns:1fr auto;gap:8px}.fulltext-row input{width:100%;border:1px solid var(--line);background:#fffdf8;padding:11px 12px;border-radius:10px}.fulltext-status{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.7}.fulltext-results{display:grid;gap:8px;margin-top:10px}.fulltext-hit{border-top:1px solid #e7e0d4;padding-top:10px}.fulltext-hit:first-child{border-top:0;padding-top:0}.fulltext-hit strong{display:block;font-size:14px;margin-bottom:4px}.fulltext-hit p{margin:0;color:#655f57;font-size:12px;line-height:1.7}.fulltext-hit mark{background:#f3df9d;padding:0 2px}.fulltext-actions{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}.library-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0 12px}.library-head h2{font-size:18px;margin:0}.count{font-size:12px;color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:260px;cursor:pointer;transition:.16s transform,.16s box-shadow}
 .card:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(48,42,31,.12)}
@@ -79,28 +79,31 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">翻刻本文が読める資料だけを公開する。年代索引は閲覧順ではなく、全文翻刻済み資料を読み込んだ時点で全件をバックグラウンド整理する。検索は資料名・人物・年代・所蔵・タグを横断する。</div>
+    <div class="hero-note">翻刻本文が読める資料だけを公開する。年代索引は閲覧順ではなく、全文翻刻済み資料を読み込んだ時点で全件をバックグラウンド整理する。カード検索は資料名・人物・年代・所蔵・タグを横断し、本文検索は翻刻本文そのものを横断する。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
-    <input id="search" placeholder="人物、文書名、内容を検索">
+    <input id="search" placeholder="資料名・人物・年代・所蔵・タグを検索">
     <select id="period"><option value="">すべての時代</option></select>
     <select id="type"><option value="">すべての文書</option></select>
     <select id="author"><option value="">すべての人物</option></select>
+    <input id="yearFrom" inputmode="numeric" placeholder="開始年">
+    <input id="yearTo" inputmode="numeric" placeholder="終了年">
     <button class="btn dark wide" id="clearBtn">絞込解除</button>
   </section>
+  <section class="fulltext-box"><div class="eyebrow">FULL TEXT SEARCH</div><div class="fulltext-row"><input id="fulltextQuery" placeholder="翻刻本文を全文検索　例：地震、借金、龍馬"><button class="btn dark" id="fulltextBtn">本文検索</button></div><div class="fulltext-status" id="fulltextStatus">固定収録した本文は静的索引で即時検索。全「みんなで翻刻」本文はn-gram全文索引も検索します。</div><div class="fulltext-results" id="fulltextResults"></div></section>
   <div class="library-head"><h2>読める資料</h2><div class="count" id="count"></div></div>
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開し、年代索引は全件に対して作る。所蔵元IIIFに根拠がない資料だけを年代未詳として残す。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開する。固定収録本文は静的索引、全「みんなで翻刻」本文はn-gram全文索引で検索する。所蔵元IIIFに根拠がない年代だけ未詳として残す。</p></div>
   </section>
   <footer>Source metadata: 各所蔵機関 / 翻刻: みんなで翻刻ほか / 画像・二次利用条件は各提供元の規定に従う。</footer>
 </main>
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
 (function(){
-  var data=null, q="", period="", type="", author="", yearFrom="", yearTo="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200, dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null;
+  var data=null, q="", period="", type="", author="", yearFrom="", yearTo="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200, dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null, staticSearchDocs=[];
   function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true}).concat(remoteDocs)}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
@@ -260,6 +263,96 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
           if(dateWorkers===0){fillFilters();renderStats();render();}
         });
     }
+  }
+  function loadStaticSearchIndex(){
+    return fetch("search-index.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error("index");return r.json()}).then(function(j){
+      staticSearchDocs=Array.isArray(j.documents)?j.documents:[];return staticSearchDocs;
+    }).catch(function(){staticSearchDocs=[];return []});
+  }
+  function normSearch(s){try{return String(s||"").normalize("NFKC").toLowerCase()}catch(e){return String(s||"").toLowerCase()}}
+  function localFulltextHits(term){
+    var needle=normSearch(term), out=[];
+    if(!needle)return out;
+    staticSearchDocs.forEach(function(d){
+      var body=normSearch(d.text||""), meta=normSearch([d.title,d.author,d.period,d.collection,(d.tags||[]).join(" ")].join(" "));
+      var at=body.indexOf(needle);
+      if(at<0&&meta.indexOf(needle)<0)return;
+      var raw=String(d.text||"");
+      var start=Math.max(0,at<0?0:at-55), end=Math.min(raw.length,at<0?110:at+needle.length+75);
+      out.push({entryId:d.honkokuEntryId||d.recordId||"",localId:d.id,title:d.title||"資料",folio:"",snippet:(start>0?"…":"")+raw.slice(start,end)+(end<raw.length?"…":"")});
+    });
+    return out;
+  }
+  function fulltextSearchUrl(term,page){
+    var cfg=data&&data.fulltextSearch?data.fulltextSearch:{};
+    var base=cfg.endpoint||"https://honkoku.dhii.jp/search/";
+    return base+"?url_key="+encodeURIComponent(term)+"&url_var=1&url_proj="+encodeURIComponent("すべて")+"&url_col="+encodeURIComponent("すべて")+"&page="+(page||1)+"&url_format=json";
+  }
+  function fulltextExternalUrl(term,page){
+    return "https://honkoku.dhii.jp/search/?url_key="+encodeURIComponent(term)+"&url_var=1&url_proj="+encodeURIComponent("すべて")+"&url_col="+encodeURIComponent("すべて")+"&page="+(page||1);
+  }
+  function stripHtml(s){var box=document.createElement("div");box.innerHTML=String(s||"");return box.textContent||box.innerText||""}
+  function flattenFulltextPayload(obj){
+    var out=[];if(!obj)return out;if(Array.isArray(obj))return obj;
+    ["results","hits","docs","data","items","navigation"].forEach(function(k){
+      var v=obj[k];
+      if(Array.isArray(v))out=out.concat(v);
+      else if(v&&typeof v==="object")Object.keys(v).forEach(function(id){
+        var x=v[id];
+        if(Array.isArray(x))x.forEach(function(y){out.push({id:id,hitcontent:y})});
+        else if(x&&typeof x==="object")out.push(Object.assign({id:id},x));
+      });
+    });
+    return out;
+  }
+  function hitField(x,names){for(var i=0;i<names.length;i++){var v=x&&x[names[i]];if(v!=null&&v!=="")return Array.isArray(v)?v[0]:v}return ""}
+  function parseRemoteFulltext(payload){
+    var rows=flattenFulltextPayload(payload),seen=new Set(),out=[];
+    rows.forEach(function(x){
+      var entryId=String(hitField(x,["entryID","entryId","entry_id","ent_id","id"])||"");
+      var title=String(hitField(x,["entry","entry_st","title","label","name"])||entryId||"検索結果");
+      var folio=String(hitField(x,["folio","page","index","ent_num"])||"");
+      var snippet=hitField(x,["hitcontent","snippet","highlight","text","content"]);
+      if(Array.isArray(snippet))snippet=snippet.join(" … ");
+      snippet=stripHtml(snippet||"");
+      var key=entryId+"|"+folio+"|"+snippet.slice(0,100);
+      if(seen.has(key))return;seen.add(key);
+      out.push({entryId:entryId,title:title,folio:folio,snippet:snippet});
+    });
+    return out;
+  }
+  function renderFulltextHits(localHits,remoteHits,term,remoteState){
+    var box=document.getElementById("fulltextResults"),status=document.getElementById("fulltextStatus");
+    var combined=[],seen=new Set();
+    localHits.concat(remoteHits||[]).forEach(function(x){
+      var key=(x.entryId||x.localId||x.title)+"|"+(x.folio||"");
+      if(seen.has(key))return;seen.add(key);combined.push(x);
+    });
+    if(!combined.length){
+      status.textContent=remoteState==="failed"?"静的索引では該当なし。外部全文索引への接続に失敗しました。":"該当なし。";
+      box.innerHTML=remoteState==="failed"?'<a class="btn dark" target="_blank" rel="noopener" href="'+esc(fulltextExternalUrl(term,1))+'">全文検索側で確認</a>':"";
+      return;
+    }
+    status.textContent="本文ヒット "+combined.length+"件"+(remoteState==="failed"?"（外部索引は未接続）":"");
+    box.innerHTML=combined.slice(0,60).map(function(x){
+      var local=x.localId?publicDocs().find(function(d){return d.id===x.localId}):publicDocs().find(function(d){return d.honkokuEntryId===x.entryId||d.recordId===x.entryId});
+      var localBtn=local?'<button class="btn" data-open-local="'+esc(local.id)+'">文庫で読む</button>':"";
+      var pg=parseInt(x.folio,10)||1;
+      var source=x.entryId?'<a class="btn" target="_blank" rel="noopener" href="https://app.honkoku.org/transcription/'+encodeURIComponent(x.entryId)+'/'+pg+'">原翻刻へ</a>':"";
+      return '<div class="fulltext-hit"><strong>'+esc(x.title)+(x.folio?'　'+esc(x.folio):'')+'</strong><p>'+esc(x.snippet||"該当本文")+'</p><div class="fulltext-actions">'+localBtn+source+'</div></div>';
+    }).join("");
+    box.querySelectorAll("[data-open-local]").forEach(function(el){el.onclick=function(){openDoc(el.getAttribute("data-open-local"))}});
+  }
+  function runFulltextSearch(term){
+    term=String(term||"").trim();
+    var status=document.getElementById("fulltextStatus"),box=document.getElementById("fulltextResults");
+    if(term.length<2){status.textContent="2文字以上で検索してください。";box.innerHTML="";return}
+    var local=localFulltextHits(term);
+    renderFulltextHits(local,[],term,"loading");
+    status.textContent="静的索引 "+local.length+"件。全本文索引も検索中…";
+    fetch(fulltextSearchUrl(term,1),{mode:"cors",cache:"no-store"}).then(function(r){if(!r.ok)throw Error("search");return r.json()}).then(function(j){
+      renderFulltextHits(local,parseRemoteFulltext(j),term,"ok");
+    }).catch(function(){renderFulltextHits(local,[],term,"failed")});
   }
   function sortDocs(a,b){
     var ay=a.year==null?999999:a.year, by=b.year==null?999999:b.year;
@@ -597,11 +690,15 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   document.getElementById("period").onchange=function(e){period=e.target.value;visibleLimit=200;render()};
   document.getElementById("type").onchange=function(e){type=e.target.value;visibleLimit=200;render()};
   document.getElementById("author").onchange=function(e){author=e.target.value;visibleLimit=200;render()};
-  document.getElementById("clearBtn").onclick=function(){q=period=type=author="";visibleLimit=200;document.getElementById("search").value="";fillFilters();render()};
+  document.getElementById("yearFrom").oninput=function(e){yearFrom=e.target.value.replace(/[^0-9]/g,"");visibleLimit=200;render()};
+  document.getElementById("yearTo").oninput=function(e){yearTo=e.target.value.replace(/[^0-9]/g,"");visibleLimit=200;render()};
+  document.getElementById("fulltextBtn").onclick=function(){runFulltextSearch(document.getElementById("fulltextQuery").value)};
+  document.getElementById("fulltextQuery").onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();runFulltextSearch(e.target.value)}};
+  document.getElementById("clearBtn").onclick=function(){q=period=type=author=yearFrom=yearTo="";visibleLimit=200;document.getElementById("search").value="";document.getElementById("yearFrom").value="";document.getElementById("yearTo").value="";fillFilters();render()};
   document.getElementById("randomBtn").onclick=function(){if(!data)return;var docs=filtered();if(!docs.length)docs=publicDocs();openDoc(docs[Math.floor(Math.random()*docs.length)].id)};
   document.getElementById("close").onclick=document.getElementById("shade").onclick=function(){document.getElementById("drawer").classList.remove("open");history.replaceState(null,"",location.pathname)};
   fetch("data.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error("data");return r.json()}).then(function(x){
-    data=x;loadDateCache();fillFilters();renderStats();render();loadRemoteCatalog().then(function(){if(location.hash){var id=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id}))openDoc(id)}});
+    data=x;loadDateCache();loadStaticSearchIndex();fillFilters();renderStats();render();loadRemoteCatalog().then(function(){if(location.hash){var id=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id}))openDoc(id)}});
     if(location.hash){var id0=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id0}))openDoc(id0)}
   }).catch(function(){document.getElementById("grid").innerHTML='<div class="empty">資料データを読み込めなかった。</div>'});
 })();
