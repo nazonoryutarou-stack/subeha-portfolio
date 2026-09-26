@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="打猿とChatGPTの企画史。企画の誕生、転換、保留、ボツ、復活を時系列で管理する。">
+<title>企画史｜打猿 Workboard</title>
+<style>
+:root{--bg:#f5f6f8;--panel:#fff;--line:#dde2e7;--text:#18202a;--muted:#77818e;--blue:#4b7bec;--green:#3aa76d;--amber:#d89614;--red:#d9534f;--purple:#8b5cf6;--shadow:0 10px 30px rgba(20,30,45,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
+a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}
+.top{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line);background:rgba(245,246,248,.93);backdrop-filter:blur(18px)}
+.brand{font-weight:900}.nav{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;padding:8px 11px;border-radius:10px;cursor:pointer}.btn.primary{background:#18202a;color:#fff;border-color:#18202a}
+.sync{font-size:11px;padding:5px 8px;border-radius:999px;background:#eaf5ef;color:#287a52}.sync.local{background:#fff3df;color:#99620b}
+.wrap{max-width:1240px;margin:auto;padding:18px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}.hero h1{font-size:clamp(30px,5vw,54px);margin:0;letter-spacing:-.05em}.hero p{color:var(--muted);max-width:740px;line-height:1.7}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 14px}.tab{border:1px solid var(--line);background:#fff;padding:9px 13px;border-radius:999px;cursor:pointer}.tab.on{background:#18202a;color:#fff}
+.toolbar{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:9px;margin-bottom:14px}.toolbar input,.toolbar select{border:1px solid var(--line);background:#fff;padding:10px 12px;border-radius:11px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0 18px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:28px;margin-top:3px}
+.timeline{position:relative;margin-left:9px}.timeline:before{content:"";position:absolute;left:13px;top:0;bottom:0;width:2px;background:#d9dfe6}
+.event{position:relative;padding-left:44px;margin:0 0 13px}.event:before{content:"";position:absolute;left:6px;top:17px;width:16px;height:16px;border-radius:50%;background:#fff;border:4px solid var(--blue);z-index:1}
+.event.drop:before{border-color:var(--red)}.event.pivot:before{border-color:var(--purple)}.event.done:before{border-color:var(--green)}.event.start:before{border-color:var(--amber)}
+.event-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px 16px;box-shadow:var(--shadow);cursor:pointer}.date{font-size:12px;color:var(--muted)}.event h3{margin:4px 0 6px;font-size:17px}.event p{margin:0;color:#66717f;line-height:1.65;font-size:13px}.pname{display:inline-block;margin-top:9px;font-size:11px;padding:4px 7px;background:#f0f2f5;border-radius:999px}
+.project-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.project{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:var(--shadow);cursor:pointer}.project h3{margin:0 0 7px}.project p{font-size:12px;color:#66717f;line-height:1.55}.row{display:flex;justify-content:space-between;gap:8px;align-items:center}.status{font-size:11px;padding:4px 7px;border-radius:999px;background:#eef2ff}.bar{height:6px;background:#eef1f4;border-radius:999px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--blue)}
+.log{display:grid;gap:8px}.log-row{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}.log-row small{color:var(--muted)}
+.empty{background:#fff;border:1px dashed #c8d0d8;border-radius:14px;padding:28px;text-align:center;color:#9099a5}
+.drawer{position:fixed;inset:0;z-index:40;pointer-events:none}.shade{position:absolute;inset:0;background:#0006;opacity:0}.panel{position:absolute;right:0;top:0;width:min(600px,100%);height:100%;overflow:auto;background:#fff;padding:22px;transform:translateX(100%);transition:.22s}.drawer.open{pointer-events:auto}.drawer.open .shade{opacity:1}.drawer.open .panel{transform:none}.close{float:right;border:0;background:#eef1f4;width:36px;height:36px;border-radius:10px}.detail h2{font-size:28px;margin:12px 0 5px}.lead{color:#66717f;line-height:1.7}.kv{display:grid;grid-template-columns:110px 1fr;gap:8px;padding:9px 0;border-bottom:1px solid #edf0f3;font-size:13px}.history-mini{border-left:2px solid #dfe4ea;padding-left:13px;margin:14px 0}.history-mini div{margin:0 0 11px}.history-mini small{color:var(--muted)}
+.editbox{background:#f7f8fa;border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:18px}.editbox label{display:block;font-size:12px;font-weight:700;margin:9px 0 5px}.editbox select,.editbox input,.editbox textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px;background:#fff}.editbox textarea{min-height:80px}
+@media(max-width:850px){.project-grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(3,1fr)}.toolbar{grid-template-columns:1fr}}@media(max-width:560px){.wrap{padding:12px}.project-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start}.nav{justify-content:flex-end}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">打猿 Workboard</div>
+  <div class="nav">
+    <span id="sync" class="sync">GitHub正本</span>
+    <a class="btn" href="./">現在地</a>
+    <button class="btn" id="exportBtn">JSON</button>
+    <button class="btn" id="resetBtn">正本へ戻す</button>
+  </div>
+</header>
+<main class="wrap">
+  <section class="hero">
+    <div><h1>企画史</h1><p>企画は「ある / ない」では足りない。いつ生まれ、何を捨て、何に変わり、どこで止まったかまで残す。未来の自分が過去の自分を発掘するための地層。</p></div>
+  </section>
+  <div class="tabs">
+    <button class="tab on" data-view="timeline">年表</button>
+    <button class="tab" data-view="projects">全企画</button>
+    <button class="tab" data-view="changes">変更履歴</button>
+  </div>
+  <section class="stats" id="stats"></section>
+  <section class="toolbar">
+    <input id="search" placeholder="企画名・出来事・タグを検索">
+    <select id="projectFilter"><option value="">すべての企画</option></select>
+    <select id="typeFilter"><option value="">すべての出来事</option><option value="start">誕生</option><option value="pivot">転換</option><option value="milestone">節目</option><option value="drop">ボツ</option><option value="done">完了</option><option value="update">更新</option></select>
+  </section>
+  <section id="content"></section>
+</main>
+<div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div id="detail" class="detail"></div></div></div>
+<script>
+(function(){
+  var STATUS={active:"進行中",next:"次",hold:"保留",dropped:"ボツ",done:"完了"};
+  var data=null, view="timeline", query="", projectFilter="", typeFilter="";
+  var storageKey="dauen-board-v2";
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
+  function localData(){try{return JSON.parse(localStorage.getItem(storageKey))}catch(e){return null}}
+  function persist(){localStorage.setItem(storageKey,JSON.stringify(data));setSync(true)}
+  function setSync(local){var el=document.getElementById("sync");el.textContent=local?"ローカル変更あり":"GitHub正本";el.className=local?"sync local":"sync"}
+  function project(id){return data.projects.find(function(p){return p.id===id})}
+  function color(st){return st==="active"?"#4b7bec":st==="next"?"#d89614":st==="hold"?"#8b5cf6":st==="dropped"?"#d9534f":"#3aa76d"}
+  function renderStats(){
+    var p=data.projects, count=function(s){return p.filter(function(x){return x.status===s}).length};
+    var arr=[["全企画",p.length],["進行中",count("active")],["次",count("next")],["保留",count("hold")],["ボツ",count("dropped")]];
+    document.getElementById("stats").innerHTML=arr.map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
+  }
+  function renderFilters(){
+    var sel=document.getElementById("projectFilter");
+    sel.innerHTML='<option value="">すべての企画</option>'+data.projects.slice().sort(function(a,b){return a.title.localeCompare(b.title,"ja")}).map(function(p){return '<option value="'+esc(p.id)+'">'+esc(p.title)+'</option>'}).join("");
+    sel.value=projectFilter;
+  }
+  function matchText(parts){return parts.join(" ").toLowerCase().indexOf(query.toLowerCase())!==-1}
+  function filteredEvents(){
+    return data.events.filter(function(e){
+      var p=project(e.projectId)||{title:"",tags:[]};
+      return (!projectFilter||e.projectId===projectFilter)&&(!typeFilter||e.type===typeFilter)&&matchText([e.title,e.detail,p.title].concat(p.tags||[]));
+    }).sort(function(a,b){return b.date.localeCompare(a.date)||b.id.localeCompare(a.id)});
+  }
+  function renderTimeline(){
+    var es=filteredEvents();
+    document.getElementById("content").innerHTML=es.length?'<div class="timeline">'+es.map(function(e){
+      var p=project(e.projectId)||{title:"不明"};
+      return '<article class="event '+esc(e.type)+'" data-project="'+esc(e.projectId)+'"><div class="event-card"><div class="date">'+esc(e.date)+' · '+esc(e.type)+'</div><h3>'+esc(e.title)+'</h3><p>'+esc(e.detail)+'</p><span class="pname">'+esc(p.title)+'</span></div></article>';
+    }).join("")+'</div>':'<div class="empty">該当する出来事なし</div>';
+    bindProjectClicks();
+  }
+  function renderProjects(){
+    var ps=data.projects.filter(function(p){return (!projectFilter||p.id===projectFilter)&&matchText([p.title,p.summary,p.note].concat(p.tags||[]))});
+    document.getElementById("content").innerHTML=ps.length?'<div class="project-grid">'+ps.map(function(p){
+      return '<article class="project" data-project="'+esc(p.id)+'"><div class="row"><h3>'+esc(p.title)+'</h3><span class="status">'+esc(STATUS[p.status]||p.status)+'</span></div><p>'+esc(p.summary)+'</p><div class="bar"><i style="width:'+Number(p.progress||0)+'%;background:'+color(p.status)+'"></i></div><div class="row" style="margin-top:7px"><small>'+esc(p.category)+'</small><small>'+Number(p.progress||0)+'%</small></div></article>';
+    }).join("")+'</div>':'<div class="empty">該当する企画なし</div>';
+    bindProjectClicks();
+  }
+  function renderChanges(){
+    var changes=(data.changes||[]).slice().sort(function(a,b){return String(b.at).localeCompare(String(a.at))});
+    var localEvents=data.events.filter(function(e){return String(e.id).indexOf("local-")===0}).sort(function(a,b){return b.date.localeCompare(a.date)});
+    var rows=changes.length?changes:localEvents;
+    document.getElementById("content").innerHTML=rows.length?'<div class="log">'+rows.map(function(x){
+      return '<div class="log-row"><small>'+esc(x.at||x.date||"")+'</small><div><strong>'+esc(x.title||x.action||"更新")+'</strong></div><div>'+esc(x.detail||x.note||"")+'</div></div>';
+    }).join("")+'</div>':'<div class="empty">このブラウザでの変更履歴はまだない。GitHub正本の変化は年表に残る。</div>';
+  }
+  function render(){renderStats();renderFilters();if(view==="timeline")renderTimeline();else if(view==="projects")renderProjects();else renderChanges()}
+  function bindProjectClicks(){document.querySelectorAll("[data-project]").forEach(function(el){el.onclick=function(){openProject(el.getAttribute("data-project"))}})}
+  function openProject(id){
+    var p=project(id);if(!p)return;
+    var hist=data.events.filter(function(e){return e.projectId===id}).sort(function(a,b){return b.date.localeCompare(a.date)});
+    var opts=Object.keys(STATUS).map(function(s){return '<option value="'+s+'"'+(p.status===s?' selected':'')+'>'+STATUS[s]+'</option>'}).join("");
+    document.getElementById("detail").innerHTML=
+      '<span class="status">'+esc(p.category)+'</span><h2>'+esc(p.title)+'</h2><p class="lead">'+esc(p.summary)+'</p>'+
+      '<div class="kv"><b>状態</b><span>'+esc(STATUS[p.status]||p.status)+'</span></div>'+
+      '<div class="kv"><b>進捗</b><span>'+Number(p.progress||0)+'%</span></div>'+
+      '<div class="kv"><b>開始</b><span>'+esc(p.started||"")+'</span></div>'+
+      '<div class="kv"><b>更新</b><span>'+esc(p.updated||"")+'</span></div>'+
+      '<div class="kv"><b>タグ</b><span>'+esc((p.tags||[]).join(" / "))+'</span></div>'+
+      '<h3>次の一手</h3><ul>'+(p.next||[]).map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul>'+
+      '<h3>企画史</h3><div class="history-mini">'+hist.map(function(e){return '<div><small>'+esc(e.date)+'</small><br><strong>'+esc(e.title)+'</strong><br>'+esc(e.detail)+'</div>'}).join("")+'</div>'+
+      '<div class="editbox"><strong>ローカル更新</strong><label>状態</label><select id="editStatus">'+opts+'</select><label>進捗 %</label><input id="editProgress" type="number" min="0" max="100" value="'+Number(p.progress||0)+'"><label>記録メモ</label><textarea id="editNote" placeholder="何が変わったか"></textarea><button class="btn primary" id="saveUpdate" style="margin-top:10px">変更を記録</button></div>';
+    document.getElementById("drawer").classList.add("open");
+    document.getElementById("saveUpdate").onclick=function(){
+      var oldStatus=p.status, oldProgress=Number(p.progress||0), newStatus=document.getElementById("editStatus").value, newProgress=Math.max(0,Math.min(100,Number(document.getElementById("editProgress").value||0))), note=document.getElementById("editNote").value.trim();
+      p.status=newStatus;p.progress=newProgress;p.updated=new Date().toISOString().slice(0,10);
+      var id2="local-"+Date.now();
+      var detail="状態 "+(STATUS[oldStatus]||oldStatus)+" → "+(STATUS[newStatus]||newStatus)+" / 進捗 "+oldProgress+"% → "+newProgress+"%"+(note?" / "+note:"");
+      data.events.push({id:id2,date:p.updated,projectId:p.id,type:"update",title:"企画を更新",detail:detail,confidence:"high"});
+      if(!data.changes)data.changes=[];
+      data.changes.push({at:new Date().toISOString(),projectId:p.id,title:p.title+" を更新",detail:detail});
+      persist();document.getElementById("drawer").classList.remove("open");render();
+    };
+  }
+  document.querySelectorAll(".tab").forEach(function(b){b.onclick=function(){document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on")});b.classList.add("on");view=b.getAttribute("data-view");render()}});
+  document.getElementById("search").oninput=function(e){query=e.target.value;render()};
+  document.getElementById("projectFilter").onchange=function(e){projectFilter=e.target.value;render()};
+  document.getElementById("typeFilter").onchange=function(e){typeFilter=e.target.value;render()};
+  document.getElementById("close").onclick=document.getElementById("shade").onclick=function(){document.getElementById("drawer").classList.remove("open")};
+  document.getElementById("exportBtn").onclick=function(){var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="workboard-history.json";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000)};
+  document.getElementById("resetBtn").onclick=function(){if(confirm("このブラウザの変更を捨ててGitHub正本へ戻しますか？")){localStorage.removeItem(storageKey);location.reload()}};
+  var local=localData();
+  if(local){data=local;setSync(true);render()}
+  else fetch("data.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error("data.json");return r.json()}).then(function(remote){data=remote;setSync(false);render()}).catch(function(){document.getElementById("content").innerHTML='<div class="empty">企画史データを読み込めなかった。</div>'});
+})();
+</script>
+</body></html>
