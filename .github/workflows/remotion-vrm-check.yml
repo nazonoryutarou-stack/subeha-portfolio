@@ -34,6 +34,8 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
       - name: Check pipeline script syntax
         working-directory: .
         run: |
@@ -186,7 +188,5 @@ jobs:
           npm run render:studio -- --project=jobs/.generated/square.json --audio=dummy.m4a --plan-only | grep -q '"composition":"VrmLipSyncSquare"'
           npm run render:studio -- --project=jobs/.generated/landscape.json --audio=dummy.m4a --plan-only | grep -q '"composition":"VrmLipSyncLandscape"'
           rm -rf jobs/.generated
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
       - name: TypeScript check
         run: npm run check
