@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>打猿 Workboard</title>
+<style>
+:root{--bg:#f4f6f8;--panel:#fff;--line:#dfe4ea;--txt:#18202a;--muted:#7a8593;--blue:#4b7bec;--green:#3aa76d;--amber:#d89614;--red:#d9534f;--purple:#8b5cf6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
+button,input,textarea{font:inherit}.top{position:sticky;top:0;z-index:10;background:#f4f6f8e8;backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}.brand{font-weight:900}.acts{display:flex;gap:8px}.btn{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:10px}.primary{background:#18202a;color:#fff;border-color:#18202a}
+.wrap{max-width:1500px;margin:auto;padding:16px}.hero{display:flex;justify-content:space-between;gap:14px;align-items:end;flex-wrap:wrap}.hero h1{font-size:clamp(28px,5vw,44px);margin:0;letter-spacing:-.04em}.hero p{color:var(--muted);margin:5px 0 0}.search{min-width:min(100%,420px);padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:16px 0}.stat{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px}.k{font-size:12px;color:var(--muted)}.v{font-size:30px;font-weight:900}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{border:1px solid var(--line);background:#fff;padding:7px 11px;border-radius:999px}.chip.on{background:#18202a;color:#fff}
+.board{display:grid;grid-template-columns:repeat(5,minmax(245px,1fr));gap:10px;overflow-x:auto}.col{min-width:245px;background:#edf1f4;border:1px solid var(--line);border-radius:15px;padding:10px}.chead{display:flex;justify-content:space-between;font-weight:900;padding:3px 3px 10px}.cnt{background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px}.cards{display:flex;flex-direction:column;gap:8px}.card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px;cursor:pointer}.ctop{display:flex;justify-content:space-between;gap:8px}.card h3{font-size:15px;margin:0}.desc{font-size:12px;color:#66717f;line-height:1.55;margin:8px 0}.tag{font-size:10px;border-radius:999px;padding:4px 7px;background:#eef2ff}.bar{height:6px;background:#edf0f3;border-radius:999px;overflow:hidden}.bar i{display:block;height:100%}.meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}.empty{border:1px dashed #c9d0d8;border-radius:12px;color:#98a2ad;padding:20px;text-align:center;font-size:12px}
+.drawer{position:fixed;inset:0;pointer-events:none;z-index:30}.shade{position:absolute;inset:0;background:#0006;opacity:0}.panel{position:absolute;right:0;top:0;width:min(560px,100%);height:100%;background:#fff;padding:20px;overflow:auto;transform:translateX(100%);transition:.2s}.drawer.open{pointer-events:auto}.drawer.open .shade{opacity:1}.drawer.open .panel{transform:none}.close{float:right;border:0;background:#eef0f2;border-radius:10px;width:36px;height:36px}.detail h2{font-size:28px;margin:12px 0}.detail p{color:#66717f;line-height:1.7}.kv{display:grid;grid-template-columns:100px 1fr;padding:9px 0;border-bottom:1px solid #edf0f3;font-size:13px}
+.modal{position:fixed;inset:0;background:#0006;z-index:50;display:none;place-items:center;padding:16px}.modal.open{display:grid}.box{width:min(900px,100%);background:#fff;border-radius:16px;padding:16px}.box textarea{width:100%;height:60vh;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:monospace;font-size:12px}.ma{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+@media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:repeat(5,82vw)}.wrap{padding:12px}}
+</style>
+</head><body>
+<header class="top"><div class="brand">打猿 Workboard</div><div class="acts"><button class="btn" id="export">JSON</button><button class="btn primary" id="edit">データ編集</button></div></header>
+<main class="wrap">
+<section class="hero"><div><h1>企画の生死を、画面で見る。</h1><p>進行中・次・保留・ボツ・完了。データはあとからJSONで差し替え。</p></div><input class="search" id="search" placeholder="企画名・タグ・メモを検索"></section>
+<section class="stats" id="stats"></section><div class="filters" id="filters"></div><section class="board" id="board"></section>
+</main>
+<div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
+<div class="modal" id="modal"><div class="box"><h2>データ編集</h2><p>ここで保存するとブラウザ内に保持。HTMLに固定したいときは <code>seed-data</code> のJSONを差し替える。</p><textarea id="editor"></textarea><div class="ma"><button class="btn" id="reset">初期値へ戻す</button><button class="btn" id="cancel">閉じる</button><button class="btn primary" id="save">保存</button></div></div></div>
+<script id="seed-data" type="application/json">
+{"updatedAt":"2026-09-26","projects":[
+{"id":"site","title":"すべての歯が見える","category":"事業","status":"active","progress":62,"updated":"2026-09-26","summary":"サイトを細く強く再設計。ごあいさつ・商品・理論を核にする。","next":["商品体系を絞る","理論ページの語彙整理","publicへ反映"],"tags":["Web","商売","祭祀技師"],"note":"全部乗せは採用しない。"},
+{"id":"whisper","title":"配信音声 文字起こし","category":"システム","status":"active","progress":38,"updated":"2026-09-26","summary":"whisper.cpp省電力バッチ。150〜161完了、162処理中。","next":["162完了確認","追加音声をwhisper-inへ"],"tags":["Whisper","Termux"],"note":"small-q5_1 / -t 1。速度より継続性。"},
+{"id":"tarot","title":"日本版タロット","category":"商品","status":"next","progress":8,"updated":"2026-09-26","summary":"日本人に遠い象徴を、日本の生活感覚で読める体系へ再設計。","next":["大アルカナ22枚の対応表","試作3枚"],"tags":["カード","占い"],"note":"和風化ではなく象徴のローカライズ。"},
+{"id":"nft","title":"大学時代NFT / 旧作再発","category":"創作","status":"hold","progress":12,"updated":"2026-09-25","summary":"過去作を選別し、NFT・プリント・証書商品として再構成。","next":["旧作収集","販売形式の選別"],"tags":["NFT","旧作"],"note":"NFT自体を主役にしない。"},
+{"id":"land","title":"架空区画 / 月の土地型商品","category":"商品","status":"next","progress":5,"updated":"2026-09-25","summary":"架空の土地・祈りの区画・証書を売る商品案。","next":["地図ルール","証書デザイン"],"tags":["証書","世界観"],"note":"現実の所有権と誤認させない。"},
+{"id":"vtuber","title":"Vチューバーエンジン","category":"システム","status":"hold","progress":44,"updated":"2026-09-23","summary":"配信音声から字幕・映像・リップシンクを自動構成。","next":["文字起こし蓄積","10分雑談集で再検証"],"tags":["映像","配信"],"note":"文字起こし待ち。"},
+{"id":"fx","title":"1000円AI FX / BTC自動売買","category":"システム","status":"hold","progress":54,"updated":"2026-09-17","summary":"初期1000円のみで複利成長を狙う自動売買実験。","next":["現行実績を再確認"],"tags":["FX","BTC"],"note":"追加資金なし。"},
+{"id":"warashibe","title":"わらしべ通運","category":"創作","status":"active","progress":28,"updated":"2026-09-26","summary":"1000円スタートの交換企画。追跡・物語・QR受渡。","next":["今週の一手"],"tags":["物流","週次"],"note":"深夜物流の雰囲気を維持。"},
+{"id":"yuuyu","title":"夕夕家族","category":"創作","status":"hold","progress":16,"updated":"2026-09-25","summary":"巨大な家で家族の誰かが常に起きている一日小説。","next":["24時間の章立て"],"tags":["小説"],"note":"事件より妙な生活。"},
+{"id":"allin","title":"サイト全部乗せ構想","category":"事業","status":"dropped","progress":100,"updated":"2026-09-25","summary":"アーケード・人物名鑑・夢日記などを全部載せる案。","next":[],"tags":["Web","ボツ"],"note":"情報過多のため不採用。"}
+]}
+</script>
+<script>
+const S={active:["進行中","#4b7bec"],next:["次","#d89614"],hold:["保留","#8b5cf6"],dropped:["ボツ","#d9534f"],done:["完了","#3aa76d"]};
+const seed=JSON.parse(document.getElementById("seed-data").textContent);let data=load(),filter="すべて",q="";
+function load(){try{return JSON.parse(localStorage.getItem("dauen-board"))||structuredClone(seed)}catch(e){return structuredClone(seed)}}
+function esc(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function projects(){return data.projects.filter(p=>(filter==="すべて"||p.category===filter)&&[p.title,p.summary,p.note,...(p.tags||[])].join(" ").toLowerCase().includes(q.toLowerCase()))}
+function renderStats(){const p=data.projects,c=x=>p.filter(y=>y.status===x).length;document.getElementById("stats").innerHTML=[["全企画",p.length],["進行中",c("active")],["次",c("next")],["保留",c("hold")],["ボツ",c("dropped")],["完了",c("done")]].map(x=>`<div class=stat><div class=k>${x[0]}</div><div class=v>${x[1]}</div></div>`).join("")}
+function renderFilters(){let cats=["すべて",...new Set(data.projects.map(p=>p.category))];document.getElementById("filters").innerHTML=cats.map(x=>`<button class="chip ${x===filter?"on":""}" data-f="${esc(x)}">${esc(x)}</button>`).join("");document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()})}
+function renderBoard(){let p=projects();document.getElementById("board").innerHTML=Object.keys(S).map(st=>{let rows=p.filter(x=>x.status===st);return `<section class=col><div class=chead><span>${S[st][0]}</span><span class=cnt>${rows.length}</span></div><div class=cards>${rows.length?rows.map(card).join(""):"<div class=empty>該当なし</div>"}</div></section>`}).join("");document.querySelectorAll(".card").forEach(x=>x.onclick=()=>detail(x.dataset.id))}
+function card(p){return `<article class=card data-id="${p.id}"><div class=ctop><h3>${esc(p.title)}</h3><span class=tag>${esc(p.category)}</span></div><div class=desc>${esc(p.summary)}</div><div class=bar><i style="width:${p.progress||0}%;background:${S[p.status][1]}"></i></div><div class=meta><span>${S[p.status][0]} ${p.progress||0}%</span><span>${esc(p.updated||"")}</span></div></article>`}
+function detail(id){let p=data.projects.find(x=>x.id===id);document.getElementById("detail").innerHTML=`<span class=tag>${esc(p.category)}</span><h2>${esc(p.title)}</h2><p>${esc(p.summary)}</p><div class=kv><b>状態</b><span>${S[p.status][0]}</span></div><div class=kv><b>進捗</b><span>${p.progress||0}%</span></div><div class=kv><b>更新</b><span>${esc(p.updated||"")}</span></div><h3>次の一手</h3>${(p.next||[]).length?`<ul>${p.next.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:"<p>なし</p>"}<h3>メモ</h3><p>${esc(p.note||"")}</p>`;document.getElementById("drawer").classList.add("open")}
+function render(){renderStats();renderFilters();renderBoard()}
+document.getElementById("search").oninput=e=>{q=e.target.value;renderBoard()};document.getElementById("close").onclick=document.getElementById("shade").onclick=()=>document.getElementById("drawer").classList.remove("open");
+const modal=document.getElementById("modal"),ed=document.getElementById("editor");document.getElementById("edit").onclick=()=>{ed.value=JSON.stringify(data,null,2);modal.classList.add("open")};document.getElementById("cancel").onclick=()=>modal.classList.remove("open");
+document.getElementById("save").onclick=()=>{try{let x=JSON.parse(ed.value);if(!Array.isArray(x.projects))throw Error("projects配列がない");data=x;localStorage.setItem("dauen-board",JSON.stringify(data));modal.classList.remove("open");render()}catch(e){alert(e.message)}};
+document.getElementById("reset").onclick=()=>{localStorage.removeItem("dauen-board");data=structuredClone(seed);ed.value=JSON.stringify(data,null,2);render()};
+document.getElementById("export").onclick=()=>{let b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="workboard-data.json";a.click()};render();
+</script></body></html>
