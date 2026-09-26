@@ -101,3 +101,13 @@ for (const base of ["https://komonjo.princeton.edu/suruga-date/","https://komonj
     console.log("DATASET_DIAG",base,r.status,txt.length,txt.slice(0,900).replace(/\s+/g," "));
   } catch(e){ console.log("DATASET_DIAG_ERR",base,String(e)); }
 }
+
+// BASEPAGE_DIAG
+for (const base of ["https://komonjo.princeton.edu/madarajima/","https://komonjo.princeton.edu/tannowa/"]) {
+  try {
+    const r=await fetch(base,{headers:{"user-agent":"Mozilla/5.0"}});
+    const txt=await r.text();
+    const hrefs=[...txt.matchAll(/(?:src|href)=[\"']([^\"']+)[\"']/gi)].map(m=>m[1]).filter(x=>/json|js|api|wp-json|data|view|doc|trans/i.test(x));
+    console.log("BASEPAGE_DIAG",base,r.status,txt.length,JSON.stringify(hrefs.slice(0,80)));
+  } catch(e){console.log("BASEPAGE_DIAG_ERR",base,String(e));}
+}
