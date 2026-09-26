@@ -65,6 +65,11 @@ for (const d of data.documents) {
       ok++;
     } else {
       d.transcriptionStatus = "missing";
+      const labels=(Array.isArray(manifest.metadata)?manifest.metadata:[]).map(row=>({
+        label:textOf(row.label),
+        len:cleanHtml(textOf(row.value)).length
+      }));
+      console.log("missing transcript metadata", d.recordId, JSON.stringify(labels), "descriptionLen", cleanHtml(textOf(manifest.description)).length);
       missing++;
     }
   } catch (e) {
