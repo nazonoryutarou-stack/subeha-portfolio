@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>苦情申請受付システム</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#f3f3f3;color:#222;font-family:'MS PGothic','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;font-size:14px;line-height:1.7;}
+  .gov-header{background:#1a3a6b;color:#fff;padding:12px 16px;font-size:15px;letter-spacing:.05em;border-bottom:4px solid #c9a13b;}
+  .gov-sub{background:#e8eef5;color:#333;font-size:11px;padding:5px 16px;border-bottom:1px solid #ccc;}
+  .container{max-width:680px;margin:0 auto;background:#fff;border:1px solid #ccc;border-top:none;}
+  .step-bar{display:flex;background:#eee;border-bottom:1px solid #ccc;font-size:10px;}
+  .step-bar div{flex:1;text-align:center;padding:8px 2px;color:#999;border-right:1px solid #ddd;}
+  .step-bar div.active{background:#1a3a6b;color:#fff;font-weight:bold;}
+  .body{padding:20px 18px;}
+  .pagetitle{font-size:17px;font-weight:bold;color:#1a3a6b;border-left:5px solid #1a3a6b;padding-left:10px;margin-bottom:18px;}
+  .notice{background:#fffbe6;border:1px solid #e6d27a;padding:10px;font-size:12px;margin-bottom:18px;line-height:1.8;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-weight:bold;font-size:13px;margin-bottom:5px;}
+  .req{background:#c00;color:#fff;font-size:10px;padding:1px 6px;margin-left:6px;border-radius:2px;}
+  .field input[type=text],.field textarea,.field select{width:100%;border:1px solid #999;padding:8px;font-family:inherit;font-size:14px;}
+  .field textarea{height:90px;resize:vertical;}
+  .hint{font-size:11px;color:#777;margin-top:3px;}
+  .err{color:#c00;font-size:12px;margin-top:3px;display:none;}
+  .checkrow{border-top:1px solid #eee;padding:10px 4px;font-size:13px;display:flex;align-items:flex-start;gap:8px;}
+  .checkrow input{margin-top:4px;}
+  .checkrow.tani{background:#fafafa;}
+  .btnrow{text-align:right;margin-top:24px;border-top:1px solid #ddd;padding-top:16px;}
+  .btn{font-family:inherit;font-size:14px;padding:10px 28px;border:1px solid #1a3a6b;background:#1a3a6b;color:#fff;cursor:pointer;border-radius:3px;}
+  .btn:hover{background:#234a85;}
+  .btn.sub{background:#fff;color:#1a3a6b;margin-right:8px;}
+  .confirm-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .confirm-table th{background:#eef2f7;text-align:left;padding:8px;border:1px solid #ccc;width:35%;vertical-align:top;}
+  .confirm-table td{padding:8px;border:1px solid #ccc;}
+  .scr{display:none;}
+  .scr.on{display:block;}
+  .foot{font-size:10px;color:#999;text-align:center;padding:16px;border-top:1px solid #eee;}
+  .doc{border:2px solid #333;padding:20px;font-family:'MS PMincho',serif;font-size:13px;line-height:2;}
+  .doc h2{text-align:center;font-size:18px;letter-spacing:.3em;margin-bottom:16px;border-bottom:2px solid #333;padding-bottom:10px;}
+  .doc .row{display:flex;border-bottom:1px dotted #999;padding:6px 0;}
+  .doc .row .k{width:40%;font-weight:bold;}
+  .doc .seal{text-align:right;margin-top:20px;color:#c00;}
+  #canvasArea{text-align:center;margin-top:16px;}
+</style>
+</head>
+<body>
+
+<div class="gov-header">苦情申請受付システム</div>
+<div class="gov-sub">すべての歯が見える ／ 苦情処理窓口　オンライン申請</div>
+
+<div class="container">
+
+  <div class="step-bar">
+    <div id="sb1" class="active">1.申請者情報</div>
+    <div id="sb2">2.苦情種別</div>
+    <div id="sb3">3.確認事項</div>
+    <div id="sb4">4.申請確認</div>
+    <div id="sb5">5.申請書発行</div>
+  </div>
+
+  <!-- STEP1 -->
+  <section id="step1" class="scr on">
+  <div class="body">
+    <div class="pagetitle">１．申請者情報の入力</div>
+    <div class="notice">本システムは苦情を受け付けるための申請窓口です。全ての項目を正確にご記入ください。記入に不備がある場合、申請は受理されません。</div>
+    <div class="field">
+      <label>申請者氏名（仮名可）<span class="req">必須</span></label>
+      <input type="text" id="f_name" maxlength="40">
+      <div class="err" id="e_name">氏名を入力してください。</div>
+    </div>
+    <div class="field">
+      <label>ふりがな<span class="req">必須</span></label>
+      <input type="text" id="f_kana" maxlength="40">
+      <div class="err" id="e_kana">ふりがなを入力してください。</div>
+    </div>
+    <div class="field">
+      <label>苦情発生年月日<span class="req">必須</span></label>
+      <input type="text" id="f_date" placeholder="例：令和七年五月三十一日" maxlength="30">
+      <div class="err" id="e_date">発生年月日を入力してください。</div>
+    </div>
+    <div class="field">
+      <label>苦情に至る経緯<span class="req">必須</span></label>
+      <textarea id="f_reason" maxlength="1000"></textarea>
+      <div class="hint">100文字以上で具体的にご記入ください。（現在 <span id="rcount">0</span> 文字）</div>
+      <div class="err" id="e_reason">100文字以上で入力してください。</div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" onclick="go1()">次へ進む ▶</button>
+    </div>
+  </div>
+  </section>
+
+  <!-- STEP2 -->
+  <section id="step2" class="scr">
+  <div class="body">
+    <div class="pagetitle">２．苦情種別の選択</div>
+    <div class="notice">該当する苦情の種別を、大分類・中分類・程度の順に選択してください。すべて選択必須です。</div>
+    <div class="field">
+      <label>大分類<span class="req">必須</span></label>
+      <select id="f_cat1" onchange="updateCat2()">
+        <option value="">選択してください</option>
+        <option>占いに関する苦情</option>
+        <option>呪術に関する苦情</option>
+        <option>応対に関する苦情</option>
+        <option>料金に関する苦情</option>
+        <option>その他の苦情</option>
+      </select>
+      <div class="err" id="e_cat1">大分類を選択してください。</div>
+    </div>
+    <div class="field">
+      <label>中分類<span class="req">必須</span></label>
+      <select id="f_cat2">
+        <option value="">先に大分類を選択してください</option>
+      </select>
+      <div class="err" id="e_cat2">中分類を選択してください。</div>
+    </div>
+    <div class="field">
+      <label>苦情の程度<span class="req">必須</span></label>
+      <select id="f_level">
+        <option value="">選択してください</option>
+        <option>甚大</option>
+        <option>重大</option>
+        <option>中程度</option>
+        <option>軽微</option>
+      </select>
+      <div class="err" id="e_level">程度を選択してください。</div>
+    </div>
+    <div class="btnrow">
+      <button class="btn sub" onclick="show('step2','step1','sb2','sb1')">◀ 戻る</button>
+      <button class="btn" onclick="go2()">次へ進む ▶</button>
+    </div>
+  </div>
+  </section>
+
+  <!-- STEP3 -->
+  <section id="step3" class="scr">
+  <div class="body">
+    <div class="pagetitle">３．確認事項への同意</div>
+    <div class="notice">以下のすべての事項をご確認の上、チェックを入れてください。一つでも未確認の場合、申請は受理されません。</div>
+    <div class="checkrow"><input type="checkbox" id="c1"><label for="c1">本申請の内容に虚偽がないことを確認しました。</label></div>
+    <div class="checkrow"><input type="checkbox" id="c2"><label for="c2">本苦情は申請者本人の意思によるものです。</label></div>
+    <div class="checkrow"><input type="checkbox" id="c3"><label for="c3">本申請に法的効力が伴わないことを承知しました。</label></div>
+    <div class="checkrow tani"><input type="checkbox" id="c4"><label for="c4">谷・要の縁者ではありませんか？</label></div>
+    <div class="checkrow"><input type="checkbox" id="c5"><label for="c5">本申請内容の取り扱いについて異議を申し立てません。</label></div>
+    <div class="checkrow"><input type="checkbox" id="c6"><label for="c6">上記すべてを確認の上、申請します。</label></div>
+    <div class="err" id="e_check">すべての項目にチェックを入れてください。</div>
+    <div class="btnrow">
+      <button class="btn sub" onclick="show('step3','step2','sb3','sb2')">◀ 戻る</button>
+      <button class="btn" onclick="go3()">申請内容を確認 ▶</button>
+    </div>
+  </div>
+  </section>
+
+  <!-- STEP4 -->
+  <section id="step4" class="scr">
+  <div class="body">
+    <div class="pagetitle">４．申請内容の最終確認</div>
+    <div class="notice">以下の内容で申請します。よろしければ「この内容で申請する」を押してください。</div>
+    <table class="confirm-table" id="confirmTable"></table>
+    <div class="btnrow">
+      <button class="btn sub" onclick="show('step4','step3','sb4','sb3')">◀ 戻る</button>
+      <button class="btn" onclick="go4()">この内容で申請する ▶</button>
+    </div>
+  </div>
+  </section>
+
+  <!-- STEP5 -->
+  <section id="step5" class="scr">
+  <div class="body">
+    <div class="pagetitle">５．苦情申請書の発行</div>
+    <div class="notice">申請を受理しました。下記の苦情申請書を画像として保存し、謎のりゅうたろうまで提出してください。提出をもって、苦情処理が開始されます。</div>
+    <div class="doc" id="docArea"></div>
+    <div id="canvasArea">
+      <button class="btn" onclick="downloadDoc()">申請書を画像で保存する</button>
+    </div>
+    <div class="btnrow">
+      <a href="index.html"><button class="btn sub">ホームに戻る</button></a>
+    </div>
+  </div>
+  </section>
+
+  <div class="foot">苦情申請受付システム ver.2.6 ／ すべての歯が見える 苦情処理窓口</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+function show(from,to,sbFrom,sbTo){
+  $(from).classList.remove('on');$(to).classList.add('on');
+  if(sbFrom)$(sbFrom).classList.remove('active');
+  if(sbTo)$(sbTo).classList.add('active');
+  window.scrollTo(0,0);
+}
+const data={};
+
+// 経緯の文字数カウント
+$('f_reason').addEventListener('input',()=>{$('rcount').textContent=$('f_reason').value.length;});
+
+// 中分類の動的変更
+const CAT2={
+  "占いに関する苦情":["鑑定結果が当たらない","鑑定結果が当たりすぎて怖い","内容が抽象的","視えたものが不快"],
+  "呪術に関する苦情":["呪いが効かない","呪いが弱すぎる","カブトムシしか扱っていない","効果が確認できない"],
+  "応対に関する苦情":["態度が不遜","返信が遅い","言葉が難解","視られている気がする"],
+  "料金に関する苦情":["無料の範囲が不明","対価の概念が曖昧","金銭を要求された記憶がない"],
+  "その他の苦情":["サイトが怖い","谷・要について","理由は言いたくない","その他"]
+};
+function updateCat2(){
+  const v=$('f_cat1').value;const sel=$('f_cat2');
+  sel.innerHTML='<option value="">選択してください</option>';
+  if(CAT2[v])CAT2[v].forEach(o=>{const op=document.createElement('option');op.textContent=o;sel.appendChild(op);});
+}
+
+function go1(){
+  let ok=true;
+  ['name','kana','date'].forEach(k=>{
+    if(!$('f_'+k).value.trim()){$('e_'+k).style.display='block';ok=false;}else{$('e_'+k).style.display='none';}
+  });
+  if($('f_reason').value.trim().length<100){$('e_reason').style.display='block';ok=false;}else{$('e_reason').style.display='none';}
+  if(!ok)return;
+  data.name=$('f_name').value.trim();data.kana=$('f_kana').value.trim();
+  data.date=$('f_date').value.trim();data.reason=$('f_reason').value.trim();
+  show('step1','step2','sb1','sb2');
+}
+function go2(){
+  let ok=true;
+  ['cat1','cat2','level'].forEach(k=>{
+    if(!$('f_'+k).value){$('e_'+k).style.display='block';ok=false;}else{$('e_'+k).style.display='none';}
+  });
+  if(!ok)return;
+  data.cat1=$('f_cat1').value;data.cat2=$('f_cat2').value;data.level=$('f_level').value;
+  show('step2','step3','sb2','sb3');
+}
+function go3(){
+  let all=true;
+  for(let i=1;i<=6;i++){if(!$('c'+i).checked)all=false;}
+  if(!all){$('e_check').style.display='block';return;}
+  $('e_check').style.display='none';
+  // 確認テーブル生成
+  const t=$('confirmTable');
+  t.innerHTML='';
+  const rows=[
+    ['申請者氏名',data.name],['ふりがな',data.kana],['苦情発生年月日',data.date],
+    ['苦情に至る経緯',data.reason],['大分類',data.cat1],['中分類',data.cat2],['程度',data.level]
+  ];
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<th>'+r[0]+'</th><td>'+escapeHtml(r[1])+'</td>';
+    t.appendChild(tr);
+  });
+  show('step3','step4','sb3','sb4');
+}
+function go4(){
+  // 申請書HTML
+  const num=genNum();
+  data.num=num;
+  $('docArea').innerHTML=
+    '<h2>苦情申請書</h2>'+
+    '<div class="row"><div class="k">受付番号</div><div>'+num+'</div></div>'+
+    '<div class="row"><div class="k">申請者氏名</div><div>'+escapeHtml(data.name)+'（'+escapeHtml(data.kana)+'）</div></div>'+
+    '<div class="row"><div class="k">苦情発生年月日</div><div>'+escapeHtml(data.date)+'</div></div>'+
+    '<div class="row"><div class="k">苦情種別</div><div>'+escapeHtml(data.cat1)+' ／ '+escapeHtml(data.cat2)+'</div></div>'+
+    '<div class="row"><div class="k">程度</div><div>'+escapeHtml(data.level)+'</div></div>'+
+    '<div class="row"><div class="k">経緯</div><div>'+escapeHtml(data.reason)+'</div></div>'+
+    '<div class="seal">受 理 ／ すべての歯が見える</div>';
+  show('step4','step5','sb4','sb5');
+}
+function genNum(){
+  const d=new Date();
+  return 'SH-'+d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)+'-'+Math.floor(Math.random()*9000+1000);
+}
+function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// 申請書を画像化（canvas）
+function downloadDoc(){
+  const W=720,H=900;
+  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  x.strokeStyle='#333';x.lineWidth=3;x.strokeRect(30,30,W-60,H-60);
+  x.fillStyle='#111';x.textAlign='center';
+  x.font='bold 32px "MS PMincho",serif';
+  x.fillText('苦 情 申 請 書',W/2,90);
+  x.strokeStyle='#333';x.lineWidth=1.5;x.beginPath();x.moveTo(60,110);x.lineTo(W-60,110);x.stroke();
+  x.textAlign='left';x.font='15px "MS PGothic",sans-serif';
+  let y=160;const lh=34;const kx=70,vx=240;
+  function row(k,v){
+    x.fillStyle='#333';x.font='bold 15px sans-serif';x.fillText(k,kx,y);
+    x.fillStyle='#111';x.font='15px sans-serif';
+    const lines=wrap(x,v,W-vx-70);
+    lines.forEach((l,i)=>x.fillText(l,vx,y+i*24));
+    y+=Math.max(lh,lines.length*24+12);
+    x.strokeStyle='#ccc';x.beginPath();x.moveTo(kx,y-14);x.lineTo(W-70,y-14);x.stroke();
+  }
+  row('受付番号',data.num);
+  row('申請者氏名',data.name+'（'+data.kana+'）');
+  row('苦情発生年月日',data.date);
+  row('苦情種別',data.cat1+' / '+data.cat2);
+  row('程度',data.level);
+  row('経緯',data.reason);
+  x.fillStyle='#c00';x.textAlign='right';x.font='bold 18px "MS PMincho",serif';
+  x.fillText('受 理  すべての歯が見える',W-70,H-70);
+  c.toBlob(b=>{
+    const url=URL.createObjectURL(b);const a=document.createElement('a');
+    a.href=url;a.download='苦情申請書_'+data.num+'.png';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  });
+}
+function wrap(ctx,text,maxW){
+  const chars=(text||'').split('');let line='',lines=[];
+  chars.forEach(ch=>{
+    if(ch==='\n'){lines.push(line);line='';return;}
+    if(ctx.measureText(line+ch).width>maxW&&line){lines.push(line);line=ch;}
+    else line+=ch;
+  });
+  lines.push(line);return lines;
+}
+</script>
+</body>
+</html>

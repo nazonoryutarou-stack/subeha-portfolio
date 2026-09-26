@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>十六霊感診断 ── すべての歯が見える</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ===== 和の高級感：黒漆 × 金 ===== */
+  :root{
+    --lacquer:#0b0a0c;       /* 漆黒（わずかに温かい黒） */
+    --lacquer2:#13111a;      /* パネル背景 */
+    --gold:#c9a86a;          /* 金 */
+    --gold-bright:#e3c98a;   /* 明るい金 */
+    --ink:#ece6d8;           /* 文字（高コントラストの生成り白） */
+    --ink-dim:#9a9484;       /* 補助文字 */
+    --line:#2a2620;          /* 罫線 */
+    --blood:#8a1c1c;         /* 差し色（朱） */
+    --mono:'Courier New',ui-monospace,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--lacquer);
+    color:var(--ink);
+    font-family:'Shippori Mincho',serif;
+    min-height:100vh;overflow-x:hidden;position:relative;
+    line-height:1.95;
+    /* 漆の微かな艶（中央がほのかに明るい） */
+    background-image:radial-gradient(ellipse at 50% 0%,rgba(201,168,106,.06),transparent 55%);
+  }
+  /* 上品な金の細線スキャン（控えめ） */
+  body::after{content:'';position:fixed;inset:0;z-index:80;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 4px);mix-blend-mode:multiply;opacity:.5;}
+  .wrap{position:relative;z-index:10;max-width:600px;margin:0 auto;padding:0 24px;}
+  .scr{display:none;}
+  .scr.on{display:block;}
+  hr{border:0;border-top:1px solid var(--line);margin:24px 0;}
+
+  /* 見出し */
+  .head{text-align:center;padding:64px 0 24px;}
+  .head .k{font-size:.62rem;letter-spacing:.42em;color:var(--gold);margin-bottom:20px;}
+  .head h1{font-weight:800;font-size:clamp(1.9rem,6.5vw,2.7rem);letter-spacing:.14em;color:var(--ink);}
+  .head h1 .accent{color:var(--gold-bright);}
+  .head p{font-size:.66rem;letter-spacing:.34em;color:var(--gold);margin-top:18px;}
+
+  /* 金の罫で囲んだ枠 */
+  .panel{border:1px solid var(--line);border-top:2px solid var(--gold);background:var(--lacquer2);padding:30px 26px;margin:24px 0;}
+
+  /* 導入 */
+  .intro-box{padding:18px 0 70px;}
+  .intro-box .about{font-size:.95rem;line-height:2.5;color:var(--ink);text-align:center;margin-bottom:22px;letter-spacing:.03em;}
+  .intro-box .about b{color:var(--gold-bright);font-weight:700;}
+  .intro-box .lead{font-size:1rem;line-height:2.4;color:var(--ink);text-align:center;margin-bottom:30px;letter-spacing:.04em;}
+  .intro-box .lead b{color:var(--gold-bright);font-weight:700;}
+  .field{margin:32px 0;text-align:center;}
+  .field label{display:block;font-size:.76rem;letter-spacing:.2em;color:var(--gold);margin-bottom:16px;}
+  .field input{background:#070609;border:1px solid var(--line);border-bottom:2px solid var(--gold);color:var(--ink);font-family:'Shippori Mincho',serif;font-size:1.05rem;letter-spacing:.08em;padding:13px 18px;width:100%;max-width:320px;text-align:center;outline:none;transition:border-color .3s;}
+  .field input:focus{border-color:var(--gold-bright);}
+  .btn{display:inline-block;background:transparent;border:1px solid var(--gold);color:var(--gold-bright);font-family:'Shippori Mincho',serif;font-weight:700;font-size:.92rem;letter-spacing:.3em;padding:15px 50px;cursor:pointer;position:relative;overflow:hidden;transition:color .3s;}
+  .btn::before{content:'';position:absolute;inset:0;background:var(--gold);opacity:.12;transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+  .btn:hover::before{transform:scaleX(1);}
+  .btn:hover{color:var(--ink);}
+  .btn span{position:relative;z-index:1;}
+  .center{text-align:center;}
+  .note{font-size:.68rem;color:var(--ink-dim);letter-spacing:.08em;line-height:1.9;margin-top:24px;}
+
+  /* 設問 */
+  .q-top{padding:36px 0 14px;}
+  .progress-wrap{height:3px;background:#070609;margin-bottom:10px;border:1px solid var(--line);}
+  .progress{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-bright));width:0%;transition:width .3s;}
+  .q-count{font-size:.7rem;letter-spacing:.18em;color:var(--gold);text-align:right;}
+  .q-axis{font-size:.66rem;letter-spacing:.28em;color:var(--gold);text-align:center;margin:28px 0 10px;}
+  /* 質問文：太め・大きめ・字間控えめで視認性UP */
+  .q-text{font-size:clamp(1.2rem,3.6vw,1.45rem);font-weight:700;line-height:2;text-align:center;min-height:120px;display:flex;align-items:center;justify-content:center;padding:18px 6px;letter-spacing:.02em;color:var(--ink);}
+  .opts{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);margin:18px 0 30px;}
+  /* 選択肢：読みやすく、金のホバー */
+  .opt{background:var(--lacquer2);border:none;color:var(--ink);font-family:'Shippori Mincho',serif;font-size:1rem;letter-spacing:.06em;padding:19px;cursor:pointer;text-align:center;transition:background .2s,color .2s;outline:none;}
+  .opt:hover{background:rgba(201,168,106,.12);color:var(--gold-bright);}
+  .opt:active{background:rgba(201,168,106,.22);}
+  .q-back{display:block;margin:0 auto;background:none;border:none;color:var(--ink-dim);font-family:'Shippori Mincho',serif;font-size:.72rem;letter-spacing:.18em;cursor:pointer;padding:10px;}
+  .q-back:hover{color:var(--gold);}
+
+  /* 結果 */
+  .result{padding:48px 0 80px;text-align:center;}
+  .result .r-emblem{display:block;margin:0 auto 16px;}
+  .result .r-eyebrow{font-size:.66rem;letter-spacing:.42em;color:var(--gold);margin-bottom:24px;}
+  .result .r-type-no{font-size:.78rem;letter-spacing:.28em;color:var(--ink-dim);margin-bottom:14px;}
+  .result .r-type{font-size:clamp(2rem,7.5vw,3rem);font-weight:800;letter-spacing:.08em;margin-bottom:12px;color:var(--gold-bright);text-shadow:0 0 30px rgba(201,168,106,.3);}
+  .result .r-combo{font-size:.74rem;letter-spacing:.2em;color:var(--ink-dim);margin-bottom:42px;}
+  .r-tokkou-box{border:1px solid var(--line);border-top:2px solid var(--gold);padding:34px 26px;margin:30px 0;position:relative;background:var(--lacquer2);}
+  .r-tokkou-box::before{content:'特効';position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--lacquer);padding:0 14px;font-size:.66rem;letter-spacing:.28em;color:var(--gold);}
+  .r-tokkou-name{font-size:1.6rem;font-weight:700;letter-spacing:.1em;margin-bottom:18px;color:var(--ink);}
+  .r-tokkou-mean{font-size:.95rem;line-height:2.2;color:var(--ink);letter-spacing:.02em;}
+  .r-desc{font-size:.92rem;line-height:2.3;color:var(--ink-dim);margin:30px 0;text-align:left;letter-spacing:.02em;}
+  .r-note-area{font-size:.9rem;line-height:2.1;color:var(--ink);min-height:20px;}
+  .anomaly{color:var(--blood);font-size:.9rem;line-height:2.1;letter-spacing:.03em;margin-top:30px;border-top:1px solid var(--blood);padding-top:28px;animation:fadein 2s ease;font-weight:700;}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  .share-row{display:flex;gap:1px;background:var(--line);border:1px solid var(--gold);margin:40px 0 20px;}
+  .share-btn{flex:1;background:var(--lacquer2);border:none;color:var(--gold);font-family:'Shippori Mincho',serif;font-size:.82rem;letter-spacing:.12em;padding:18px 8px;cursor:pointer;text-decoration:none;display:block;transition:background .2s,color .2s;}
+  .share-btn:hover{background:rgba(201,168,106,.14);color:var(--gold-bright);}
+  .retry{background:none;border:none;color:var(--ink-dim);font-family:'Shippori Mincho',serif;font-size:.72rem;letter-spacing:.18em;cursor:pointer;padding:12px;}
+  .retry:hover{color:var(--gold);}
+  .back-home{display:inline-block;margin-top:30px;color:var(--ink-dim);font-size:.72rem;letter-spacing:.2em;text-decoration:none;}
+  .back-home:hover{color:var(--gold);}
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--lacquer2);border:1px solid var(--gold);color:var(--gold-bright);font-size:.78rem;letter-spacing:.12em;padding:14px 28px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
+  .toast.on{opacity:1;}
+
+  /* ---- 結果文（総則・本文） ---- */
+  .sousoku{border:1px solid rgba(201,168,106,.35);background:rgba(201,168,106,.04);padding:18px 16px;margin:0 0 24px;text-align:left;}
+  .sousoku .st{font-size:.62rem;letter-spacing:.5em;color:var(--gold);margin-bottom:12px;}
+  .sousoku p{font-size:.78rem;line-height:2.05;color:var(--ink-dim);margin:0 0 12px;}
+  .sousoku p:last-child{margin-bottom:0;color:var(--ink);}
+  .kp{font-size:.86rem;line-height:2.1;color:var(--ink);margin:0 0 16px;text-align:left;}
+  .kp-hook{color:var(--ink-dim);}
+  .kp-job{border-left:2px solid var(--gold);padding-left:12px;color:var(--gold-bright);font-size:.8rem;line-height:1.95;}
+  .kp-cost{color:#c49090;}
+  .kp-sahou{border-top:1px solid rgba(201,168,106,.25);padding-top:16px;}
+  .kp-last{color:var(--gold-bright);}
+  .r-disclaim{margin-top:18px;font-size:.58rem;letter-spacing:.18em;color:var(--ink-dim);}
+
+  /* ===== indexと同じ観測所の気配（人魂と霧・枠・走査） ===== */
+  #void{position:fixed;inset:0;z-index:0;display:block;background:#000;}
+  .vig{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 84% 76% at center,transparent 40%,rgba(0,0,0,.72) 100%);}
+  .grain{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.045;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:gm .6s steps(3) infinite;}
+  @keyframes gm{0%{transform:translate(0,0)}33%{transform:translate(-4px,3px)}66%{transform:translate(3px,-2px)}100%{transform:translate(0,0)}}
+  .chrome{position:fixed;inset:0;z-index:5;pointer-events:none;}
+  .chrome .br{position:absolute;width:30px;height:30px;border:1px solid var(--gold);opacity:.38;}
+  .chrome .br.tl{top:14px;left:14px;border-right:0;border-bottom:0;}
+  .chrome .br.tr{top:14px;right:14px;border-left:0;border-bottom:0;}
+  .chrome .br.bl{bottom:calc(14px + env(safe-area-inset-bottom,0px));left:14px;border-right:0;border-top:0;}
+  .chrome .br.brr{bottom:calc(14px + env(safe-area-inset-bottom,0px));right:14px;border-left:0;border-top:0;}
+  .chrome .ruler{position:absolute;top:14px;left:54px;right:54px;height:6px;background-image:repeating-linear-gradient(90deg,var(--line) 0,var(--line) 1px,transparent 1px,transparent 30px);opacity:.5;}
+  .chrome .topbar{position:absolute;top:25px;left:54px;right:54px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:.5rem;letter-spacing:.2em;color:var(--ink-dim);}
+  .chrome .topbar .c{color:var(--gold);}
+  .chrome .topbar .d{animation:bl 1.4s steps(2) infinite;}
+  @keyframes bl{50%{opacity:0;}}
+
+  /* ===== GPT版から抽出：判定註・判定内訳 ===== */
+  .r-confidence{margin:0 0 22px;text-align:left;}
+  .confidence-card{border:1px solid rgba(201,168,106,.35);background:rgba(201,168,106,.045);padding:18px 16px;margin:0 0 18px;}
+  .confidence-card .st,.axis-report .st{font-size:.62rem;letter-spacing:.42em;color:var(--gold);margin-bottom:10px;text-align:left;}
+  .confidence-title{font-size:.95rem;color:var(--gold-bright);font-weight:700;letter-spacing:.06em;margin-bottom:8px;}
+  .confidence-card p{font-size:.78rem;line-height:2;color:var(--ink-dim);margin:0;}
+  .confidence-card b{color:var(--ink);font-weight:700;}
+  .axis-report{border:1px solid var(--line);background:rgba(19,17,26,.85);padding:18px 16px;margin:0 0 28px;text-align:left;}
+  .axis-row{margin:15px 0 18px;}
+  .axis-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:7px;}
+  .axis-head span{font-size:.76rem;letter-spacing:.16em;color:var(--ink);}
+  .axis-head em{font-style:normal;font-size:.68rem;letter-spacing:.08em;color:var(--gold);}
+  .axis-bar{height:8px;background:#070609;border:1px solid var(--line);position:relative;overflow:hidden;}
+  .axis-bar::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(201,168,106,.08),rgba(201,168,106,.34));}
+  .axis-bar .mid{position:absolute;left:50%;top:-4px;width:1px;height:16px;background:rgba(236,230,216,.25);}
+  .axis-bar i{position:absolute;top:-4px;width:3px;height:16px;background:var(--gold-bright);box-shadow:0 0 12px rgba(227,201,138,.55);transform:translateX(-50%);}
+  .axis-labels{display:flex;justify-content:space-between;font-size:.62rem;color:var(--ink-dim);letter-spacing:.12em;margin-top:7px;}
+  .opt.selected{background:rgba(201,168,106,.18);color:var(--gold-bright);box-shadow:inset 3px 0 0 var(--gold);}
+  @media (max-width:480px){.axis-head{display:block;}.axis-head em{display:block;margin-top:4px;}}
+
+  /* ===== 結果一覧（管理用・横スクロール／名前欄に【結果表示】） ===== */
+  .gallery{position:fixed;inset:0;z-index:300;background:#000;display:none;flex-direction:column;}
+  .gallery.on{display:flex;}
+  .gal-bar{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);background:rgba(7,6,9,.94);font-family:var(--mono);}
+  .gal-title{font-size:.58rem;letter-spacing:.24em;color:var(--gold);}
+  .gal-hint{font-size:.5rem;letter-spacing:.1em;color:var(--ink-dim);}
+  .gal-count{font-size:.62rem;letter-spacing:.16em;color:var(--ink-dim);margin-left:auto;}
+  .gal-count b{color:var(--gold-bright);font-weight:700;}
+  .gal-close{background:none;border:1px solid var(--line);color:var(--ink-dim);font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;padding:8px 12px;cursor:pointer;}
+  .gal-close:hover{color:var(--gold);border-color:var(--gold);}
+  .gal-track{flex:1;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+  .gal-panel{flex:0 0 100%;width:100vw;height:100%;overflow-y:auto;scroll-snap-align:center;padding:6px 22px 24px;border-right:1px solid rgba(42,38,32,.5);}
+  .gal-panel .result{padding:30px 0 40px;}
+  .gal-em{display:block;margin:0 auto 16px;}
+  .gal-nav{position:absolute;top:54%;transform:translateY(-50%);z-index:3;background:rgba(7,6,9,.72);border:1px solid var(--line);color:var(--gold);font-size:1.5rem;line-height:1;width:40px;height:60px;cursor:pointer;font-family:serif;}
+  .gal-nav:hover{border-color:var(--gold);background:rgba(201,168,106,.14);}
+  .gal-prev{left:5px;}.gal-next{right:5px;}
+  @media(max-width:600px){.gal-nav{width:30px;height:48px;font-size:1.15rem;opacity:.55;}}
+</style>
+</head>
+<body>
+<canvas id="void"></canvas>
+<div class="vig"></div><div class="grain"></div>
+<div class="chrome">
+  <span class="br tl"></span><span class="br tr"></span><span class="br bl"></span><span class="br brr"></span>
+  <span class="ruler"></span>
+  <div class="topbar"><span>第〇九一號観測所</span><span class="c">十六霊感診断<span class="d"> ●</span></span></div>
+</div>
+<div class="wrap">
+
+  <section id="screen-intro" class="scr on">
+    <div class="head">
+      <div class="k">其ノ壱</div>
+      <h1 data-t="十六霊感診断">十六霊感診断</h1>
+      <p>SIXTEEN TYPES OF SIGHT</p>
+    </div>
+    <div class="intro-box">
+      <p class="about">
+        霊感とは、特別な人だけのものではありません。<br>
+        誰の心にも、目には映らない何かを感じ取る力が、<br>
+        大なり小なり眠っています。
+      </p>
+      <p class="about">
+        この診断は、五十の問いをとおして、<br>
+        あなたのなかに眠るその力が<br>
+        <b>どんな形をしているのか</b>を、そっと視ていくものです。
+      </p>
+      <p class="about">
+        力の形は、十六種類。<br>
+        あなたが何を感じ取りやすいのか、<br>
+        その型には、それぞれに名前と特性があります。
+      </p>
+
+      <hr>
+
+      <p class="lead">それでは、はじめましょう。<br>よろしければ、お名前をお聞かせください。</p>
+      <div class="field">
+        <label>お名前（仮名でもかまいません）</label>
+        <input id="nameInput" type="text" placeholder="お名前を入力" autocomplete="off" maxlength="32">
+      </div>
+      <div class="center">
+        <button class="btn" id="startBtn"><span>視 て も ら う</span></button>
+      </div>
+      <p class="note">全五十問・四段階でお答えいただきます。<br>所要およそ三分です。深く考えず、感じたままにお答えください。</p>
+    </div>
+  </section>
+
+  <section id="screen-quiz" class="scr">
+    <div class="q-top">
+      <div class="progress-wrap"><div class="progress" id="prog"></div></div>
+      <div class="q-count"><span id="qNow">1</span> / 50</div>
+    </div>
+    <div class="q-axis" id="qAxis">─</div>
+    <div class="q-text" id="qText">─</div>
+    <div class="opts">
+      <button class="opt" data-v="3">とても　そう思う</button>
+      <button class="opt" data-v="2">やや　そう思う</button>
+      <button class="opt" data-v="1">あまり　思わない</button>
+      <button class="opt" data-v="0">全く　思わない</button>
+    </div>
+    <button class="q-back" id="backBtn">← ひとつ戻る</button>
+  </section>
+
+  <section id="screen-result" class="scr">
+    <div class="result">
+      <canvas id="rEmblem" class="r-emblem" width="336" height="336" aria-hidden="true"></canvas>
+      <div class="r-eyebrow">あなたの霊感の型</div>
+      <div class="r-type-no" id="rNo">─</div>
+      <div class="r-type" id="rType">─</div>
+      <div class="r-combo" id="rCombo">─</div>
+      <div class="r-confidence" id="rConfidence"></div>
+      <div class="axis-report" id="axisReport"></div>
+      <div class="r-tokkou-box">
+        <div class="r-tokkou-name" id="rTokkouName">─</div>
+        <div class="r-tokkou-mean" id="rTokkouMean">─</div>
+      </div>
+      <div class="r-desc" id="rDesc"></div>
+      <div class="r-note-area" id="rNote"></div>
+      <div id="rAnomaly"></div>
+      <div class="r-disclaim">※本診断は創作である。</div>
+      <div class="share-row">
+        <a class="share-btn" id="shareX" href="#" target="_blank">Xで視せる</a>
+        <button class="share-btn" id="shareImg">札を保存</button>
+        <button class="share-btn" id="shareCopy">結果を写す</button>
+      </div>
+      <button class="retry" id="retryBtn">もう一度視てもらう</button>
+      <br>
+      <a class="back-home" href="index.html">← ホームに戻る</a>
+    </div>
+  </section>
+
+</div>
+<div id="gallery" class="gallery">
+  <div class="gal-bar">
+    <span class="gal-title">結果表示</span><span class="gal-hint">← 横スクロールで十六型 →</span>
+    <span class="gal-count"><b id="galNow">1</b> / 16</span>
+    <button id="galClose" class="gal-close">閉じる ✕</button>
+  </div>
+  <div class="gal-track" id="galTrack"></div>
+  <button class="gal-nav gal-prev" id="galPrev" aria-label="前へ">‹</button>
+  <button class="gal-nav gal-next" id="galNext" aria-label="次へ">›</button>
+</div>
+<div class="toast" id="toast">コピーしました</div>
+<script>
+/* =========================================================
+   設定エリア（後から変えられる）
+   ========================================================= */
+
+// ▼ サイトURL（シェア時に付く）
+const SITE_URL = "https://subetenohagamieru.neocities.org/";
+
+// ▼ 隠しコマンド（この名前を入力すると隠しページへ飛ぶ）
+const SECRET_COMMAND = "0292";
+const SECRET_PAGE    = "kuroku.html";
+// 三下モードのトリガー
+const SANSHITA_TRIGGER = "ふんばれオロチ山";
+// 結果一覧（管理用）：名前欄にこれを入れると十六型を全画面・横スクロールで一覧
+const GALLERY_COMMAND = "【結果表示】";
+
+// ▼ 地雷問題（各軸の25問目）。trueで「心当たりあり寄り」の回答をすると踏んだ判定
+//    踏んだ数に応じて結果末尾の異変テキストが出る
+const ANOMALY_THRESHOLD_VALUE = 2; // 回答値が2以上(とても/やや)で「踏んだ」とみなす
+
+// ▼ 結果末尾に出す異変テキスト（地雷を1つ以上踏んだ人に表示）
+const ANOMALY_TEXT = "システムがあなたの回答に異変を感知しました。<br>危険を感じたらすぐに謎のりゅうたろう宛にご連絡ください。";
+
+/* =========================================================
+   16タイプ定義
+   軸: A 視覚(s)↔身体(b) / B 過去(p)↔未来(f) / C 人(h)↔場所(l) / D 死霊(d)↔生霊(v)
+   タイプ名は後から差し替え可能（今は全て〇〇〇〇）
+   ========================================================= */
+const TYPES = {
+  "s-p-h-d": {no:"其ノ壱", name:"妖怪絵巻", tokkou:"故人面影特効", mean:"死んだ人の「今の顔」が視える。姿は、生前の精神性で決まる。", combo:"視覚・過去・人・死霊"},
+  "s-p-h-v": {no:"其ノ弐", name:"心霊写真", tokkou:"生霊残像特効", mean:"生きている人間が置き忘れた念が、像として視える。", combo:"視覚・過去・人・生霊"},
+  "s-p-l-d": {no:"其ノ参", name:"捜査報告書", tokkou:"事故物件特効", mean:"その部屋で何があったかが、検証写真のように視える。", combo:"視覚・過去・場所・死霊"},
+  "s-p-l-v": {no:"其ノ四", name:"事件記事", tokkou:"未練残響特効", mean:"生者が場所に置いていった未練が、形になって視える。", combo:"視覚・過去・場所・生霊"},
+  "s-f-h-d": {no:"其ノ伍", name:"診療記録", tokkou:"死相特効", mean:"顔に重なりはじめた、終わりの所見が視える。", combo:"視覚・未来・人・死霊"},
+  "s-f-h-v": {no:"其ノ六", name:"予告状", tokkou:"加害予兆特効", mean:"これから誰かを傷つける人間の、支度が視える。", combo:"視覚・未来・人・生霊"},
+  "s-f-l-d": {no:"其ノ七", name:"警告表示", tokkou:"警戒区域特効", mean:"まだ何も起きていない場所に立つ、警告の表示が視える。", combo:"視覚・未来・場所・死霊"},
+  "s-f-l-v": {no:"其ノ八", name:"注意喚起", tokkou:"因縁地特効", mean:"これから生きた人間を呼ぶ場所の、掲示が視える。", combo:"視覚・未来・場所・生霊"},
+  "b-p-h-d": {no:"其ノ九", name:"死亡届", tokkou:"憑依痕特効", mean:"一度「明け渡した」ことのある人の痕を、肌で感じ取る。", combo:"身体・過去・人・死霊"},
+  "b-p-h-v": {no:"其ノ十", name:"供述調書", tokkou:"怨念感応特効", mean:"生きている人間の、まだ言っていない恨みを受信する。", combo:"身体・過去・人・生霊"},
+  "b-p-l-d": {no:"其ノ十一", name:"実話怪談", tokkou:"地縛感応特効", mean:"土地に縛られたまま姿を変え続けるものを、肌で感じる。", combo:"身体・過去・場所・死霊"},
+  "b-p-l-v": {no:"其ノ十二", name:"歴史小説", tokkou:"滞留感応特効", mean:"土地に積もった、生きてきた人間の厚みを足の裏から読む。", combo:"身体・過去・場所・生霊"},
+  "b-f-h-d": {no:"其ノ十三", name:"ドクロマーク", tokkou:"死期感応特効", mean:"人に貼られはじめた期限の印を、感じ取ってしまう。", combo:"身体・未来・人・死霊"},
+  "b-f-h-v": {no:"其ノ十四", name:"怪文書", tokkou:"悪意察知特効", mean:"まだ実行されていない悪意の下書きが、肌に届く。", combo:"身体・未来・人・生霊"},
+  "b-f-l-d": {no:"其ノ十五", name:"立禁テープ", tokkou:"凶兆感応特効", mean:"まだ張られていない規制線を、くぐる前に感じ取る。", combo:"身体・未来・場所・死霊"},
+  "b-f-l-v": {no:"其ノ十六", name:"空襲警報", tokkou:"磁場感応特効", mean:"場所がこれから人を動かす予兆を、体で受信する。", combo:"身体・未来・場所・生霊"}
+};
+
+/* ===== 結果文（総則＋十六型・第二稿） ===== */
+const SOUSOKU = `はじめに、この世界の決まりを三つ。
+
+一つ。死んだものの姿は、生前の顔では決まりません。生前の精神性で決まります。穏やかに生きたものは、穏やかな形に。そうでないものは、そうでない形に。そして、そうでない形の方が、ずっと多い。人の形を保っていられるものは、わずかです。ほとんどは、化物です。
+
+二つ。変化は、死んだ日に終わりません。半永久に続きます。昨日視えたものと今日視えるものは、同じものでも、同じ姿をしていません。
+
+三つ。力は、無料ではありません。何かを視られる者、感じ取れる者は、その代わりに、誰もが当たり前に持っているものを、すでに失っています。それぞれの結果に書きました。思い当たるはずです。
+
+記録者註──私も、あの世を視る目と引き換えに、人を見る目を失いました。`;
+
+const KEKKA = {
+  "s-p-h-d": `視えるのは、死んだ人の、今の顔です。
+
+亡くなった時の顔ではありません。魂の、現在の姿です。死者の姿は生前の精神性で決まり、死んだ後も変わり続けます。同じ故人でも、四十九日と一周忌では、違う姿で視えます。穏やかだった人は、しばらく人の形のまま。そうでなかった人は、早くから崩れていきます。古い絵巻の妖怪は、空想ではありません。あなたと同じ目を持った絵師が、「途中の姿」を写生した記録です。
+
+葬式の帰り、遺影と違う表情が浮かんで離れなかったことはありませんか。
+
+夢で会う故人の顔が、会うたびに少しずつ違うことは。
+
+古い絵巻の化物を見て、想像にしては正確すぎる、と思ったことは。
+
+錯覚ではありません。写生です。
+あなたは、弔いの場に向いています。遺族が忘れかけた「その人らしさ」を、まだ人の形が残っているうちに、返してあげられる。
+
+向いている仕事：復元納棺師、葬祭ディレクター、遺影の修整、肖像画家、仏師、伝記の聞き書き。
+
+代償の話をします。あなたは、生きている人間の顔を覚える力を失っています。昨日会った人の顔が、今日はもう曖昧なはずです。人の顔写真を撮りたがるのは、趣味ではありません。補助です。
+
+作法をひとつ。
+視えた顔を描き残すなら、目は入れないこと。古い絵巻に瞳のない化物がいるのは、描き損じではありません。入れた目は、視線を返します。
+
+最後に。
+いつか、懐かしい人が、人の形をしていない姿で視えても、驚かないであげてください。
+姿が変わっても、あなたの所へ来る用事は、変わっていません。`,
+  "s-p-h-v": `視えるのは、生きている人間の、置き忘れです。
+
+死者ではありません。生者の念です。念は、想いの種類で残る場所が違います。執着は指の形に、恋慕は髪の形に、恨みは歯の形に残ります。古い念ほど濃く現像され、置いた本人が忘れても消えません。むしろ、忘れられた残像ほど、勝手に育ちます。置いた本人の精神性が変われば、残像も形を変える。生き物だと思ってください。
+
+初対面の人の「後ろ」が、なんとなく気になったことはありませんか。
+
+別れたばかりの友人が、まだ「二人」に見えたことは。
+
+集合写真の中で、ひとりだけ様子が違って見えたことは。
+
+錯覚ではありません。残像です。
+あなたの「なんとなく嫌な感じ」は、勘ではなく検出です。誰かに憑いた重いものを、本人より先に見つけられます。
+
+向いている仕事：人事、探偵・興信所、ストーカー対策の警備、看護、保育、写真館。
+
+代償の話をします。あなたは、自分に向けられた念だけが視えません。誰があなたを想い、誰があなたを恨んでいるか、世界であなただけが知りません。みんなの背中が視えて、自分の背中だけ、写りません。
+
+作法をひとつ。
+視えても、見つめないこと。残像は、見られたことに気づくと、置いた本人に報せます。
+
+最後に。
+ピントには、合う距離というものがあります。
+残像がいつもよりはっきり視える日。
+あなたが近づいたのではありません。向こうが、合わせてきています。`,
+  "s-p-l-d": `視えるのは、その部屋で、何があったかです。
+
+ただし、映像では来ません。検証写真です。順番のばらばらな静止画で来て、たいてい、最後の一枚が最初に来ます。現場は水に残るので、台所と風呂場が一番よく喋ります。それから、良くないものが死んだ部屋は、間取りが少し「合わなく」なります。廊下の長さ、天井の近さ。死んだものの精神性が崩れていくのに合わせて、そのずれは、年々大きくなります。
+
+内見で、理由を言えないまま断った部屋はありませんか。
+
+ホテルで、ベッドの位置を変えたくなった夜は。
+
+友人の新居で、一箇所だけ視線を置けない場所があったことは。
+
+錯覚ではありません。実況見分です。
+告知義務の切れた物件も、塗り替えられた壁も、あなたの前では申告し直すことになります。安い物件の安い理由を、内見の三歩目で知る側です。
+
+向いている仕事：事故物件を扱う不動産、特殊清掃、遺品整理士、保険調査員、鑑識の周辺、ルポライター。
+
+代償の話をします。あなたは、自分の部屋という安心を失っています。どの部屋でも、初日の夜の眠りしか眠れません。引っ越しを繰り返すのも、家具の配置を変え続けるのも、落ち着く場所を探しているからです。見つかりません。探す目と、寛ぐ心は、引き換えだからです。
+
+作法をひとつ。
+視えても、調べ直さないこと。終わった現場は、検証し直すと「事件」に戻ります。戻った事件には、関係者が要ります。
+
+最後に。
+報告書の一枚目には、第一発見者の欄があります。
+視えてしまった時点で。
+その欄は、もう埋まっています。`,
+  "s-p-l-v": `視えるのは、生きている人間が、場所に置いていった未練です。
+
+今もどこかで生きている誰かが、通い詰め、待ち続け、置いていった想いの跡です。未練は積もると、形を結びます。待った未練は、待った方角へ首が伸びていきます。そして残響は、置いた本人と今も繋がっています。本人が拗らせるほど、現地の残響は濃くなる。記事と違って、こちらは校了しません。
+
+誰もいないベンチに、先客がいる気がしたことはありませんか。
+
+閉店した店の貼り紙の前で、足が止まったことは。
+
+引っ越しで空になった部屋が、空に見えなかったことは。
+
+錯覚ではありません。続報です。
+事件は記事になった日に終わりますが、未練は紙面に載りません。載らなかった続きを、あなたは読めます。
+
+向いている仕事：行方不明者・家出人の捜索、店舗開発、都市計画、駅の係員、古物商、取り壊し前の建物調査。
+
+代償の話をします。あなたは、自分の未練と、懐かしさを失っています。捨てた物も、別れた人も、惜しめません。薄情だと言われたことがあるはずです。あなたの部屋に物が少ないのは、性格ではありません。
+
+作法をひとつ。
+残響の出どころを、辿らないこと。記事は読むだけで済みますが、辿れば取材です。取材は、必ず相手に伝わります。
+
+最後に。
+日に日に濃くなっていく残響が、あれば。
+それは、置いた本人が、まだ通っているということです。
+あなたとは、もう何度も、すれ違っています。`,
+  "s-f-h-d": `視えるのは、顔に重なりはじめた、終わりの所見です。
+
+死相は、一枚ではありません。顔の上に「これからの顔」が重なって視えます。病の死相はゆっくり濃くなり、事故の死相は、前日に突然貼り付きます。そして死相とは、死後の姿の予告です。穏やかに生きた人の死相は、最後まで人の顔のまま。そうでない人の死相は、生きているうちから、化物の相になっていきます。あなたは死相の形で、その人がどう生きてきたかまで、分かってしまう。
+
+「顔が変わったな」と思った人の訃報を、後で聞いたことはありませんか。
+
+集合写真で、ひとりだけ印象の違う顔があったことは。
+
+別れ際に、振り返って、もう一度顔を見てしまったことは。
+
+錯覚ではありません。所見です。
+あなたは「また今度」を言わずに済む人です。会わせたい人を、間に合ううちに会わせられる。あなたに見送られる人は、幸運です。
+
+向いている仕事：看取りの介護、緩和ケアの周辺、終活の相談員、遺影写真の撮影、それから、家族のそば。
+
+代償の話をします。あなたは、普通の顔色を読む力を失っています。元気なのか疲れているのか、風邪なのか仮病なのか、終わり以外の体調が、顔から読めません。「顔色をうかがう」ということが、あなたにはできません。終わりだけが読める目とは、そういう目です。
+
+作法をひとつ。
+視えても、告知しないこと。余命は、告知されると、縮むことがあります。
+
+最後に。
+あなたは毎日、鏡を見ます。
+毎日見ているものの変化に、人は気づけません。
+あなたの所見を取れる者が、あなたのほかにいないことだけ、覚えておいてください。`,
+  "s-f-h-v": `視えるのは、これから誰かを傷つける人の、支度です。
+
+支度は、身体に出ます。目の置き方、笑い方の拍子、距離の詰め方。読めるのは、本人の中で「決まった」後だけです。迷っているうちは、読めません。決まった瞬間に封がされ、封のされた人間だけが、あなたに視えます。調子のいい日は、順番まで読めます。誰から先に、まで。
+
+ニュースで捕まった顔を見て、「やっぱり」と思ったことはありませんか。
+
+特定の人と二人きりになるのを、理由もなく避けたことは。
+
+「いい人だよ」と言われるたび、頷けなかった相手は。
+
+錯覚ではありません。予告状です。
+事が起きる前に、あなた宛てに届いている。だからあなたは、防げる側に立てます。あなたの「この人は嫌だ」は、履歴書より正確です。
+
+向いている仕事：採用面接、警備計画、学校の生活指導、児童福祉、空港の保安検査、与信審査。
+
+代償の話をします。あなたは、無償の善意を信じる力を失っています。親切も、贈り物も、告白も、まず「用件」を探してしまう。あなたが素直に受け取れた好意は、これまでに、いくつありましたか。
+
+作法をひとつ。
+読めても、読めた顔をしないこと。予兆を読まれたと知った人間は、予定を、早めます。
+
+最後に。
+予告状というものは、無関係な家には届きません。
+あなたに視えたということは。
+宛先は、あなたの近くだということです。`,
+  "s-f-l-d": `視えるのは、まだ何も起きていない場所に立った、表示です。
+
+事故の後に立て看板が立つのは、誰でも知っています。あなたに視えるのは、その逆です。表示には種類があります。立入禁止、徐行、この先行き止まり。ただし、図柄しか読めません。文字の部分は、毎回潰れています。理由までは、読ませてもらえない決まりです。そして区域は生きています。広がる年と、縮む年があります。
+
+いつもの近道を、その日だけ使わなかったことはありませんか。
+
+特定の踏切や交差点で、毎回わずかに足が速くなることは。
+
+「ここ、嫌だな」と口にした場所のニュースを、後日見たことは。
+
+錯覚ではありません。先に立った表示です。
+あなたが選び直した道のおかげで、起きなかったことが、もう幾つもあります。数えられないだけです。
+
+向いている仕事：通学路の安全点検、交通安全対策、土木の安全管理、警備、旅程の作成、防災士。
+
+代償の話をします。あなたは、最短距離を失っています。近道が、使えません。あなたの人生の移動距離は、人より長い。遅刻が多いのは、だらしないからではありません。あなたの足は、あなたより先に表示を読んでいます。
+
+作法をひとつ。
+表示の数を、口に出して数えないこと。表示は、読まれていると分かると、増え方が変わります。
+
+最後に。
+警告表示は、危険のそばにしか立ちません。
+年々それがよく視えるようになっているなら。
+表示が増えたのか、あなたが近づいているのか。確かめる方法は、ありません。`,
+  "s-f-l-v": `視えるのは、生きている人間を、これから呼ぶ場所です。
+
+事故ではありません。死人も出ません。ただ、同じことが起きるのです。場所には、人を選んで呼ぶ癖があります。同じ失敗をする人間を、同じ番地に集めます。そして場所の癖も、変わり続けます。住む人間を入れ替えながら、好みを変えていく。あなたには、その掲示が視えます。調子のいい日は、誰宛てかまで、薄く読めます。
+
+「あの店、また変わったね」と言う場所が、決まっていませんか。
+
+よく通る道で、いつも同じ種類の貼り紙を見ることは。
+
+部屋探しで、条件のいい物件ほど嫌な感じがしたことは。
+
+錯覚ではありません。掲示です。
+回覧板が回る前に、あなたにはもう貼り出されています。あなたの「なんとなくやめておく」で、友人を何人も救えます。
+
+向いている仕事：出店の相談、不動産仲介、引っ越しの相談、移住支援、自治会、土地の調査の周辺。
+
+代償の話をします。あなたは、「住めば都」を失っています。あなたは、どの土地にも呼ばれません。どこに住んでも、客のまま。自由とも言いますが、あなたの家がどこにもない、ということでもあります。
+
+作法をひとつ。
+場所の癖を、その場所の中で口にしないこと。注意喚起は、名指しをしないものです。名指しされた場所は、した者を覚えます。
+
+最後に。
+因縁地は、人を選んで呼ぶと言いました。
+今お住まいの場所、ご自分で選んだつもりでいるでしょう。
+内見のとき、妙に話が早かったのを、覚えていますか。`,
+  "b-p-h-d": `感じ取るのは、一度「明け渡した」ことのある人です。
+
+憑かれている人ではありません。憑かれていた人です。大病の後、大きな喪失の後、本人も家族も「あの時期は人が変わっていた」としか言わない、あの期間。あの間、席は空いていて、別の何かが座っていました。痕は受理印のように残り、印影で「何が座っていたか」まで分かります。元は人だったものと、最初から人でなかったものとでは、印の形が違います。そして座っていたものは、出て行く時に控えを取ります。控えを持ったまま、向こうで姿を変え続けています。戻ってくる時は、出て行った時と同じ姿ではありません。
+
+「一時期おかしかった」と語られる人の、その時期の話に、肌が粟立ったことはありませんか。
+
+回復した人と握手して、回復という言葉に引っかかったことは。
+
+初対面なのに、「この人は一度戻ってきた人だ」と感じたことは。
+
+錯覚ではありません。受理印です。
+痕のある人に必要なのは、再発の心配ではなく、再訪への備えです。それを知っているのは、あなただけです。
+
+向いている仕事：依存症の回復支援、カウンセリングの周辺、介護、宗教者の補佐、保護司、夜勤の見守り。
+
+代償の話をします。あなたは、人に気軽に触れる力を失っています。握手、抱擁、満員電車。触れると読んでしまうから、触れられない。恋人と手を繋ぐのに、覚悟が要るはずです。
+
+作法をひとつ。
+痕に気づいても、本人に時期を確認しないこと。日付を口にすると、控えと、照合されます。
+
+最後に。
+死亡届は、亡くなった本人には出せません。
+必ず、そばにいた誰かが書きます。
+あなたが痕を読めるのは、いずれ書く側に回る人だからです。練習だと思ってください。`,
+  "b-p-h-v": `感じ取るのは、生きている人間が、まだ言っていない恨みです。
+
+語られた恨みではありません。署名済みの和解でもありません。恨みには鮮度があり、新しい恨みは高く、古い恨みは低く響きます。あなたはそれを、音程で受信しています。本人が忘れた恨みも、身体は供述を続けています。あなたが受け取っているのは、本人すらもう読めなくなった調書です。
+
+仲がいいはずの二人の間の温度に、気づいたことはありませんか。
+
+謝罪を受けながら、これは本心ではないと分かったことは。
+
+「怒ってないよ」と言った人の隣で、息が浅くなったことは。
+
+錯覚ではありません。取り調べです。
+あなたの前では、人は黙秘ができません。こじれる前の恨みを感じ取れるあなたは、破裂する前に、知らせる側に立てます。
+
+向いている仕事：調停・仲裁の周辺、人事労務、苦情対応、夫婦相談、介護の現場、法事の席次を決める係。
+
+代償の話をします。あなたは、自分の怒りを失っています。怒るべき場面で、「これは誰の怒りだったか」と考えてしまい、自分の分が分からなくなる。あなたは長いこと、自分のために怒っていません。
+
+作法をひとつ。
+感じ取っても、聞き出さないこと。恨みは、口に出された瞬間に調書になります。一度調書になった恨みは、取り下げても記録に残ります。あなたが聞き役になった日、立会人の欄には、あなたの名前が入ります。
+
+最後に。
+あなたの周りに、何も感じない人が、ひとりいるはずです。
+感じないのは、無いからではありません。
+一番長く、黙秘しているからです。`,
+  "b-p-l-d": `感じ取るのは、その土地から離れられないものです。
+
+動けないものです。事情があって、そこに縛られている。そして、縛られたまま、姿を変え続けています。同じ場所の怪異の目撃談が、白い女、黒い影、大きな獣と、ばらばらなのを不思議に思ったことはありませんか。誰かが嘘をついているのではありません。全員、本当のことを言っています。時期が違うだけです。あなたが受信しているのは、いつも「今の姿」です。
+
+特定の場所でだけ、決まって体調が変わることはありませんか。
+
+引っ越しの初日、部屋に「先にいた」気配を感じたことは。
+
+怪談を聞いていて、話に出る場所の見当がついてしまうことは。
+
+錯覚ではありません。採話です。
+語り手が語る前から、あなたは現地の音を拾っています。作り話は、土地の音がしません。だから実話怪談の真偽が、あなたには分かります。
+
+向いている仕事：地域史の編纂、民俗調査、怪談の語り手・採話者、文化財調査、墓地の管理、不動産の重要事項調査。
+
+代償の話をします。あなたは、「無人」を失っています。誰もいない部屋、誰もいない夜道、という安心が、一生ありません。ひとりになれない。孤独を失った、と言えば聞こえはいいですが。
+
+作法をひとつ。
+拾った場所の名前を、夜に口へ出さないこと。実話怪談が場所をぼかすのは、語り手を守るためではありません。聞き手を守るためです。
+
+最後に。
+実話怪談の「実話」とは、本当にあった話、という意味ではありません。
+まだ終わっていない話、という意味です。
+あなたが今までに頷いて聞いた話の数だけ、あなたを覚えている場所があります。`,
+  "b-p-l-v": `感じ取るのは、土地に積もった、生きてきた人間の厚みです。
+
+幽霊ではありません。営みです。何代もの人間が、そこで商い、祈り、待ち合わせ、別れてきた。その繰り返しは、地層のように溜まります。ただし、厚みは均一ではありません。章の切れ目があります。そして土地には、まだ退場していない登場人物がいます。あなたは、続き物を途中の巻から読まされているのです。
+
+古い商店街で、理由もなく胸がいっぱいになったことはありませんか。
+
+旧道や参道で、自然と歩く速さが変わることは。
+
+土地の「気風」というものが、住む前から分かることは。
+
+錯覚ではありません。行間です。
+史実に書かれなかった暮らしの分が、現地に残っていて、あなたはそれを読めます。あなたが「ここは続く」と感じた店は、続きます。土地が、続けさせるからです。
+
+向いている仕事：老舗の継承支援、商店街の再生、郷土史家、執筆、宿の主人、神社仏閣の維持の周辺。
+
+代償の話をします。あなたは、「初めて」を失っています。初めて来た町が、初めてに感じられません。旅の新鮮さも、引っ越しの高揚も、あなたには薄い。既視感だけが、どこまでも続きます。
+
+作法をひとつ。
+読めても、書き足さないこと。土地の話に自分の解釈を足して人に語ると、次の章の筋が、変わることがあります。
+
+最後に。
+歴史小説の登場人物は、自分が登場人物だと知りません。
+あなたが越してきた日から、あなたも連載に入っています。
+よく読める人ほど、よく書かれます。`,
+  "b-f-h-d": `感じ取るのは、人に貼られはじめた、期限の印です。
+
+瓶に貼られた毒物のラベルのように、その人の輪郭のどこかに、もう貼られているのです。印の意匠は、人によって違います。そしてその形は、死後にその人がなる姿の、予告です。穏やかに生きた人の印は、最後まで小さく、静かな形のまま。そうでない人の印は、早くから大きく、見ていられない形に育ちます。印は、貼られた日から、育ち続けるのです。
+
+別れ際に、これが最後だと「分かって」しまったことはありませんか。
+
+切る理由のない電話を、その夜だけ切れなかったことは。
+
+訃報より先に、喪服の置き場所を確かめていた自分に気づいたことは。
+
+錯覚ではありません。表示です。
+これは十六の中で、いちばん重い目です。けれど、いちばん人を悔いから守れる目でもあります。言うべきことを、間に合ううちに言える。あなたに見送られた人は、幸運です。
+
+向いている仕事：看取り士、緩和ケアの助手、葬祭業、エンディングノートの相談員、ペットの看取り、それから、家族のそば。
+
+代償の話をします。あなたは、「またね」を軽く言う力を失っています。全部の別れ際が、遺言の重さになる。電話が長いのも、改札で振り返る癖も、性格ではありません。
+
+作法をひとつ。
+印が読めても、本人に伝えないこと。それから、剥がそうとしないこと。ラベルは中身の表示であって、原因ではありません。剥がしても、中身は変わりません。剥がした手に、匂いが移るだけです。
+
+最後に。
+あなたにはいつか、誰の印も感じない日が来ます。
+静かになった、と思うでしょう。
+ラベルというものは、瓶の内側からは読めないのです。`,
+  "b-f-h-v": `感じ取るのは、まだ実行されていない、悪意の下書きです。
+
+本人の中でまだ清書されていない、宛名と用件だけ決まった状態の悪意。差出人不明のまま、あなたの肌に先に届きます。下書きは、何度も書き直されます。あなたが受信しているのは、版の違う何通かです。それから、自筆でない悪意というものもあります。憑いたものが、人に書かせる文面です。差出人の欄が二重に透けて見える時は、それです。本人を責めても、筆は止まりません。
+
+評判のいい人を、どうしても信用できなかったことはありませんか。
+
+丁寧なメールの文面に、書かれていない用件を読んだことは。
+
+「悪い人じゃないよ」と擁護した自分の声が、嘘くさかったことは。
+
+錯覚ではありません。検閲です。
+投函前の文面を、あなたは読んでいます。あなたの「この話は降りる」は、契約書の隅々より正確です。
+
+向いている仕事：与信・契約の審査、詐欺対策、コンプライアンスの周辺、校閲、消費生活相談員、結婚相談所の身辺確認。
+
+代償の話をします。あなたは、自分の加害に鈍くなっています。他人の下書きは読めるのに、自分が誰を傷つけたかは、届きません。検閲官は、自分の文書だけは検閲できないのです。
+
+作法をひとつ。
+読めても、筆跡を当てないこと。差出人を探された怪文書は、次から匿名をやめます。宛名だけ、はっきり書いて寄越すようになります。
+
+最後に。
+怪文書は、読める人の所へ集まる性質があります。
+あなたの受信が年々早くなっているのは、腕が上がったからではありません。
+出す側が、あなたを読者に選びはじめているからです。`,
+  "b-f-l-d": `感じ取るのは、まだ張られていない、規制線です。
+
+何も起きていない交差点に、何も起きていない川辺に、先に、ゆるく張られている。張りの強さで、規模が分かります。ゆるい線は、ひとり分。強い線は、それ以上。線は動きます。前日に消える線もあります。回避された未来です。そして、あなたが避けると、線が細くなることがあります。あなたの退避は、線の内側の数を、減らしています。
+
+行くはずだった場所が、当日になって急に億劫になったことはありませんか。
+
+理由を作ってまで、集合場所を変えたがったことは。
+
+取りやめた旅行先の地名を、後日ニュースで見たことは。
+
+錯覚ではありません。現場保存です。
+あなたの「気乗りしない」は、わがままではなく退避です。家族の予定に口を出せる立場にいてください。あなたの一言は、保険より効きます。
+
+向いている仕事：旅程の安全管理、イベントの下見、警備の配置計画、損害保険の周辺、登山計画の審査、修学旅行の下見係。
+
+代償の話をします。あなたは、安心して予定を組む力を失っています。先の約束を入れた瞬間から、胸騒ぎの当番が始まる。あなたの手帳が白いのは、忙しくないからではありません。
+
+作法をひとつ。
+感じても、くぐらないこと。張られる前のテープは、内側がまだ決まっていません。先に入った者から、内側になります。
+
+最後に。
+テープの内と外は、張られた瞬間に分かれるのではありません。
+先に分かれていて、テープは、確認に来るだけです。
+ご自分が今どちら側か、時々、確かめてください。`,
+  "b-f-l-v": `感じ取るのは、場所が、これから人を動かす予兆です。
+
+霊ではありません。土地そのものの傾きです。群衆が雪崩れる、街が空になる、人がいっせいに同じ方向を向く。その前には、磁場が先に傾きます。警報には段階があります。試験放送、予報、発令、解除。あなたが何でもない日に感じる小さな胸騒ぎは、試験放送です。本番ではありません。本番の、点検です。それから、大きなものが通る道も、磁場が先に倒れます。人ではないものの通り道も、あなたには「人混みの予感」として届きます。区別は、つきません。
+
+人混みに入るなり、出口を確かめる癖はありませんか。
+
+「今日は出たくない」と思った日に限って、電車が止まることは。
+
+祭りやイベントを先に抜けた夜、何かあったと後で知ったことは。
+
+錯覚ではありません。発令前です。
+あなたは、警報より先に鳴る側の人間です。あなたは家族を先に動かせます。避難が「早すぎた」ことを、後から笑われてください。笑われた回数が、守った回数です。
+
+向いている仕事：雑踏警備、イベント運営、防災計画、避難誘導、危機管理、駅の混雑対応。
+
+代償の話をします。あなたは、静寂を失っています。完全な静けさが、発令前の音にしか聞こえない。眠る時に小さく音を流すのは、好みではありません。
+
+作法をひとつ。
+鳴り止んだ静けさを、解除と読み違えないこと。警報は、解除の放送までが警報です。いちばん危ないのは、静かになった直後です。
+
+最後に。
+警報は、音源に近い者から聞こえます。
+あなたがいつも最初に気づくのは、耳がいいからではありません。
+いつも、いちばん近くにいるからです。`,
+};
+
+
+/* =========================================================
+   質問データ
+   axis: A/B/C/D, dir: 正方向(+1)=その軸の前者(視覚/過去/人/死霊)を示す
+                       逆方向(-1)=後者(身体/未来/場所/生霊)を示す
+   mine:true は地雷問題（スコアに含めず、踏んだ判定のみ）
+   ========================================================= */
+const Q = [
+  // 1
+  {ax:"A",d:1,t:"誰もいないはずの部屋から、視線を感じて振り返ることがある"},
+  // 2
+  {ax:"D",d:1,t:"古い写真を見ていると、写っている人の「今」が気になってしまう"},
+  // 3
+  {ax:"C",d:-1,t:"初めて入った建物で、なぜか落ち着く場所と、居たくない場所がはっきり分かれる"},
+  // 4
+  {ax:"B",d:-1,t:"電話やメッセージが来る少し前に、誰からか分かることがある"},
+  // 5
+  {ax:"A",d:-1,t:"理由もなく、体の特定の場所だけが急に冷たくなることがある"},
+  // 6
+  {ax:"C",d:1,t:"特定の人と会った日は、決まって体調や気分が大きく変わる"},
+  // 7
+  {ax:"D",d:-1,t:"遠くにいるはずの誰かのことを、ふいに強く感じる瞬間がある"},
+  // 8
+  {ax:"B",d:1,t:"中古品や古道具を手にすると、前の持ち主のことを想像してしまう"},
+  // 9
+  {ax:"A",d:1,t:"夜、天井や壁のシミが、顔や人の形に見えてくることがある"},
+  // 10
+  {ax:"C",d:-1,t:"通るたびに、なぜか早足になってしまう道や場所がある"},
+  // 11 ★地雷A
+  {ax:"A",d:0,mine:true,t:"谷・要（たに かなめ）という人物に、心当たりがある"},
+  // 12
+  {ax:"D",d:1,t:"亡くなった人の話をしていると、その場の空気が変わる気がする"},
+  // 13
+  {ax:"B",d:-1,t:"「行かない方がいい」という感覚に従って、予定を変えたことがある"},
+  // 14
+  {ax:"A",d:-1,t:"姿は見えなくても、「今ここに誰かいる」と肌で分かることがある"},
+  // 15
+  {ax:"C",d:1,t:"その人自身ではなく、背後にある「別の何か」を感じることがある"},
+  // 16
+  {ax:"B",d:1,t:"古い建物に入ると、そこで昔あった出来事が浮かぶことがある"},
+  // 17
+  {ax:"D",d:1,t:"墓地や葬儀の場で、他の人より強く何かを受け取ってしまう"},
+  // 18
+  {ax:"A",d:1,t:"写真や鏡に、写るはずのないものを探してしまう癖がある"},
+  // 19
+  {ax:"C",d:-1,t:"誰も住んでいない家から、人の気配を感じたことがある"},
+  // 20
+  {ax:"B",d:-1,t:"嫌な予感が、後になって的中することがよくある"},
+  // 21
+  {ax:"D",d:-1,t:"誰かに強く思われていると、なんとなく体で分かる"},
+  // 22
+  {ax:"A",d:-1,t:"特定の場所に入ると、息が浅くなったり胸が詰まったりする"},
+  // 23 ★地雷B
+  {ax:"B",d:0,mine:true,t:"深夜の3時に、5000円を誰かに渡した記憶がある"},
+  // 24
+  {ax:"C",d:1,t:"縁を切ったはずの相手の気配を、離れていても感じることがある"},
+  // 25
+  {ax:"D",d:1,t:"夜中に、誰かに呼ばれた気がして目が覚めることがある"},
+  // 26
+  {ax:"B",d:1,t:"初対面の人の「これまで」が、なんとなく想像できてしまう"},
+  // 27
+  {ax:"A",d:1,t:"視界の隅で動いたものを振り返ると、何もいないことが多い"},
+  // 28
+  {ax:"C",d:-1,t:"引っ越しや席替えのあと、運や体調が大きく変わったことがある"},
+  // 29
+  {ax:"D",d:-1,t:"眠れない夜、それが自分のせいではない気がすることがある"},
+  // 30
+  {ax:"B",d:-1,t:"これから会う人に、何が起きるか感じてしまうことがある"},
+  // 31 ★地雷C
+  {ax:"C",d:0,mine:true,t:"母親が言語に精通している"},
+  // 32
+  {ax:"A",d:-1,t:"誰かに見られている感覚を、視線として体で受け取ることがある"},
+  // 33
+  {ax:"D",d:1,t:"亡くなった身内の気配を、今でも感じることがある"},
+  // 34
+  {ax:"C",d:1,t:"人混みの中で、特定の一人から強い「圧」を感じることがある"},
+  // 35
+  {ax:"B",d:1,t:"その場所に「終わったこと」の余韻を感じ取ることがある"},
+  // 36
+  {ax:"A",d:1,t:"暗がりで、輪郭のあるものが視界の端をよぎることがある"},
+  // 37
+  {ax:"D",d:-1,t:"別れた相手の執着が、今も自分に絡んでいる気がする"},
+  // 38
+  {ax:"C",d:-1,t:"土地や建物そのものに、感情があるように思えることがある"},
+  // 39
+  {ax:"B",d:-1,t:"夢で見たことが、後で現実になったことがある"},
+  // 40
+  {ax:"A",d:-1,t:"温度が変わっていないのに、急に寒気を感じることがある"},
+  // 41
+  {ax:"D",d:1,t:"古い墓や慰霊の場所に、なぜか引き寄せられることがある"},
+  // 42
+  {ax:"C",d:1,t:"人を介して、見えない何かが移ってくるように感じることがある"},
+  // 43
+  {ax:"B",d:1,t:"誰かの過去の傷を、言われる前に察してしまうことがある"},
+  // 44
+  {ax:"A",d:1,t:"古い絵や人形の目が、こちらを見ている気がすることがある"},
+  // 45
+  {ax:"D",d:-1,t:"生きている人の「想い」の方が、死者より重いと感じる"},
+  // 46
+  {ax:"C",d:-1,t:"部屋の隅や天井から、視線や気配が降りてくる気がする"},
+  // 47
+  {ax:"B",d:-1,t:"危険が近づくと、それより先に体や心が反応する"},
+  // 48
+  {ax:"A",d:-1,t:"「視える」より「感じる」方が、自分には自然だと思う"},
+  // 49 ★地雷D
+  {ax:"D",d:0,mine:true,t:"グランフロント大阪の地下搬入路に立ち入ったことがある"},
+  // 50
+  {ax:"D",d:-1,t:"自分が感じ取るのは、亡くなった人より、生きている人の念の方が多い"}
+];
+
+const AXIS_LABEL = {A:"視　覚　／　身　体",B:"過　去　／　未　来",C:"人　／　場　所",D:"死　霊　／　生　霊"};
+
+/* =========================================================
+   状態
+   ========================================================= */
+let userName = "";
+let idx = 0;
+let answers = new Array(Q.length).fill(null);
+let currentType = null;
+let currentCode = null;
+let sanshita = false;
+
+const $ = id => document.getElementById(id);
+function show(scr){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));$(scr).classList.add('on');window.scrollTo(0,0);}
+
+/* ---- 開始 ---- */
+$('startBtn').addEventListener('click',start);
+$('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')start();});
+
+function start(){
+  const v = $('nameInput').value.trim();
+  // 隠しコマンド判定（管理者ページ）
+  if(v === SECRET_COMMAND){
+    location.href = SECRET_PAGE;
+    return;
+  }
+  // 結果一覧（管理用・横スクロール）
+  if(v === GALLERY_COMMAND){
+    openResultGallery();
+    return;
+  }
+  // 三下モード判定
+  sanshita = v.startsWith(SANSHITA_TRIGGER);
+  userName = v || "名もなき者";
+  idx = 0;
+  answers = new Array(Q.length).fill(null);
+  show('screen-quiz');
+  render();
+}
+
+/* ---- 三下口調への変換 ---- */
+function toSanshita(t){
+  let s = t;
+  // 一人称・語彙（語尾より先に、文中の語を砕く）
+  s = s.replace(/自分は/g,'あっしは').replace(/自分/g,'あっし');
+  s = s.replace(/私は/g,'あっしは').replace(/私/g,'あっし');
+  s = s.replace(/亡くなった/g,'死んじまった');
+  // 語尾は一度だけ処理（最後にマッチした一つだけ適用して二重化を防ぐ）
+  if(/が多い$/.test(s)) s = s.replace(/が多い$/,'が多いんでやんす');
+  else if(/がある$/.test(s)) s = s.replace(/がある$/,'があるんでやんすかい');
+  else if(/思う$/.test(s)) s = s.replace(/思う$/,'思うんでやんすかい');
+  else if(/ある$/.test(s)) s = s.replace(/ある$/,'あるんでやんすかい');
+  else if(/感じる$/.test(s)) s = s.replace(/感じる$/,'感じちまうんでやんすかい');
+  else if(/する$/.test(s)) s = s.replace(/する$/,'しちまうんでやんすかい');
+  else if(/くる$/.test(s)) s = s.replace(/くる$/,'くるんでやんすかい');
+  else if(/れる$/.test(s)) s = s.replace(/れる$/,'れちまうんでやんすかい');
+  else if(/わかる$/.test(s)) s = s.replace(/わかる$/,'わかっちまうんでやんすかい');
+  else if(/捉える$/.test(s)) s = s.replace(/捉える$/,'捉えちまうんでやんす');
+  else if(/だ$/.test(s)) s = s.replace(/だ$/,'なんでやんす');
+  else s = s + 'んでやんすかい';
+  return s;
+}
+
+/* ---- 質問描画 ---- */
+function render(){
+  const q = Q[idx];
+  $('qNow').textContent = idx+1;
+  $('prog').style.width = ((idx)/Q.length*100)+'%';
+  $('qAxis').textContent = AXIS_LABEL[q.ax];
+  $('qText').textContent = sanshita ? toSanshita(q.t) : q.t;
+  $('backBtn').style.visibility = idx===0 ? 'hidden':'visible';
+  // 選択肢を初期状態（黒）に戻す
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.blur();
+    b.style.background = '';
+    b.style.color = '';
+  });
+}
+
+/* ---- 回答 ---- */
+document.querySelectorAll('.opt').forEach(b=>{
+  b.addEventListener('click',()=>{
+    b.blur();
+    b.style.background = '';
+    b.style.color = '';
+    answers[idx] = parseInt(b.dataset.v);
+    if(idx < Q.length-1){ idx++; render(); }
+    else finish();
+  });
+});
+$('backBtn').addEventListener('click',()=>{ if(idx>0){idx--;render();} });
+
+/* ---- 判定 ---- */
+const AXIS_META = {
+  A:{title:"受信形式", leftKey:"s", rightKey:"b", left:"視覚", right:"身体", leftHint:"像・輪郭・写真のように来る", rightHint:"寒気・圧・痛みとして来る"},
+  B:{title:"時間感覚", leftKey:"p", rightKey:"f", left:"過去", right:"未来", leftHint:"残ったものを読む", rightHint:"まだ起きていないものを拾う"},
+  C:{title:"焦点", leftKey:"h", rightKey:"l", left:"人", right:"場所", leftHint:"人の背後や輪郭に反応する", rightHint:"土地・部屋・道に反応する"},
+  D:{title:"気配の出所", leftKey:"d", rightKey:"v", left:"死霊", right:"生霊", leftHint:"死者・弔い・終わったものに寄る", rightHint:"生者の念・執着・悪意に寄る"}
+};
+
+function typeKeyFromProfile(profile, flipAx){
+  return ["A","B","C","D"].map(ax=>{
+    const m = AXIS_META[ax];
+    const positive = profile[ax].score >= 0;
+    if(ax === flipAx) return positive ? m.rightKey : m.leftKey;
+    return positive ? m.leftKey : m.rightKey;
+  }).join("-");
+}
+function strengthLabel(v){
+  const a = Math.abs(v);
+  if(a >= 0.55) return "強";
+  if(a >= 0.28) return "中";
+  if(a >= 0.12) return "弱";
+  return "境界";
+}
+function renderConfidence(profile, key){
+  const axes = ["A","B","C","D"];
+  const avg = axes.reduce((n,ax)=>n+profile[ax].abs,0) / axes.length;
+  const weak = axes.filter(ax=>profile[ax].abs < 0.18);
+  const weakest = axes.slice().sort((a,b)=>profile[a].abs-profile[b].abs)[0];
+  const altKey = typeKeyFromProfile(profile, weakest);
+  const alt = TYPES[altKey];
+  let title = "判定は安定しています";
+  let note = "四軸の反応が比較的そろっているため、この型を主判定として扱えます。";
+  if(avg < 0.22 || weak.length >= 2){
+    title = "境界を含む判定です";
+    note = "複数の軸が拮抗しています。主判定は出していますが、近い型も併せて読むと刺さりやすくなります。";
+  } else if(weak.length === 1){
+    title = "一軸だけ揺れています";
+    note = AXIS_META[weak[0]].title + "が境界にあります。主判定は有効ですが、状況によって隣接型の顔も出ます。";
+  } else if(avg >= 0.55){
+    title = "かなり濃い判定です";
+    note = "各軸の偏りが強く、同じ回答傾向なら再診断しても同型に戻りやすい状態です。";
+  }
+  return `<div class="confidence-card">
+    <div class="st">判　定　註</div>
+    <div class="confidence-title">${title}</div>
+    <p>${note}<br>最も近い隣接型：<b>${alt.name}</b>（${AXIS_META[weakest].title}だけ反転）</p>
+  </div>`;
+}
+function renderAxisReport(profile){
+  let h = '<div class="st">判　定　内　訳</div>';
+  ["A","B","C","D"].forEach(ax=>{
+    const m = AXIS_META[ax];
+    const v = profile[ax].score;
+    const pct = Math.max(0, Math.min(100, ((v + 1) / 2) * 100));
+    const pole = v >= 0 ? m.left : m.right;
+    const hint = v >= 0 ? m.leftHint : m.rightHint;
+    h += `<div class="axis-row">
+      <div class="axis-head"><span>${m.title}</span><em>${pole}寄り・${strengthLabel(v)}</em></div>
+      <div class="axis-bar"><span class="mid"></span><i style="left:${pct}%"></i></div>
+      <div class="axis-labels"><span>${m.right}</span><span>${m.left}</span></div>
+      <div class="axis-labels"><span></span><span>${hint}</span></div>
+    </div>`;
+  });
+  return h;
+}
+
+function finish(){
+  $('prog').style.width='100%';
+  // 各軸を -1.0〜+1.0 に正規化。「思わない」も反対極の証拠として数え、設問数の偏りを正す。
+  let profile = {A:{sum:0,n:0},B:{sum:0,n:0},C:{sum:0,n:0},D:{sum:0,n:0}};
+  let mineHits = 0;
+  Q.forEach((q,i)=>{
+    const a = answers[i];
+    if(a===null) return;
+    if(q.mine){ if(a >= ANOMALY_THRESHOLD_VALUE) mineHits++; return; }
+    const centered = (a - 1.5) / 1.5; // 0,1,2,3 → -1,-0.33,+0.33,+1
+    profile[q.ax].sum += centered * q.d;
+    profile[q.ax].n += 1;
+  });
+  ["A","B","C","D"].forEach(ax=>{
+    profile[ax].score = profile[ax].n ? profile[ax].sum / profile[ax].n : 0;
+    profile[ax].abs = Math.abs(profile[ax].score);
+  });
+  const key = [
+    profile.A.score>=0 ? "s":"b",
+    profile.B.score>=0 ? "p":"f",
+    profile.C.score>=0 ? "h":"l",
+    profile.D.score>=0 ? "d":"v"
+  ].join("-");
+  const type = TYPES[key];
+  showResult(type, mineHits, key, profile);
+}
+
+/* ---- 結果文の描画（総則＋本文。段落に意味づけ） ---- */
+function renderKekka(key){
+  let h = '<div class="sousoku"><div class="st">総　則</div>';
+  SOUSOKU.trim().split(/\n\n+/).forEach(p=>{
+    h += '<p>'+p.replace(/\n/g,'<br>')+'</p>';
+  });
+  h += '</div>';
+  (KEKKA[key]||"").trim().split(/\n\n+/).forEach(p=>{
+    let cls='kp';
+    if(p.indexOf('向いている仕事：')===0) cls+=' kp-job';
+    else if(p.indexOf('代償の話をします')===0) cls+=' kp-cost';
+    else if(p.indexOf('作法をひとつ')===0) cls+=' kp-sahou';
+    else if(p.indexOf('最後に。')===0) cls+=' kp-last';
+    else if(/(ありませんか。|ことは。)$/.test(p)) cls+=' kp-hook';
+    h += '<p class="'+cls+'">'+p.replace(/\n/g,'<br>')+'</p>';
+  });
+  return h;
+}
+
+/* ---- 結果表示 ---- */
+let lastResultText = "";
+function showResult(type, mineHits, key, profile){
+  $('rNo').textContent = type.no;
+  $('rType').textContent = type.name;
+  $('rCombo').textContent = type.combo;
+
+  // 判定註・判定内訳（GPT版から抽出）
+  if(profile && document.getElementById('rConfidence')){
+    $('rConfidence').innerHTML = renderConfidence(profile, key);
+    $('axisReport').innerHTML = renderAxisReport(profile);
+  }
+  $('rTokkouName').textContent = type.tokkou;
+  $('rTokkouMean').textContent = type.mean;
+  $('rDesc').innerHTML = renderKekka(key);
+
+  // 名前を添える
+  $('rNote').innerHTML = userName + " よ。あなたに宿るのは、この型である。";
+
+  // 異変テキスト（地雷を踏んだ人のみ）
+  if(mineHits > 0){
+    $('rAnomaly').innerHTML = '<div class="anomaly">'+ANOMALY_TEXT+'</div>';
+  } else {
+    $('rAnomaly').innerHTML = '';
+  }
+
+  // シェア用テキスト
+  lastResultText = "【十六霊感診断】\n私の霊感の型は「"+type.name+"」\n特効："+type.tokkou+"\n（"+type.combo+"）\n\nすべての歯が見える";
+  const tweet = encodeURIComponent(lastResultText + "\n" + SITE_URL);
+  $('shareX').href = "https://twitter.com/intent/tweet?text="+tweet;
+
+  // 画像生成用に現在のタイプと符号を保持
+  currentType = type;
+  currentCode = key;
+
+  // 型の紋を描く（四軸から自動生成）
+  (function(){var ec=$('rEmblem');if(!ec)return;var S=168,DPR=Math.min(window.devicePixelRatio||1,2);
+    ec.width=S*DPR;ec.height=S*DPR;ec.style.width=S+'px';ec.style.height=S+'px';
+    var ex=ec.getContext('2d');ex.setTransform(DPR,0,0,DPR,0,0);ex.clearRect(0,0,S,S);drawEmblem(ex,key,S/2,S/2,S*0.42);})();
+
+  show('screen-result');
+}
+
+/* ---- シェア：画像生成 ---- */
+$('shareImg').addEventListener('click',()=>{
+  if(!currentType) return;
+  toast("画像を生成中…");
+  // フォント読み込みを待ってから描画（文字化け防止）
+  if(document.fonts && document.fonts.ready){
+    document.fonts.load('800 90px "Shippori Mincho"').then(()=>{
+      document.fonts.ready.then(()=>generateCard(currentType));
+    }).catch(()=>generateCard(currentType));
+  } else {
+    generateCard(currentType);
+  }
+});
+
+/* ---- 型の紋（四軸から自動生成する観測印） ----
+   A 視覚(s)=眼・視線の放射／身体(b)=波紋　B 過去(p)=左標／未来(f)=右標
+   C 人(h)=上の三点／場所(l)=地平線と方形　D 死霊(d)=欠けた核／生霊(v)=満ちた核
+   ※ここは差し替え自由。手描きの絵に置き換えたい時は、この関数を絵の描画に変えればよい。 */
+function drawEmblem(ctx, code, cx, cy, R){
+  var p=code.split('-'),A=p[0],B=p[1],C=p[2],D=p[3];
+  var GOLD='#c9a86a',GB='#e3c98a',BONE='#d8cdb8';
+  ctx.save();ctx.translate(cx,cy);ctx.lineCap='round';ctx.lineJoin='round';
+  var lw=Math.max(1,R*0.02);
+  ctx.strokeStyle=GOLD;ctx.lineWidth=lw;ctx.beginPath();ctx.arc(0,0,R,0,6.2832);ctx.stroke();
+  ctx.strokeStyle='rgba(201,168,106,0.38)';ctx.lineWidth=lw*0.8;ctx.beginPath();ctx.arc(0,0,R*0.84,0,6.2832);ctx.stroke();
+  if(A==='s'){
+    var ew=R*0.72,eh=R*0.40;
+    ctx.strokeStyle=GB;ctx.lineWidth=lw;
+    ctx.beginPath();ctx.moveTo(-ew,0);ctx.quadraticCurveTo(0,-eh,ew,0);ctx.quadraticCurveTo(0,eh,-ew,0);ctx.closePath();ctx.stroke();
+    ctx.strokeStyle='rgba(201,168,106,0.5)';ctx.lineWidth=lw*0.7;
+    for(var i=0;i<32;i++){var a=i/32*6.2832,r1=R*0.84,r2=R*0.74;ctx.beginPath();ctx.moveTo(Math.cos(a)*r1,Math.sin(a)*r1);ctx.lineTo(Math.cos(a)*r2,Math.sin(a)*r2);ctx.stroke();}
+  }else{
+    ctx.strokeStyle='rgba(216,205,184,0.55)';ctx.lineWidth=lw*0.9;
+    for(var k=1;k<=3;k++){ctx.beginPath();ctx.arc(0,0,R*0.2*k+R*0.04,0,6.2832);ctx.stroke();}
+  }
+  var cr=R*0.15;
+  if(D==='v'){
+    ctx.fillStyle=GB;ctx.beginPath();ctx.arc(0,0,cr*0.7,0,6.2832);ctx.fill();
+    ctx.strokeStyle='rgba(227,201,138,0.5)';ctx.lineWidth=lw*0.7;ctx.beginPath();ctx.arc(0,0,cr,0,6.2832);ctx.stroke();
+  }else{
+    ctx.strokeStyle=BONE;ctx.lineWidth=lw;ctx.beginPath();ctx.arc(0,0,cr,-1.9,1.9);ctx.stroke();
+  }
+  (function(){var ang=(B==='f')?0:Math.PI,rr=R*0.92,tri=R*0.1;
+   ctx.save();ctx.translate(Math.cos(ang)*rr,Math.sin(ang)*rr);ctx.rotate(ang);
+   ctx.fillStyle=GOLD;ctx.beginPath();ctx.moveTo(tri,0);ctx.lineTo(-tri*0.6,tri*0.7);ctx.lineTo(-tri*0.6,-tri*0.7);ctx.closePath();ctx.fill();ctx.restore();})();
+  if(C==='h'){
+    ctx.fillStyle=BONE;var dots=[-0.36,0,0.36];
+    for(var d2=0;d2<3;d2++){var a2=-Math.PI/2+dots[d2],rr2=R*0.6;ctx.beginPath();ctx.arc(Math.cos(a2)*rr2,Math.sin(a2)*rr2,lw*1.4,0,6.2832);ctx.fill();}
+  }else{
+    ctx.strokeStyle='rgba(216,205,184,0.65)';ctx.lineWidth=lw*0.9;var hy=R*0.5,hw=R*0.5;
+    ctx.beginPath();ctx.moveTo(-hw,hy);ctx.lineTo(hw,hy);ctx.stroke();
+    ctx.strokeRect(-R*0.09,hy-R*0.18,R*0.18,R*0.18);
+  }
+  ctx.restore();
+}
+
+function generateCard(type){
+  const W = 1080, H = 1080;
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const x = c.getContext('2d');
+
+  // 背景（黒）
+  x.fillStyle = '#050505';
+  x.fillRect(0,0,W,H);
+
+  // ノイズ風の点
+  x.fillStyle = 'rgba(216,205,184,0.025)';
+  for(let i=0;i<2200;i++){
+    x.fillRect(Math.random()*W, Math.random()*H, 1.5, 1.5);
+  }
+
+  // スキャンライン
+  x.fillStyle = 'rgba(0,0,0,0.25)';
+  for(let y=0;y<H;y+=4){ x.fillRect(0,y,W,2); }
+
+  // 外枠
+  x.strokeStyle = '#16140f';
+  x.lineWidth = 2;
+  x.strokeRect(60,60,W-120,H-120);
+
+  const cx = W/2;
+  const bone = '#d8cdb8', dim = '#7d745f', blood = '#a51212';
+
+  // 上部ラベル
+  x.textAlign = 'center';
+  x.fillStyle = blood;
+  x.font = '500 26px "Shippori Mincho", serif';
+  x.fillText('十 六 霊 感 診 断', cx, 150);
+
+  // 番号
+  x.fillStyle = dim;
+  x.font = '400 30px "Shippori Mincho", serif';
+  x.fillText(type.no, cx, 470);
+
+  // 型の紋（四軸から自動生成）
+  drawEmblem(x, currentCode, cx, 300, 112);
+
+  // タイプ名（大）
+  x.fillStyle = bone;
+  x.font = '800 90px "Shippori Mincho", serif';
+  x.fillText(type.name, cx, 558);
+
+  // 組み合わせ
+  x.fillStyle = dim;
+  x.font = '400 28px "Shippori Mincho", serif';
+  x.fillText(type.combo, cx, 620);
+
+  // 特効ボックス
+  const bx = 150, bw = W-300, by = 660, bh = 230;
+  x.strokeStyle = '#2a1010';
+  x.lineWidth = 1.5;
+  x.strokeRect(bx, by, bw, bh);
+  // 特効ラベル
+  x.fillStyle = '#050505';
+  x.fillRect(bx+40, by-16, 120, 32);
+  x.fillStyle = blood;
+  x.font = '500 24px "Shippori Mincho", serif';
+  x.fillText('特 効', bx+100, by+8);
+  // 特効名
+  x.fillStyle = bone;
+  x.font = '700 52px "Shippori Mincho", serif';
+  x.fillText(type.tokkou, cx, by+95);
+  // 特効の意味（折り返し）
+  x.fillStyle = dim;
+  x.font = '400 28px "Shippori Mincho", serif';
+  wrapText(x, type.mean, cx, by+155, bw-100, 44);
+
+  // フッター
+  x.fillStyle = bone;
+  x.font = '700 38px "Shippori Mincho", serif';
+  x.fillText('すべての歯が見える', cx, 990);
+  x.fillStyle = dim;
+  x.font = '400 22px "Shippori Mincho", serif';
+  x.fillText('subetenohagamieru.neocities.org', cx, 1030);
+
+  // 保存
+  c.toBlob(function(blob){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '十六霊感診断_'+type.tokkou+'.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast("画像を保存しました");
+  });
+}
+
+function wrapText(ctx, text, cx, y, maxW, lh){
+  const chars = text.split('');
+  let line = '';
+  let lines = [];
+  for(let i=0;i<chars.length;i++){
+    const test = line + chars[i];
+    if(ctx.measureText(test).width > maxW && line!==''){
+      lines.push(line);
+      line = chars[i];
+    } else {
+      line = test;
+    }
+  }
+  lines.push(line);
+  lines.forEach((l,i)=>ctx.fillText(l, cx, y + i*lh));
+}
+
+/* ---- シェア：コピー ---- */
+$('shareCopy').addEventListener('click',()=>{
+  const txt = lastResultText + "\n" + location.href;
+  navigator.clipboard.writeText(txt).then(()=>toast("コピーしました")).catch(()=>{
+    // フォールバック
+    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');toast("コピーしました");}catch(e){toast("コピーできませんでした");}
+    document.body.removeChild(ta);
+  });
+});
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800);}
+
+/* ---- やり直し ---- */
+$('retryBtn').addEventListener('click',()=>{ show('screen-intro'); });
+
+/* ====== 結果一覧（管理用・横スクロール／名前欄に【結果表示】） ====== */
+function profileFromKey(key){
+  var parts=key.split('-'),posLetter={A:'s',B:'p',C:'h',D:'d'},ax=['A','B','C','D'],prof={};
+  ax.forEach(function(a,i){var s=(parts[i]===posLetter[a])?1:-1;prof[a]={score:s,abs:1};});
+  return prof;
+}
+function openResultGallery(){
+  var track=document.getElementById('galTrack');
+  if(!track.getAttribute('data-built')){
+    var html='';
+    Object.keys(TYPES).forEach(function(key){
+      var t=TYPES[key];
+      html+='<section class="gal-panel"><div class="gal-panel-inner result">'
+        +'<canvas class="r-emblem gal-em" data-key="'+key+'" width="336" height="336" aria-hidden="true"></canvas>'
+        +'<div class="r-eyebrow">あなたの霊感の型</div>'
+        +'<div class="r-type-no">'+t.no+'</div>'
+        +'<div class="r-type">'+t.name+'</div>'
+        +'<div class="r-combo">'+t.combo+'</div>'
+        +'<div class="r-confidence">'+renderConfidence(profileFromKey(key),key)+'</div>'
+        +'<div class="axis-report">'+renderAxisReport(profileFromKey(key))+'</div>'
+        +'<div class="r-tokkou-box"><div class="r-tokkou-name">'+t.tokkou+'</div><div class="r-tokkou-mean">'+t.mean+'</div></div>'
+        +'<div class="r-desc">'+renderKekka(key)+'</div>'
+        +'</div></section>';
+    });
+    track.innerHTML=html;
+    track.setAttribute('data-built','1');
+    var cvs=track.querySelectorAll('.gal-em');
+    for(var i=0;i<cvs.length;i++){(function(cv){
+      var key=cv.getAttribute('data-key'),S=168,DPR=Math.min(window.devicePixelRatio||1,2);
+      cv.width=S*DPR;cv.height=S*DPR;cv.style.width=S+'px';cv.style.height=S+'px';
+      var ex=cv.getContext('2d');ex.setTransform(DPR,0,0,DPR,0,0);drawEmblem(ex,key,S/2,S/2,S*0.42);
+    })(cvs[i]);}
+  }
+  document.getElementById('gallery').classList.add('on');
+  track.scrollLeft=0; updateGalCount();
+}
+function updateGalCount(){
+  var tr=document.getElementById('galTrack');if(!tr||!tr.clientWidth)return;
+  var i=Math.round(tr.scrollLeft/tr.clientWidth)+1;
+  document.getElementById('galNow').textContent=Math.min(16,Math.max(1,i));
+}
+(function(){
+  var close=document.getElementById('galClose'),prev=document.getElementById('galPrev'),next=document.getElementById('galNext'),tr=document.getElementById('galTrack');
+  if(close)close.addEventListener('click',function(){document.getElementById('gallery').classList.remove('on');});
+  if(prev)prev.addEventListener('click',function(){tr.scrollBy({left:-tr.clientWidth,behavior:'smooth'});});
+  if(next)next.addEventListener('click',function(){tr.scrollBy({left:tr.clientWidth,behavior:'smooth'});});
+  if(tr)tr.addEventListener('scroll',function(){updateGalCount();});
+})();
+
+/* ====== 人魂と霧（indexと同じ観測所の気配） ====== */
+(function(){
+  var cv=document.getElementById('void'); if(!cv) return;
+  var cx=cv.getContext('2d'); var W,H,DPR;
+  function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);}
+  resize();window.addEventListener('resize',resize);
+  function Wisp(){this.reset(true);}
+  Wisp.prototype.reset=function(init){this.x=Math.random()*W;this.y=init?Math.random()*H:H+40;this.r=4+Math.random()*9;this.vy=0.15+Math.random()*0.5;this.sway=0.3+Math.random()*0.9;this.phase=Math.random()*6.28;this.pspeed=0.005+Math.random()*0.015;this.fp=Math.random()*6.28;this.trail=[];};
+  Wisp.prototype.step=function(){this.phase+=this.pspeed;this.fp+=0.04+Math.random()*0.03;this.x+=Math.sin(this.phase)*this.sway;this.y-=this.vy;this.trail.unshift({x:this.x,y:this.y});if(this.trail.length>16)this.trail.pop();if(this.y<-50)this.reset(false);};
+  Wisp.prototype.draw=function(){var fl=0.55+0.45*Math.sin(this.fp);
+    for(var i=this.trail.length-1;i>=0;i--){var t=this.trail[i];var k=i/this.trail.length;var a=(1-k)*0.15*fl;var rr=this.r*(0.4+0.6*(1-k));var g=cx.createRadialGradient(t.x,t.y,0,t.x,t.y,rr*2.4);g.addColorStop(0,'rgba(255,255,255,'+a+')');g.addColorStop(1,'rgba(255,255,255,0)');cx.fillStyle=g;cx.beginPath();cx.arc(t.x,t.y,rr*2.4,0,6.2832);cx.fill();}
+    var g2=cx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r*3.4);g2.addColorStop(0,'rgba(255,255,255,'+(0.82*fl)+')');g2.addColorStop(0.22,'rgba(228,232,236,'+(0.42*fl)+')');g2.addColorStop(1,'rgba(200,210,220,0)');cx.fillStyle=g2;cx.beginPath();cx.arc(this.x,this.y,this.r*3.4,0,6.2832);cx.fill();};
+  function Fog(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=180+Math.random()*260;this.vx=(Math.random()-0.5)*0.16;this.vy=(Math.random()-0.5)*0.1;this.a=0.014+Math.random()*0.028;}
+  Fog.prototype.step=function(){this.x+=this.vx;this.y+=this.vy;if(this.x<-this.r)this.x=W+this.r;if(this.x>W+this.r)this.x=-this.r;if(this.y<-this.r)this.y=H+this.r;if(this.y>H+this.r)this.y=-this.r;};
+  Fog.prototype.draw=function(){var g=cx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);g.addColorStop(0,'rgba(180,185,195,'+this.a+')');g.addColorStop(1,'rgba(180,185,195,0)');cx.fillStyle=g;cx.beginPath();cx.arc(this.x,this.y,this.r,0,6.2832);cx.fill();};
+  var N=window.innerWidth<560?12:18,wisps=[],fogs=[];
+  for(var i=0;i<N;i++)wisps.push(new Wisp());
+  for(var j=0;j<6;j++)fogs.push(new Fog());
+  function loop(){cx.clearRect(0,0,W,H);cx.fillStyle='#000';cx.fillRect(0,0,W,H);
+    cx.globalCompositeOperation='source-over';for(var f=0;f<fogs.length;f++){fogs[f].step();fogs[f].draw();}
+    cx.globalCompositeOperation='lighter';for(var w=0;w<wisps.length;w++){wisps[w].step();wisps[w].draw();}
+    cx.globalCompositeOperation='source-over';requestAnimationFrame(loop);}
+  loop();
+})();
+</script>
+</body>
+</html>
