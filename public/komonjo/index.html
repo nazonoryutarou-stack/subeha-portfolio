@@ -238,7 +238,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   }
   function pumpDateQueue(){
     while(dateWorkers<4&&dateQueue.length){
-      var d=dateQueue.shift(); dateWorkers++;
+      let d=dateQueue.shift(); dateWorkers++;
       fetch(d.manifestUrl,{cache:"force-cache"})
         .then(function(r){if(!r.ok)throw Error("manifest");return r.json()})
         .then(function(m){
