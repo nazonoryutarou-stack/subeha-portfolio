@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">原資料20点を収蔵。本文欄にはdata.jsonへ固定保存した翻刻だけを表示する。現在の実翻刻は0/20。外部取得に成功したふりはしない。</div>
+    <div class="hero-note">翻刻本文を出典確認できる資料だけを公開する。未翻刻・機械翻刻だけの資料は表に出さず、内部バックログに残す。蔵書数より「ここで読める」を優先する。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -89,11 +89,11 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     <select id="author"><option value="">すべての人物</option></select>
     <button class="btn dark wide" id="clearBtn">絞込解除</button>
   </section>
-  <div class="library-head"><h2>収蔵資料</h2><div class="count" id="count"></div></div>
+  <div class="library-head"><h2>読める資料</h2><div class="count" id="count"></div></div>
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>本文は外部サービスからのライブ取得ではなく、このリポジトリに固定保存する。20点の原画像はそのまま参照し、翻刻は一件ずつ校訂してdata.jsonへ積む。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>公開一覧に出す条件は「翻刻本文があり、出典確認できること」。未翻刻や機械OCRだけの資料は内部バックログに留め、読める状態になった時点で初めて公開する。</p></div>
   </section>
   <footer>Source metadata: 京都大学貴重資料デジタルアーカイブ / 画像・二次利用条件は各所蔵元の規定に従う。</footer>
 </main>
@@ -101,6 +101,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
 <script>
 (function(){
   var data=null, q="", period="", type="", author="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={};
+  function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true})}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
   function sortDocs(a,b){
@@ -109,8 +110,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     return a.title.localeCompare(b.title,"ja");
   }
   function filtered(){
-    return data.documents.filter(function(d){
-      var text=[d.title,d.reading,d.author,d.summary,d.type,d.period,d.collection].join(" ").toLowerCase();
+    return publicDocs().filter(function(d){
+      var text=[d.title,d.reading,d.author,d.summary,d.type,d.period,d.collection,d.transcription].join(" ").toLowerCase();
       return (!q||text.indexOf(q.toLowerCase())!==-1)&&(!period||d.period===period)&&(!type||d.type===type)&&(!author||d.author===author);
     }).sort(sortDocs);
   }
@@ -120,25 +121,26 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       e.innerHTML='<option value="">'+label+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'">'+esc(v)+'</option>'}).join("");
       e.value=current;
     }
-    fill("period",uniq(data.documents.map(function(d){return d.period})),"すべての時代");
-    fill("type",uniq(data.documents.map(function(d){return d.type})),"すべての文書");
-    fill("author",uniq(data.documents.map(function(d){return d.author})),"すべての人物");
+    var docs=publicDocs();
+    fill("period",uniq(docs.map(function(d){return d.period})),"すべての時代");
+    fill("type",uniq(docs.map(function(d){return d.type})),"すべての文書");
+    fill("author",uniq(docs.map(function(d){return d.author})),"すべての人物");
   }
   function renderStats(){
-    var docs=data.documents;
+    var docs=publicDocs(), all=data.documents;
     var yearDocs=docs.filter(function(d){return d.year!=null}).map(function(d){return d.year});
     var min=Math.min.apply(null,yearDocs), max=Math.max.apply(null,yearDocs);
     var people=uniq(docs.map(function(d){return d.author})).length;
     document.getElementById("stats").innerHTML=[
-      ["収蔵",docs.length+"点"],
-      ["年代",min+"–"+max],
-      ["人物",people+"名"],
-      ["翻刻済",docs.filter(function(d){return !!(d.transcription||"").trim()}).length+"/"+docs.length]
+      ["公開",docs.length+"点"],
+      ["収集済",all.length+"点"],
+      ["年代",yearDocs.length?min+"–"+max:"—"],
+      ["本文","全点翻刻あり"]
     ].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
   }
   function render(){
     var docs=filtered();
-    document.getElementById("count").textContent=docs.length+" / "+data.documents.length+"点";
+    document.getElementById("count").textContent=docs.length+"点公開";
     document.getElementById("grid").innerHTML=docs.length?docs.map(function(d){
       return '<article class="card" data-id="'+esc(d.id)+'">'+
         '<div class="kicker">'+esc(d.period)+' · '+esc(d.dateDisplay)+'</div>'+
@@ -319,7 +321,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     });
   }
   function openDoc(id){
-    var d=data.documents.find(function(x){return x.id===id});if(!d)return;
+    var d=publicDocs().find(function(x){return x.id===id});if(!d)return;
     iiifPages=[];iiifIndex=0;iiifZoom=100;
     document.getElementById("detail").innerHTML=
       '<div class="eyebrow">'+esc(d.period)+' / '+esc(d.type)+'</div>'+
@@ -345,11 +347,11 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   document.getElementById("type").onchange=function(e){type=e.target.value;render()};
   document.getElementById("author").onchange=function(e){author=e.target.value;render()};
   document.getElementById("clearBtn").onclick=function(){q=period=type=author="";document.getElementById("search").value="";fillFilters();render()};
-  document.getElementById("randomBtn").onclick=function(){if(!data)return;var docs=filtered();if(!docs.length)docs=data.documents;openDoc(docs[Math.floor(Math.random()*docs.length)].id)};
+  document.getElementById("randomBtn").onclick=function(){if(!data)return;var docs=filtered();if(!docs.length)docs=publicDocs();openDoc(docs[Math.floor(Math.random()*docs.length)].id)};
   document.getElementById("close").onclick=document.getElementById("shade").onclick=function(){document.getElementById("drawer").classList.remove("open");history.replaceState(null,"",location.pathname)};
   fetch("data.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw Error("data");return r.json()}).then(function(x){
     data=x;fillFilters();renderStats();render();
-    if(location.hash){var id=decodeURIComponent(location.hash.slice(1));if(data.documents.some(function(d){return d.id===id}))openDoc(id)}
+    if(location.hash){var id=decodeURIComponent(location.hash.slice(1));if(publicDocs().some(function(d){return d.id===id}))openDoc(id)}
   }).catch(function(){document.getElementById("grid").innerHTML='<div class="empty">資料データを読み込めなかった。</div>'});
 })();
 </script>
