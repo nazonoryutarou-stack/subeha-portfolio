@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">翻刻本文が読める資料だけを公開する。年代索引は閲覧順ではなく、全文翻刻済み資料を読み込んだ時点で全件をバックグラウンド整理する。カード検索は資料名・人物・年代・所蔵・タグを横断し、本文検索は固定収録本文を即時検索、全コーパスは公開全文索引へ引き継ぐ。</div>
+    <div class="hero-note">翻刻本文が読める資料だけを公開する。全文翻刻済み資料は静的カタログから一括で棚に載せ、年代は表示・閲覧した資料から所蔵元IIIFの根拠を確認してブラウザに保存する。カード検索は資料名・人物・年代・所蔵・タグを横断し、本文検索は固定収録本文を即時検索、全コーパスは公開全文索引へ引き継ぐ。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -420,7 +420,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     document.getElementById("stats").innerHTML=[
       ["公開",docs.length+"点"],
       ["収集済",allCount+"点"],
-      ["年代索引",processed+"/"+docs.length],
+      ["年代確認",processed+"/"+docs.length],
       ["年代未詳",unknown+"点"]
     ].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
   }
