@@ -103,7 +103,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
 (function(){
-  var data=null, q="", period="", type="", author="", yearFrom="", yearTo="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200, fulltextVisibleLimit=60, fulltextLastHits=[], fulltextLastTerm="", dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null, staticSearchDocs=[];
+  var data=null, q="", period="", type="", author="", yearFrom="", yearTo="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200, fulltextVisibleLimit=60, fulltextLastHits=[], fulltextLastTerm="", dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null, dateObserver=null, staticSearchDocs=[];
   function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true}).concat(remoteDocs)}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
@@ -424,6 +424,25 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       ["年代未詳",unknown+"点"]
     ].map(function(x){return '<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>'}).join("");
   }
+  function observeVisibleDates(){
+    if(dateObserver){dateObserver.disconnect();dateObserver=null}
+    var cards=Array.from(document.querySelectorAll("[data-id]"));
+    if(!cards.length)return;
+    if(!("IntersectionObserver" in window)){
+      queueDateEnrichment(cards.slice(0,24).map(function(el){return publicDocs().find(function(d){return d.id===el.getAttribute("data-id")})}).filter(Boolean));
+      return;
+    }
+    dateObserver=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(!entry.isIntersecting)return;
+        var id=entry.target.getAttribute("data-id");
+        var d=publicDocs().find(function(x){return x.id===id});
+        if(d)queueDateEnrichment([d]);
+        dateObserver.unobserve(entry.target);
+      });
+    },{rootMargin:"360px 0px"});
+    cards.forEach(function(el){dateObserver.observe(el)});
+  }
   function render(){
     var docs=filtered();
     document.getElementById("count").textContent=docs.length+"点公開";
@@ -440,6 +459,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     }).join("")+(docs.length>shown.length?'<div class="empty" style="grid-column:1/-1"><button class="btn dark" id="moreBtn">さらに200点表示（残り '+(docs.length-shown.length)+'）</button></div>':''):'<div class="empty">該当する資料がない。</div>';
     document.querySelectorAll("[data-id]").forEach(function(el){el.onclick=function(){openDoc(el.getAttribute("data-id"))}});
     var more=document.getElementById("moreBtn"); if(more)more.onclick=function(){visibleLimit+=200;render()};
+    observeVisibleDates();
   }
   function manifestUrl(d){
     return d.manifestUrl || ("https://rmda.kulib.kyoto-u.ac.jp/iiif/metadata_manifest/"+encodeURIComponent(d.recordId)+"/manifest.json");
@@ -639,8 +659,57 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       return doc;
     }).filter(Boolean);
   }
-  function loadRemoteCatalog(){
-    var projects=(data.remoteSource&&data.remoteSource.projects)||[];
+  function hydrateRemoteCatalogRow(r){
+    var id=String(r&&r.id||""), project=String(r&&r.projectId||"");
+    if(!id||!project||!r.title)return null;
+    var cached=dateCache[id];
+    var doc={
+      id:"remote-"+project+"-"+id,
+      honkokuEntryId:id,
+      title:String(r.title),
+      reading:"",
+      year:null,
+      dateDisplay:"年代未詳",
+      dateCertainty:"unknown",
+      period:"年代未整理",
+      type:"翻刻資料",
+      author:"不詳",
+      summary:"「みんなで翻刻」で全文翻刻済みの公開資料。",
+      recordId:id,
+      collection:"みんなで翻刻 / "+project,
+      sourceUrl:"https://app.honkoku.org/transcription/"+encodeURIComponent(id)+"/1",
+      sourceInstitution:String(r.sourceInstitution||"原所蔵機関"),
+      archive:"みんなで翻刻",
+      rightsUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+      manifestUrl:String(r.manifestUrl||""),
+      sourceViewerUrl:String(r.manifestUrl||""),
+      transcription:"",
+      kundoku:"",
+      modern:"",
+      publicReadable:true,
+      remoteReadable:true,
+      pageCount:Math.max(1,Number(r.pageCount)||1),
+      projectId:project,
+      remoteTextBase:"https://raw.githubusercontent.com/yuta1984/honkoku-data/master/v3/"+encodeURIComponent(project)+"/"+encodeURIComponent(id)+"/",
+      transcriptionStatus:"crowdsourced",
+      transcriptionLicense:"CC BY-SA 4.0",
+      transcriptionAttribution:"みんなで翻刻 contributors"
+    };
+    if(cached){if(cached.noDate)doc._dateFetched=true;else applyDateMeta(doc,cached)}
+    return doc;
+  }
+  function activateRemoteCatalog(found){
+    var localIds=new Set(data.documents.map(function(d){return d.honkokuEntryId||d.recordId||d.id}));
+    var seen=new Set(), out=[];
+    found.forEach(function(d){
+      if(!d)return;
+      var key=d.honkokuEntryId||d.recordId||d.id;
+      if(!key||localIds.has(key)||seen.has(key))return;
+      seen.add(key);out.push(d);
+    });
+    remoteDocs=out;remoteLoaded=true;fillFilters();renderStats();render();return out;
+  }
+  function loadRemoteCatalogLegacy(projects){
     if(!projects.length){remoteLoaded=true;return Promise.resolve([])}
     var raw="https://raw.githubusercontent.com/yuta1984/honkoku-data/master/v3/";
     var cursor=0, workers=[], found=[];
@@ -653,10 +722,31 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
         .catch(function(){})
         .then(worker);
     }
-    for(var i=0;i<6;i++)workers.push(worker());
-    return Promise.all(workers).then(function(){
-      remoteDocs=found;remoteLoaded=true;queueDateEnrichment(remoteDocs);fillFilters();renderStats();render();return found;
-    });
+    for(var i=0;i<4;i++)workers.push(worker());
+    return Promise.all(workers).then(function(){return activateRemoteCatalog(found)});
+  }
+  function loadRemoteCatalog(){
+    var cfg=data.remoteSource||{}, projects=cfg.projects||[], catalog=cfg.staticCatalog||"catalog/index.json";
+    var base=catalog.replace(/[^/]+$/,"");
+    return fetch(catalog,{cache:"no-store"})
+      .then(function(r){if(!r.ok)throw Error("catalog");return r.json()})
+      .then(function(manifest){
+        var parts=Array.isArray(manifest.parts)?manifest.parts:[];
+        if(!parts.length)throw Error("catalog parts");
+        return Promise.all(parts.map(function(part){
+          return fetch(base+part,{cache:"force-cache"}).then(function(r){if(!r.ok)throw Error("catalog part");return r.json()});
+        }));
+      })
+      .then(function(chunks){
+        var found=[];
+        chunks.forEach(function(chunk){
+          (chunk&&Array.isArray(chunk.documents)?chunk.documents:[]).forEach(function(r){
+            var d=hydrateRemoteCatalogRow(r);if(d)found.push(d);
+          });
+        });
+        return activateRemoteCatalog(found);
+      })
+      .catch(function(){return loadRemoteCatalogLegacy(projects)});
   }
   function remotePageName(index){return String(index+1).padStart(3,"0")+".txt"}
   function loadRemoteTextPage(d,index){
@@ -696,6 +786,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   }
   function openDoc(id,initialPage){
     var d=publicDocs().find(function(x){return x.id===id});if(!d)return;
+    queueDateEnrichment([d]);
     iiifPages=[];iiifIndex=Math.max(0,Number(initialPage)||0);iiifZoom=100;
     document.getElementById("detail").innerHTML=
       '<div class="eyebrow">'+esc(d.period)+' / '+esc(d.type)+'</div>'+
