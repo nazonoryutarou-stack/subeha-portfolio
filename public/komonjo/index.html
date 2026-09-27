@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">翻刻本文が読める資料だけを公開する。年代索引は閲覧順ではなく、全文翻刻済み資料を読み込んだ時点で全件をバックグラウンド整理する。カード検索は資料名・人物・年代・所蔵・タグを横断し、本文検索は翻刻本文そのものを横断する。</div>
+    <div class="hero-note">翻刻本文が読める資料だけを公開する。年代索引は閲覧順ではなく、全文翻刻済み資料を読み込んだ時点で全件をバックグラウンド整理する。カード検索は資料名・人物・年代・所蔵・タグを横断し、本文検索は固定収録本文を即時検索、全コーパスは公開全文索引へ引き継ぐ。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -91,12 +91,12 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     <input id="yearTo" inputmode="numeric" placeholder="終了年">
     <button class="btn dark wide" id="clearBtn">絞込解除</button>
   </section>
-  <section class="fulltext-box"><div class="eyebrow">FULL TEXT SEARCH</div><div class="fulltext-row"><input id="fulltextQuery" placeholder="翻刻本文を全文検索　例：地震、借金、龍馬"><button class="btn dark" id="fulltextBtn">本文検索</button></div><div class="fulltext-status" id="fulltextStatus">固定収録した本文は静的索引で即時検索。全「みんなで翻刻」本文はn-gram全文索引も検索します。</div><div class="fulltext-results" id="fulltextResults"></div></section>
+  <section class="fulltext-box"><div class="eyebrow">FULL TEXT SEARCH</div><div class="fulltext-row"><input id="fulltextQuery" placeholder="翻刻本文を全文検索　例：地震、借金、龍馬"><button class="btn dark" id="fulltextBtn">本文検索</button></div><div class="fulltext-status" id="fulltextStatus">固定収録した本文はこのサイト内の静的索引で即時検索。全「みんなで翻刻」本文は公開全文索引へ同じ検索語を渡します。</div><div class="fulltext-results" id="fulltextResults"></div></section>
   <div class="library-head"><h2>読める資料</h2><div class="count" id="count"></div></div>
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開する。固定収録本文は静的索引、全「みんなで翻刻」本文はn-gram全文索引で検索する。所蔵元IIIFに根拠がない年代だけ未詳として残す。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開する。固定収録本文は静的索引で検索し、全「みんなで翻刻」本文は公開全文索引へ接続する。所蔵元IIIFに根拠がない年代だけ未詳として残す。</p></div>
   </section>
   <footer>Source metadata: 各所蔵機関 / 翻刻: みんなで翻刻ほか / 画像・二次利用条件は各提供元の規定に従う。</footer>
 </main>
@@ -286,10 +286,10 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   function fulltextSearchUrl(term,page){
     var cfg=data&&data.fulltextSearch?data.fulltextSearch:{};
     var base=cfg.endpoint||"https://honkoku.dhii.jp/search/";
-    return base+"?url_key="+encodeURIComponent(term)+"&url_var=1&url_proj="+encodeURIComponent("すべて")+"&url_col="+encodeURIComponent("すべて")+"&page="+(page||1)+"&url_format=json";
+    return base+"?url_key="+encodeURIComponent(term)+"&url_var=1&url_proj="+encodeURIComponent("すべて")+"&url_col="+encodeURIComponent("すべて")+"&page="+(page||1);
   }
   function fulltextExternalUrl(term,page){
-    return "https://honkoku.dhii.jp/search/?url_key="+encodeURIComponent(term)+"&url_var=1&url_proj="+encodeURIComponent("すべて")+"&url_col="+encodeURIComponent("すべて")+"&page="+(page||1);
+    return fulltextSearchUrl(term,page);
   }
   function stripHtml(s){var box=document.createElement("div");box.innerHTML=String(s||"");return box.textContent||box.innerText||""}
   function flattenFulltextPayload(obj){
@@ -348,11 +348,15 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     var status=document.getElementById("fulltextStatus"),box=document.getElementById("fulltextResults");
     if(term.length<2){status.textContent="2文字以上で検索してください。";box.innerHTML="";return}
     var local=localFulltextHits(term);
-    renderFulltextHits(local,[],term,"loading");
-    status.textContent="静的索引 "+local.length+"件。全本文索引も検索中…";
-    fetch(fulltextSearchUrl(term,1),{mode:"cors",cache:"no-store"}).then(function(r){if(!r.ok)throw Error("search");return r.json()}).then(function(j){
-      renderFulltextHits(local,parseRemoteFulltext(j),term,"ok");
-    }).catch(function(){renderFulltextHits(local,[],term,"failed")});
+    renderFulltextHits(local,[],term,"local");
+    var external='<a class="btn dark" target="_blank" rel="noopener" href="'+esc(fulltextExternalUrl(term,1))+'">みんなで翻刻 全文索引で検索</a>';
+    if(local.length){
+      status.textContent="文庫内の固定全文索引で "+local.length+"件。全「みんなで翻刻」本文は外部全文索引でも同じ語を検索できます。";
+      box.insertAdjacentHTML("beforeend",'<div class="fulltext-actions" style="margin-top:12px">'+external+'</div>');
+    }else{
+      status.textContent="固定収録本文には該当なし。全「みんなで翻刻」本文を横断する全文索引へ検索を引き継げます。";
+      box.innerHTML='<div class="fulltext-actions">'+external+'</div>';
+    }
   }
   function sortDocs(a,b){
     var ay=a.year==null?999999:a.year, by=b.year==null?999999:b.year;
