@@ -22,7 +22,7 @@ a{color:inherit}button,input,select{font:inherit}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 20px}.stat{background:var(--card);border:1px solid var(--line);padding:13px 15px;border-radius:14px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:28px;margin-top:4px}
 .toolbar{display:grid;grid-template-columns:2fr 1fr 1fr 1fr .72fr .72fr auto;gap:9px;margin-bottom:14px;position:sticky;top:58px;z-index:10;background:var(--paper);padding:10px 0}
 .toolbar input,.toolbar select{width:100%;border:1px solid var(--line);background:var(--card);padding:11px 12px;border-radius:10px;color:var(--ink)}.toolbar button{white-space:nowrap}
-.fulltext-box{margin:0 0 18px;border:1px solid var(--line);background:var(--card);border-radius:16px;padding:14px}.fulltext-row{display:grid;grid-template-columns:1fr auto;gap:8px}.fulltext-row input{width:100%;border:1px solid var(--line);background:#fffdf8;padding:11px 12px;border-radius:10px}.fulltext-status{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.7}.fulltext-results{display:grid;gap:8px;margin-top:10px}.fulltext-hit{border-top:1px solid #e7e0d4;padding-top:10px}.fulltext-hit:first-child{border-top:0;padding-top:0}.fulltext-hit strong{display:block;font-size:14px;margin-bottom:4px}.fulltext-hit p{margin:0;color:#655f57;font-size:12px;line-height:1.7}.fulltext-hit mark{background:#f3df9d;padding:0 2px}.fulltext-actions{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}.library-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0 12px}.library-head h2{font-size:18px;margin:0}.count{font-size:12px;color:var(--muted)}
+.fulltext-box{margin:0 0 18px;border:1px solid var(--line);background:var(--card);border-radius:16px;padding:14px}.fulltext-row{display:grid;grid-template-columns:1fr auto;gap:8px}.fulltext-row input{width:100%;border:1px solid var(--line);background:#fffdf8;padding:11px 12px;border-radius:10px}.fulltext-status{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.7}.corpus-sync{display:grid;grid-template-columns:auto auto minmax(110px,220px) 1fr;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #e7e0d4}.corpus-sync progress{width:100%;height:10px}.corpus-sync span{font-size:11px;color:var(--muted);line-height:1.5}.fulltext-results{display:grid;gap:8px;margin-top:10px}.fulltext-hit{border-top:1px solid #e7e0d4;padding-top:10px}.fulltext-hit:first-child{border-top:0;padding-top:0}.fulltext-hit strong{display:block;font-size:14px;margin-bottom:4px}.fulltext-hit p{margin:0;color:#655f57;font-size:12px;line-height:1.7}.fulltext-hit mark{background:#f3df9d;padding:0 2px}.fulltext-actions{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}.library-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0 12px}.library-head h2{font-size:18px;margin:0}.count{font-size:12px;color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:260px;cursor:pointer;transition:.16s transform,.16s box-shadow}
 .card:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(48,42,31,.12)}
@@ -61,7 +61,7 @@ a{color:inherit}button,input,select{font:inherit}
 @media(max-width:900px){.reading-workspace{grid-template-columns:1fr}}
 footer{padding:30px 0;color:#837b6f;font-size:11px}
 @media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}.toolbar{grid-template-columns:1fr 1fr 1fr}.toolbar input{grid-column:1/-1}.hero{grid-template-columns:1fr}.hero-note{border-left:0;border-top:1px solid var(--line);padding:14px 0 0}}
-@media(max-width:650px){.wrap{padding:14px}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.toolbar{top:54px;grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.toolbar .wide{grid-column:1/-1}.about{grid-template-columns:1fr}.brand small{display:none}}
+@media(max-width:650px){.wrap{padding:14px}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.toolbar{top:54px;grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.toolbar .wide{grid-column:1/-1}.corpus-sync{grid-template-columns:1fr 1fr}.corpus-sync progress,.corpus-sync span{grid-column:1/-1}.about{grid-template-columns:1fr}.brand small{display:none}}
 </style>
 </head>
 <body>
@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">翻刻本文が読める資料だけを公開する。全文翻刻済み資料は静的カタログから一括で棚に載せ、年代は表示・閲覧した資料から所蔵元IIIFの根拠を確認してブラウザに保存する。カード検索は資料名・人物・年代・所蔵・タグを横断し、本文検索は固定収録本文を即時検索、全コーパスは公開全文索引へ引き継ぐ。</div>
+    <div class="hero-note">翻刻本文が読める資料だけを公開する。全文翻刻済み資料は静的カタログから一括で棚に載せ、年代は表示・閲覧した資料から所蔵元IIIFの根拠を確認してブラウザに保存する。カード検索は資料名・人物・年代・所蔵・タグを横断し、本文は固定蔵書を即時検索し、みんなで翻刻全コーパスは端末内に一度だけ索引を作って横断検索する。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -91,19 +91,19 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     <input id="yearTo" inputmode="numeric" placeholder="終了年">
     <button class="btn dark wide" id="clearBtn">絞込解除</button>
   </section>
-  <section class="fulltext-box"><div class="eyebrow">FULL TEXT SEARCH</div><div class="fulltext-row"><input id="fulltextQuery" placeholder="翻刻本文を全文検索　例：地震、借金、龍馬"><button class="btn dark" id="fulltextBtn">本文検索</button></div><div class="fulltext-status" id="fulltextStatus">固定収録した本文はこのサイト内の静的索引で即時検索。全「みんなで翻刻」本文は公開全文索引へ同じ検索語を渡します。</div><div class="fulltext-results" id="fulltextResults"></div></section>
+  <section class="fulltext-box"><div class="eyebrow">FULL TEXT SEARCH</div><div class="fulltext-row"><input id="fulltextQuery" placeholder="翻刻本文を全文検索　例：地震、借金、龍馬"><button class="btn dark" id="fulltextBtn">本文検索</button></div><div class="fulltext-status" id="fulltextStatus">固定収録本文は即時検索。みんなで翻刻3,637件は公開txtを端末内へ一度保存すると、この欄だけで横断検索できます。</div><div class="corpus-sync"><button class="btn dark" id="corpusSyncBtn">端末内全文索引を作る</button><button class="btn" id="corpusStopBtn" hidden>停止</button><progress id="corpusProgress" max="1" value="0"></progress><span id="corpusSyncStatus">カタログ読込中</span></div><div class="fulltext-results" id="fulltextResults"></div></section>
   <div class="library-head"><h2>読める資料</h2><div class="count" id="count"></div></div>
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開する。固定収録本文は静的索引で検索し、全「みんなで翻刻」本文は公開全文索引へ接続する。所蔵元IIIFに根拠がない年代だけ未詳として残す。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開する。固定収録本文は静的索引で即時検索し、全「みんなで翻刻」本文は公開txtをIndexedDBへ端末内保存して横断検索する。所蔵元IIIFに根拠がない年代だけ未詳として残す。</p></div>
   </section>
   <footer>Source metadata: 各所蔵機関 / 翻刻: みんなで翻刻ほか / 画像・二次利用条件は各提供元の規定に従う。</footer>
 </main>
 <div class="drawer" id="drawer"><div class="shade" id="shade"></div><div class="panel"><button class="close" id="close">×</button><div class="detail" id="detail"></div></div></div>
 <script>
 (function(){
-  var data=null, q="", period="", type="", author="", yearFrom="", yearTo="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, visibleLimit=200, fulltextVisibleLimit=60, fulltextLastHits=[], fulltextLastTerm="", dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null, dateObserver=null, staticSearchDocs=[];
+  var data=null, q="", period="", type="", author="", yearFrom="", yearTo="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, remoteCatalogVersion="catalog-v1", visibleLimit=200, fulltextVisibleLimit=60, fulltextLastHits=[], fulltextLastTerm="", fulltextTruncated=false, dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null, dateObserver=null, staticSearchDocs=[], corpusDbPromise=null, corpusSyncRunning=false, corpusSyncStop=false, corpusIndexed=0, corpusFailed=0;
   function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true}).concat(remoteDocs)}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
@@ -302,6 +302,108 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     });
     return out;
   }
+  function openCorpusDb(){
+    if(corpusDbPromise)return corpusDbPromise;
+    corpusDbPromise=new Promise(function(resolve,reject){
+      if(!window.indexedDB){reject(Error("IndexedDB unavailable"));return}
+      var req=indexedDB.open("komonjo-corpus-v1",1);
+      req.onupgradeneeded=function(){var db=req.result;if(!db.objectStoreNames.contains("docs"))db.createObjectStore("docs",{keyPath:"id"})};
+      req.onsuccess=function(){resolve(req.result)};
+      req.onerror=function(){reject(req.error||Error("IndexedDB"))};
+    });
+    return corpusDbPromise;
+  }
+  function corpusRows(){
+    return openCorpusDb().then(function(db){return new Promise(function(resolve,reject){
+      var req=db.transaction("docs","readonly").objectStore("docs").getAll();
+      req.onsuccess=function(){resolve((req.result||[]).filter(function(x){return x&&x.version===remoteCatalogVersion}))};
+      req.onerror=function(){reject(req.error||Error("corpus read"))};
+    })});
+  }
+  function putCorpusRow(row){
+    return openCorpusDb().then(function(db){return new Promise(function(resolve,reject){
+      var tx=db.transaction("docs","readwrite");tx.objectStore("docs").put(row);
+      tx.oncomplete=function(){resolve(row)};tx.onerror=function(){reject(tx.error||Error("corpus write"))};
+    })});
+  }
+  function updateCorpusUi(message){
+    var status=document.getElementById("corpusSyncStatus"),progress=document.getElementById("corpusProgress"),start=document.getElementById("corpusSyncBtn"),stop=document.getElementById("corpusStopBtn");
+    var total=remoteDocs.length||0;
+    if(progress){progress.max=Math.max(1,total);progress.value=Math.min(corpusIndexed,total)}
+    if(status)status.textContent=message||("端末内索引 "+corpusIndexed+" / "+total+"点"+(corpusFailed?"　失敗 "+corpusFailed+"点":""));
+    if(start){start.disabled=corpusSyncRunning||!remoteLoaded;start.textContent=corpusIndexed>=total&&total?"端末内全文索引 完成":(corpusIndexed?"端末内全文索引を再開":"端末内全文索引を作る")}
+    if(stop){stop.hidden=!corpusSyncRunning}
+  }
+  function refreshCorpusStatus(){
+    if(!remoteLoaded){updateCorpusUi("カタログ読込中");return Promise.resolve(0)}
+    return corpusRows().then(function(rows){
+      corpusIndexed=rows.length;updateCorpusUi();
+      return corpusIndexed;
+    }).catch(function(){updateCorpusUi("このブラウザでは端末内索引を利用できません");return 0});
+  }
+  function fetchRemoteDocumentText(d){
+    var pages=new Array(d.pageCount), cursor=0, stopped=false;
+    function worker(){
+      if(stopped)return Promise.resolve();
+      var i=cursor++;if(i>=d.pageCount)return Promise.resolve();
+      if(corpusSyncStop){stopped=true;return Promise.resolve()}
+      return fetch(d.remoteTextBase+remotePageName(i),{cache:"force-cache"}).then(function(r){
+        if(!r.ok)throw Error("text "+r.status);return r.text();
+      }).then(function(t){pages[i]=t}).then(worker);
+    }
+    var workers=[];for(var w=0;w<Math.min(4,d.pageCount);w++)workers.push(worker());
+    return Promise.all(workers).then(function(){
+      if(corpusSyncStop)throw Error("stopped");
+      for(var i=0;i<pages.length;i++)if(pages[i]==null)throw Error("page missing");
+      return pages.map(function(t,i){return "【"+(i+1)+"】\n"+String(t||"").trim()}).join("\n\n");
+    });
+  }
+  function startCorpusSync(){
+    if(corpusSyncRunning||!remoteLoaded)return Promise.resolve();
+    corpusSyncRunning=true;corpusSyncStop=false;corpusFailed=0;updateCorpusUi("端末内索引を準備中…");
+    return corpusRows().then(function(existing){
+      var have=new Set(existing.map(function(x){return x.id})), queue=remoteDocs.filter(function(d){return !have.has(d.honkokuEntryId||d.recordId)});
+      corpusIndexed=existing.length;updateCorpusUi();
+      var cursor=0;
+      function worker(){
+        if(corpusSyncStop||cursor>=queue.length)return Promise.resolve();
+        var d=queue[cursor++], id=d.honkokuEntryId||d.recordId;
+        return fetchRemoteDocumentText(d).then(function(text){
+          return putCorpusRow({id:id,version:remoteCatalogVersion,title:d.title,projectId:d.projectId,pageCount:d.pageCount,text:text,updatedAt:new Date().toISOString()});
+        }).then(function(){corpusIndexed++;updateCorpusUi()}).catch(function(e){
+          if(String(e&&e.message||e)!=="stopped"){corpusFailed++;updateCorpusUi()}
+        }).then(worker);
+      }
+      var workers=[];for(var i=0;i<2;i++)workers.push(worker());
+      return Promise.all(workers);
+    }).finally(function(){
+      corpusSyncRunning=false;
+      var total=remoteDocs.length;
+      updateCorpusUi(corpusSyncStop?"端末内索引を停止しました。"+corpusIndexed+" / "+total+"点":(corpusIndexed>=total?"端末内全文索引 完成　"+corpusIndexed+"点":"端末内索引 "+corpusIndexed+" / "+total+"点"));
+      if(!corpusSyncStop&&fulltextLastTerm)runFulltextSearch(fulltextLastTerm);
+    });
+  }
+  function stopCorpusSync(){corpusSyncStop=true;updateCorpusUi("停止処理中…")}
+  function cachedCorpusHits(term){
+    var needle=normSearch(term), limit=1000;
+    if(!needle)return Promise.resolve({hits:[],indexed:0,truncated:false});
+    return corpusRows().then(function(rows){
+      var hits=[],truncated=false;
+      rows.some(function(r){
+        var segments=textPageSegments(r.text||"");
+        for(var i=0;i<segments.length;i++){
+          var seg=segments[i], body=normSearch(seg.text), at=body.indexOf(needle);
+          if(at<0)continue;
+          var start=Math.max(0,at-55),end=Math.min(seg.text.length,at+needle.length+75);
+          hits.push({entryId:r.id,title:r.title||r.id,folio:seg.folio==null?"":String(seg.folio),snippet:(start>0?"…":"")+seg.text.slice(start,end)+(end<seg.text.length?"…":"")});
+          if(hits.length>=limit){truncated=true;return true}
+        }
+        return false;
+      });
+      corpusIndexed=rows.length;updateCorpusUi();
+      return {hits:hits,indexed:rows.length,truncated:truncated};
+    }).catch(function(){return {hits:[],indexed:0,truncated:false,error:true}});
+  }
   function fulltextSearchUrl(term,page){
     var cfg=data&&data.fulltextSearch?data.fulltextSearch:{};
     var base=cfg.endpoint||"https://honkoku.dhii.jp/search/";
@@ -342,13 +444,14 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   }
   function renderStoredFulltextHits(term,remoteState){
     var box=document.getElementById("fulltextResults"),status=document.getElementById("fulltextStatus");
+    var scope=remoteState==="complete"?"（端末内コーパス全件）":remoteState==="partial"?"（端末内索引の作成済み分）":"";
     if(!fulltextLastHits.length){
-      status.textContent=remoteState==="failed"?"静的索引では該当なし。外部全文索引への接続に失敗しました。":"該当なし。";
-      box.innerHTML=remoteState==="failed"?'<a class="btn dark" target="_blank" rel="noopener" href="'+esc(fulltextExternalUrl(term,1))+'">全文検索側で確認</a>':"";
+      status.textContent=remoteState==="complete"?"該当なし。":remoteState==="partial"?"作成済みの端末内索引には該当なし。索引未作成の資料があります。":"固定収録本文には該当なし。";
+      box.innerHTML="";
       return;
     }
     var shown=fulltextLastHits.slice(0,fulltextVisibleLimit);
-    status.textContent="本文ヒット "+fulltextLastHits.length+"件 / 表示 "+shown.length+"件"+(remoteState==="failed"?"（外部索引は未接続）":"");
+    status.textContent="本文ヒット "+fulltextLastHits.length+(fulltextTruncated?"件以上":"件")+" / 表示 "+shown.length+"件 "+scope;
     box.innerHTML=shown.map(function(x){
       var local=x.localId?publicDocs().find(function(d){return d.id===x.localId}):publicDocs().find(function(d){return d.honkokuEntryId===x.entryId||d.recordId===x.entryId});
       var pg=parseInt(x.folio,10)||1;
@@ -362,7 +465,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     box.querySelectorAll("[data-open-local]").forEach(function(el){el.onclick=function(){openDoc(el.getAttribute("data-open-local"),Number(el.getAttribute("data-page")||0))}});
     var more=document.getElementById("fulltextMoreBtn");if(more)more.onclick=function(){fulltextVisibleLimit+=60;renderStoredFulltextHits(term,remoteState)};
   }
-  function renderFulltextHits(localHits,remoteHits,term,remoteState){
+  function renderFulltextHits(localHits,remoteHits,term,remoteState,truncated){
     var combined=[],seen=new Set();
     localHits.concat(remoteHits||[]).forEach(function(x){
       var key=(x.entryId||x.localId||x.title)+"|"+(x.folio||"")+"|"+(x.snippet||"").slice(0,80);
@@ -370,23 +473,24 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     });
     fulltextLastHits=combined;
     fulltextLastTerm=term;
+    fulltextTruncated=!!truncated;
     renderStoredFulltextHits(term,remoteState);
   }
   function runFulltextSearch(term){
     term=String(term||"").trim();
     var status=document.getElementById("fulltextStatus"),box=document.getElementById("fulltextResults");
-    if(term.length<2){status.textContent="2文字以上で検索してください。";box.innerHTML="";fulltextLastHits=[];fulltextLastTerm="";return}
-    fulltextVisibleLimit=60;
+    if(term.length<2){status.textContent="2文字以上で検索してください。";box.innerHTML="";fulltextLastHits=[];fulltextLastTerm="";fulltextTruncated=false;return}
+    fulltextVisibleLimit=60;fulltextLastTerm=term;
     var local=localFulltextHits(term);
-    renderFulltextHits(local,[],term,"local");
-    var external='<a class="btn dark" target="_blank" rel="noopener" href="'+esc(fulltextExternalUrl(term,1))+'">みんなで翻刻 全文索引で検索</a>';
-    if(local.length){
-      status.textContent="文庫内の固定全文索引で "+local.length+"件。全「みんなで翻刻」本文は外部全文索引でも同じ語を検索できます。";
-      box.insertAdjacentHTML("beforeend",'<div class="fulltext-actions" style="margin-top:12px">'+external+'</div>');
-    }else{
-      status.textContent="固定収録本文には該当なし。全「みんなで翻刻」本文を横断する全文索引へ検索を引き継げます。";
-      box.innerHTML='<div class="fulltext-actions">'+external+'</div>';
-    }
+    status.textContent="端末内全文索引を検索中…";
+    cachedCorpusHits(term).then(function(cached){
+      var complete=remoteLoaded&&cached.indexed>=remoteDocs.length&&remoteDocs.length>0;
+      renderFulltextHits(local,cached.hits,term,complete?"complete":(cached.indexed?"partial":"local"),cached.truncated);
+      if(!complete){
+        var external='<a class="btn" target="_blank" rel="noopener" href="'+esc(fulltextExternalUrl(term,1))+'">未索引分を公開全文検索で確認</a>';
+        box.insertAdjacentHTML("beforeend",'<div class="fulltext-actions" style="margin-top:12px">'+external+'</div>');
+      }
+    });
   }
   function sortDocs(a,b){
     var ay=a.year==null?999999:a.year, by=b.year==null?999999:b.year;
@@ -707,10 +811,11 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       if(!key||localIds.has(key)||seen.has(key))return;
       seen.add(key);out.push(d);
     });
-    remoteDocs=out;remoteLoaded=true;fillFilters();renderStats();render();return out;
+    remoteDocs=out;remoteLoaded=true;fillFilters();renderStats();render();refreshCorpusStatus();return out;
   }
   function loadRemoteCatalogLegacy(projects){
-    if(!projects.length){remoteLoaded=true;return Promise.resolve([])}
+    remoteCatalogVersion="legacy-v3";
+    if(!projects.length){remoteLoaded=true;refreshCorpusStatus();return Promise.resolve([])}
     var raw="https://raw.githubusercontent.com/yuta1984/honkoku-data/master/v3/";
     var cursor=0, workers=[], found=[];
     function worker(){
@@ -731,6 +836,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     return fetch(catalog,{cache:"no-store"})
       .then(function(r){if(!r.ok)throw Error("catalog");return r.json()})
       .then(function(manifest){
+        remoteCatalogVersion=String(manifest.generatedAt||manifest.version||"catalog-v1");
         var parts=Array.isArray(manifest.parts)?manifest.parts:[];
         if(!parts.length)throw Error("catalog parts");
         return Promise.all(parts.map(function(part){
@@ -817,6 +923,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   document.getElementById("yearTo").oninput=function(e){yearTo=e.target.value.replace(/[^0-9]/g,"");visibleLimit=200;render()};
   document.getElementById("fulltextBtn").onclick=function(){runFulltextSearch(document.getElementById("fulltextQuery").value)};
   document.getElementById("fulltextQuery").onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();runFulltextSearch(e.target.value)}};
+  document.getElementById("corpusSyncBtn").onclick=function(){startCorpusSync()};
+  document.getElementById("corpusStopBtn").onclick=function(){stopCorpusSync()};
   document.getElementById("clearBtn").onclick=function(){q=period=type=author=yearFrom=yearTo="";visibleLimit=200;document.getElementById("search").value="";document.getElementById("yearFrom").value="";document.getElementById("yearTo").value="";fillFilters();render()};
   document.getElementById("randomBtn").onclick=function(){if(!data)return;var docs=filtered();if(!docs.length)docs=publicDocs();openDoc(docs[Math.floor(Math.random()*docs.length)].id)};
   document.getElementById("close").onclick=document.getElementById("shade").onclick=function(){document.getElementById("drawer").classList.remove("open");history.replaceState(null,"",location.pathname)};
