@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">翻刻本文が読める資料だけを公開する。全文翻刻済み資料は静的カタログから一括で棚に載せ、年代は表示・閲覧した資料から所蔵元IIIFの根拠を確認してブラウザに保存する。カード検索は資料名・人物・年代・所蔵・タグを横断し、独自収録の公開翻刻は即時検索し、通常コーパスは端末内に一度だけ索引を作って横断検索する。</div>
+    <div class="hero-note">翻刻本文が読める資料だけを公開する。全文翻刻済み資料は静的カタログから一括で棚に載せ、年代は表示・閲覧した資料から所蔵元IIIFの根拠を確認してブラウザに保存する。カード検索は資料名・人物・年代・所蔵・タグを横断し、独自収録の公開翻刻は即時検索、通常コーパスは公開全文APIをこの画面から直接検索する。端末内索引は任意のバックアップとして使える。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -91,12 +91,12 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     <input id="yearTo" inputmode="numeric" placeholder="終了年">
     <button class="btn dark wide" id="clearBtn">絞込解除</button>
   </section>
-  <section class="fulltext-box"><div class="eyebrow">FULL TEXT SEARCH</div><div class="fulltext-row"><input id="fulltextQuery" placeholder="翻刻本文を全文検索　例：地震、借金、龍馬"><button class="btn dark" id="fulltextBtn">本文検索</button></div><div class="fulltext-status" id="fulltextStatus">独自収録の公開翻刻は即時検索。通常コーパス3,657件は公開txtを端末内へ一度保存すると、この欄だけで横断検索できます。</div><div class="corpus-sync"><button class="btn dark" id="corpusSyncBtn">端末内全文索引を作る</button><button class="btn" id="corpusStopBtn" hidden>停止</button><progress id="corpusProgress" max="1" value="0"></progress><span id="corpusSyncStatus">カタログ読込中</span></div><div class="fulltext-results" id="fulltextResults"></div></section>
+  <section class="fulltext-box"><div class="eyebrow">FULL TEXT SEARCH</div><div class="fulltext-row"><input id="fulltextQuery" placeholder="翻刻本文を全文検索　例：地震、借金、龍馬"><button class="btn dark" id="fulltextBtn">本文検索</button></div><div class="fulltext-status" id="fulltextStatus">独自収録の公開翻刻は即時検索。通常コーパス3,657件は「みん翻検索」の公開JSON APIをこの欄から直接検索します。端末内索引は任意のバックアップです。</div><div class="corpus-sync"><button class="btn" id="corpusSyncBtn">端末内索引を作る（任意）</button><button class="btn" id="corpusStopBtn" hidden>停止</button><progress id="corpusProgress" max="1" value="0"></progress><span id="corpusSyncStatus">カタログ読込中</span></div><div class="fulltext-results" id="fulltextResults"></div></section>
   <div class="library-head"><h2>読める資料</h2><div class="count" id="count"></div></div>
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開する。独自収録の公開翻刻は静的索引で即時検索し、みんなで翻刻由来資料は通常コーパスへ統合して、公開txtをIndexedDBへ端末内保存し横断検索する。所蔵元IIIFに根拠がない年代だけ未詳として残す。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開する。独自収録の公開翻刻は静的索引で即時検索し、みんなで翻刻由来資料は通常コーパスへ統合して公開JSON APIを直接検索する。IndexedDBの端末内索引は任意のバックアップとして残す。所蔵元IIIFに根拠がない年代だけ未詳として残す。</p></div>
   </section>
   <footer>Source metadata: 各所蔵機関 / 翻刻: みんなで翻刻ほか / 画像・二次利用条件は各提供元の規定に従う。</footer>
 </main>
@@ -426,6 +426,9 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     var base=cfg.endpoint||"https://honkoku.dhii.jp/search/";
     return base+"?url_key="+encodeURIComponent(term)+"&url_var=1&url_proj="+encodeURIComponent("すべて")+"&url_col="+encodeURIComponent("すべて")+"&page="+(page||1);
   }
+  function fulltextJsonUrl(term,page){
+    return fulltextSearchUrl(term,page)+"&url_format=json";
+  }
   function fulltextExternalUrl(term,page){
     return fulltextSearchUrl(term,page);
   }
@@ -459,11 +462,56 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     });
     return out;
   }
+  function libraryEntryMap(){
+    var map=new Map();
+    publicDocs().forEach(function(d){
+      var id=String(d.honkokuEntryId||d.recordId||"");
+      if(id)map.set(id,d);
+    });
+    return map;
+  }
+  function filterRemoteHitsToLibrary(hits){
+    var map=libraryEntryMap();
+    return (hits||[]).map(function(x){
+      var id=String(x.entryId||"");
+      var d=id?map.get(id):null;
+      if(!d)return null;
+      return Object.assign({},x,{title:d.title||x.title,localId:d.id});
+    }).filter(Boolean);
+  }
+  function fetchRemoteFulltextPage(term,page){
+    var controller="AbortController" in window?new AbortController():null;
+    var timer=controller?setTimeout(function(){controller.abort()},8000):null;
+    return fetch(fulltextJsonUrl(term,page),{cache:"no-store",credentials:"omit",signal:controller?controller.signal:void 0})
+      .then(function(r){if(!r.ok)throw Error("search "+r.status);return r.text()})
+      .then(function(t){
+        var payload;try{payload=JSON.parse(t)}catch(e){throw Error("search json")}
+        return filterRemoteHitsToLibrary(parseRemoteFulltext(payload));
+      })
+      .finally(function(){if(timer)clearTimeout(timer)});
+  }
+  function fetchRemoteFulltext(term){
+    var all=[],seen=new Set(),page=1,maxPages=3;
+    function next(){
+      if(page>maxPages)return Promise.resolve(all);
+      var current=page++;
+      return fetchRemoteFulltextPage(term,current).then(function(rows){
+        var added=0;
+        rows.forEach(function(x){
+          var key=(x.entryId||"")+"|"+(x.folio||"")+"|"+(x.snippet||"").slice(0,100);
+          if(seen.has(key))return;seen.add(key);all.push(x);added++;
+        });
+        if(!rows.length||!added)return all;
+        return next();
+      });
+    }
+    return next();
+  }
   function renderStoredFulltextHits(term,remoteState){
     var box=document.getElementById("fulltextResults"),status=document.getElementById("fulltextStatus");
-    var scope=remoteState==="complete"?"（端末内コーパス全件）":remoteState==="partial"?"（端末内索引の作成済み分）":"";
+    var scope=remoteState==="api"?"（公開全文API＋文庫内キャッシュ）":remoteState==="complete"?"（端末内コーパス全件）":remoteState==="partial"?"（端末内索引の作成済み分）":"";
     if(!fulltextLastHits.length){
-      status.textContent=remoteState==="complete"?"該当なし。":remoteState==="partial"?"作成済みの端末内索引には該当なし。索引未作成の資料があります。":"独自収録本文には該当なし。";
+      status.textContent=remoteState==="api"?"この文庫の公開全文API結果には該当なし。":remoteState==="complete"?"該当なし。":remoteState==="partial"?"作成済みの端末内索引には該当なし。索引未作成の資料があります。":"独自収録本文には該当なし。";
       box.innerHTML="";
       return;
     }
@@ -497,15 +545,26 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     term=String(term||"").trim();
     var status=document.getElementById("fulltextStatus"),box=document.getElementById("fulltextResults");
     if(term.length<2){status.textContent="2文字以上で検索してください。";box.innerHTML="";fulltextLastHits=[];fulltextLastTerm="";fulltextTruncated=false;return}
+    if(!remoteLoaded){
+      status.textContent="資料カタログを読み込んでいます。読み込み後に全文検索します…";
+      setTimeout(function(){
+        if(remoteLoaded&&document.getElementById("fulltextQuery").value.trim()===term)runFulltextSearch(term);
+      },700);
+      return;
+    }
     fulltextVisibleLimit=60;fulltextLastTerm=term;
     var local=localFulltextHits(term);
-    status.textContent="端末内全文索引を検索中…";
-    cachedCorpusHits(term).then(function(cached){
+    status.textContent="公開全文APIと端末内キャッシュを検索中…";
+    Promise.allSettled([fetchRemoteFulltext(term),cachedCorpusHits(term)]).then(function(results){
+      var apiOk=results[0].status==="fulfilled",apiHits=apiOk?results[0].value:[];
+      var cached=results[1].status==="fulfilled"?results[1].value:{hits:[],indexed:0,truncated:false,error:true};
       var complete=remoteLoaded&&cached.indexed>=remoteDocs.length&&remoteDocs.length>0;
-      renderFulltextHits(local,cached.hits,term,complete?"complete":(cached.indexed?"partial":"local"),cached.truncated);
-      if(!complete){
-        var external='<a class="btn" target="_blank" rel="noopener" href="'+esc(fulltextExternalUrl(term,1))+'">未索引分を公開全文検索で確認</a>';
+      var state=apiOk?"api":(complete?"complete":(cached.indexed?"partial":"local"));
+      renderFulltextHits(local,apiHits.concat(cached.hits||[]),term,state,cached.truncated);
+      if(!apiOk){
+        var external='<a class="btn" target="_blank" rel="noopener" href="'+esc(fulltextExternalUrl(term,1))+'">公開全文検索で確認</a>';
         box.insertAdjacentHTML("beforeend",'<div class="fulltext-actions" style="margin-top:12px">'+external+'</div>');
+        status.textContent+=(cached.indexed?"　公開JSON APIには接続できなかったため端末内索引を使用。":"　公開JSON APIには接続できませんでした。");
       }
     });
   }
