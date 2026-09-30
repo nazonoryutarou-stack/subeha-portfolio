@@ -91,12 +91,12 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     <input id="yearTo" inputmode="numeric" placeholder="終了年">
     <button class="btn dark wide" id="clearBtn">絞込解除</button>
   </section>
-  <section class="fulltext-box"><div class="eyebrow">FULL TEXT SEARCH</div><div class="fulltext-row"><input id="fulltextQuery" placeholder="翻刻本文を全文検索　例：地震、借金、龍馬"><button class="btn dark" id="fulltextBtn">本文検索</button></div><div class="fulltext-status" id="fulltextStatus">固定収録本文は即時検索。みんなで翻刻3,637件は公開txtを端末内へ一度保存すると、この欄だけで横断検索できます。</div><div class="corpus-sync"><button class="btn dark" id="corpusSyncBtn">端末内全文索引を作る</button><button class="btn" id="corpusStopBtn" hidden>停止</button><progress id="corpusProgress" max="1" value="0"></progress><span id="corpusSyncStatus">カタログ読込中</span></div><div class="fulltext-results" id="fulltextResults"></div></section>
+  <section class="fulltext-box"><div class="eyebrow">FULL TEXT SEARCH</div><div class="fulltext-row"><input id="fulltextQuery" placeholder="翻刻本文を全文検索　例：地震、借金、龍馬"><button class="btn dark" id="fulltextBtn">本文検索</button></div><div class="fulltext-status" id="fulltextStatus">独自収録の公開翻刻は即時検索。通常コーパス3,657件は公開txtを端末内へ一度保存すると、この欄だけで横断検索できます。</div><div class="corpus-sync"><button class="btn dark" id="corpusSyncBtn">端末内全文索引を作る</button><button class="btn" id="corpusStopBtn" hidden>停止</button><progress id="corpusProgress" max="1" value="0"></progress><span id="corpusSyncStatus">カタログ読込中</span></div><div class="fulltext-results" id="fulltextResults"></div></section>
   <div class="library-head"><h2>読める資料</h2><div class="count" id="count"></div></div>
   <section class="grid" id="grid"></section>
   <section class="about">
     <div><h2>この文庫の方針</h2><p>画像を勝手に抱え込むのではなく、原所蔵機関を正本として参照する。ここで価値を足すのは、探しやすさ、読みやすさ、翻刻、読み下し、現代語、語注。つまり「史料を所有する」のではなく、「史料までの距離を短くする」。</p></div>
-    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開する。固定収録本文は静的索引で即時検索し、全「みんなで翻刻」本文は公開txtをIndexedDBへ端末内保存して横断検索する。所蔵元IIIFに根拠がない年代だけ未詳として残す。</p></div>
+    <div><h2>翻刻を本体にする</h2><p>全文翻刻済み資料だけを公開する。独自収録の公開翻刻は静的索引で即時検索し、みんなで翻刻由来資料は通常コーパスへ統合して、公開txtをIndexedDBへ端末内保存し横断検索する。所蔵元IIIFに根拠がない年代だけ未詳として残す。</p></div>
   </section>
   <footer>Source metadata: 各所蔵機関 / 翻刻: みんなで翻刻ほか / 画像・二次利用条件は各提供元の規定に従う。</footer>
 </main>
@@ -463,7 +463,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     var box=document.getElementById("fulltextResults"),status=document.getElementById("fulltextStatus");
     var scope=remoteState==="complete"?"（端末内コーパス全件）":remoteState==="partial"?"（端末内索引の作成済み分）":"";
     if(!fulltextLastHits.length){
-      status.textContent=remoteState==="complete"?"該当なし。":remoteState==="partial"?"作成済みの端末内索引には該当なし。索引未作成の資料があります。":"固定収録本文には該当なし。";
+      status.textContent=remoteState==="complete"?"該当なし。":remoteState==="partial"?"作成済みの端末内索引には該当なし。索引未作成の資料があります。":"独自収録本文には該当なし。";
       box.innerHTML="";
       return;
     }
@@ -788,14 +788,14 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       id:"remote-"+project+"-"+id,
       honkokuEntryId:id,
       title:String(r.title),
-      reading:"",
-      year:null,
-      dateDisplay:"年代未詳",
-      dateCertainty:"unknown",
-      period:"年代未整理",
-      type:"翻刻資料",
-      author:"不詳",
-      summary:"「みんなで翻刻」で全文翻刻済みの公開資料。",
+      reading:String(r.reading||""),
+      year:r.year==null?null:Number(r.year),
+      dateDisplay:String(r.dateDisplay||"年代未詳"),
+      dateCertainty:String(r.dateCertainty||"unknown"),
+      period:String(r.period||"年代未整理"),
+      type:String(r.type||"翻刻資料"),
+      author:String(r.author||"不詳"),
+      summary:String(r.summary||"「みんなで翻刻」で全文翻刻済みの公開資料。"),
       recordId:id,
       collection:"みんなで翻刻 / "+project,
       sourceUrl:"https://app.honkoku.org/transcription/"+encodeURIComponent(id)+"/1",
@@ -814,7 +814,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       remoteTextBase:"https://raw.githubusercontent.com/yuta1984/honkoku-data/master/v3/"+encodeURIComponent(project)+"/"+encodeURIComponent(id)+"/",
       transcriptionStatus:"crowdsourced",
       transcriptionLicense:"CC BY-SA 4.0",
-      transcriptionAttribution:"みんなで翻刻 contributors"
+      transcriptionAttribution:"みんなで翻刻 contributors",
+      tags:Array.isArray(r.tags)?r.tags:[]
     };
     if(cached){if(cached.noDate)doc._dateFetched=true;else applyDateMeta(doc,cached)}
     return doc;
