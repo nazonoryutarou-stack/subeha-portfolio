@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-09-27T20:02:00+09:00",
+  "updatedAt": "2026-09-30T12:35:00+09:00",
   "title": "古文書文庫 β",
   "description": "翻刻本文を取得でき、出典と利用条件を確認できる資料だけ公開する古文書デジタル文庫。",
   "policy": {
@@ -1436,13 +1436,26 @@
     "enabled": true,
     "provider": "みん翻検索 by SAT",
     "endpoint": "https://honkoku.dhii.jp/search/",
-    "mode": "external-fulltext-index",
+    "mode": "device-local-corpus-cache",
     "queryParams": {
       "variant": "1",
       "project": "すべて",
       "collection": "すべて"
     },
     "localStaticIndex": "search-index.json",
-    "note": "固定収録本文はsearch-index.jsonでサイト内検索。全みんなで翻刻本文はSATの公開全文索引に検索語を引き継ぐ。GitHub Actionsは使用しない。"
+    "note": "GitHub Actions不使用。固定本文は静的索引、みんなで翻刻3,637件はIndexedDBへ端末内保存して横断検索。75,498頁を一括自動取得せず、利用者操作で停止・再開可能。端末内索引が未完成の間だけSAT公開全文索引を補助導線として残す。",
+    "deviceCorpus": {
+      "db": "komonjo-corpus-v1",
+      "documents": 3637,
+      "pages": 75498,
+      "source": "yuta1984/honkoku-data v3 raw text",
+      "persistence": "IndexedDB",
+      "behavior": "利用者が索引作成を開始したときだけ公開txtを順次取得し、停止・再開可能。以後は文庫内検索欄で横断検索する。"
+    },
+    "externalFallback": {
+      "provider": "みん翻検索 by SAT",
+      "endpoint": "https://honkoku.dhii.jp/search/",
+      "purpose": "端末内索引が未完成の間だけ未索引分を確認する補助導線"
+    }
   }
 }
