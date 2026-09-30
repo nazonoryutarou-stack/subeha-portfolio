@@ -548,7 +548,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     if(!remoteLoaded){
       status.textContent="資料カタログを読み込んでいます。読み込み後に全文検索します…";
       setTimeout(function(){
-        if(remoteLoaded&&document.getElementById("fulltextQuery").value.trim()===term)runFulltextSearch(term);
+        if(document.getElementById("fulltextQuery").value.trim()===term)runFulltextSearch(term);
       },700);
       return;
     }
