@@ -79,7 +79,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       <h1>昔の人の<br>生の記録。</h1>
       <p>有名な文学作品ではなく、軍事命令、書状、日記、盟約。昔の人が実際に仕事をし、頼み、怒り、学び、戦っていた紙を、普通の人でも辿れる図書館にする。</p>
     </div>
-    <div class="hero-note">翻刻本文が読める資料だけを公開する。全文翻刻済み資料は静的カタログから一括で棚に載せ、年代は表示・閲覧した資料から所蔵元IIIFの根拠を確認してブラウザに保存する。カード検索は資料名・人物・年代・所蔵・タグを横断し、本文は固定蔵書を即時検索し、みんなで翻刻全コーパスは端末内に一度だけ索引を作って横断検索する。</div>
+    <div class="hero-note">翻刻本文が読める資料だけを公開する。全文翻刻済み資料は静的カタログから一括で棚に載せ、年代は表示・閲覧した資料から所蔵元IIIFの根拠を確認してブラウザに保存する。カード検索は資料名・人物・年代・所蔵・タグを横断し、独自収録の公開翻刻は即時検索し、通常コーパスは端末内に一度だけ索引を作って横断検索する。</div>
   </section>
   <section class="stats" id="stats"></section>
   <section class="toolbar">
@@ -916,7 +916,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       '<div class="eyebrow">'+esc(d.period)+' / '+esc(d.type)+'</div>'+
       '<h2>'+esc(d.title)+'</h2><div class="reading">'+esc(d.reading)+'</div>'+
       '<p class="lead">'+esc(d.summary)+'</p>'+
-      '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻本文</strong><span id="sourceTranscriptionState" class="source-state '+(((d.transcription||"").trim()||d.remoteReadable)?'ok':'none')+'">'+(d.remoteReadable?'読込中':((d.transcription||"").trim()?'翻刻済':'未翻刻'))+'</span></div><pre id="sourceTranscriptionText" class="transcription-text">'+(d.remoteReadable?'翻刻本文を読み込んでいます…':((d.transcription||"").trim()?esc(d.transcription):'この資料の翻刻本文は、まだ収録されていません。'))+'</pre><div id="sourceTranscriptionNote" class="transcription-note">'+(d.remoteReadable?'みんなで翻刻 V3 / CC BY-SA 4.0':'固定保存した翻刻本文を表示。')+'</div></div></div>'+
+      '<div class="reading-workspace"><div class="reader"><div class="reader-head"><div class="reader-title">原資料</div><div class="reader-tools"><button id="iiifPrev">←</button><span id="iiifCounter">読込中</span><button id="iiifNext">→</button><button id="iiifZoomOut">−</button><button id="iiifZoomIn">＋</button></div></div><div class="iiif-stage" id="iiifStage"><div class="iiif-loading">IIIF画像を読み込んでいます…</div></div></div><div class="source-transcription"><div class="source-transcription-head"><strong>翻刻本文</strong><span id="sourceTranscriptionState" class="source-state '+(((d.transcription||"").trim()||d.remoteReadable)?'ok':'none')+'">'+(d.remoteReadable?'読込中':((d.transcription||"").trim()?'翻刻済':'未翻刻'))+'</span></div><pre id="sourceTranscriptionText" class="transcription-text">'+(d.remoteReadable?'翻刻本文を読み込んでいます…':((d.transcription||"").trim()?esc(d.transcription):'この資料の翻刻本文は、まだ収録されていません。'))+'</pre><div id="sourceTranscriptionNote" class="transcription-note">'+(d.remoteReadable?'みんなで翻刻 V3 / CC BY-SA 4.0':'独自収録した翻刻本文を表示。')+'</div></div></div>'+
       '<div class="kv"><b>年代</b><span>'+esc(dateDisplaySafe(d))+'</span></div>'+
       '<div class="kv"><b>年代精度</b><span>'+esc(dateCertaintyLabel(d))+'</span></div>'+
       '<div class="kv"><b>作成者</b><span>'+esc(d.author)+'</span></div>'+
