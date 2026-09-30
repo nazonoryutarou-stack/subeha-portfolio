@@ -313,11 +313,23 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
     });
     return corpusDbPromise;
   }
-  function corpusRows(){
+  function clearCorpusStore(){
     return openCorpusDb().then(function(db){return new Promise(function(resolve,reject){
-      var req=db.transaction("docs","readonly").objectStore("docs").getAll();
-      req.onsuccess=function(){resolve((req.result||[]).filter(function(x){return x&&x.version===remoteCatalogVersion}))};
-      req.onerror=function(){reject(req.error||Error("corpus read"))};
+      var tx=db.transaction("docs","readwrite");tx.objectStore("docs").clear();
+      tx.oncomplete=function(){resolve()};tx.onerror=function(){reject(tx.error||Error("corpus clear"))};
+    })});
+  }
+  function prepareCorpusVersion(){
+    var key="komonjo-corpus-version";
+    var current="";try{current=localStorage.getItem(key)||""}catch(e){}
+    if(current===remoteCatalogVersion)return Promise.resolve();
+    return clearCorpusStore().then(function(){try{localStorage.setItem(key,remoteCatalogVersion)}catch(e){}});
+  }
+  function corpusKeys(){
+    return openCorpusDb().then(function(db){return new Promise(function(resolve,reject){
+      var req=db.transaction("docs","readonly").objectStore("docs").getAllKeys();
+      req.onsuccess=function(){resolve(req.result||[])};
+      req.onerror=function(){reject(req.error||Error("corpus keys"))};
     })});
   }
   function putCorpusRow(row){
@@ -336,8 +348,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   }
   function refreshCorpusStatus(){
     if(!remoteLoaded){updateCorpusUi("カタログ読込中");return Promise.resolve(0)}
-    return corpusRows().then(function(rows){
-      corpusIndexed=rows.length;updateCorpusUi();
+    return prepareCorpusVersion().then(corpusKeys).then(function(keys){
+      corpusIndexed=keys.length;updateCorpusUi();
       return corpusIndexed;
     }).catch(function(){updateCorpusUi("このブラウザでは端末内索引を利用できません");return 0});
   }
@@ -361,8 +373,8 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   function startCorpusSync(){
     if(corpusSyncRunning||!remoteLoaded)return Promise.resolve();
     corpusSyncRunning=true;corpusSyncStop=false;corpusFailed=0;updateCorpusUi("端末内索引を準備中…");
-    return corpusRows().then(function(existing){
-      var have=new Set(existing.map(function(x){return x.id})), queue=remoteDocs.filter(function(d){return !have.has(d.honkokuEntryId||d.recordId)});
+    return prepareCorpusVersion().then(corpusKeys).then(function(existing){
+      var have=new Set(existing.map(String)), queue=remoteDocs.filter(function(d){return !have.has(String(d.honkokuEntryId||d.recordId))});
       corpusIndexed=existing.length;updateCorpusUi();
       var cursor=0;
       function worker(){
@@ -386,23 +398,28 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   function stopCorpusSync(){corpusSyncStop=true;updateCorpusUi("停止処理中…")}
   function cachedCorpusHits(term){
     var needle=normSearch(term), limit=1000;
-    if(!needle)return Promise.resolve({hits:[],indexed:0,truncated:false});
-    return corpusRows().then(function(rows){
-      var hits=[],truncated=false;
-      rows.some(function(r){
-        var segments=textPageSegments(r.text||"");
-        for(var i=0;i<segments.length;i++){
-          var seg=segments[i], body=normSearch(seg.text), at=body.indexOf(needle);
-          if(at<0)continue;
-          var start=Math.max(0,at-55),end=Math.min(seg.text.length,at+needle.length+75);
-          hits.push({entryId:r.id,title:r.title||r.id,folio:seg.folio==null?"":String(seg.folio),snippet:(start>0?"…":"")+seg.text.slice(start,end)+(end<seg.text.length?"…":"")});
-          if(hits.length>=limit){truncated=true;return true}
+    if(!needle||!remoteLoaded)return Promise.resolve({hits:[],indexed:0,truncated:false});
+    return prepareCorpusVersion().then(openCorpusDb).then(function(db){return new Promise(function(resolve,reject){
+      var hits=[],indexed=0,truncated=false;
+      var req=db.transaction("docs","readonly").objectStore("docs").openCursor();
+      req.onsuccess=function(){
+        var cursor=req.result;
+        if(!cursor){corpusIndexed=indexed;updateCorpusUi();resolve({hits:hits,indexed:indexed,truncated:truncated});return}
+        indexed++;
+        if(!truncated){
+          var r=cursor.value||{},segments=textPageSegments(r.text||"");
+          for(var i=0;i<segments.length;i++){
+            var seg=segments[i],body=normSearch(seg.text),at=body.indexOf(needle);
+            if(at<0)continue;
+            var start=Math.max(0,at-55),end=Math.min(seg.text.length,at+needle.length+75);
+            hits.push({entryId:r.id,title:r.title||r.id,folio:seg.folio==null?"":String(seg.folio),snippet:(start>0?"…":"")+seg.text.slice(start,end)+(end<seg.text.length?"…":"")});
+            if(hits.length>=limit){truncated=true;break}
+          }
         }
-        return false;
-      });
-      corpusIndexed=rows.length;updateCorpusUi();
-      return {hits:hits,indexed:rows.length,truncated:truncated};
-    }).catch(function(){return {hits:[],indexed:0,truncated:false,error:true}});
+        cursor.continue();
+      };
+      req.onerror=function(){reject(req.error||Error("corpus search"))};
+    })}).catch(function(){return {hits:[],indexed:0,truncated:false,error:true}});
   }
   function fulltextSearchUrl(term,page){
     var cfg=data&&data.fulltextSearch?data.fulltextSearch:{};
