@@ -106,6 +106,13 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   var data=null, q="", period="", type="", author="", yearFrom="", yearTo="", iiifPages=[], iiifIndex=0, iiifZoom=100, sourceTextCache={}, remoteDocs=[], currentDoc=null, remoteLoaded=false, remoteCatalogVersion="catalog-v1", visibleLimit=200, fulltextVisibleLimit=60, fulltextLastHits=[], fulltextLastTerm="", fulltextTruncated=false, dateCache={}, dateQueue=[], dateWorkers=0, dateSaveTimer=null, dateObserver=null, staticSearchDocs=[], corpusDbPromise=null, corpusSyncRunning=false, corpusSyncStop=false, corpusIndexed=0, corpusFailed=0;
   function publicDocs(){return data.documents.filter(function(d){return d.publicReadable===true}).concat(remoteDocs)}
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
+  function highlightSnippet(text,term){
+    var raw=String(text||""),needle=String(term||"");
+    if(!needle)return esc(raw);
+    var normRaw=normSearch(raw),normNeedle=normSearch(needle),at=normRaw.indexOf(normNeedle);
+    if(at<0)return esc(raw);
+    return esc(raw.slice(0,at))+"<mark>"+esc(raw.slice(at,at+needle.length))+"</mark>"+esc(raw.slice(at+needle.length));
+  }
   function uniq(arr){return Array.from(new Set(arr.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ja")})}
   function dateCertaintyLabel(d){var m={source:"出典確認",range:"範囲",partial:"年未詳",inferred:"推定",unknown:"未詳"};return m[d.dateCertainty]||"未詳"}
   function dateDisplaySafe(d){return (d.dateDisplay||"年代未詳")+(d.dateCertainty==="inferred"?"（推定）":"")}
@@ -533,7 +540,7 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
       var pg=parseInt(x.folio,10)||1;
       var localBtn=local?'<button class="btn" data-open-local="'+esc(local.id)+'" data-page="'+Math.max(0,pg-1)+'">文庫で'+(x.folio?esc(x.folio)+"頁を":"")+'読む</button>':"";
       var source=x.entryId?'<a class="btn" target="_blank" rel="noopener" href="https://app.honkoku.org/transcription/'+encodeURIComponent(x.entryId)+'/'+pg+'">原翻刻へ</a>':"";
-      return '<div class="fulltext-hit"><strong>'+esc(x.title)+(x.folio?'　'+esc(x.folio)+'頁':'')+'</strong><p>'+esc(x.snippet||"該当本文")+'</p><div class="fulltext-actions">'+localBtn+source+'</div></div>';
+      return '<div class="fulltext-hit"><strong>'+esc(x.title)+(x.folio?'　'+esc(x.folio)+'頁':'')+'</strong><p>'+highlightSnippet(x.snippet||"該当本文",term)+'</p><div class="fulltext-actions">'+localBtn+source+'</div></div>';
     }).join("");
     if(fulltextLastHits.length>shown.length){
       box.insertAdjacentHTML("beforeend",'<div class="fulltext-actions" style="margin-top:12px"><button class="btn dark" id="fulltextMoreBtn">さらに60件表示（残り '+(fulltextLastHits.length-shown.length)+'）</button></div>');
@@ -1011,7 +1018,11 @@ footer{padding:30px 0;color:#837b6f;font-size:11px}
   document.getElementById("yearTo").oninput=function(e){yearTo=e.target.value.replace(/[^0-9]/g,"");visibleLimit=200;render()};
   document.getElementById("fulltextBtn").onclick=function(){runFulltextSearch(document.getElementById("fulltextQuery").value)};
   document.getElementById("fulltextQuery").onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();runFulltextSearch(e.target.value)}};
-  document.getElementById("corpusSyncBtn").onclick=function(){startCorpusSync()};
+  document.getElementById("corpusSyncBtn").onclick=function(){
+    if(corpusIndexed>=remoteDocs.length&&remoteDocs.length){startCorpusSync();return}
+    if(!window.confirm("端末内索引は通常コーパス最大75,519頁の公開txtを順次取得します。通信量と保存容量を使います。オフライン用に作成しますか？"))return;
+    startCorpusSync();
+  };
   document.getElementById("corpusStopBtn").onclick=function(){stopCorpusSync()};
   document.getElementById("clearBtn").onclick=function(){q=period=type=author=yearFrom=yearTo="";visibleLimit=200;document.getElementById("search").value="";document.getElementById("yearFrom").value="";document.getElementById("yearTo").value="";fillFilters();render()};
   document.getElementById("randomBtn").onclick=function(){if(!data)return;var docs=filtered();if(!docs.length)docs=publicDocs();openDoc(docs[Math.floor(Math.random()*docs.length)].id)};
