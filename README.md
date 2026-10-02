@@ -1,3 +1,14 @@
+# すべての歯が見える｜思想アーカイブ
+
+現行トップの再構築は `docs/thought-archive.md` を参照。コンテンツ正本は `content/thought/archive.json`、公開ファイルは `public/`。本文は新規指定を待つ未登録表示のみ。
+
+```sh
+node scripts/build-thought.mjs
+node --test tests/thought/*.test.mjs
+```
+
+以下は改修前の構成についての運用記録です。既存ファイルは保持しています。
+
 # すべての歯が見える｜不氣屋
 
 配信・ことば・作品・商品をまとめた公式サイト。正本はこのリポジトリ、公開ファイルは `public/`。

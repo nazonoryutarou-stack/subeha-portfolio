@@ -9,6 +9,9 @@ on:
       - 'hitotsu-ore-choji.png'
       - '.github/workflows/neocities.yml'
       - 'scripts/build-komonjo.mjs'
+      - 'scripts/build-thought.mjs'
+      - 'scripts/thought/**'
+      - 'content/thought/**'
   workflow_dispatch:
 
 permissions:
@@ -27,6 +30,9 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
+
+      - name: Build thought archive
+        run: node scripts/build-thought.mjs
 
       - name: Stage shared assets
         shell: bash
