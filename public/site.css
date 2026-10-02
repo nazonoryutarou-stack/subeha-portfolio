@@ -1,0 +1,83 @@
+:root{--paper:#f5f2ea;--ink:#181612;--muted:#655f55;--hair:#c9c2b6;--red:#872d25;--serif:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;--sans:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-underline-offset:.25em}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--red);outline-offset:5px}
+.site-shell{width:min(100% - 64px,1060px);margin:auto;padding-top:30px}
+.home-hero{display:grid;grid-template-columns:1.35fr 1fr;gap:48px;padding:34px 0 48px;align-items:center}
+.kicker{font:500 .8125rem/1.8 var(--sans);letter-spacing:.14em;color:var(--red);margin:0 0 14px}
+.home-hero h1{font-size:clamp(2.8rem,5.5vw,4.8rem);font-weight:500;letter-spacing:.01em;line-height:1.25;margin:0}
+.home-hero .motto{font-size:1.125rem;letter-spacing:.1em;line-height:1.8;margin:22px 0 14px}
+.hero-intro{font:400 1rem/1.9 var(--sans);max-width:34rem;margin:0}
+.hero-record{border-left:1px solid var(--hair);padding:24px 0 24px 34px}
+.hero-record .record-word{margin:0;font-size:clamp(2rem,3.5vw,3rem);line-height:1.45;font-weight:500}
+.record-source{display:block;font:400 .875rem/1.8 var(--sans);color:var(--muted);margin:20px 0 24px}
+.text-link{display:inline-flex;min-height:44px;align-items:center;font:500 .9375rem/1.8 var(--sans)}
+.read-section,.broadcast-section,.shop-section,.greeting-section{padding:42px 0 46px;border-top:1px solid var(--ink)}
+.section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:18px;margin-bottom:26px}
+.section-heading h2{margin:0;font-size:1.875rem;font-weight:500}
+.section-no{font:.875rem/1.6 var(--sans);color:var(--muted)}
+.feature-story{display:grid;grid-template-columns:.8fr 1.2fr;gap:44px;padding:28px 0 36px;border-bottom:1px solid var(--hair)}
+.feature-story h3{font-size:clamp(2rem,4vw,3.5rem);font-weight:500;line-height:1.3;margin:0}
+.feature-story .story-intro{font:400 1rem/1.9 var(--sans);margin:0 0 18px;max-width:36rem}
+.story-meta{font:.8125rem/1.8 var(--sans);color:var(--muted);margin:18px 0 0}
+.shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.shelf-item{display:flex;flex-direction:column;padding:28px 24px 8px 0}
+.shelf-item+.shelf-item{border-left:1px solid var(--hair);padding-left:24px}
+.shelf-item h3{font-size:1.5rem;font-weight:500;line-height:1.6;margin:0 0 14px}
+.shelf-item p{font:400 1rem/1.9 var(--sans);margin:0 0 20px}
+.shelf-item .text-link{align-self:flex-start;margin-top:auto}
+.word-preview{margin:0 0 22px;padding:0;list-style:none}
+.word-preview li{border-top:1px solid var(--hair);padding:13px 0;font-size:1.0625rem;line-height:1.7}
+.word-preview li:first-child{border-top:0;padding-top:0}
+.broadcast-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:44px}
+.broadcast-layout h3{font:600 1.125rem/1.6 var(--sans);letter-spacing:.12em;margin:0 0 12px}
+.broadcast-layout p{font:400 1rem/1.9 var(--sans);margin:0 0 12px}
+.broadcast-name{font-size:1.4rem!important;font-family:var(--serif)!important;color:var(--red);overflow-wrap:anywhere}
+.broadcast-note{color:var(--muted)}
+.shop-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.shop-item{padding:24px;border:1px solid var(--hair)}
+.shop-item h3{font-size:1.5rem;line-height:1.6;font-weight:500;margin:0 0 14px}
+.shop-item p{font:400 1rem/1.9 var(--sans);margin:0 0 14px}
+.price{color:var(--red)}
+.greeting-details{border-top:1px solid var(--hair)}
+.greeting-details:last-child{border-bottom:1px solid var(--hair)}
+.greeting-details summary{padding:22px 4px;font-size:1.125rem;line-height:1.8;cursor:pointer}
+.greeting-details[open] summary{border-bottom:1px solid var(--hair)}
+.greeting-body{max-width:720px;margin:30px 0 40px;font:400 1rem/2.1 var(--sans)}
+.greeting-body p{margin:0 0 1.4em}
+.greeting-body h2{font-size:1.25rem;margin:30px 0 18px}
+.greeting-body .address{font-weight:600}
+.words-header{padding:32px 0 42px}
+.words-header h1{font-size:clamp(3rem,8vw,5rem);font-weight:500;margin:0 0 22px;line-height:1.25}
+.words-header p{font:400 1rem/1.9 var(--sans);margin:0}
+.words-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--ink)}
+.word-entry{position:relative;min-height:230px;padding:30px 34px 30px 0;border-bottom:1px solid var(--hair);scroll-margin-top:24px}
+.word-entry:nth-child(even){padding-left:34px;border-left:1px solid var(--hair)}
+.word-entry .word-no{font:.875rem/1.6 var(--sans);color:var(--muted);display:inline-block;min-height:32px}
+.word-entry blockquote{margin:18px 0 0;font-size:clamp(1.5rem,3vw,2rem);font-weight:500;line-height:1.7;overflow-wrap:anywhere}
+.word-entry:target{background:rgba(135,45,37,.055)}
+.words-after{padding:30px 0;display:flex;flex-wrap:wrap;gap:12px 32px}
+@media(max-width:760px){
+.site-shell{width:calc(100% - 36px);padding-top:18px}
+.home-hero{grid-template-columns:1fr;gap:26px;padding:24px 0 30px}
+.home-hero h1{font-size:clamp(2.5rem,10vw,3.75rem)}
+.home-hero .motto{margin-top:18px}
+.hero-record{border-left:0;border-top:1px solid var(--hair);padding:24px 0 0}
+.hero-record .record-word{font-size:2rem}
+.record-source{margin:12px 0 8px}
+.read-section,.broadcast-section,.shop-section,.greeting-section{padding:30px 0 34px}
+.section-heading h2{font-size:1.625rem}
+.feature-story{grid-template-columns:1fr;gap:20px;padding:0 0 26px}
+.feature-story h3{font-size:2.5rem}
+.shelf{grid-template-columns:1fr}
+.shelf-item,.shelf-item+.shelf-item{padding:24px 0;border-left:0;border-bottom:1px solid var(--hair)}
+.shelf-item:last-child{padding-bottom:0;border-bottom:0}
+.broadcast-layout,.shop-layout{grid-template-columns:1fr;gap:20px}
+.shop-item{padding:20px}
+.words-list{grid-template-columns:1fr}
+.word-entry,.word-entry:nth-child(even){min-height:0;padding:24px 0 30px;border-left:0}
+.word-entry blockquote{margin-top:12px;font-size:1.75rem}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

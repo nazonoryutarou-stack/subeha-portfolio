@@ -1,9 +1,15 @@
-.global-nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 2px 22px;margin-bottom:5svh;border-bottom:.75px solid rgba(24,22,18,.28)}
-.global-nav .brand{color:#181612;text-decoration:none;font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:10px;font-weight:500;letter-spacing:.34em;white-space:nowrap}
-.global-nav .nav-links{display:flex;align-items:center;gap:28px}
-.global-nav .nav-links a{position:relative;color:#756f65;text-decoration:none;font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:10px;font-weight:500;letter-spacing:.22em;transition:color .35s ease,opacity .35s ease}
-.global-nav .nav-links a[href="/arcade/"],.global-nav .nav-links a[href$="/arcade/"]{display:none!important}
-.global-nav .nav-links a:hover,.global-nav .nav-links a:focus-visible{color:#181612;text-decoration:none}
-.global-nav .nav-links a[aria-current="page"]{color:#181612}
-.global-nav .nav-links a[aria-current="page"]::after{content:"";position:absolute;left:0;right:.22em;bottom:-8px;height:1px;background:#9b3f2f;opacity:.72}
-@media(max-width:620px){.global-nav{margin-bottom:4svh;padding-bottom:18px}.global-nav .brand{font-size:9px;letter-spacing:.24em}.global-nav .nav-links{gap:20px}.global-nav .nav-links a{font-size:9px}}
+.global-nav{display:flex;align-items:center;justify-content:space-between;gap:16px 28px;flex-wrap:wrap;padding:0 0 20px;margin-bottom:24px;border-bottom:1px solid rgba(24,22,18,.3)}
+.global-nav .brand{color:#181612;text-decoration:none;font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:1rem;font-weight:600;letter-spacing:.05em;line-height:1.8;padding:6px 0;overflow-wrap:anywhere}
+.global-nav .nav-links{display:flex;align-items:center;gap:8px 22px;flex-wrap:wrap}
+.global-nav .nav-links a{position:relative;color:#655f55;text-decoration:none;font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;font-size:.875rem;line-height:1.6;min-height:44px;display:inline-flex;align-items:center}
+.global-nav .nav-links a:hover,.global-nav .nav-links a:focus-visible{color:#181612;text-decoration:underline;text-underline-offset:.35em}
+.global-nav .nav-links a[aria-current="page"]{color:#872d25;text-decoration:underline;text-underline-offset:.35em}
+a:focus-visible,summary:focus-visible{outline:2px solid #872d25;outline-offset:4px}
+.skip-link{position:absolute;top:-100px;left:18px;padding:12px 18px;background:#181612;color:#f5f2ea;z-index:100;font:1rem/1.5 system-ui,sans-serif}
+.skip-link:focus{top:12px}
+.public-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:30px 0 42px;border-top:1px solid rgba(24,22,18,.3);font:1rem/1.8 system-ui,-apple-system,"Yu Gothic",sans-serif}
+.public-footer b{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-weight:500}
+.public-footer p{margin:8px 0 0;font-size:.875rem;color:#655f55}
+.public-footer nav{display:flex;flex-wrap:wrap;gap:8px 22px}
+.public-footer a{min-height:44px;display:inline-flex;align-items:center;font-size:.875rem;color:#181612;text-underline-offset:.3em}
+@media(max-width:760px){.global-nav{margin-bottom:18px;gap:8px;padding-bottom:12px}.global-nav .brand{width:100%}.global-nav .nav-links{gap:8px 24px}.public-footer{flex-direction:column;gap:12px}}
