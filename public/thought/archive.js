@@ -16,6 +16,16 @@ fetch(new URL('meta.json',base)).then(r=>{if(!r.ok)throw Error('metadata');retur
  paint();addEventListener('pageshow',()=>{if(current){set(sessionStorage,'thought-trail',trail);set(sessionStorage,'thought-current',current);}else trail=get(sessionStorage,'thought-trail',[]).filter(valid);paint();});
  document.addEventListener('click',e=>{const link=e.target.closest('a[data-to]');if(!link||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;const to=link.dataset.to;set(sessionStorage,'thought-pending',{to,trail:current?trail:[]});});
  const search=document.querySelector('[data-search]');if(search){search.parentElement.hidden=false;search.addEventListener('input',()=>{const q=search.value.trim().toLocaleLowerCase();document.querySelectorAll('.index-row').forEach(row=>{const f=by.get(row.dataset.to);row.hidden=!`${f.branchNumber} ${f.tags.join(' ')}`.toLocaleLowerCase().includes(q);});});}
+ document.querySelectorAll('.thought-graph').forEach(graph=>{
+  const paths=[...graph.querySelectorAll('[data-from]')],parents=new Map();
+  paths.forEach(path=>{const to=path.dataset.edgeTo;if(!parents.has(to))parents.set(to,[]);parents.get(to).push(path.dataset.from);});
+  const clear=()=>{graph.classList.remove('is-focused');graph.querySelectorAll('.is-active').forEach(el=>el.classList.remove('is-active'));};
+  const focus=id=>{clear();const active=new Set(),queue=[id];while(queue.length){const node=queue.pop();if(active.has(node))continue;active.add(node);queue.push(...(parents.get(node)||[]));}graph.classList.add('is-focused');graph.querySelectorAll('[data-node]').forEach(node=>node.classList.toggle('is-active',active.has(node.dataset.node)));paths.forEach(path=>path.classList.toggle('is-active',active.has(path.dataset.from)&&active.has(path.dataset.edgeTo)));};
+  graph.addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const link=e.target.closest('a[data-to]');if(link)focus(link.dataset.to);});
+  graph.addEventListener('pointerleave',clear);
+  graph.addEventListener('focusin',e=>{const link=e.target.closest('a[data-to]');if(link)focus(link.dataset.to);});
+  graph.addEventListener('focusout',e=>{if(!graph.contains(e.relatedTarget))clear();});
+ });
  const svg=document.querySelector('.map-window svg');if(!svg)return;const controls=document.querySelector('.map-controls');controls.hidden=false;const initial=svg.dataset.viewbox.split(' ').map(Number);let view=[...initial],zoom=1;const status=document.querySelector('.map-status');const stage=svg.parentElement;stage.dataset.mapReady='';const update=()=>{view[0]=Math.max(-30,Math.min(initial[2]-view[2]+30,view[0]));view[1]=Math.max(-30,Math.min(initial[3]-view[3]+30,view[1]));svg.setAttribute('viewBox',view.join(' '));status.textContent=`表示倍率 ${Math.round(zoom*100)}%`;};
  function changeZoom(factor){const next=Math.min(6,Math.max(.5,zoom*factor)),ratio=zoom/next;view=[view[0]+view[2]*(1-ratio)/2,view[1]+view[3]*(1-ratio)/2,view[2]*ratio,view[3]*ratio];zoom=next;update();}
  document.querySelectorAll('[data-zoom]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.zoom==='reset'){view=[...initial];zoom=1;update();}else changeZoom(b.dataset.zoom==='in'?1.25:.8);}));
