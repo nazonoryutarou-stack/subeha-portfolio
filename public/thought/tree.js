@@ -100,7 +100,7 @@
       product.addEventListener('blur', clearFocus);
     });
 
-    stage.querySelectorAll('a.classification').forEach((word) => {
+    stage.querySelectorAll('a.classification,a.root').forEach((word) => {
       word.addEventListener('pointerenter', () => focusBranch(word));
       word.addEventListener('pointerleave', clearFocus);
       word.addEventListener('focus', () => focusBranch(word));

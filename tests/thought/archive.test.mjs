@@ -18,8 +18,8 @@ test('reduced motion and mobile controls remain available',async()=>{const css=a
 test('rendered parent connections use the real IDs, not branch strings',()=>{
  const html=renderWordTree(a.fragments,a.entryId,id=>`/${id}/`),nodes=new Map();
  const matches=[...html.matchAll(/<li data-parent="([^"]+)"><a[^>]*data-node="([^"]+)" data-fragment="([^"]+)"/g)];
- for(const m of matches)nodes.set(m[2],m[3]);
- const actual=matches.filter(m=>m[1]!=='words-root').map(m=>({from:nodes.get(m[1]),to:m[3]}));
+ for(const m of html.matchAll(/data-node="([^"]+)" data-fragment="([^"]+)"/g))nodes.set(m[1],m[2]);
+ const actual=matches.map(m=>({from:nodes.get(m[1]),to:m[3]}));
  assert.deepEqual(actual.sort((x,y)=>x.to.localeCompare(y.to)),edges(a.fragments).sort((x,y)=>x.to.localeCompare(y.to)));
  const b=copy();b.fragments[0].branchNumber='99';const changed=renderWordTree(b.fragments,b.entryId,id=>`/${id}/`);assert(changed.includes('href="/f-001/"'));assert(changed.includes('断章 99'));
 });
