@@ -28,6 +28,7 @@ jobs:
       - name: Prepare site
         shell: bash
         run: |
+          node scripts/build-thought.mjs
           rm -rf _site
           cp -R public _site
           cp hitotsu-ore-choji.png _site/hitotsu-ore-choji.png

@@ -1,0 +1,14 @@
+/* Reader position and accessibility only. Original product-tree geometry is in tree.css. */
+a.node{cursor:pointer}
+a.node:focus-visible{outline:1px solid var(--ink);outline-offset:4px}
+.node.is-current strong{text-decoration:underline;text-decoration-thickness:.75px;text-underline-offset:5px}
+.node.is-current .glyph{color:var(--vermilion);opacity:1}
+.node.is-visited .meta{opacity:1}
+.connector-path.is-travelled{stroke:var(--ink);stroke-width:1.15;opacity:.92}
+.tree-wrap{overscroll-behavior-x:contain}
+.tree-actions{display:flex;flex-wrap:wrap;gap:8px 24px;margin:28px 2px 0;font:12px/1.8 system-ui,sans-serif;color:var(--muted)}
+.tree-actions a{display:inline-flex;align-items:center;min-height:44px}
+.tree-legend span:before{display:none}
+.tree-legend .position-dot{display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--vermilion);margin:0 6px 2px 0}
+.tree-legend .travel-line{display:inline-block;width:20px;height:.75px;background:var(--ink);margin:0 8px 3px 0}
+@media(prefers-reduced-motion:reduce){.tree-stage *, .tree-stage *:before,.tree-stage *:after{animation:none!important;transition:none!important}}
