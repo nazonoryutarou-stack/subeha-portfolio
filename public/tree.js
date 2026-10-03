@@ -19,7 +19,8 @@
       li.dataset.parent = parentId;
 
       const fallbackCode = `${String(data.prefix || 'P').toUpperCase()}-${path.map((n) => String(n).padStart(2, '0')).join('-')}-${String(productIndex + 1).padStart(2, '0')}`;
-      li.innerHTML = `<div class="node product" tabindex="0" data-node="${esc(productId)}"><strong>${esc(product.name)}</strong><span class="meta"><i></i>${esc(product.code || fallbackCode)}${product.version ? ` / ${esc(product.version)}` : ''}</span></div>`;
+      const meta = [product.code || fallbackCode, product.version, product.status].filter(Boolean).join(' / ');
+      li.innerHTML = `<div class="node product" tabindex="0" data-node="${esc(productId)}"><strong>${esc(product.name)}</strong><span class="meta"><i></i>${esc(meta)}</span></div>`;
       return li;
     };
 
