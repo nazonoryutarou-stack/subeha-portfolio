@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#070807">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="祭祀技師『すべての歯が見える』の霊視、診断、実験、作品、遊戯、観測記録を集めた観測所。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="すべての歯が見える｜祭祀技師・観測所">
+<meta property="og:description" content="霊視、祭祀具、実験、作品、遊び。異界の入口だけは、読めるようにする。">
+<meta name="twitter:card" content="summary">
+<title>すべての歯が見える｜祭祀技師・観測所</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070807;
+  --bg-soft:#0b0c0b;
+  --panel:#10110f;
+  --panel-2:#151613;
+  --ink:#efebe3;
+  --sub:#bbb5aa;
+  --muted:#7c776e;
+  --line:#2b2a26;
+  --line-2:#444039;
+  --blue:#87a8bc;
+  --blue-soft:rgba(135,168,188,.10);
+  --red:#9e3d37;
+  --green:#82a47e;
+  --amber:#bd965d;
+  --serif:'Shippori Mincho B1',serif;
+  --latin:'Cormorant Garamond',serif;
+  --mono:'IBM Plex Mono',monospace;
+  --max:1160px;
+  --header:74px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg);scroll-padding-top:calc(var(--header) + 18px)}
+body{
+  margin:0;
+  min-height:100%;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 12% 5%,rgba(135,168,188,.09),transparent 26rem),
+    radial-gradient(circle at 88% 20%,rgba(158,61,55,.055),transparent 22rem),
+    linear-gradient(180deg,#070807 0%,#090a09 48%,#060706 100%);
+  font-family:var(--serif);
+  font-size:16px;
+  line-height:1.9;
+  letter-spacing:.035em;
+  overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+button,input,select,textarea{font:inherit}
+a{color:inherit}
+img{max-width:100%;display:block}
+button,a{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+::selection{background:var(--blue);color:#081012}
+#ambient{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
+.site{position:relative;z-index:1}
+.wrap{width:min(calc(100% - 34px),var(--max));margin-inline:auto}
+.skip{position:fixed;left:-9999px;top:12px;z-index:200;background:var(--ink);color:#000;padding:9px 13px;text-decoration:none}
+.skip:focus{left:12px}
+.scroll-progress{position:fixed;left:0;top:0;z-index:120;width:0;height:2px;background:var(--blue);box-shadow:0 0 14px rgba(135,168,188,.6)}
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  background:rgba(7,8,7,.9);
+  backdrop-filter:blur(18px);
+}
+.header-inner{min-height:var(--header);display:flex;align-items:center;justify-content:space-between;gap:24px}
+.identity{display:flex;align-items:center;gap:13px;text-decoration:none;min-width:0}
+.identity-mark{
+  width:44px;height:44px;flex:0 0 44px;
+  display:grid;place-items:center;
+  border:1px solid var(--line-2);
+  background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(135,168,188,.035));
+  font-size:1.28rem;
+  box-shadow:inset 0 0 22px rgba(135,168,188,.035);
+}
+.identity strong{display:block;font-size:.95rem;letter-spacing:.14em;font-weight:600;white-space:nowrap}
+.identity small{display:block;font-family:var(--mono);font-size:.61rem;letter-spacing:.13em;color:var(--muted);white-space:nowrap}
+.nav{display:flex;gap:21px;align-items:center}
+.nav a{position:relative;font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-decoration:none;color:var(--sub);white-space:nowrap;padding:7px 0}
+.nav a::after{content:"";position:absolute;left:0;right:100%;bottom:1px;height:1px;background:var(--blue);transition:.25s ease}
+.nav a:hover,.nav a.active{color:var(--ink)}
+.nav a:hover::after,.nav a.active::after{right:0}
+.menu-btn{display:none;width:42px;height:42px;border:1px solid var(--line-2);background:transparent;color:var(--ink);cursor:pointer;place-items:center}
+.menu-btn span,.menu-btn::before,.menu-btn::after{content:"";display:block;width:17px;height:1px;background:currentColor;transition:.25s ease}
+.menu-btn span{margin:4px 0}
+.menu-btn[aria-expanded="true"] span{opacity:0}
+.menu-btn[aria-expanded="true"]::before{transform:translateY(5px) rotate(45deg)}
+.menu-btn[aria-expanded="true"]::after{transform:translateY(-5px) rotate(-45deg)}
+
+.hero{padding:clamp(72px,11vw,144px) 0 88px;min-height:min(900px,calc(100svh - var(--header)));display:grid;align-items:center}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(320px,.88fr);gap:58px;align-items:end}
+.eyebrow{font-family:var(--mono);font-size:.67rem;letter-spacing:.22em;color:var(--blue);text-transform:uppercase;margin-bottom:22px}
+h1{margin:0;font-size:clamp(3rem,8vw,7.1rem);line-height:1.02;letter-spacing:.07em;font-weight:600;text-wrap:balance}
+.hero-copy{max-width:43rem}
+.hero-copy p{color:var(--sub);font-size:clamp(1rem,2vw,1.16rem);margin:28px 0 0;max-width:41rem}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.btn{
+  min-height:46px;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:10px 17px;
+  border:1px solid var(--line-2);
+  background:rgba(255,255,255,.025);
+  color:var(--ink);
+  text-decoration:none;
+  font-family:var(--mono);
+  font-size:.69rem;
+  letter-spacing:.12em;
+  cursor:pointer;
+  transition:.2s ease;
+}
+.btn:hover{background:var(--ink);color:#060706;border-color:var(--ink);transform:translateY(-1px)}
+.btn.primary{border-color:rgba(135,168,188,.56);background:var(--blue-soft)}
+.hero-console{border:1px solid var(--line);background:linear-gradient(180deg,rgba(15,16,14,.9),rgba(9,10,8,.92));box-shadow:0 28px 80px rgba(0,0,0,.24)}
+.console-head{display:flex;justify-content:space-between;gap:16px;padding:13px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.61rem;letter-spacing:.13em;color:var(--muted)}
+.console-head .live{color:#9ec89c}
+.console-body{display:grid;grid-template-columns:1fr 1fr}
+.console-stat{padding:20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.console-stat:nth-child(2n){border-right:0}
+.console-stat:nth-last-child(-n+2){border-bottom:0}
+.console-stat small{display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;color:var(--muted);margin-bottom:8px}
+.console-stat strong{display:block;font-size:1.12rem;line-height:1.5;font-weight:500;letter-spacing:.06em;word-break:break-word}
+.console-stat .mono{font-family:var(--mono);font-size:.78rem;color:var(--sub)}
+
+.section{padding:88px 0}
+.section + .section{border-top:1px solid rgba(255,255,255,.055)}
+.section-head{display:grid;grid-template-columns:minmax(220px,.55fr) minmax(0,1fr);gap:42px;align-items:end;margin-bottom:36px}
+.section-kicker{font-family:var(--mono);font-size:.64rem;letter-spacing:.2em;color:var(--blue);text-transform:uppercase;margin-bottom:9px}
+h2{margin:0;font-size:clamp(2rem,5vw,4.15rem);line-height:1.12;letter-spacing:.07em;font-weight:600}
+.section-head p{margin:0;color:var(--sub);max-width:47rem}
+
+.pillar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pillar{position:relative;min-height:250px;padding:24px;border:1px solid var(--line);background:rgba(14,15,13,.78);overflow:hidden}
+.pillar::after{content:attr(data-mark);position:absolute;right:10px;bottom:-35px;font-size:8rem;line-height:1;color:rgba(255,255,255,.025);font-family:var(--serif)}
+.pillar small{font-family:var(--mono);font-size:.59rem;letter-spacing:.14em;color:var(--muted)}
+.pillar h3{margin:34px 0 10px;font-size:1.35rem;letter-spacing:.09em}
+.pillar p{margin:0;color:var(--sub);font-size:.91rem}
+
+.service-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.service{
+  grid-column:span 4;
+  min-height:260px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  padding:22px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(20,21,18,.9),rgba(11,12,10,.94));
+  text-decoration:none;
+  overflow:hidden;
+  transition:.25s ease;
+}
+.service:hover{transform:translateY(-3px);border-color:#565149;background:linear-gradient(180deg,rgba(25,26,22,.96),rgba(12,13,11,.98))}
+.service::after{content:attr(data-index);position:absolute;right:12px;bottom:-22px;font-family:var(--latin);font-size:7rem;color:rgba(255,255,255,.026);line-height:1;pointer-events:none}
+.service .tag{font-family:var(--mono);font-size:.59rem;letter-spacing:.14em;color:var(--muted);margin-bottom:34px}
+.service h3{margin:0 0 10px;font-size:1.35rem;line-height:1.45;letter-spacing:.08em;font-weight:600}
+.service p{margin:0;color:var(--sub);font-size:.9rem;line-height:1.75}
+.service .go{margin-top:auto;padding-top:22px;font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;color:var(--blue)}
+.service.featured{grid-column:span 8;background:linear-gradient(135deg,rgba(135,168,188,.10),rgba(20,21,18,.94) 50%,rgba(158,61,55,.05))}
+.service.featured h3{font-size:clamp(1.5rem,3vw,2.25rem)}
+.service.disabled{opacity:.62;cursor:default}
+.service.disabled:hover{transform:none;border-color:var(--line)}
+.status{display:inline-flex;align-items:center;width:max-content;margin-top:14px;padding:3px 7px;border:1px solid var(--line-2);font-family:var(--mono);font-size:.54rem;letter-spacing:.1em;color:var(--muted)}
+
+.route{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);background:rgba(10,11,9,.7)}
+.route-step{position:relative;padding:26px 24px;min-height:190px;border-right:1px solid var(--line)}
+.route-step:last-child{border-right:0}
+.route-no{font-family:var(--mono);font-size:.6rem;color:var(--blue);letter-spacing:.14em}
+.route-step h3{margin:24px 0 8px;font-size:1.12rem;letter-spacing:.09em}
+.route-step p{margin:0;color:var(--sub);font-size:.88rem}
+.route-step a{display:inline-block;margin-top:15px;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;color:var(--blue);text-decoration:none}
+
+.reading-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.72fr);gap:24px;align-items:start}
+.reading-copy{padding:30px;border:1px solid var(--line);background:rgba(15,16,14,.86)}
+.reading-copy p{margin:0 0 18px;color:var(--sub)}
+.reading-copy p:last-of-type{margin-bottom:0}
+.reading-note{padding:25px;border:1px solid var(--line);background:rgba(255,255,255,.018)}
+.reading-note h3{margin:0 0 14px;font-size:1rem;letter-spacing:.12em}
+.reading-note ul{margin:0;padding-left:1.2em;color:var(--sub)}
+.reading-note li+li{margin-top:10px}
+
+.records-shell{border:1px solid var(--line);background:rgba(10,11,9,.74)}
+.records-topline{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:13px 15px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;color:var(--muted)}
+.records-topline strong{color:var(--sub);font-weight:400}
+.records-tools{
+  position:sticky;top:var(--header);z-index:20;
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  padding:14px;
+  border-bottom:1px solid var(--line);
+  background:rgba(11,12,10,.96);
+  backdrop-filter:blur(12px);
+}
+.records-tools input,.records-tools select,.records-tools button{
+  min-height:43px;
+  border:1px solid var(--line-2);
+  background:#0a0b09;
+  color:var(--ink);
+  padding:8px 11px;
+  outline:none;
+  font-family:var(--mono);
+  font-size:.67rem;
+  letter-spacing:.08em;
+}
+.records-tools input{flex:1;min-width:190px}
+.records-tools button{cursor:pointer}
+.records-tools button.active{background:var(--ink);color:#070807}
+.records-list{display:grid}
+.record{display:grid;grid-template-columns:180px minmax(0,1fr);gap:28px;padding:31px;border-bottom:1px solid var(--line)}
+.record:last-child{border-bottom:0}
+.record-meta{font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;color:var(--muted);line-height:1.7}
+.record-kind{display:inline-flex;margin-bottom:9px;color:var(--blue)}
+.record h3{margin:0 0 12px;font-size:clamp(1.2rem,2.5vw,1.65rem);line-height:1.5;letter-spacing:.07em;font-weight:600}
+.record-body{color:var(--sub);white-space:pre-wrap;word-break:break-word}
+.records-state{padding:40px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.69rem;letter-spacing:.1em}
+.records-state button{margin-top:14px}
+.load-row{padding:18px;border-top:1px solid var(--line);text-align:center}
+
+.external-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.external-card{display:block;padding:25px;border:1px solid var(--line);background:rgba(13,14,12,.76);text-decoration:none}
+.external-card:hover{border-color:var(--line-2)}
+.external-card h3{margin:0 0 10px;font-size:1.1rem;letter-spacing:.1em}
+.external-card p{margin:0;color:var(--sub);font-size:.9rem}
+.external-card .external-go{display:block;margin-top:15px;font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;color:var(--blue)}
+
+.footer{padding:44px 0 58px;border-top:1px solid rgba(255,255,255,.06);color:var(--muted)}
+.footer-inner{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;flex-wrap:wrap}
+.footer strong{color:var(--sub);font-weight:500;letter-spacing:.12em}
+.footer-links{display:flex;gap:16px;flex-wrap:wrap}
+.footer-links a{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-decoration:none}
+.footer-links a:hover{color:var(--ink)}
+
+.back-top{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:70;width:46px;height:46px;border:1px solid var(--line-2);background:rgba(8,9,8,.9);color:var(--ink);font-family:var(--mono);cursor:pointer;opacity:0;pointer-events:none;transform:translateY(10px);transition:.25s ease}
+.back-top.show{opacity:1;pointer-events:auto;transform:none}
+.reveal{opacity:0;transform:translateY(20px);transition:.8s ease}
+.reveal.on{opacity:1;transform:none}
+.noscript{margin:20px auto;padding:16px;border:1px solid var(--red);color:#e5aaa5;width:min(calc(100% - 34px),var(--max))}
+
+@media(max-width:920px){
+  .hero-grid,.section-head,.reading-grid{grid-template-columns:1fr}
+  .hero-console{max-width:42rem}
+  .pillar-grid{grid-template-columns:1fr}
+  .pillar{min-height:auto}
+  .service,.service.featured{grid-column:span 6}
+  .section-head{gap:18px}
+  .record{grid-template-columns:1fr;gap:10px}
+  .route{grid-template-columns:1fr}
+  .route-step{border-right:0;border-bottom:1px solid var(--line);min-height:auto}
+  .route-step:last-child{border-bottom:0}
+}
+@media(max-width:720px){
+  :root{--header:66px}
+  .wrap{width:min(calc(100% - 22px),var(--max))}
+  .header-inner{min-height:var(--header);gap:12px}
+  .identity small{display:none}
+  .menu-btn{display:grid}
+  .nav{
+    position:absolute;
+    top:100%;left:0;right:0;
+    display:grid;
+    gap:0;
+    max-height:0;
+    overflow:hidden;
+    background:rgba(7,8,7,.98);
+    border-bottom:0 solid var(--line);
+    transition:max-height .28s ease,border-width .28s ease;
+  }
+  .nav.open{max-height:340px;border-bottom-width:1px}
+  .nav a{padding:14px 22px;border-top:1px solid var(--line)}
+  .nav a::after{display:none}
+  .hero{padding:70px 0 64px;min-height:auto}
+  h1{font-size:clamp(2.75rem,16vw,4.8rem)}
+  .hero-grid{gap:42px}
+  .section{padding:66px 0}
+  .service,.service.featured{grid-column:span 12;min-height:220px}
+  .records-tools{top:var(--header)}
+  .record{padding:23px 18px}
+  .external-grid{grid-template-columns:1fr}
+  .console-stat{padding:17px 14px}
+  .console-stat strong{font-size:1rem}
+}
+@media(max-width:460px){
+  .identity strong{font-size:.82rem;letter-spacing:.1em}
+  .identity-mark{width:39px;height:39px;flex-basis:39px}
+  .console-body{grid-template-columns:1fr}
+  .console-stat{border-right:0}
+  .console-stat:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
+  .console-stat:last-child{border-bottom:0}
+  .records-tools input{min-width:100%;width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none;transition:none}
+  .btn,.service,.nav,.back-top{transition:none}
+  #ambient{display:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">本文へ移動</a>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+<canvas id="ambient" aria-hidden="true"></canvas>
+<noscript><div class="noscript">このサイトの観測記録表示にはJavaScriptが必要です。サービスへの入口は引き続き利用できます。</div></noscript>
+
+<div class="site">
+<header class="header">
+  <div class="wrap header-inner">
+    <a class="identity" href="#top" aria-label="すべての歯が見える トップへ">
+      <span class="identity-mark">視</span>
+      <span><strong>すべての歯が見える</strong><small>RITUAL TECHNICIAN / OBSERVATORY</small></span>
+    </a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mainNav" aria-label="メニューを開く"><span></span></button>
+    <nav class="nav" id="mainNav" aria-label="主要メニュー">
+      <a href="#about">活動</a>
+      <a href="#services">入口</a>
+      <a href="#reading">霊視</a>
+      <a href="#records">記録</a>
+      <a href="#contact">交信</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div class="reveal on">
+        <div class="eyebrow">観測所　第〇九一號</div>
+        <h1>すべての歯が<br>見える</h1>
+        <div class="hero-copy">
+          <p>霊視、祭祀具、実験、作品、遊び。ここは、それぞれ別の入口へ続く観測所です。異界そのものは難解でも、入口まで難解である必要はありません。</p>
+        </div>
+        <div class="hero-actions">
+          <a class="btn primary" href="#services">公開中の入口を見る</a>
+          <a class="btn" href="#records">観測記録を読む</a>
+        </div>
+      </div>
+
+      <aside class="hero-console reveal on" aria-label="観測所の現在状態">
+        <div class="console-head"><span>OBSERVATORY STATUS</span><span class="live">● 接続中</span></div>
+        <div class="console-body">
+          <div class="console-stat"><small>PUBLIC ENTRANCES</small><strong>6</strong></div>
+          <div class="console-stat"><small>ARCHIVE</small><strong id="heroRecordCount">取得中</strong></div>
+          <div class="console-stat"><small>LATEST RECORD</small><strong id="heroLatestTitle">照合中</strong></div>
+          <div class="console-stat"><small>LOCAL TIME</small><strong class="mono" id="localClock">--:--:--</strong></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="about">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div><div class="section-kicker">What happens here</div><h2>この観測所で<br>扱うもの</h2></div>
+        <p>「すべての歯が見える」は、祭祀技師としての実務、霊視、研究、作品、遊びを一つの観測所へ収める名義です。何でも混ぜるのではなく、役割の違う入口として並べています。</p>
+      </div>
+      <div class="pillar-grid">
+        <article class="pillar reveal" data-mark="視"><small>01 / PRACTICE</small><h3>霊視と祭祀</h3><p>相談者の世界の捉え方を観測し、必要に応じて儀式や祭祀具という形へ落とし込みます。</p></article>
+        <article class="pillar reveal" data-mark="具"><small>02 / TOOLS</small><h3>道具と仕組み</h3><p>霊能者や民間宗教者の仕事を支える記録、導線、道具、安全設計をつくります。</p></article>
+        <article class="pillar reveal" data-mark="遊"><small>03 / EXPERIMENT</small><h3>実験と遊び</h3><p>診断、ゲーム、プログラミング言語など、難しい概念を触れる形へ変換します。</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div><div class="section-kicker">Entrances</div><h2>公開中の入口</h2></div>
+        <p>各サービスは別ページで動きます。現在使える入口を先に、その後へ制作中のものを並べました。迷路は作品の中でやればよく、目次まで迷路にする必要はないので。</p>
+      </div>
+
+      <div class="service-grid">
+        <a class="service featured reveal" data-index="01" href="#reading">
+          <span class="tag">SPIRITUAL READING / TELEPHONE</span>
+          <h3>霊視鑑定</h3>
+          <p>電話で話しながら、あなたが世界をどのように捉え、解釈しているかを拝見します。運、縁、業、才能は、その像に付随して観測されます。</p>
+          <span class="go">注意事項と申込方法を見る　↓</span>
+        </a>
+        <a class="service reveal" data-index="02" href="十六霊感診断.html">
+          <span class="tag">DIAGNOSIS</span><h3>十六霊感診断</h3><p>霊感の現れ方を十六の型として観測する診断。</p><span class="go">診断を開く　↗</span>
+        </a>
+        <a class="service reveal" data-index="03" href="gyogen_rin_v1_1_1_largefile_qr.html">
+          <span class="tag">PROGRAMMING LANGUAGE</span><h3>魚言・鱗式</h3><p>魚偏の漢字だけで記述する、実際に動くプログラミング言語と可逆ファイル魚函。</p><span class="go">実行水槽を開く　↗</span>
+        </a>
+        <a class="service reveal" data-index="04" href="バケモンGO.html">
+          <span class="tag">HUNT / OBSERVATION</span><h3>バケモンGO</h3><p>街や生活の中に潜む、まだ分類されていないものを捕まえる。</p><span class="go">狩場を開く　↗</span>
+        </a>
+        <a class="service reveal" data-index="05" href="ヤニブ.html">
+          <span class="tag">CARD GAME</span><h3>ヤニブ</h3><p>考えすぎた頭を、一度ゲームで空にするための余興。</p><span class="go">遊び方を見る　↗</span>
+        </a>
+        <a class="service reveal" data-index="06" href="苦情受付.html">
+          <span class="tag">CLAIMS</span><h3>苦情受付</h3><p>不具合、違和感、苦情。異界にも窓口くらいは必要です。</p><span class="go">受付を開く　↗</span>
+        </a>
+        <article class="service disabled reveal" data-index="07" aria-label="妹字 制作中">
+          <span class="tag">PERSONAL GLYPH</span><h3>妹字</h3><p>依頼者の内側にある「妹の力」を、存在しない一字として制作します。</p><span class="status">制作中</span>
+        </article>
+        <article class="service disabled reveal" data-index="08" aria-label="抽象油絵 あなた 制作中">
+          <span class="tag">PORTRAIT / OIL</span><h3>抽象油絵「あなた」</h3><p>電話で話しながら霊視し、見えた姿を抽象画として描きます。</p><span class="status">制作中</span>
+        </article>
+        <article class="service disabled reveal" data-index="09" aria-label="呼び接ぎの器 制作中">
+          <span class="tag">RITUAL OBJECT</span><h3>呼び接ぎの器</h3><p>古い器の破片を接ぎ、他人の生活の時間を現在へ呼び戻す器。</p><span class="status">制作中</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="route">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div><div class="section-kicker">First route</div><h2>初めて来た人へ</h2></div>
+        <p>何から見ればよいか分からない場合の順路です。三段階あるだけなので、テーマパークの地図ほど残酷ではありません。</p>
+      </div>
+      <div class="route reveal">
+        <article class="route-step"><span class="route-no">STEP 01</span><h3>まず診断する</h3><p>十六霊感診断で、自分の感覚がどの型へ寄っているか確かめます。</p><a href="十六霊感診断.html">診断を開く　↗</a></article>
+        <article class="route-step"><span class="route-no">STEP 02</span><h3>記録を読む</h3><p>観測記録で、活動の考え方や制作の途中経過を眺めます。</p><a href="#records">観測記録へ　↓</a></article>
+        <article class="route-step"><span class="route-no">STEP 03</span><h3>必要なら交信する</h3><p>霊視や制作について具体的に依頼したい場合はXから連絡します。</p><a href="https://x.com/subetenoha" target="_blank" rel="noopener noreferrer">Xを開く　↗</a></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="reading">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div><div class="section-kicker">Reading</div><h2>霊視について</h2></div>
+        <p>占いの結果を断言する場所ではなく、依頼者が世界をどう捉えているか、その像を電話越しに観測する時間です。</p>
+      </div>
+      <div class="reading-grid">
+        <div class="reading-copy reveal">
+          <p>すべ歯は占い師ではありません。昼間は祭祀技師として、霊能者や民間宗教者の鑑定や除霊に同行し、儀式の安全性を確保する仕事をしています。</p>
+          <p>私に視えるのは、あなたがこの世界をどう捉えて、どう解釈しているのかです。付随して、あなたの運や縁、業や才能を拝見することができます。</p>
+          <p>鑑定は主に電話で行います。文章では霊視ができないこと、対面では体調を崩す方がいらっしゃるためです。</p>
+          <div class="hero-actions"><a class="btn primary" href="https://x.com/subetenoha" target="_blank" rel="noopener noreferrer">Xで「鑑定希望」</a></div>
+        </div>
+        <aside class="reading-note reveal">
+          <h3>注意事項</h3>
+          <ul>
+            <li>病気や障害については、必ず医師や医療機関の判断を最優先にしてください。</li>
+            <li>法律相談、犯罪、訴訟、事件に関する判断は専門家へ相談してください。</li>
+            <li>相談時間は20〜30分程度です。内容をメモにしておくと進行が円滑です。</li>
+            <li>良くも悪くも、この世に絶対はありません。鑑定結果は未来や結果を保証しません。</li>
+            <li>雑談は霊能、スピリチュアル、民間信仰に関係する内容に限ります。</li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="records">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div><div class="section-kicker">Archive</div><h2>観測記録</h2></div>
+        <p>公開スプレッドシートから取得した記録です。検索、分類、並び替えができます。取得に失敗した場合は、この端末に残った直近の記録を表示します。</p>
+      </div>
+      <div class="records-shell reveal">
+        <div class="records-topline"><span>PUBLIC ARCHIVE</span><strong id="recordsSummary">接続中</strong></div>
+        <div class="records-tools">
+          <input id="recordQuery" type="search" placeholder="見出し・本文・分類を検索" aria-label="記録を検索">
+          <select id="recordFilter" aria-label="分類で絞り込む"><option value="">すべての分類</option></select>
+          <button id="newestBtn" class="active" type="button">新しい順</button>
+          <button id="oldestBtn" type="button">古い順</button>
+          <button id="clearFilterBtn" type="button">解除</button>
+        </div>
+        <div id="recordsList" class="records-list"><div class="records-state">記録を読み込んでいます…</div></div>
+        <div class="load-row"><button id="loadMoreBtn" class="btn" type="button" hidden>続きを読む</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div><div class="section-kicker">Signals</div><h2>交信と手記</h2></div>
+        <p>日々の交信はX、長い記録はnoteへ分けています。本体サイトは入口と保管庫に徹し、外部の流れを無理に全部飲み込まない構造です。</p>
+      </div>
+      <div class="external-grid">
+        <a class="external-card reveal" href="https://x.com/subetenoha" target="_blank" rel="noopener noreferrer"><h3>交信 ／ X</h3><p>配信、短い観測、告知。最も速い通信路。</p><span class="external-go">Xを開く　↗</span></a>
+        <a class="external-card reveal" href="https://note.com/light_dill8112" target="_blank" rel="noopener noreferrer"><h3>手記 ／ note</h3><p>研究、考察、制作記録。長い文章を収める場所。</p><span class="external-go">noteを開く　↗</span></a>
+        <article class="external-card reveal"><h3>このサイトについて</h3><p>公開ページは入口と観測記録だけに絞り、管理機能は別ページへ分離しています。閲覧者へ操作の都合を背負わせないためです。</p></article>
+        <article class="external-card reveal"><h3>今後の入口</h3><p>妹字、抽象油絵「あなた」、呼び接ぎの器、初心者用米粒写経、薬草栽培標本など。完成したものから公開中の一覧へ接続します。</p></article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div><strong>すべての歯が見える</strong><br><small>理解されなくても成立する異界。その入口だけは読めるようにする。</small></div>
+    <div class="footer-links"><a href="#top">上へ戻る</a><a href="https://x.com/subetenoha" target="_blank" rel="noopener noreferrer">X</a><a href="https://note.com/light_dill8112" target="_blank" rel="noopener noreferrer">note</a></div>
+  </div>
+</footer>
+</div>
+
+<button class="back-top" id="backTop" type="button" aria-label="ページ上部へ戻る">↑</button>
+
+<script>
+(function(){
+  'use strict';
+
+  const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRA1AuFPfz23AiuyNHirTIn8pslZOn8UHyaFzB0SaBWewcErvPV6YIMBy_6tA6MyNTMLjEY11jwDL0w/pub?output=csv';
+  const CACHE_KEY='subetenoha_public_records_v2';
+  const list=document.getElementById('recordsList');
+  const query=document.getElementById('recordQuery');
+  const filter=document.getElementById('recordFilter');
+  const newest=document.getElementById('newestBtn');
+  const oldest=document.getElementById('oldestBtn');
+  const clearFilter=document.getElementById('clearFilterBtn');
+  const more=document.getElementById('loadMoreBtn');
+  const summary=document.getElementById('recordsSummary');
+  const heroCount=document.getElementById('heroRecordCount');
+  const heroLatest=document.getElementById('heroLatestTitle');
+  let all=[];
+  let view=[];
+  let sortDesc=true;
+  let shown=0;
+  const BATCH=10;
+
+  function esc(value){
+    return String(value||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function normalize(value){
+    return String(value||'').normalize('NFKC').toLocaleLowerCase('ja');
+  }
+
+  function parseCSV(text){
+    const rows=[];
+    let row=[];
+    let cur='';
+    let quoted=false;
+    for(let i=0;i<text.length;i++){
+      const ch=text[i];
+      const next=text[i+1];
+      if(quoted){
+        if(ch==='"'&&next==='"'){cur+='"';i++;}
+        else if(ch==='"'){quoted=false;}
+        else{cur+=ch;}
+      }else if(ch==='"'){
+        quoted=true;
+      }else if(ch===','){
+        row.push(cur);cur='';
+      }else if(ch==='\n'){
+        row.push(cur);rows.push(row);row=[];cur='';
+      }else if(ch!=='\r'){
+        cur+=ch;
+      }
+    }
+    if(cur!==''||row.length){row.push(cur);rows.push(row);}
+    return rows;
+  }
+
+  function parseTime(value){
+    const m=String(value||'').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})(?:\D+(\d{1,2})\D+(\d{1,2})(?:\D+(\d{1,2}))?)?/);
+    if(!m)return 0;
+    return new Date(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0)).getTime();
+  }
+
+  function rowsToRecords(rows){
+    const records=[];
+    let start=0;
+    if(rows[0]&&/タイムスタンプ|日付|コンテンツ|見出し|本文/.test(rows[0].join('')))start=1;
+    for(let i=start;i<rows.length;i++){
+      const row=rows[i]||[];
+      const date=(row[0]||'').trim();
+      const kind=(row[1]||'記録').trim()||'記録';
+      const head=(row[2]||'').trim();
+      const body=(row[3]||'').trim();
+      if(!head&&!body)continue;
+      records.push({date,kind,head:head||'（無題）',text:body,time:parseTime(date)||i});
+    }
+    return records;
+  }
+
+  function rebuildFilter(){
+    const selected=filter.value;
+    filter.innerHTML='<option value="">すべての分類</option>';
+    [...new Set(all.map(item=>item.kind))].sort((a,b)=>a.localeCompare(b,'ja')).forEach(kind=>{
+      const option=document.createElement('option');
+      option.value=kind;
+      option.textContent=kind;
+      filter.appendChild(option);
+    });
+    if([...filter.options].some(option=>option.value===selected))filter.value=selected;
+  }
+
+  function updateSummary(sourceLabel){
+    const latest=[...all].sort((a,b)=>b.time-a.time)[0];
+    heroCount.textContent=all.length+'件';
+    heroLatest.textContent=latest?latest.head:'記録なし';
+    summary.textContent=all.length+'件 / '+sourceLabel;
+  }
+
+  function apply(){
+    const q=normalize(query.value.trim());
+    const kind=filter.value;
+    view=all.filter(item=>{
+      if(kind&&item.kind!==kind)return false;
+      if(!q)return true;
+      return normalize(item.kind+' '+item.head+' '+item.text).includes(q);
+    });
+    view.sort((a,b)=>sortDesc?b.time-a.time:a.time-b.time);
+    shown=0;
+    list.innerHTML='';
+    append();
+    summary.textContent=(view.length===all.length?all.length:view.length+' / '+all.length)+'件表示';
+  }
+
+  function append(){
+    if(!view.length){
+      list.innerHTML='<div class="records-state">該当する記録はありません。</div>';
+      more.hidden=true;
+      return;
+    }
+    const end=Math.min(shown+BATCH,view.length);
+    for(let i=shown;i<end;i++){
+      const item=view[i];
+      const article=document.createElement('article');
+      article.className='record';
+      article.innerHTML='<div class="record-meta"><span class="record-kind">'+esc(item.kind)+'</span><br>'+esc(item.date)+'</div><div><h3>'+esc(item.head)+'</h3><div class="record-body">'+esc(item.text)+'</div></div>';
+      list.appendChild(article);
+    }
+    shown=end;
+    more.hidden=shown>=view.length;
+    if(!more.hidden)more.textContent='続きを読む　'+shown+' / '+view.length;
+  }
+
+  function loadFromCache(){
+    try{
+      const cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+      if(!cached||!Array.isArray(cached.records)||!cached.records.length)return false;
+      all=cached.records;
+      rebuildFilter();
+      updateSummary('端末保存');
+      apply();
+      return true;
+    }catch(_){return false;}
+  }
+
+  function fetchRecords(){
+    list.innerHTML='<div class="records-state">記録を読み込んでいます…</div>';
+    summary.textContent='接続中';
+    fetch(CSV_URL,{cache:'no-store'})
+      .then(response=>{if(!response.ok)throw new Error('HTTP '+response.status);return response.text();})
+      .then(text=>{
+        all=rowsToRecords(parseCSV(text));
+        if(!all.length)throw new Error('公開記録が空です');
+        try{localStorage.setItem(CACHE_KEY,JSON.stringify({savedAt:Date.now(),records:all}));}catch(_){}
+        rebuildFilter();
+        updateSummary('公開CSV');
+        apply();
+      })
+      .catch(error=>{
+        if(loadFromCache()){
+          summary.textContent=all.length+'件 / 端末保存（通信失敗）';
+          return;
+        }
+        heroCount.textContent='取得失敗';
+        heroLatest.textContent='通信途絶';
+        summary.textContent='取得失敗';
+        list.innerHTML='<div class="records-state">記録の取得に失敗しました。<br>'+esc(error.message)+'<br><button class="btn" id="retryRecords" type="button">再試行</button></div>';
+        document.getElementById('retryRecords').addEventListener('click',fetchRecords,{once:true});
+      });
+  }
+
+  query.addEventListener('input',apply);
+  filter.addEventListener('change',apply);
+  newest.addEventListener('click',()=>{sortDesc=true;newest.classList.add('active');oldest.classList.remove('active');apply();});
+  oldest.addEventListener('click',()=>{sortDesc=false;oldest.classList.add('active');newest.classList.remove('active');apply();});
+  clearFilter.addEventListener('click',()=>{query.value='';filter.value='';apply();query.focus();});
+  more.addEventListener('click',append);
+  fetchRecords();
+
+  const menuBtn=document.getElementById('menuBtn');
+  const nav=document.getElementById('mainNav');
+  menuBtn.addEventListener('click',()=>{
+    const open=menuBtn.getAttribute('aria-expanded')==='true';
+    menuBtn.setAttribute('aria-expanded',String(!open));
+    menuBtn.setAttribute('aria-label',open?'メニューを開く':'メニューを閉じる');
+    nav.classList.toggle('open',!open);
+  });
+  nav.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{
+    menuBtn.setAttribute('aria-expanded','false');
+    menuBtn.setAttribute('aria-label','メニューを開く');
+    nav.classList.remove('open');
+  }));
+
+  const revealObserver=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){entry.target.classList.add('on');revealObserver.unobserve(entry.target);}
+    });
+  },{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(element=>revealObserver.observe(element));
+
+  const navLinks=[...nav.querySelectorAll('a[href^="#"]')];
+  const sections=navLinks.map(link=>document.querySelector(link.getAttribute('href'))).filter(Boolean);
+  const sectionObserver=new IntersectionObserver(entries=>{
+    const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    if(!visible)return;
+    navLinks.forEach(link=>link.classList.toggle('active',link.getAttribute('href')==='#'+visible.target.id));
+  },{rootMargin:'-20% 0px -65% 0px',threshold:[0,.2,.5]});
+  sections.forEach(section=>sectionObserver.observe(section));
+
+  const progress=document.getElementById('scrollProgress');
+  const backTop=document.getElementById('backTop');
+  function updateScrollUI(){
+    const max=document.documentElement.scrollHeight-innerHeight;
+    const ratio=max>0?scrollY/max:0;
+    progress.style.width=(ratio*100)+'%';
+    backTop.classList.toggle('show',scrollY>700);
+  }
+  addEventListener('scroll',updateScrollUI,{passive:true});
+  addEventListener('resize',updateScrollUI);
+  backTop.addEventListener('click',()=>scrollTo({top:0,behavior:'smooth'}));
+  updateScrollUI();
+
+  const clock=document.getElementById('localClock');
+  function tickClock(){
+    clock.textContent=new Intl.DateTimeFormat('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
+  }
+  tickClock();
+  setInterval(tickClock,1000);
+})();
+
+(function(){
+  'use strict';
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const canvas=document.getElementById('ambient');
+  const ctx=canvas.getContext('2d');
+  let width=0;
+  let height=0;
+  let dpr=1;
+  let points=[];
+  let animationId=0;
+
+  function resize(){
+    dpr=Math.min(devicePixelRatio||1,2);
+    width=innerWidth;
+    height=innerHeight;
+    canvas.width=width*dpr;
+    canvas.height=height*dpr;
+    canvas.style.width=width+'px';
+    canvas.style.height=height+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    points=Array.from({length:width<600?8:14},()=>({x:Math.random()*width,y:Math.random()*height,r:2+Math.random()*5,v:.08+Math.random()*.2,p:Math.random()*Math.PI*2}));
+  }
+
+  function frame(){
+    ctx.clearRect(0,0,width,height);
+    ctx.globalCompositeOperation='lighter';
+    for(const point of points){
+      point.p+=.01;
+      point.y-=point.v;
+      point.x+=Math.sin(point.p)*.12;
+      if(point.y<-20){point.y=height+20;point.x=Math.random()*width;}
+      const gradient=ctx.createRadialGradient(point.x,point.y,0,point.x,point.y,point.r*5);
+      gradient.addColorStop(0,'rgba(210,222,230,.18)');
+      gradient.addColorStop(1,'rgba(210,222,230,0)');
+      ctx.fillStyle=gradient;
+      ctx.beginPath();
+      ctx.arc(point.x,point.y,point.r*5,0,Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalCompositeOperation='source-over';
+    animationId=requestAnimationFrame(frame);
+  }
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){cancelAnimationFrame(animationId);}else{frame();}
+  });
+  addEventListener('resize',resize);
+  resize();
+  frame();
+})();
+</script>
+</body>
+</html>
