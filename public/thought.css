@@ -42,8 +42,6 @@ button{color:inherit}
 .index-row{display:grid;grid-template-columns:90px 1fr;gap:18px;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
 .index-row small{color:var(--muted)}
 .index-row strong{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(20px,3vw,32px);font-weight:500}
-.old-world{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:56px;padding-top:20px;border-top:1px solid var(--line)}
-.old-world a{color:var(--muted);font-size:12px}
 @media (min-width:900px){
   .node{width:84vw}
   .rail{padding-left:8vw;padding-right:8vw}
