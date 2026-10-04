@@ -3,102 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="すべての歯が見える・不氣屋の公式サイト。短編「忍者解釈」、語録、古文書文庫、GRAVITYでの音声配信、商品。">
+<meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、断章と分岐として読むサイト。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#f5f2ea">
-<title>すべての歯が見える｜不氣屋</title>
-<link rel="icon" href="./hitotsu-ore-choji.png" type="image/png">
-<link rel="stylesheet" href="./site.css">
-<link rel="stylesheet" href="./nav.css">
+<meta name="theme-color" content="#f4f1e8">
+<title>すべての歯が見える</title>
+<link rel="stylesheet" href="./thought.css">
 </head>
 <body>
-<a class="skip-link" href="#main">本文へ</a>
-<div class="site-shell">
-<nav class="global-nav" aria-label="主要メニュー">
-<a class="brand" href="./">すべての歯が見える</a>
-<div class="nav-links"><a href="./#read">読む</a><a href="./#broadcast">配信</a><a href="./products/">商品</a><a href="./theory/">理論</a></div></nav>
-<main id="main">
-<header class="home-hero">
-<div><p class="kicker">不氣屋 / 丁子方</p><h1>すべての<br>歯が見える</h1><p class="motto">呪われてても心は錦。</p><p class="hero-intro">祭祀技師、映像制作、配信。<br>ここに、話と作品を置いています。</p></div>
-<aside class="hero-record" aria-label="語録より"><p class="kicker">語録 / 001</p><p class="record-word">人類の付録</p><span class="record-source">言いたいことが2個ある</span><a class="text-link" href="./words/">語録を開く</a></aside>
+<a class="skip-link" href="#thought">本文へ</a>
+
+<header class="topbar">
+  <a class="wordmark" href="./" aria-label="すべての歯が見える">すべての歯が見える</a>
+  <button class="map-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">全体を見る</button>
 </header>
-<section class="read-section" id="read" aria-labelledby="read-title">
-<div class="section-heading"><h2 id="read-title">読む</h2><span class="section-no">01 / 記録と作品</span></div>
-<article class="feature-story">
-<div><p class="kicker">短編小説 / なます市警</p><h3>忍者解釈</h3><p class="story-meta">著者：打猿</p></div>
-<div><p class="story-intro">なます市立激怒高等学校、二年三組。<br>一クラス、三十二人の変死事件。<br>警察、専門家、行政、そして忍者が、荒唐無稽な死因を真顔で処理する。</p><a class="text-link" href="./works/ninja-kaishaku/">本文を読む</a></div>
-</article>
-<div class="shelf">
-<article class="shelf-item"><p class="kicker">ことば</p><h3>語録</h3><ul class="word-preview"><li>玉露とリプトン</li><li>大なめくじの神話</li><li>ツルッと人を怒らせる</li></ul><a class="text-link" href="./words/">語録を読む</a></article>
-<article class="shelf-item"><p class="kicker">文庫</p><h3>古文書文庫</h3><p>時代、人物、文書の種類から探す。原資料と、読める本文を辿るための文庫。</p><a class="text-link" href="./komonjo/">文庫を開く</a></article>
-<article class="shelf-item"><p class="kicker">作業仮説</p><h3>理論</h3><p>知覚、記録、道具。不可解な経験を扱うための、三つの見方。</p><a class="text-link" href="./theory/">理論を読む</a></article>
-</div>
-</section>
-<section class="broadcast-section" id="broadcast" aria-labelledby="broadcast-title">
-<div class="section-heading"><h2 id="broadcast-title">配信</h2><span class="section-no">02 / 声</span></div>
-<div class="broadcast-layout"><div><h3>GRAVITY</h3><p>音声配信</p><p class="broadcast-name">すべての歯が見える</p></div><div><p>GRAVITYで「すべての歯が見える」として配信しています。アプリ内で、この名前を検索してください。</p><p class="broadcast-note">配信から来た方は、上の「読む」から作品と語録へ。話の続きを、ここに置いていきます。</p></div></div>
-</section>
-<section class="shop-section" id="products" aria-labelledby="products-title">
-<div class="section-heading"><h2 id="products-title">商品と相談</h2><a class="text-link" href="./products/">商品一覧</a></div>
-<div class="shop-layout">
-<article class="shop-item"><p class="kicker">悪ふざけ</p><h3>パワーワード札</h3><p class="price">1,000円</p><a class="text-link" href="./products/#joke-title">商品を見る</a></article>
-<article class="shop-item"><p class="kicker">対話</p><h3>人生相談</h3><p>宇宙の帝王モード／<br>おもしろい刑事さんモード</p><p class="price">各60分 / 5,000円</p><a class="text-link" href="./products/#service-title">相談の案内を読む</a></article>
-</div>
-</section>
-<section class="greeting-section" id="greeting" aria-labelledby="greeting-title">
-<div class="section-heading"><h2 id="greeting-title">ごあいさつ</h2><span class="section-no">03 / すべての歯が見える</span></div>
-<details class="greeting-details"><summary>祭祀技師という仕事</summary><div class="greeting-body"><p>
-          『すべての歯が見える』でございます。<br>
-          祭祀技師という仕事をしております。<br>
-          儀式や祈りを設計するエンジニア、と言えば分かりやすいでしょうか。<br>
-          人類は長い歴史の中で、さまざまな「祈り」の形を生み出してきました。<br>
-          伝統、文化、習慣、哲学、思想、規範。<br>
-          あるいは、もっと曖昧な、場の空気や雰囲気のようなもの。<br>
-          祈りは、社会のあらゆる場所で実践され、信じられ、形を変えながら今日まで残ってきました。<br>
-          けれども今では、飛行機に乗れば遠い国へ一日で行けます。<br>
-          インターネットを使えば、世界中の人とすぐに話せます。<br>
-          医学や農業、科学技術も発達し、かつて祈りに託されていた多くの願いを、別の方法で叶えられるようになりました。<br>
-          子孫繁栄。<br>
-          五穀豊穣。<br>
-          無病息災。<br>
-          そうした大きな願いを、社会そのものが少しずつ引き受けるようになった時代に、祈りには何が残るのでしょうか。<br>
-          おそらく、ずいぶん個人的な願いです。<br>
-          好きな人とねんごろになりたい。<br>
-          この仕事で褒められたい。<br>
-          子どもたちには安心して眠ってもらいたい。<br>
-          どうにもならないことに、一矢報いたい。<br>
-          そういう、小さくて、切実で、他人には説明しづらい願いのために、祈りはまだ残っているのだと思います。<br>
-          我々は、そこに新しい祈りの形を提案します。<br>
-          「ここまで頑張ってお願いしたんだから、きっと良くなるはずだろう」<br>
-          そんな実感をつくるための、祈りと儀式を設計します。<br>
-          我々が提供するものは、少し高額で、やや面倒です。<br>
-          時間がかかることもあります。<br>
-          道具が必要なこともあります。<br>
-          意味の分からないことを、真面目にやっていただく場合もあります。<br>
-          でも、祈りって、たぶんそういうものでしょう。<br>
-          簡単すぎると、祈った気がしない。<br>
-          何かを用意して、手を動かして、少し時間を使う。<br>
-          その手間ごと含めて、祈りなのだと思います。<br>
-          おかえりなさい。<br>
-          我々は、あなたの祈りを肯定します。
-        </p></div></details>
-<details class="greeting-details"><summary>丁子方より</summary><div class="greeting-body"><div class="greeting-copy">
-        <p class="address">同業各位</p>
-        <p>この度、目出度く暖簾分けと相成り候（ハゲに破門された）。</p>
-        <p>蛸舟方戦後派改め、独立独歩。丁子方代表、すべての歯が見える名義での再出発をいたします。</p>
-        <p>技術的な連続性は当方の理解する範囲で維持されております。</p>
-        <p>商品の印は全て一つ折れ丁子に変更しております。予めご了承ください。</p>
-        <p>当方、守り神は<br>左祢見延奈久尓（さねみえなくに）<br>（出典・作者未詳　万葉集巻十四　三三九一　東歌）<br>登許波尒毛我母（とこはにもがも）<br>（出典・作者未詳　万葉集巻十四　三四三六　東歌）<br>といたします。</p>
-        <p>法は擬吠声、摺鉢舞、口霞を主といたします。</p>
-        <div class="greeting-postscript">
-          <h2>追記</h2>
-          <p class="requests">・大仏廻国・中京編のフィルムを断片でもお持ちの方。<br>・綿島の上陸可能地点について情報をお持ちの方。<br>・谷要（たにかなめ）と接触された経験をお持ちの方。</p>
-          <p>情報が大変不足しております。ご一報ください。</p>
-        </div>
-      </div></div></details>
-</section>
+
+<main id="thought" class="thought-shell" aria-live="polite">
+  <section class="rail-wrap" aria-label="思考の流れ">
+    <div class="rail" id="rail"></div>
+  </section>
+
+  <nav class="branch-nav" id="branchNav" aria-label="次の分岐"></nav>
+
+  <p class="gesture-note">横へ送る / 矢印キーでも移動できます</p>
 </main>
-<footer class="public-footer"><div><b>すべての歯が見える</b><p>呪われてても心は錦。</p></div><nav aria-label="フッターメニュー"><a href="./#read">作品・読み物</a><a href="./#broadcast">配信</a><a href="mailto:nazonoryutarou@gmail.com">お問い合わせ</a></nav></footer>
-</div>
+
+<aside class="utility-panel" id="utilityPanel" hidden>
+  <div class="utility-inner">
+    <div class="utility-head">
+      <p>INDEX</p>
+      <button id="closePanel" type="button">閉じる</button>
+    </div>
+    <div id="nodeIndex" class="node-index"></div>
+    <nav class="old-world" aria-label="既存コンテンツ">
+      <a href="./words/">語録</a>
+      <a href="./works/ninja-kaishaku/">忍者解釈</a>
+      <a href="./komonjo/">古文書文庫</a>
+      <a href="./theory/">理論</a>
+      <a href="./products/">商品</a>
+      <a href="./workboard/">企画管理</a>
+    </nav>
+  </div>
+</aside>
+
+<noscript>この閲覧画面にはJavaScriptが必要です。</noscript>
+<script src="./thought.js" defer></script>
 </body>
 </html>
