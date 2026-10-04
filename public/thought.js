@@ -48,12 +48,18 @@ function render(){
 function updateBranches(){
   const node = nodes[current];
   if(!node){ branchNav.innerHTML=""; return; }
+  const nextNode = node.next ? nodes.find(n=>n.id===node.next) : null;
   const children = (node.children || []).map(id=>nodes.find(n=>n.id===id)).filter(Boolean);
-  branchNav.innerHTML = children.map(child => `
+  const links = [];
+  if(nextNode){
+    links.push(`<button class="branch-link" type="button" data-target="${escapeHTML(nextNode.id)}">${escapeHTML(nextNode.id)} → ${escapeHTML(nextNode.title)}</button>`);
+  }
+  links.push(...children.map(child => `
     <button class="branch-link" type="button" data-target="${escapeHTML(child.id)}">
-      ${escapeHTML(child.id)} → ${escapeHTML(child.title)}
+      ${escapeHTML(child.id)} ↘ ${escapeHTML(child.title)}
     </button>
-  `).join("");
+  `));
+  branchNav.innerHTML = links.join("");
   branchNav.querySelectorAll("[data-target]").forEach(btn=>{
     btn.addEventListener("click",()=>jumpTo(btn.dataset.target));
   });
