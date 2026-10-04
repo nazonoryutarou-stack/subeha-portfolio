@@ -14,8 +14,8 @@ button{color:inherit}
 .skip-link{position:fixed;left:1rem;top:-4rem;z-index:100;background:var(--ink);color:var(--paper);padding:.7rem 1rem}
 .skip-link:focus{top:1rem}
 .topbar{position:fixed;inset:0 0 auto 0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(18px,4vw,54px);background:linear-gradient(var(--paper) 72%,rgba(244,241,232,0));pointer-events:none}
-.wordmark,.map-button{pointer-events:auto}
-.wordmark{color:var(--ink);text-decoration:none;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-weight:700;letter-spacing:.08em}
+.crest-home,.map-button{pointer-events:auto}
+.crest-home{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;text-decoration:none}.crest-home img{display:block;width:34px;height:34px;object-fit:contain}
 .map-button{border:0;border-bottom:1px solid var(--ink);padding:3px 0;background:transparent;cursor:pointer;font-size:12px;letter-spacing:.08em}
 .thought-shell{min-height:100svh;display:grid;grid-template-rows:1fr auto auto;overflow:hidden}
 .rail-wrap{display:flex;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;padding:90px 0 32px}
