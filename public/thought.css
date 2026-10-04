@@ -1,0 +1,53 @@
+:root{
+  --paper:#f4f1e8;
+  --ink:#171715;
+  --muted:#817c72;
+  --line:#c9c3b6;
+  --soft:#ebe7dd;
+  --accent:#1f3f36;
+}
+*{box-sizing:border-box}
+html{background:var(--paper);color:var(--ink)}
+body{margin:0;min-height:100svh;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;background:var(--paper)}
+button,a{font:inherit}
+button{color:inherit}
+.skip-link{position:fixed;left:1rem;top:-4rem;z-index:100;background:var(--ink);color:var(--paper);padding:.7rem 1rem}
+.skip-link:focus{top:1rem}
+.topbar{position:fixed;inset:0 0 auto 0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(18px,4vw,54px);background:linear-gradient(var(--paper) 72%,rgba(244,241,232,0));pointer-events:none}
+.wordmark,.map-button{pointer-events:auto}
+.wordmark{color:var(--ink);text-decoration:none;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-weight:700;letter-spacing:.08em}
+.map-button{border:0;border-bottom:1px solid var(--ink);padding:3px 0;background:transparent;cursor:pointer;font-size:12px;letter-spacing:.08em}
+.thought-shell{min-height:100svh;display:grid;grid-template-rows:1fr auto auto;overflow:hidden}
+.rail-wrap{display:flex;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;padding:90px 0 32px}
+.rail-wrap::-webkit-scrollbar{display:none}
+.rail{display:flex;align-items:stretch;min-width:max-content}
+.node{position:relative;width:100vw;max-width:100vw;min-height:56svh;display:flex;align-items:center;justify-content:center;padding:7vw clamp(24px,10vw,150px);scroll-snap-align:center}
+.node::after{content:"";position:absolute;right:-9vw;top:50%;width:18vw;border-top:1px solid var(--line);pointer-events:none}
+.node:last-child::after{display:none}
+.card{width:min(760px,100%);display:grid;gap:22px}
+.node-id{margin:0;color:var(--muted);font-size:12px;letter-spacing:.18em;font-variant-numeric:tabular-nums}
+.node h1{margin:0;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(40px,8vw,92px);font-weight:500;line-height:1.05;letter-spacing:-.04em}
+.body{display:grid;gap:.9em;max-width:720px}
+.body p{margin:0;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(18px,2.15vw,25px);line-height:1.9}
+.branch-nav{min-height:68px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 22px 12px}
+.branch-link{border:1px solid var(--line);background:transparent;padding:10px 16px;cursor:pointer;text-decoration:none;color:var(--ink);border-radius:999px;font-size:13px}
+.branch-link:hover,.branch-link:focus-visible{border-color:var(--ink)}
+.gesture-note{margin:0;padding:0 18px 18px;text-align:center;color:var(--muted);font-size:10px;letter-spacing:.08em}
+.utility-panel{position:fixed;inset:0;z-index:40;background:rgba(244,241,232,.985);overflow:auto}
+.utility-inner{width:min(980px,100%);margin:auto;padding:28px clamp(20px,6vw,70px) 72px}
+.utility-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:14px}
+.utility-head p{margin:0;font-size:12px;letter-spacing:.18em}
+.utility-head button{border:0;background:transparent;cursor:pointer}
+.node-index{display:grid;gap:0;margin-top:30px}
+.index-row{display:grid;grid-template-columns:90px 1fr;gap:18px;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.index-row small{color:var(--muted)}
+.index-row strong{font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(20px,3vw,32px);font-weight:500}
+.old-world{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:56px;padding-top:20px;border-top:1px solid var(--line)}
+.old-world a{color:var(--muted);font-size:12px}
+@media (min-width:900px){
+  .node{width:84vw}
+  .rail{padding-left:8vw;padding-right:8vw}
+}
+@media (prefers-reduced-motion:no-preference){
+  .rail-wrap{scroll-behavior:smooth}
+}
