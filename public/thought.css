@@ -29,6 +29,8 @@ button{color:inherit}
 .node h1{margin:0;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(40px,8vw,92px);font-weight:500;line-height:1.05;letter-spacing:-.04em}
 .body{display:grid;gap:.9em;max-width:720px}
 .body p{margin:0;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(18px,2.15vw,25px);line-height:1.9}
+.body a{color:inherit;text-decoration-thickness:1px;text-underline-offset:.16em;overflow-wrap:anywhere}
+.body a:hover,.body a:focus-visible{color:var(--accent)}
 .branch-nav{min-height:68px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 22px 12px}
 .branch-link{border:1px solid var(--line);background:transparent;padding:10px 16px;cursor:pointer;text-decoration:none;color:var(--ink);border-radius:999px;font-size:13px}
 .branch-link:hover,.branch-link:focus-visible{border-color:var(--ink)}
