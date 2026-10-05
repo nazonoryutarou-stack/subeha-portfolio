@@ -14,6 +14,20 @@ function escapeHTML(value=""){
   return value.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 }
 
+function linkifyText(value=""){
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  let html = "";
+  let lastIndex = 0;
+  for (const match of value.matchAll(urlPattern)) {
+    html += escapeHTML(value.slice(lastIndex, match.index));
+    const url = match[0];
+    html += `<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(url)}</a>`;
+    lastIndex = match.index + url.length;
+  }
+  html += escapeHTML(value.slice(lastIndex));
+  return html;
+}
+
 function render(){
   rail.innerHTML = nodes.map((node, i) => `
     <article class="node" data-id="${escapeHTML(node.id)}" id="node-${escapeHTML(node.id)}">
@@ -21,7 +35,7 @@ function render(){
         <p class="node-id">${escapeHTML(node.id)}</p>
         <h1>${escapeHTML(node.title)}</h1>
         <div class="body">
-          ${node.body.map(p => `<p>${escapeHTML(p)}</p>`).join("")}
+          ${node.body.map(p => `<p>${linkifyText(p)}</p>`).join("")}
         </div>
       </div>
     </article>
