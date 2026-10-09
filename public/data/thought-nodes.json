@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "root": "1-1",
   "nodes": [
     {
@@ -42,6 +42,16 @@
         "俺はこれで行く。https://youtu.be/URkdYPWq93A?si=-9FKyAM_emOC11LW",
         "剣の舞でもいい気がする。",
         "好きに決めろ。歌詞がないものをおすすめする。"
+      ],
+      "parent": null,
+      "next": "1-4",
+      "children": []
+    },
+    {
+      "id": "1-4",
+      "title": "幸せな世界",
+      "body": [
+        "全人類が「壊れない肝臓」を持っていること。"
       ],
       "parent": null,
       "next": null,
