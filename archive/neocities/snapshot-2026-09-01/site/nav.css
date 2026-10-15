@@ -1,0 +1,8 @@
+.global-nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 2px 22px;margin-bottom:5svh;border-bottom:.75px solid rgba(24,22,18,.28)}
+.global-nav .brand{color:#181612;text-decoration:none;font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:10px;font-weight:500;letter-spacing:.34em;white-space:nowrap}
+.global-nav .nav-links{display:flex;align-items:center;gap:28px}
+.global-nav .nav-links a{position:relative;color:#756f65;text-decoration:none;font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif;font-size:10px;font-weight:500;letter-spacing:.22em;transition:color .35s ease,opacity .35s ease}
+.global-nav .nav-links a:hover,.global-nav .nav-links a:focus-visible{color:#181612;text-decoration:none}
+.global-nav .nav-links a[aria-current="page"]{color:#181612}
+.global-nav .nav-links a[aria-current="page"]::after{content:"";position:absolute;left:0;right:.22em;bottom:-8px;height:1px;background:#9b3f2f;opacity:.72}
+@media(max-width:620px){.global-nav{margin-bottom:4svh;padding-bottom:18px}.global-nav .brand{font-size:9px;letter-spacing:.24em}.global-nav .nav-links{gap:20px}.global-nav .nav-links a{font-size:9px}}

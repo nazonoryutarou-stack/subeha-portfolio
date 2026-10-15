@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SEKKA STUDIO｜ただの石。それ以上の、静けさ。</title>
+  <meta name="description" content="ただの石を最大限よく見せるための非商用デモサイト。商品リンクなし。購入導線なし。石だけあり。">
+  <style>
+    :root{
+      --ink:#11110f;
+      --ink-2:#1c1b18;
+      --paper:#f3efe7;
+      --paper-2:#e7dfd2;
+      --stone:#777064;
+      --stone-hi:#b9b0a0;
+      --muted:#8b8273;
+      --line:rgba(30,28,24,.16);
+      --white:#fffaf0;
+      --shadow:0 34px 90px rgba(0,0,0,.34);
+      --serif:"Times New Roman","Yu Mincho","Hiragino Mincho ProN",serif;
+      --sans:system-ui,-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;background:var(--ink);color:var(--paper)}
+    body{margin:0;font-family:var(--sans);letter-spacing:.03em;line-height:1.85;background:var(--ink);overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit;color:inherit}
+    ::selection{background:#d9c9ad;color:#111}
+
+    .noise{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.18;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E")}
+    .site{position:relative;z-index:1}
+
+    .header{position:fixed;top:0;left:0;right:0;z-index:20;display:grid;grid-template-columns:220px 1fr 150px;align-items:center;gap:24px;padding:24px clamp(18px,4vw,54px);background:linear-gradient(to bottom,rgba(12,12,11,.82),rgba(12,12,11,.18),transparent);backdrop-filter:blur(10px)}
+    .brand{font-family:var(--serif);letter-spacing:.35em;line-height:1;display:inline-grid;gap:5px;text-transform:uppercase;font-size:25px;font-weight:700}
+    .brand small{font-family:var(--sans);font-size:9px;letter-spacing:.62em;font-weight:600;color:rgba(243,239,231,.72)}
+    .nav{display:flex;justify-content:center;gap:clamp(18px,4vw,64px);font-family:var(--serif);font-size:14px;color:rgba(243,239,231,.84)}
+    .nav a{position:relative;padding:8px 0}
+    .nav a:after{content:"";position:absolute;left:0;right:100%;bottom:4px;height:1px;background:var(--paper);transition:.35s ease}
+    .nav a:hover:after{right:0}
+    .header-end{display:flex;align-items:center;justify-content:flex-end;gap:24px;font-family:var(--serif);font-size:13px;color:rgba(243,239,231,.82)}
+    .hamb{width:34px;height:22px;border:0;background:transparent;padding:0;display:grid;gap:6px;cursor:pointer}
+    .hamb span{display:block;height:1px;background:var(--paper)}
+
+    .hero{min-height:100svh;display:grid;grid-template-columns:minmax(300px,.9fr) minmax(420px,1.1fr);align-items:center;gap:7vw;padding:132px clamp(20px,7vw,120px) 70px;background:radial-gradient(circle at 75% 35%,rgba(197,183,154,.16),transparent 27%),linear-gradient(110deg,#050505 0%,#11100e 50%,#2b2925 100%);position:relative;overflow:hidden}
+    .hero:before{content:"";position:absolute;inset:auto -12% -24% -12%;height:48%;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.55));pointer-events:none}
+    .eyebrow{font-family:var(--serif);text-transform:uppercase;font-size:13px;letter-spacing:.22em;color:rgba(243,239,231,.58);margin:0 0 24px}
+    .hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(42px,6.4vw,91px);line-height:1.22;letter-spacing:.08em;margin:0 0 28px;text-wrap:balance;text-shadow:0 12px 50px rgba(0,0,0,.5)}
+    .lead{font-size:clamp(15px,1.25vw,18px);max-width:640px;color:rgba(243,239,231,.72);margin:0 0 38px}
+    .actions{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:52px}
+    .btn{min-width:178px;display:inline-flex;align-items:center;justify-content:center;padding:14px 24px;border:1px solid rgba(243,239,231,.6);font-family:var(--serif);letter-spacing:.12em;font-size:14px;transition:.28s ease}
+    .btn.primary{background:var(--paper);color:#111;border-color:var(--paper)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 18px 45px rgba(0,0,0,.26)}
+    .micro{display:grid;grid-template-columns:repeat(3,max-content);gap:20px 38px;margin:0;color:rgba(243,239,231,.72);font-size:13px}
+    .micro div{display:grid;gap:2px}
+    .micro dt{font-family:var(--serif);letter-spacing:.2em;color:rgba(243,239,231,.44)}
+    .micro dd{margin:0;color:rgba(243,239,231,.86)}
+
+    .stage{min-height:560px;position:relative;display:grid;place-items:center;isolation:isolate}
+    .plinth{position:absolute;width:min(78%,610px);height:210px;bottom:6%;right:2%;background:linear-gradient(135deg,#a19a8b,#706b62 48%,#383633 49%,#252422 100%);box-shadow:var(--shadow);transform:perspective(900px) rotateX(5deg) rotateY(-19deg);border:1px solid rgba(255,255,255,.16)}
+    .plinth:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.16),transparent 40%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E")}
+    .stone-svg{width:min(78vw,660px);height:auto;position:relative;z-index:2;filter:drop-shadow(0 44px 40px rgba(0,0,0,.55))}
+    .stone-shadow{position:absolute;width:54%;height:48px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.62),transparent 72%);bottom:26%;right:17%;z-index:1;filter:blur(7px)}
+
+    .strip{display:grid;grid-template-columns:repeat(4,1fr);background:var(--paper);color:var(--ink);border-top:1px solid rgba(255,255,255,.55);border-bottom:1px solid var(--line)}
+    .view{min-height:260px;border-right:1px solid var(--line);display:grid;grid-template-rows:1fr auto;align-items:center;justify-items:center;padding:28px 22px 19px;background:linear-gradient(180deg,#f8f5ee,#eee7dc)}
+    .view:nth-child(2){background:#e6dfd3}
+    .view:last-child{border-right:0}
+    .view svg{width:min(78%,270px);max-height:176px;filter:drop-shadow(0 24px 22px rgba(50,45,38,.18))}
+    .view.texture svg{width:100%;height:180px;max-height:none;filter:none}
+    .view span{font-family:var(--serif);letter-spacing:.16em;font-size:12px;color:rgba(17,17,15,.62)}
+
+    .material{background:linear-gradient(180deg,#f3efe7,#e7dfd2);color:var(--ink);display:grid;grid-template-columns:.7fr 1.3fr 1fr;gap:44px;padding:72px clamp(20px,5vw,72px);border-bottom:1px solid var(--line)}
+    .dark{color:rgba(17,17,15,.52);margin-bottom:12px}
+    .section-title h2,.material h2,.process h2,.closing h2{font-family:var(--serif);font-weight:400;letter-spacing:.08em;line-height:1.45;margin:0;font-size:clamp(27px,3vw,48px)}
+    .specs{display:grid;grid-template-columns:1fr 1fr;gap:0 42px;border-left:1px solid var(--line);border-right:1px solid var(--line);padding:0 34px}
+    .spec{display:grid;grid-template-columns:120px 1fr;gap:18px;border-bottom:1px solid var(--line);padding:13px 0;align-items:baseline}
+    .spec span{font-family:var(--serif);color:rgba(17,17,15,.56);font-size:14px}
+    .spec strong{font-size:15px;font-weight:600;letter-spacing:.06em}
+    .philo p{margin:22px 0 0;color:rgba(17,17,15,.62)}
+
+    .process{display:grid;grid-template-columns:.9fr 1.1fr;gap:70px;padding:98px clamp(20px,7vw,120px);background:#11110f;color:var(--paper)}
+    .process p:not(.eyebrow){color:rgba(243,239,231,.68);max-width:660px}
+    .steps{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:rgba(243,239,231,.14);border:1px solid rgba(243,239,231,.14)}
+    .steps li{display:grid;grid-template-columns:70px 160px 1fr;gap:22px;align-items:center;background:#171613;padding:26px 28px}
+    .steps span{font-family:var(--serif);color:rgba(243,239,231,.38)}
+    .steps strong{font-family:var(--serif);font-size:22px;font-weight:400;letter-spacing:.1em}
+    .steps em{font-style:normal;color:rgba(243,239,231,.62)}
+
+    .gallery{background:var(--paper);color:var(--ink);padding:78px clamp(20px,5vw,72px)}
+    .gallery-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:32px}
+    .gallery-grid{display:grid;grid-template-columns:1.15fr .85fr 1fr;grid-auto-rows:250px;gap:14px}
+    .gallery-card{position:relative;overflow:hidden;background:#cbc1b2;box-shadow:0 20px 55px rgba(39,35,28,.08);border:1px solid rgba(17,17,15,.08)}
+    .gallery-card.large{grid-row:span 2}
+    .gallery-art{position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.35),transparent 22%),linear-gradient(135deg,#8b806f,#332f29);filter:saturate(.86)}
+    .gallery-card:nth-child(2) .gallery-art{background:radial-gradient(ellipse at 70% 20%,rgba(255,247,221,.62),transparent 28%),linear-gradient(135deg,#2a251f,#9d8e75)}
+    .gallery-card:nth-child(3) .gallery-art{background:radial-gradient(circle at 84% 22%,#d7d0b7,transparent 20%),linear-gradient(90deg,#1c1713,#604f3e 42%,#bfd0a8)}
+    .gallery-card:nth-child(4) .gallery-art{background:radial-gradient(circle at 76% 34%,rgba(255,255,255,.6),transparent 5%),radial-gradient(circle at 59% 58%,rgba(255,255,255,.35),transparent 4%),linear-gradient(135deg,#121212,#343c35,#928776)}
+    .gallery-card:nth-child(5) .gallery-art{background:linear-gradient(90deg,#292824 0 52%,#756c5d 52% 100%)}
+    .gallery-stone{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);width:42%;aspect-ratio:1.55/.9;border-radius:58% 45% 50% 48%;background:radial-gradient(circle at 36% 26%,#b6ad9d 0 6%,transparent 20%),radial-gradient(circle at 64% 70%,#4a453d,transparent 42%),linear-gradient(135deg,#938b7d,#5a554d);box-shadow:0 22px 27px rgba(0,0,0,.33);overflow:hidden}
+    .gallery-stone:before{content:"";position:absolute;inset:-40%;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='1.3' numOctaves='4'/%3E%3C/filter%3E%3Crect width='90' height='90' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E");mix-blend-mode:multiply;opacity:.45}
+    .gallery-card figcaption{position:absolute;left:18px;bottom:14px;font-family:var(--serif);letter-spacing:.14em;font-size:12px;color:rgba(255,250,240,.78);text-shadow:0 2px 14px rgba(0,0,0,.9)}
+
+    .closing{padding:118px clamp(20px,7vw,120px);background:radial-gradient(circle at 55% 0%,rgba(211,195,161,.15),transparent 30%),#0b0b0a;text-align:center;color:var(--paper)}
+    .closing div{max-width:830px;margin:auto}
+    .closing p:not(.eyebrow){color:rgba(243,239,231,.68);font-size:17px}
+    .footer{display:grid;grid-template-columns:1fr auto auto;gap:38px;align-items:center;padding:34px clamp(20px,4vw,56px);background:#060606;color:rgba(243,239,231,.68);font-size:13px;border-top:1px solid rgba(243,239,231,.12)}
+    .footer strong{font-family:var(--serif);letter-spacing:.18em;color:var(--paper)}
+    .footer p{margin:5px 0 0}.footer nav{display:flex;gap:28px;flex-wrap:wrap}.footer a:hover{color:var(--paper)}
+
+    [data-reveal]{opacity:0;transform:translateY(20px);transition:opacity .75s ease,transform .75s ease}
+    [data-reveal].show{opacity:1;transform:none}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    @media (max-width:980px){
+      .header{grid-template-columns:1fr auto;padding:18px 20px;background:rgba(9,9,8,.84)}
+      .nav{display:none;position:absolute;top:74px;left:16px;right:16px;background:#151410;border:1px solid rgba(243,239,231,.14);padding:18px;box-shadow:0 26px 70px rgba(0,0,0,.35)}
+      .nav.open{display:grid;gap:8px;justify-content:stretch}.nav a{padding:10px 0}.header-end{gap:16px}.hero{grid-template-columns:1fr;gap:30px;padding-top:114px}.stage{min-height:430px;order:-1}.plinth{width:78%;height:150px;right:10%;bottom:8%}.hero-copy{max-width:760px}.material{grid-template-columns:1fr;gap:28px}.specs{border:0;padding:0;grid-template-columns:1fr 1fr}.process{grid-template-columns:1fr}.gallery-grid{grid-template-columns:1fr 1fr;grid-auto-rows:220px}.gallery-card.large{grid-row:span 1}.footer{grid-template-columns:1fr}.footer nav{gap:14px 22px}
+    }
+    @media (max-width:620px){
+      body{line-height:1.75}.brand{font-size:20px}.header{padding:14px 14px}.header-end span{display:none}.hero{padding:100px 17px 44px}.hero h1{font-size:42px;letter-spacing:.04em}.lead{font-size:15px}.actions{display:grid}.btn{width:100%}.micro{grid-template-columns:1fr;gap:8px}.stage{min-height:330px}.stone-svg{width:100%}.strip{grid-template-columns:1fr 1fr}.view{min-height:210px;padding:20px 14px}.material{padding:48px 17px}.specs{grid-template-columns:1fr}.spec{grid-template-columns:92px 1fr}.process{padding:62px 17px;gap:34px}.steps li{grid-template-columns:1fr;gap:8px;padding:22px}.gallery{padding:48px 17px}.gallery-head{display:block}.gallery-grid{grid-template-columns:1fr;grid-auto-rows:220px}.closing{padding:72px 17px}.footer{padding:28px 17px}.footer nav{display:grid}
+    }
+  </style>
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="site">
+    <header class="header" data-reveal>
+      <a class="brand" href="#top"><span>SEKKA</span><small>STUDIO</small></a>
+      <nav class="nav" id="nav" aria-label="主要ナビゲーション">
+        <a href="#about">About</a><a href="#material">Material</a><a href="#process">Process</a><a href="#gallery">Gallery</a><a href="#philosophy">Philosophy</a>
+      </nav>
+      <div class="header-end"><span>JP / EN</span><button class="hamb" id="menu" aria-label="メニュー"><span></span><span></span><span></span></button></div>
+    </header>
+
+    <main id="top">
+      <section class="hero" id="about">
+        <div class="hero-copy" data-reveal>
+          <p class="eyebrow">No. 001 / Ordinary Stone</p>
+          <h1>ただの石。<br>それ以上の、静けさ。</h1>
+          <p class="lead">長い時間をかけて、自然がかたちづくったひとつの存在。派手さはないけれど、そこには揺るがない質感がある。</p>
+          <div class="actions"><a class="btn primary" href="#object">オブジェクトを探る</a><a class="btn" href="#material">詳細を見る</a></div>
+          <dl class="micro"><div><dt>状態</dt><dd>静止</dd></div><div><dt>用途</dt><dd>観測</dd></div><div><dt>分類</dt><dd>ただの石</dd></div></dl>
+        </div>
+        <div class="stage" data-reveal aria-label="台座の上に置かれた石のCG表現">
+          <div class="plinth" aria-hidden="true"></div><div class="stone-shadow" aria-hidden="true"></div>
+          <svg class="stone-svg" viewBox="0 0 760 520" role="img" aria-label="灰色の丸い石のCG">
+            <defs>
+              <radialGradient id="stoneGrad" cx="36%" cy="26%" r="72%">
+                <stop offset="0" stop-color="#c7beac"/><stop offset=".24" stop-color="#958d7f"/><stop offset=".64" stop-color="#69645b"/><stop offset="1" stop-color="#383631"/>
+              </radialGradient>
+              <filter id="stoneNoise" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="5" seed="9" result="n"/>
+                <feDisplacementMap in="SourceGraphic" in2="n" scale="13"/>
+                <feColorMatrix in="n" type="saturate" values="0" result="grain"/>
+                <feBlend in="SourceGraphic" in2="grain" mode="multiply"/>
+              </filter>
+              <clipPath id="clipHero"><ellipse cx="383" cy="226" rx="255" ry="165" transform="rotate(-5 383 226)"/></clipPath>
+            </defs>
+            <ellipse cx="383" cy="226" rx="255" ry="165" transform="rotate(-5 383 226)" fill="url(#stoneGrad)" filter="url(#stoneNoise)"/>
+            <g clip-path="url(#clipHero)" opacity=".32">
+              <circle cx="270" cy="168" r="5" fill="#453f38"/><circle cx="335" cy="250" r="3" fill="#332f29"/><circle cx="485" cy="155" r="4" fill="#514b42"/><circle cx="520" cy="264" r="6" fill="#37332e"/><circle cx="420" cy="317" r="3" fill="#2f2c28"/>
+              <path d="M145 230 C260 188 430 352 640 210" fill="none" stroke="#d5ccb8" stroke-width="2" opacity=".16"/>
+              <path d="M160 302 C310 244 430 390 618 284" fill="none" stroke="#1d1b18" stroke-width="3" opacity=".19"/>
+            </g>
+            <ellipse cx="302" cy="151" rx="92" ry="49" fill="#fff3d3" opacity=".13" transform="rotate(-17 302 151)"/>
+          </svg>
+        </div>
+      </section>
+
+      <section class="strip" id="object" aria-labelledby="object-title">
+        <h2 class="sr-only" id="object-title">石の観測ビュー</h2>
+        <article class="view" data-reveal><svg viewBox="0 0 320 210"><defs><radialGradient id="a" cx="35%" cy="25%"><stop offset="0" stop-color="#bfb6a5"/><stop offset="1" stop-color="#4f4b44"/></radialGradient><filter id="na"><feTurbulence baseFrequency=".05" numOctaves="4"/><feDisplacementMap in="SourceGraphic" scale="7"/></filter></defs><ellipse cx="160" cy="112" rx="104" ry="65" fill="url(#a)" filter="url(#na)"/><ellipse cx="160" cy="180" rx="118" ry="14" fill="#3a342e" opacity=".16"/></svg><span>FRONT</span></article>
+        <article class="view texture" data-reveal><svg viewBox="0 0 420 210" preserveAspectRatio="none"><defs><filter id="tex"><feTurbulence baseFrequency=".08" numOctaves="6" seed="14"/><feColorMatrix type="matrix" values=".6 0 0 0 .22 0 .57 0 0 .2 0 0 .52 0 .17 0 0 0 1 0"/></filter></defs><rect width="420" height="210" filter="url(#tex)"/><circle cx="105" cy="62" r="15" fill="#25231f" opacity=".15"/><circle cx="290" cy="128" r="9" fill="#fff" opacity=".08"/></svg><span>CLOSE UP</span></article>
+        <article class="view" data-reveal><svg viewBox="0 0 320 210"><defs><radialGradient id="b" cx="35%" cy="22%"><stop offset="0" stop-color="#c4baa7"/><stop offset="1" stop-color="#4d4941"/></radialGradient><filter id="nb"><feTurbulence baseFrequency=".055" numOctaves="5"/><feDisplacementMap in="SourceGraphic" scale="8"/></filter></defs><ellipse cx="160" cy="99" rx="56" ry="83" fill="url(#b)" filter="url(#nb)"/><ellipse cx="160" cy="187" rx="72" ry="10" fill="#3a342e" opacity=".13"/></svg><span>SIDE</span></article>
+        <article class="view" data-reveal><svg viewBox="0 0 320 210"><defs><radialGradient id="c" cx="33%" cy="25%"><stop offset="0" stop-color="#c2b8a6"/><stop offset="1" stop-color="#494640"/></radialGradient><filter id="nc"><feTurbulence baseFrequency=".052" numOctaves="4"/><feDisplacementMap in="SourceGraphic" scale="9"/></filter></defs><ellipse cx="165" cy="88" rx="96" ry="60" transform="rotate(-10 165 88)" fill="url(#c)" filter="url(#nc)"/><ellipse cx="165" cy="174" rx="88" ry="15" fill="#27231f" opacity=".14" filter="blur(2px)"/></svg><span>ISOLATED</span></article>
+      </section>
+
+      <section class="material" id="material">
+        <div class="section-title" data-reveal><p class="eyebrow dark">Material Qualities</p><h2>素材の特徴</h2></div>
+        <div class="specs" data-reveal>
+          <div class="spec"><span>重量</span><strong>約 1,317 g</strong></div><div class="spec"><span>質感</span><strong>細粒でなめらか</strong></div><div class="spec"><span>起源</span><strong>川の流れ / 日本・岐阜県</strong></div><div class="spec"><span>表面</span><strong>自然な風化痕と微細な斑点</strong></div><div class="spec"><span>触感</span><strong>ひんやりとして落ち着く</strong></div><div class="spec"><span>個性</span><strong>不均一で、繰り返しがない</strong></div>
+        </div>
+        <aside class="philo" id="philosophy" data-reveal><p class="eyebrow dark">Philosophy</p><h2>美しさは、特別さの中ではなく、静かに在るものの中にある。</h2><p>私たちは、日常の中で見過ごされてしまうものに目を向けます。役割を終えたように見えるものにも、時間の痕跡と物語がある。この石は、そのことをそっと教えてくれる存在です。</p></aside>
+      </section>
+
+      <section class="process" id="process">
+        <div data-reveal><p class="eyebrow">Process</p><h2>何もしないものを、ちゃんと見るための工程。</h2><p>採取、洗浄、乾燥、観察、撮影。劇的な加工は行わず、石がすでに持っている輪郭と沈黙を、光と余白で引き出します。まあ、ただの石にここまでやるのかという話ではある。やります。</p></div>
+        <ol class="steps" data-reveal><li><span>01</span><strong>Observe</strong><em>表面の凹凸、重心、欠けを観測する。</em></li><li><span>02</span><strong>Light</strong><em>硬い影ではなく、時間を含む柔らかな陰影を探す。</em></li><li><span>03</span><strong>Frame</strong><em>余白を与え、石の沈黙が逃げないようにする。</em></li></ol>
+      </section>
+
+      <section class="gallery" id="gallery">
+        <div class="gallery-head" data-reveal><div><p class="eyebrow dark">Gallery</p><h2>同じ石。異なる光。</h2></div><p style="max-width:420px;color:rgba(17,17,15,.58);margin:0">石は何もしていない。なのに、光が変わると態度が変わる。無能な会議よりはよほど雄弁です。</p></div>
+        <div class="gallery-grid">
+          <figure class="gallery-card large" data-reveal><div class="gallery-art"></div><div class="gallery-stone"></div><figcaption>午前の影</figcaption></figure>
+          <figure class="gallery-card" data-reveal><div class="gallery-art"></div><div class="gallery-stone"></div><figcaption>斜めの光</figcaption></figure>
+          <figure class="gallery-card" data-reveal><div class="gallery-art"></div><div class="gallery-stone"></div><figcaption>窓辺</figcaption></figure>
+          <figure class="gallery-card" data-reveal><div class="gallery-art"></div><div class="gallery-stone"></div><figcaption>水の記憶</figcaption></figure>
+          <figure class="gallery-card" data-reveal><div class="gallery-art"></div><div class="gallery-stone"></div><figcaption>壁の沈黙</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="closing"><div data-reveal><p class="eyebrow">Non Commerce Demonstration</p><h2>これは、売るためではなく、見せるための石である。</h2><p>商品リンク、価格、購入ボタンはありません。あるのは、ただの石をどこまで美しく見せられるかという、かなり真顔の技術検証だけです。</p></div></section>
+    </main>
+
+    <footer class="footer"><div><strong>SEKKA STUDIO</strong><p>Observing the ordinary. Honoring time.</p></div><nav><a href="#about">私たちについて</a><a href="#material">素材について</a><a href="#process">制作の考え方</a><a href="#gallery">ギャラリー</a><a href="#philosophy">哲学</a></nav><span>JP / EN</span></footer>
+  </div>
+  <script>
+    const nav=document.getElementById('nav');
+    document.getElementById('menu').addEventListener('click',()=>nav.classList.toggle('open'));
+    nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('open')));
+    const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');io.unobserve(e.target)}})},{threshold:.12});
+    document.querySelectorAll('[data-reveal]').forEach(el=>io.observe(el));
+  </script>
+</body>
+</html>

@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>夕暮れの商店街｜すべての歯が見える</title>
+<meta name="robots" content="noindex">
+
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#f2eadc;
+  --mid:#d0b08d;
+  --dim:#8c7763;
+  --line:#3b2f25;
+  --bg:#11100e;
+  --serif:'Shippori Mincho B1',serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body{
+  font-family:var(--serif);
+  color:var(--ink);
+  touch-action:none;
+}
+#c{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
+.grade{
+  position:fixed;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 85% at 50% 40%, transparent 44%, rgba(28,12,8,.52) 100%),
+    linear-gradient(180deg, rgba(20,18,35,.09), rgba(255,110,40,.05));
+  mix-blend-mode:multiply;
+}
+.warm{
+  position:fixed;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:rgba(255,155,70,.05);
+}
+.grain{
+  position:fixed;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  opacity:.12;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.35) 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(0,0,0,.35) 0 1px, transparent 1px);
+  background-size:3px 3px,4px 4px;
+  mix-blend-mode:overlay;
+}
+.top{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:8;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 14px 8px;
+  background:linear-gradient(180deg,rgba(10,8,6,.68),transparent);
+  pointer-events:none;
+}
+.top .k{
+  font-family:var(--mono);
+  font-size:.5rem;
+  letter-spacing:.24em;
+  color:var(--mid);
+}
+.top h1{
+  font-size:.92rem;
+  font-weight:800;
+  letter-spacing:.22em;
+  text-shadow:0 1px 8px rgba(0,0,0,.6);
+}
+.top .sp{flex:1;}
+.top button{
+  pointer-events:auto;
+  font-family:var(--mono);
+  font-size:.52rem;
+  letter-spacing:.12em;
+  color:var(--ink);
+  background:rgba(12,10,8,.65);
+  border:1px solid rgba(210,176,141,.35);
+  padding:7px 10px;
+  cursor:pointer;
+}
+.hud{
+  position:fixed;
+  right:14px;
+  top:calc(46px + env(safe-area-inset-top,0px));
+  z-index:8;
+  font-family:var(--mono);
+  font-size:.5rem;
+  letter-spacing:.11em;
+  line-height:1.8;
+  color:var(--mid);
+  text-align:right;
+  pointer-events:none;
+  text-shadow:0 1px 8px rgba(0,0,0,.6);
+}
+.hud .clock{
+  color:#e9d8bd;
+}
+.caption{
+  position:fixed;
+  left:50%;
+  bottom:calc(100px + env(safe-area-inset-bottom,0px));
+  transform:translateX(-50%);
+  z-index:9;
+  width:min(88vw,700px);
+  padding:12px 15px 13px;
+  border:1px solid rgba(208,176,141,.34);
+  background:linear-gradient(180deg,rgba(18,13,10,.84),rgba(10,8,6,.72));
+  backdrop-filter:blur(4px);
+  box-shadow:0 10px 28px rgba(0,0,0,.28);
+  pointer-events:none;
+  transition:opacity .38s ease, transform .38s ease;
+}
+.caption.dim{
+  opacity:0;
+  transform:translate(-50%,7px);
+}
+.caption .name{
+  font-size:.9rem;
+  font-weight:800;
+  letter-spacing:.18em;
+  color:#f5e7d0;
+}
+.caption .text{
+  margin-top:6px;
+  font-size:.73rem;
+  line-height:1.9;
+  letter-spacing:.08em;
+  color:#ddccb8;
+}
+.controls{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  z-index:10;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+  padding:0 14px;
+}
+.controls button{
+  min-height:58px;
+  border:1px solid rgba(208,176,141,.45);
+  color:#f7ebd8;
+  background:linear-gradient(180deg,rgba(38,25,17,.84),rgba(14,10,7,.82));
+  font-family:var(--serif);
+  font-weight:800;
+  font-size:.88rem;
+  letter-spacing:.18em;
+  text-indent:.18em;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);
+}
+.camctl{
+  position:fixed;
+  left:14px;
+  bottom:calc(84px + env(safe-area-inset-bottom,0px));
+  z-index:10;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  max-width:min(78vw,520px);
+}
+.camctl button{
+  min-width:60px;
+  min-height:42px;
+  border:1px solid rgba(208,176,141,.4);
+  color:#f6ead6;
+  background:rgba(18,13,10,.78);
+  font-family:var(--mono);
+  font-size:.62rem;
+  letter-spacing:.12em;
+  box-shadow:0 6px 16px rgba(0,0,0,.22);
+}
+button:active{
+  background:#f6ead6 !important;
+  color:#1a120e !important;
+}
+.veil{
+  position:fixed;
+  inset:0;
+  z-index:20;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:28px;
+  background:radial-gradient(ellipse 100% 80% at 50% 38%,#3a2336 0%,#15100e 72%);
+}
+.veil.off{display:none;}
+.veil .eye{
+  font-family:var(--mono);
+  font-size:.56rem;
+  letter-spacing:.42em;
+  color:var(--mid);
+  margin-bottom:26px;
+}
+.veil h2{
+  font-size:clamp(2.4rem,12vw,4rem);
+  font-weight:800;
+  letter-spacing:.14em;
+  text-indent:.14em;
+  color:#f6ead6;
+  text-shadow:0 0 40px rgba(255,170,90,.3);
+}
+.veil .sub{
+  font-family:var(--mono);
+  font-size:.6rem;
+  letter-spacing:.3em;
+  color:var(--mid);
+  margin-top:18px;
+}
+.veil .orn{
+  width:min(64vw,320px);
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--mid),transparent);
+  margin:26px 0;
+}
+.veil p{
+  font-size:.8rem;
+  letter-spacing:.12em;
+  line-height:2.2;
+  color:#e6d2bc;
+  max-width:26em;
+}
+.veil .go{
+  margin-top:38px;
+  font-family:var(--serif);
+  font-weight:800;
+  font-size:1rem;
+  letter-spacing:.34em;
+  text-indent:.34em;
+  color:#f6ead6;
+  background:rgba(20,12,10,.5);
+  border:1px solid var(--mid);
+  padding:16px 50px;
+  cursor:pointer;
+}
+.veil .foot{
+  margin-top:26px;
+  font-family:var(--mono);
+  font-size:.5rem;
+  letter-spacing:.16em;
+  color:var(--dim);
+}
+.veil .foot a{
+  color:var(--mid);
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+<canvas id="c"></canvas>
+<div class="grade"></div>
+<div class="warm" id="warmLayer"></div>
+<div class="grain"></div>
+
+<div class="top">
+  <span class="k">第〇九一號観測所</span>
+  <h1>夕暮れの商店街</h1>
+  <span class="sp"></span>
+  <button id="soundBtn" type="button">音 入</button>
+  <button id="resetViewBtn" type="button">視点 戻</button>
+</div>
+
+<div class="hud">
+  <span class="clock" id="clockHud">観測時刻 17:40</span><br>
+  ドラッグ : 視点回転<br>
+  ホイール / 寄る引く : ズーム<br>
+  注視 : 全体 / 看板 / 入口 / 店先 / 二階
+</div>
+
+<div class="caption" id="captionBox">
+  <div class="name" id="capName">夕凪酒店</div>
+  <div class="text" id="capText">冷えた瓶だけが、まだ日暮れを覚えている。</div>
+</div>
+
+<div class="camctl">
+  <button id="zoomInBtn" type="button">寄る</button>
+  <button id="zoomOutBtn" type="button">引く</button>
+  <button id="focusBtn" type="button">注視 全体</button>
+</div>
+
+<div class="controls">
+  <button id="prevBtn" type="button">前の店</button>
+  <button id="sideBtn" type="button">反対側</button>
+  <button id="nextBtn" type="button">次の店</button>
+</div>
+
+<div class="veil" id="veil">
+  <div class="eye">観測所・余興 ／ 其ノ六</div>
+  <h2>夕暮れの商店街</h2>
+  <div class="sub">— a long summer evening —</div>
+  <div class="orn"></div>
+  <p>日が傾いている。蝉が鳴いている。<br>誰もいない商店街を、店先に近い目線で見る。<br>日は、ゆっくりと沈む。沈みきるかどうかは、まだ確認されていない。</p>
+  <button class="go" id="enterBtn" type="button">見る</button>
+  <div class="foot"><a href="index.html">‹‹ 観測所へ戻る</a></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  if(typeof THREE === "undefined"){
+    document.getElementById("veil").innerHTML = "3Dの読み込みに失敗した。通信を確認して開き直してくれ。";
+    return;
+  }
+
+  function boot(){
+    var SHOP_DATA = [
+      {name:"夕凪酒店", kind:"liquor", wall:"#b99672", sign:"#79342c", text:"#f5e3c8", whisper:"冷えた瓶だけが、まだ日暮れを覚えている。", style:"machiya"},
+      {name:"魚辰", kind:"fish", wall:"#91a9a5", sign:"#245a64", text:"#edf6ef", whisper:"氷の匂いが、店を閉めてからも抜けない。", style:"fish"},
+      {name:"米屋九番", kind:"rice", wall:"#d1c2a0", sign:"#6f5636", text:"#f4ead4", whisper:"奥で誰かが袋を縫っているような気がする。", style:"kura"},
+      {name:"肉の深町", kind:"meat", wall:"#b87964", sign:"#8d2d2d", text:"#fff1df", whisper:"赤い紙だけが妙に新しい。", style:"showcase"},
+      {name:"喫茶かげろう", kind:"cafe", wall:"#8f7d6b", sign:"#3f2c22", text:"#f2dfbf", whisper:"椅子の位置が、最後の客のまま止まっている。", style:"cafe"},
+      {name:"金物はしもと", kind:"hardware", wall:"#8a8f8a", sign:"#45504a", text:"#eee2ca", whisper:"釘の匂いと、湿った木の匂いが混ざっている。", style:"open"},
+      {name:"月見たばこ店", kind:"tobacco", wall:"#c2a875", sign:"#8f6a2d", text:"#271a10", whisper:"ガラス越しに、もう売れない銘柄が眠っている。", style:"booth"},
+      {name:"湯乃跡", kind:"bath", wall:"#8fa19d", sign:"#2f5f72", text:"#edf7f0", whisper:"暖簾はないが、濡れた記憶だけが残っている。", style:"bath"},
+      {name:"空き店舗", kind:"vacant", wall:"#98908a", sign:"#4e463f", text:"#cfc4b0", whisper:"シャッターの錆だけが、閉めた日を正確に数えている。", whisperNight:"両隣の店は、ここに何の店があったか、それぞれ違う答えを言う。", style:"vacant"},
+      {name:"片目文具", kind:"stationery", wall:"#b7a99a", sign:"#5a4a72", text:"#f1e7d0", whisper:"便箋の束が、夕方になると少しだけ傾く。", style:"machiya"},
+      {name:"花の残り", kind:"flower", wall:"#a98b78", sign:"#4c6a4f", text:"#f5ead5", whisper:"花が枯れてから値札が付けられた。", style:"flower"},
+      {name:"朝焼けパン", kind:"bread", wall:"#d3b890", sign:"#8b5938", text:"#fff0d7", whisper:"もう匂いはしないのに、腹だけが覚えている。", style:"cafe"},
+      {name:"氷室商店", kind:"ice", wall:"#9fb8bd", sign:"#2f6b8a", text:"#f0fbff", whisper:"溶けた水の跡だけが、毎日きちんと増えている。", style:"showcase"},
+      {name:"骨董みぞれ", kind:"antique", wall:"#7f6f5b", sign:"#3a281e", text:"#e9d6b7", whisper:"売り物より、棚の影の方が古い。", style:"darkwood"},
+      {name:"影写真館", kind:"photo", wall:"#766f73", sign:"#2f2b30", text:"#e8dfce", whisper:"飾られた家族写真には、誰も笑っていない。", style:"photo"},
+      {name:"爪切屋", kind:"odd", wall:"#a67c76", sign:"#5a2028", text:"#f6e3d8", whisper:"看板にだけ、新しい塗料が使われている。", style:"booth"}
+    ];
+
+    /* ============ 夕暮れの状態 ============ */
+    var DUSK = {
+      phase:0,            /* 0=夕金色 → 1=宵の底。1には漸近するだけで、届かない */
+      enterTime:-1,
+      visitedMax:0,
+      nightText:false,    /* 囁きが夜版に切り替わったか */
+      chimeDone:false
+    };
+    var NIGHT_T = 0.86;   /* 夜の囁きに切り替わる閾値 */
+
+    var lamps = [];        /* 街灯 {head,light,th,t0} */
+    var signLights = [];   /* 看板灯 {light,th,buzz,seed} */
+    var windowGlows = [];  /* 窓明かり {m,th} */
+
+    function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+    function lerp(a,b,t){ return a+(b-a)*t; }
+    function smooth(x,a,b){
+      var s = clamp((x-a)/(b-a),0,1);
+      return s*s*(3-2*s);
+    }
+
+    var canvas = document.getElementById("c");
+    var renderer = new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:false});
+    renderer.setClearColor(0x11100e,1);
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    renderer.physicallyCorrectLights = false;
+    if(THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+
+    var scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0xd38d5d, 24, 155);
+
+    var camera = new THREE.PerspectiveCamera(43,1,0.1,300);
+
+    function resize(){
+      var w = innerWidth;
+      var h = innerHeight;
+      renderer.setSize(w,h,false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    function num(hex){ return parseInt(hex.replace("#",""),16); }
+
+    function std(color, rough, metal, extra){
+      var m = new THREE.MeshStandardMaterial({
+        color:color,
+        roughness:rough===undefined ? .92 : rough,
+        metalness:metal===undefined ? .04 : metal
+      });
+      if(extra){ for(var k in extra) m[k] = extra[k]; }
+      return m;
+    }
+
+    function makeTex(cv){
+      var tx = new THREE.CanvasTexture(cv);
+      if(THREE.sRGBEncoding) tx.encoding = THREE.sRGBEncoding;
+      tx.needsUpdate = true;
+      return tx;
+    }
+
+    function box(w,h,d,mat){ return new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); }
+    function cyl(r1,r2,h,seg,mat){ return new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,seg||12),mat); }
+    function plane(w,h,mat){ return new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat); }
+
+    function applyShadow(obj){
+      obj.traverse(function(o){
+        if(o.isMesh){
+          o.castShadow = true;
+          o.receiveShadow = true;
+        }
+      });
+    }
+
+    function canvasNoise(g,w,h,n,a1,a2,color){
+      for(var i=0;i<n;i++){
+        var a = a1 + Math.random()*(a2-a1);
+        g.fillStyle = color.replace("__A__", a.toFixed(3));
+        g.fillRect(Math.random()*w, Math.random()*h, 1+Math.random()*18, 1+Math.random()*4);
+      }
+    }
+
+    function dirtyWallTexture(store){
+      var cv = document.createElement("canvas");
+      cv.width = 1024;
+      cv.height = 1024;
+      var g = cv.getContext("2d");
+
+      g.fillStyle = store.wall;
+      g.fillRect(0,0,1024,1024);
+
+      var grad = g.createLinearGradient(0,0,0,1024);
+      grad.addColorStop(0,"rgba(255,240,200,.16)");
+      grad.addColorStop(.25,"rgba(255,255,255,.05)");
+      grad.addColorStop(.65,"rgba(90,55,28,.07)");
+      grad.addColorStop(1,"rgba(35,22,14,.38)");
+      g.fillStyle = grad;
+      g.fillRect(0,0,1024,1024);
+
+      canvasNoise(g,1024,1024,2200,.012,.08,"rgba(40,25,15,__A__)");
+
+      for(var c=0;c<26;c++){
+        var x = Math.random()*980;
+        var y = Math.random()*860;
+        g.beginPath();
+        g.moveTo(x,y);
+        for(var q=0;q<6;q++){
+          x += (Math.random()-.5)*28;
+          y += 10+Math.random()*26;
+          g.lineTo(x,y);
+        }
+        g.strokeStyle = "rgba(42,28,20,.14)";
+        g.lineWidth = 1.5;
+        g.stroke();
+      }
+
+      for(var r=0;r<24;r++){
+        var rx = Math.random()*920;
+        var ry = 620+Math.random()*320;
+        var rw = 12+Math.random()*36;
+        var rh = 60+Math.random()*140;
+        var grd = g.createLinearGradient(rx,ry,rx,ry+rh);
+        grd.addColorStop(0,"rgba(35,22,14,0)");
+        grd.addColorStop(1,"rgba(35,22,14,.11)");
+        g.fillStyle = grd;
+        g.fillRect(rx,ry,rw,rh);
+      }
+
+      for(var s=0;s<180;s++){
+        g.fillStyle = "rgba(45,28,18,"+(.02+Math.random()*.14)+")";
+        g.fillRect(Math.random()*1024,860+Math.random()*150,2+Math.random()*18,1+Math.random()*8);
+      }
+
+      return makeTex(cv);
+    }
+
+    function tileTexture(base,alt){
+      var cv = document.createElement("canvas");
+      cv.width = 512;
+      cv.height = 512;
+      var g = cv.getContext("2d");
+      for(var y=0;y<512;y+=64){
+        for(var x=0;x<512;x+=64){
+          g.fillStyle = ((x+y)/64)%2 ? base : alt;
+          g.fillRect(x,y,64,64);
+          g.strokeStyle = "rgba(30,30,30,.18)";
+          g.strokeRect(x,y,64,64);
+        }
+      }
+      canvasNoise(g,512,512,600,.01,.06,"rgba(0,0,0,__A__)");
+      return makeTex(cv);
+    }
+
+    function metalTexture(base){
+      var cv = document.createElement("canvas");
+      cv.width = 512;
+      cv.height = 512;
+      var g = cv.getContext("2d");
+      g.fillStyle = base;
+      g.fillRect(0,0,512,512);
+
+      var gr = g.createLinearGradient(0,0,512,0);
+      gr.addColorStop(0,"rgba(255,255,255,.14)");
+      gr.addColorStop(.5,"rgba(255,255,255,.02)");
+      gr.addColorStop(1,"rgba(0,0,0,.16)");
+      g.fillStyle = gr;
+      g.fillRect(0,0,512,512);
+
+      for(var i=0;i<512;i+=18){
+        g.fillStyle = "rgba(255,255,255,.03)";
+        g.fillRect(i,0,1,512);
+      }
+      canvasNoise(g,512,512,700,.01,.06,"rgba(0,0,0,__A__)");
+      return makeTex(cv);
+    }
+
+    /* 空き店舗のシャッター */
+    function shutterTexture(){
+      var cv = document.createElement("canvas");
+      cv.width = 512;
+      cv.height = 512;
+      var g = cv.getContext("2d");
+      g.fillStyle = "#8d867c";
+      g.fillRect(0,0,512,512);
+
+      for(var y=0;y<512;y+=16){
+        g.fillStyle = "rgba(0,0,0,.26)";
+        g.fillRect(0,y,512,3);
+        g.fillStyle = "rgba(255,255,255,.09)";
+        g.fillRect(0,y+8,512,2);
+      }
+
+      for(var r=0;r<9;r++){
+        var rx = Math.random()*470;
+        var ry = Math.random()*260;
+        var rh = 120+Math.random()*260;
+        var grd = g.createLinearGradient(rx,ry,rx,ry+rh);
+        grd.addColorStop(0,"rgba(122,62,32,0)");
+        grd.addColorStop(.5,"rgba(122,62,32,.16)");
+        grd.addColorStop(1,"rgba(84,42,24,.22)");
+        g.fillStyle = grd;
+        g.fillRect(rx,ry,10+Math.random()*26,rh);
+      }
+
+      canvasNoise(g,512,512,900,.01,.07,"rgba(30,22,16,__A__)");
+
+      var grime = g.createLinearGradient(0,360,0,512);
+      grime.addColorStop(0,"rgba(30,22,16,0)");
+      grime.addColorStop(1,"rgba(30,22,16,.34)");
+      g.fillStyle = grime;
+      g.fillRect(0,360,512,152);
+
+      return makeTex(cv);
+    }
+
+    function glassTexture(lit){
+      var cv = document.createElement("canvas");
+      cv.width = 512;
+      cv.height = 512;
+      var g = cv.getContext("2d");
+
+      g.fillStyle = lit ? "#3b3027" : "#161a23";
+      g.fillRect(0,0,512,512);
+
+      if(lit){
+        var glow = g.createRadialGradient(190,160,20,260,200,260);
+        glow.addColorStop(0,"rgba(255,215,145,.7)");
+        glow.addColorStop(.45,"rgba(255,165,90,.22)");
+        glow.addColorStop(1,"rgba(0,0,0,0)");
+        g.fillStyle = glow;
+        g.fillRect(0,0,512,512);
+      }
+
+      g.fillStyle = "rgba(220,240,245,.16)";
+      g.beginPath();
+      g.moveTo(36,44);
+      g.lineTo(180,44);
+      g.lineTo(90,470);
+      g.lineTo(0,470);
+      g.closePath();
+      g.fill();
+
+      g.fillStyle = "rgba(255,255,255,.08)";
+      g.beginPath();
+      g.moveTo(280,20);
+      g.lineTo(360,20);
+      g.lineTo(200,512);
+      g.lineTo(145,512);
+      g.closePath();
+      g.fill();
+
+      return makeTex(cv);
+    }
+
+    function interiorTexture(store){
+      var cv = document.createElement("canvas");
+      cv.width = 768;
+      cv.height = 768;
+      var g = cv.getContext("2d");
+
+      g.fillStyle = "#17110d";
+      g.fillRect(0,0,768,768);
+
+      var glow = g.createRadialGradient(360,220,20,380,260,420);
+      glow.addColorStop(0,"rgba(255,185,95,.34)");
+      glow.addColorStop(.6,"rgba(120,70,34,.12)");
+      glow.addColorStop(1,"rgba(0,0,0,0)");
+      g.fillStyle = glow;
+      g.fillRect(0,0,768,768);
+
+      for(var r=0;r<4;r++){
+        g.fillStyle = "rgba(110,78,48,.55)";
+        g.fillRect(56,110+r*130,656,12);
+
+        for(var i=0;i<15;i++){
+          var x = 72+i*40;
+          var y = 76+r*130;
+          var h = 28+Math.random()*54;
+
+          if(store.kind==="liquor"){
+            g.fillStyle = ["#345944","#6b3f2c","#263f5a"][i%3];
+            g.fillRect(x,y+h*.15,16,h);
+            g.fillStyle = "#e7d5ac";
+            g.fillRect(x+3,y+h*.56,10,13);
+          }else if(store.kind==="stationery" || store.kind==="photo"){
+            g.fillStyle = ["#6a5a8a","#8a4f46","#3f5d57","#b07a3a"][i%4];
+            g.fillRect(x,y,20,h);
+          }else{
+            g.fillStyle = ["#7b5a3e","#665b4a","#9a7d52","#3f5d57"][i%4];
+            g.fillRect(x,y+Math.random()*8,24,h*.74);
+          }
+        }
+      }
+
+      return makeTex(cv);
+    }
+
+    function signTexture(text,bg,fg,w,h,size){
+      var cv = document.createElement("canvas");
+      cv.width = w || 720;
+      cv.height = h || 170;
+      var g = cv.getContext("2d");
+
+      g.fillStyle = bg;
+      g.fillRect(0,0,cv.width,cv.height);
+
+      var wood = g.createLinearGradient(0,0,0,cv.height);
+      wood.addColorStop(0,"rgba(255,255,255,.14)");
+      wood.addColorStop(.18,"rgba(255,255,255,.04)");
+      wood.addColorStop(.52,"rgba(0,0,0,.02)");
+      wood.addColorStop(1,"rgba(0,0,0,.2)");
+      g.fillStyle = wood;
+      g.fillRect(0,0,cv.width,cv.height);
+
+      for(var i=0;i<42;i++){
+        g.strokeStyle = "rgba(255,255,255,.035)";
+        g.lineWidth = 1+Math.random()*2;
+        g.beginPath();
+        var y = Math.random()*cv.height;
+        g.moveTo(0,y);
+        g.lineTo(cv.width,y+(Math.random()-.5)*14);
+        g.stroke();
+      }
+
+      g.strokeStyle = "rgba(0,0,0,.48)";
+      g.lineWidth = 11;
+      g.strokeRect(7,7,cv.width-14,cv.height-14);
+      g.strokeStyle = "rgba(255,240,210,.14)";
+      g.lineWidth = 2;
+      g.strokeRect(18,18,cv.width-36,cv.height-36);
+
+      g.fillStyle = fg;
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.font = "900 " + (size||64) + "px 'Shippori Mincho B1', serif";
+      g.fillText(text,cv.width/2,cv.height*.52);
+
+      canvasNoise(g,cv.width,cv.height,120,.01,.08,"rgba(0,0,0,__A__)");
+      return makeTex(cv);
+    }
+
+    function posterTexture(title,bg,fg){
+      var cv = document.createElement("canvas");
+      cv.width = 200;
+      cv.height = 140;
+      var g = cv.getContext("2d");
+      g.fillStyle = bg || "#e8d6b2";
+      g.fillRect(0,0,200,140);
+      g.fillStyle = "rgba(0,0,0,.05)";
+      g.fillRect(0,110,200,30);
+      g.strokeStyle = "rgba(0,0,0,.25)";
+      g.lineWidth = 5;
+      g.strokeRect(4,4,192,132);
+      g.fillStyle = fg || "#563621";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.font = "800 32px 'Shippori Mincho B1', serif";
+      g.fillText(title,100,64);
+      return makeTex(cv);
+    }
+
+    function asphaltTexture(){
+      var cv = document.createElement("canvas");
+      cv.width = 1024;
+      cv.height = 1024;
+      var g = cv.getContext("2d");
+      g.fillStyle = "#413c3a";
+      g.fillRect(0,0,1024,1024);
+      canvasNoise(g,1024,1024,3200,.02,.1,"rgba(0,0,0,__A__)");
+      canvasNoise(g,1024,1024,1000,.01,.06,"rgba(255,255,255,__A__)");
+
+      g.strokeStyle = "rgba(0,0,0,.08)";
+      for(var i=0;i<28;i++){
+        g.beginPath();
+        g.moveTo(Math.random()*1024,Math.random()*1024);
+        for(var j=0;j<6;j++){
+          g.lineTo(Math.random()*1024,Math.random()*1024);
+        }
+        g.stroke();
+      }
+      return makeTex(cv);
+    }
+
+    function concreteTexture(){
+      var cv = document.createElement("canvas");
+      cv.width = 1024;
+      cv.height = 1024;
+      var g = cv.getContext("2d");
+      g.fillStyle = "#7d756a";
+      g.fillRect(0,0,1024,1024);
+      canvasNoise(g,1024,1024,2400,.015,.08,"rgba(0,0,0,__A__)");
+      canvasNoise(g,1024,1024,600,.01,.03,"rgba(255,255,255,__A__)");
+      return makeTex(cv);
+    }
+
+    var streetHalf = 6.82;
+
+    function fx(side,offset){ return side*(streetHalf-offset); }
+
+    function frontPlane(group,side,offset,y,z,w,h,material){
+      var p = plane(w,h,material);
+      p.position.set(fx(side,offset),y,z);
+      p.rotation.y = side<0 ? Math.PI/2 : -Math.PI/2;
+      group.add(p);
+      return p;
+    }
+
+    function frontBox(group,side,offset,y,z,dx,dy,dz,material){
+      var b = box(dx,dy,dz,material);
+      b.position.set(fx(side,offset),y,z);
+      group.add(b);
+      return b;
+    }
+
+    function addGroundAO(group, side, z, w, d){
+      var ao = new THREE.Mesh(
+        new THREE.PlaneGeometry(w,d),
+        new THREE.MeshBasicMaterial({
+          color:0x000000,
+          transparent:true,
+          opacity:.18,
+          depthWrite:false,
+          side:THREE.DoubleSide
+        })
+      );
+      ao.rotation.x = -Math.PI/2;
+      ao.position.set(fx(side,1.0),.055,z);
+      group.add(ao);
+    }
+
+    function addUnderEaveShadow(group, side, z, w){
+      frontPlane(
+        group,side,.48,3.52,z,w,1.0,
+        new THREE.MeshBasicMaterial({
+          color:0x050403,
+          transparent:true,
+          opacity:.35,
+          side:THREE.DoubleSide,
+          depthWrite:false
+        })
+      );
+    }
+
+    /* ============ 空（夕暮れが進む） ============ */
+    var skyCtx = null;
+    var skyTex = null;
+    var sunDisc = null;
+    var skyStopsA = [[0,"#243a6b"],[.34,"#5d4a78"],[.62,"#b36c83"],[.84,"#ee9d5a"],[1,"#f6d198"]];
+    var skyStopsB = [[0,"#0a1130"],[.34,"#171a45"],[.62,"#33244e"],[.84,"#63324a"],[1,"#8f4a3a"]];
+    var skyColA = [];
+    var skyColB = [];
+    var skyTmp = new THREE.Color();
+    var lastSkyBucket = -1;
+
+    function redrawSky(p){
+      var bucket = Math.round(p*220);
+      if(bucket===lastSkyBucket) return;
+      lastSkyBucket = bucket;
+
+      var grd = skyCtx.createLinearGradient(0,0,0,256);
+      for(var i=0;i<skyStopsA.length;i++){
+        skyTmp.copy(skyColA[i]).lerp(skyColB[i],p);
+        grd.addColorStop(skyStopsA[i][0], skyTmp.getStyle());
+      }
+      skyCtx.fillStyle = grd;
+      skyCtx.fillRect(0,0,4,256);
+      skyTex.needsUpdate = true;
+    }
+
+    function addSky(){
+      var cv = document.createElement("canvas");
+      cv.width = 4;
+      cv.height = 256;
+      skyCtx = cv.getContext("2d");
+
+      for(var i=0;i<skyStopsA.length;i++){
+        skyColA.push(new THREE.Color(skyStopsA[i][1]));
+        skyColB.push(new THREE.Color(skyStopsB[i][1]));
+      }
+
+      skyTex = makeTex(cv);
+      redrawSky(0);
+
+      var sky = new THREE.Mesh(
+        new THREE.SphereGeometry(220,28,18),
+        new THREE.MeshBasicMaterial({map:skyTex,side:THREE.BackSide,fog:false})
+      );
+      scene.add(sky);
+
+      sunDisc = new THREE.Mesh(
+        new THREE.CircleGeometry(9.5,28),
+        new THREE.MeshBasicMaterial({color:0xffd9a3,transparent:true,opacity:.92,fog:false})
+      );
+      sunDisc.position.set(0,8.2,128);
+      sunDisc.lookAt(0,8.2,0);
+      scene.add(sunDisc);
+    }
+
+    addSky();
+
+    var hemi = new THREE.HemisphereLight(0xffdfba,0x493843,.95);
+    scene.add(hemi);
+
+    var sun = new THREE.DirectionalLight(0xffc99a,1.08);
+    sun.position.set(-14,22,28);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 1536;
+    sun.shadow.mapSize.height = 1536;
+    sun.shadow.camera.left = -70;
+    sun.shadow.camera.right = 70;
+    sun.shadow.camera.top = 70;
+    sun.shadow.camera.bottom = -70;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 100;
+    sun.shadow.bias = -0.00015;
+    scene.add(sun);
+
+    var amb = new THREE.AmbientLight(0x5e4c58,.34);
+    scene.add(amb);
+
+    /* 昼→宵の両端色 */
+    var cFogA = new THREE.Color(0xd38d5d), cFogB = new THREE.Color(0x2b2340);
+    var cHemiA = new THREE.Color(0xffdfba), cHemiB = new THREE.Color(0x35406b);
+    var cGndA = new THREE.Color(0x493843), cGndB = new THREE.Color(0x1c1a2e);
+    var cSunA = new THREE.Color(0xffc99a), cSunB = new THREE.Color(0x8a4638);
+    var cAmbA = new THREE.Color(0x5e4c58), cAmbB = new THREE.Color(0x262640);
+
+    var road = new THREE.Mesh(
+      new THREE.PlaneGeometry(10.2,220),
+      new THREE.MeshStandardMaterial({map:asphaltTexture(),roughness:1,metalness:0})
+    );
+    road.rotation.x = -Math.PI/2;
+    road.receiveShadow = true;
+    scene.add(road);
+
+    var walkL = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.2,220),
+      new THREE.MeshStandardMaterial({map:concreteTexture(),roughness:.98,metalness:0})
+    );
+    walkL.rotation.x = -Math.PI/2;
+    walkL.position.set(-6.25,.02,0);
+    walkL.receiveShadow = true;
+    scene.add(walkL);
+
+    var walkR = walkL.clone();
+    walkR.position.x = 6.25;
+    scene.add(walkR);
+
+    for(var c=0;c<2;c++){
+      var sideC = c===0 ? -1 : 1;
+      var curb = box(.18,.16,220,std(0x8b8479,.96,.02));
+      curb.position.set(sideC*4.95,.08,0);
+      curb.receiveShadow = true;
+      curb.castShadow = true;
+      scene.add(curb);
+    }
+
+    for(var zc=-100;zc<=100;zc+=6){
+      var dash = new THREE.Mesh(new THREE.PlaneGeometry(.18,2.4),std(0xbcae93,.88,.03));
+      dash.rotation.x = -Math.PI/2;
+      dash.position.set(0,.031,zc);
+      dash.receiveShadow = true;
+      scene.add(dash);
+    }
+
+    for(var lf=-96;lf<96;lf+=5.4){
+      var sideLf = Math.random()<.5 ? -1 : 1;
+      var leaf = box(.06,.016,.22,std(Math.random()<.5?0x8a6b3d:0xb79b68,.96,0));
+      leaf.position.set(sideLf*(4.4+Math.random()*1.2),.055,lf+Math.random()*2);
+      leaf.rotation.y = Math.random()*Math.PI;
+      scene.add(leaf);
+    }
+
+    function addWindow(group,side,z,y,w,h,store,lit){
+      frontBox(group,side,-.04,y,z,.08,h+.3,w+.3,std(0x100f0f,.95,0));
+      frontPlane(group,side,-.10,y,z,w,h,new THREE.MeshBasicMaterial({map:interiorTexture(store),side:THREE.DoubleSide}));
+
+      /* 窓明かり。日が沈むほど、一つずつ灯る */
+      var glow = frontPlane(group,side,.045,y,z,w*.92,h*.92,new THREE.MeshBasicMaterial({
+        color:0xffb066,
+        transparent:true,
+        opacity:0,
+        blending:THREE.AdditiveBlending,
+        depthWrite:false,
+        side:THREE.DoubleSide
+      }));
+      windowGlows.push({m:glow, th: lit ? .14+Math.random()*.12 : .55+Math.random()*.32});
+
+      frontBox(group,side,.06,y,z-w/2-.08,.18,h+.28,.08,std(0x4a382f,.94,.04));
+      frontBox(group,side,.06,y,z+w/2+.08,.18,h+.28,.08,std(0x4a382f,.94,.04));
+      frontBox(group,side,.06,y+h/2+.08,z,.18,.12,w+.3,std(0x4a382f,.94,.04));
+      frontBox(group,side,.06,y-h/2-.08,z,.18,.12,w+.3,std(0x4a382f,.94,.04));
+      frontBox(group,side,.10,y,z,.13,h,.05,std(0x4a382f,.94,.04));
+      frontBox(group,side,.10,y,z,.13,.05,w,std(0x4a382f,.94,.04));
+      frontPlane(group,side,.18,y,z,w,h,new THREE.MeshBasicMaterial({map:glassTexture(lit),transparent:true,opacity:.82,side:THREE.DoubleSide}));
+      frontBox(group,side,.38,y-h/2-.15,z,.32,.08,w+.42,std(0x5a4739,.95,0));
+    }
+
+    function addDoorInset(group,side,z,w,h,store){
+      frontBox(group,side,-.06,1.45,z,.08,h+.26,w+.24,std(0x120d0a,.95,0));
+      frontPlane(group,side,-.10,1.46,z,w,h,new THREE.MeshBasicMaterial({map:interiorTexture(store),side:THREE.DoubleSide}));
+      frontBox(group,side,.10,1.45,z-w/2-.06,.24,h+.28,.1,std(0x4b3930,.93,.04));
+      frontBox(group,side,.10,1.45,z+w/2+.06,.24,h+.28,.1,std(0x4b3930,.93,.04));
+      frontBox(group,side,.10,1.45+h/2+.07,z,.24,.12,w+.25,std(0x4b3930,.93,.04));
+      frontBox(group,side,.10,1.45-h/2-.07,z,.24,.12,w+.25,std(0x4b3930,.93,.04));
+      frontPlane(group,side,.24,1.45,z-.38,w*.46,h*.96,new THREE.MeshBasicMaterial({map:glassTexture(true),transparent:true,opacity:.86,side:THREE.DoubleSide}));
+      frontPlane(group,side,.26,1.45,z+.38,w*.46,h*.96,new THREE.MeshBasicMaterial({map:glassTexture(false),transparent:true,opacity:.82,side:THREE.DoubleSide}));
+      frontBox(group,side,.64,.15,z,.72,.14,w+.5,std(0x6a5c4f,.96,0));
+      frontBox(group,side,.98,.06,z,.62,.08,w+.7,std(0x8c7f6c,.95,0));
+    }
+
+    function addMachiya(group,side,z,store){
+      addWindow(group,side,z-2.75,2.02,1.18,1.36,store,true);
+      addDoorInset(group,side,z,1.56,2.4,store);
+      addWindow(group,side,z+2.75,2.02,1.18,1.36,store,false);
+      for(var i=0;i<16;i++){
+        frontBox(group,side,.31,1.82,z-3.48+i*.24,.055,2.2,.04,std(0x4e392d,.94,.04));
+      }
+    }
+
+    function addFish(group,side,z,store){
+      frontBox(group,side,.08,1.0,z,.2,2.0,7.25,new THREE.MeshStandardMaterial({map:tileTexture("#c6e1df","#93b7bc"),roughness:.78,metalness:.02}));
+      frontBox(group,side,-.04,1.45,z,.08,2.65,4.35,std(0x120f0d,.95,0));
+      frontPlane(group,side,-.09,1.45,z,4.05,2.36,new THREE.MeshBasicMaterial({map:interiorTexture(store),side:THREE.DoubleSide}));
+      frontBox(group,side,.10,1.45,z-2.15,.24,2.82,.12,std(0x3d4a4d,.9,.06));
+      frontBox(group,side,.10,1.45,z+2.15,.24,2.82,.12,std(0x3d4a4d,.9,.06));
+      frontBox(group,side,.10,2.86,z,.24,.14,4.4,std(0x3d4a4d,.9,.06));
+      for(var n=0;n<4;n++){
+        frontPlane(group,side,.26,1.92,z-1.34+n*.9,.76,1.22,new THREE.MeshBasicMaterial({color:0x2b5b67,transparent:true,opacity:.96,side:THREE.DoubleSide}));
+      }
+      addWindow(group,side,z+3.05,2.02,1.0,1.3,store,false);
+    }
+
+    function addKura(group,side,z,store){
+      frontBox(group,side,.12,2.0,z,.22,3.4,7.2,std(0xd8c8aa,.96,.02));
+      frontBox(group,side,.18,2.0,z-3.45,.32,3.5,.18,std(0x3e332b,.95,.03));
+      frontBox(group,side,.18,2.0,z+3.45,.32,3.5,.18,std(0x3e332b,.95,.03));
+      addDoorInset(group,side,z,1.65,2.46,store);
+      addWindow(group,side,z-2.5,2.08,1.02,1.16,store,true);
+      addWindow(group,side,z+2.5,2.08,1.02,1.16,store,false);
+    }
+
+    function addShowcase(group,side,z,store){
+      addDoorInset(group,side,z-1.3,1.05,2.34,store);
+      frontBox(group,side,-.04,1.52,z+1.1,.08,2.36,2.75,std(0x120f0d,.95,0));
+      frontPlane(group,side,-.09,1.52,z+1.1,2.42,2.1,new THREE.MeshBasicMaterial({map:interiorTexture(store),side:THREE.DoubleSide}));
+      frontBox(group,side,.14,1.52,z+1.1,.28,2.42,2.86,std(0x4c3930,.94,.04));
+      frontPlane(group,side,.28,1.8,z+1.1,2.1,1.24,new THREE.MeshBasicMaterial({map:glassTexture(true),transparent:true,opacity:.78,side:THREE.DoubleSide}));
+      frontBox(group,side,.42,1.06,z+1.1,.45,.13,2.7,std(0x8d7552,.93,.06));
+      addWindow(group,side,z-3.05,2.02,1.08,1.3,store,Math.random()<.5);
+    }
+
+    function addCafe(group,side,z,store){
+      addWindow(group,side,z-2.22,1.98,1.68,1.82,store,true);
+      addDoorInset(group,side,z+.55,1.3,2.42,store);
+      addWindow(group,side,z+2.62,1.98,1.24,1.82,store,true);
+      frontBox(group,side,.94,.52,z+2.45,.55,.8,1.15,std(0x2c2723,.92,.04));
+      frontPlane(group,side,1.08,.74,z+2.45,1.0,.56,new THREE.MeshBasicMaterial({map:glassTexture(true),transparent:true,opacity:.62,side:THREE.DoubleSide}));
+    }
+
+    function addOpen(group,side,z,store){
+      frontBox(group,side,-.04,1.48,z,.08,2.72,4.45,std(0x140f0c,.95,0));
+      frontPlane(group,side,-.09,1.48,z,4.08,2.44,new THREE.MeshBasicMaterial({map:interiorTexture(store),side:THREE.DoubleSide}));
+      frontBox(group,side,.10,1.48,z-2.2,.24,2.92,.12,std(0x4d3a31,.94,.04));
+      frontBox(group,side,.10,1.48,z+2.2,.24,2.92,.12,std(0x4d3a31,.94,.04));
+      frontBox(group,side,.10,2.88,z,.24,.14,4.42,std(0x4d3a31,.94,.04));
+      frontBox(group,side,.10,.16,z,.32,.14,4.42,std(0x4d3a31,.94,.04));
+    }
+
+    function addBooth(group,side,z,store){
+      addDoorInset(group,side,z+1.55,1.2,2.38,store);
+      frontBox(group,side,-.04,1.62,z-1.15,.08,1.7,2.25,std(0x130f0d,.95,0));
+      frontPlane(group,side,-.09,1.62,z-1.15,1.95,1.44,new THREE.MeshBasicMaterial({map:interiorTexture(store),side:THREE.DoubleSide}));
+      frontBox(group,side,.12,1.62,z-1.15,.25,1.68,2.2,std(0x4c3930,.94,.04));
+      frontPlane(group,side,.26,1.84,z-1.15,1.78,1.02,new THREE.MeshBasicMaterial({map:glassTexture(true),transparent:true,opacity:.78,side:THREE.DoubleSide}));
+      frontBox(group,side,.40,1.18,z-1.15,.38,.12,2.1,std(0x8e7654,.93,.05));
+    }
+
+    function addBath(group,side,z,store){
+      frontBox(group,side,.10,1.05,z,.2,2.1,7.15,new THREE.MeshStandardMaterial({map:tileTexture("#d7d2c2","#bfc8c2"),roughness:.8,metalness:.02}));
+      addWindow(group,side,z-2.55,2.02,1.06,1.54,store,true);
+      frontBox(group,side,-.04,1.48,z,.08,2.82,3.05,std(0x130f0d,.95,0));
+      frontPlane(group,side,-.09,1.48,z,2.62,2.48,new THREE.MeshBasicMaterial({map:interiorTexture(store),side:THREE.DoubleSide}));
+      frontBox(group,side,.10,1.48,z-1.55,.24,2.94,.12,std(0x4d3a31,.94,.04));
+      frontBox(group,side,.10,1.48,z+1.55,.24,2.94,.12,std(0x4d3a31,.94,.04));
+      frontBox(group,side,.10,2.92,z,.24,.14,3.08,std(0x4d3a31,.94,.04));
+      for(var i=0;i<4;i++){
+        frontPlane(group,side,.24,1.78,z-1.12+i*.74,.64,1.36,new THREE.MeshBasicMaterial({color:0x2f5f72,transparent:true,opacity:.96,side:THREE.DoubleSide}));
+      }
+      frontPlane(group,side,.32,2.18,z,.9,.78,new THREE.MeshBasicMaterial({map:signTexture("ゆ","#f0fbff","#286d94",180,180,72),side:THREE.DoubleSide}));
+      addWindow(group,side,z+2.55,2.02,1.06,1.54,store,false);
+      var chimney = cyl(.22,.28,2.2,12,std(0x6d625b,.94,.04));
+      chimney.position.set(fx(side,-1.8),6.55,z+2.8);
+      group.add(chimney);
+    }
+
+    function addFlower(group,side,z,store){
+      addOpen(group,side,z,store);
+      frontBox(group,side,1.06,.72,z,.42,.9,5.9,std(0x4a563d,.96,.02));
+    }
+
+    function addPhoto(group,side,z,store){
+      addWindow(group,side,z-2.25,2.02,1.56,1.72,store,false);
+      addDoorInset(group,side,z+.45,1.24,2.38,store);
+      addWindow(group,side,z+2.55,2.02,1.2,1.72,store,false);
+      frontPlane(group,side,.30,2.02,z-2.25,1.1,1.3,new THREE.MeshBasicMaterial({color:0x111111,transparent:true,opacity:.28,side:THREE.DoubleSide}));
+    }
+
+    function addDarkwood(group,side,z,store){
+      frontBox(group,side,.12,2.2,z,.24,4.2,7.25,std(0x5a4636,.94,.04));
+      for(var i=0;i<18;i++){
+        frontBox(group,side,.26,2.15,z-3.45+i*.4,.12,4.0,.055,std(0x3f3028,.94,.04));
+      }
+      addDoorInset(group,side,z,1.55,2.44,store);
+      addWindow(group,side,z-2.6,2.02,1.02,1.3,store,true);
+      addWindow(group,side,z+2.6,2.02,1.02,1.3,store,false);
+    }
+
+    /* 空き店舗。シャッター一枚と、剥がれかけの貼り紙だけ */
+    function addVacant(group,side,z,store){
+      frontBox(group,side,.02,1.62,z,.1,3.0,6.9,new THREE.MeshStandardMaterial({map:shutterTexture(),roughness:.96,metalness:.05}));
+      frontBox(group,side,.10,1.62,z-3.5,.24,3.1,.14,std(0x4b4038,.94,.04));
+      frontBox(group,side,.10,1.62,z+3.5,.24,3.1,.14,std(0x4b4038,.94,.04));
+      frontBox(group,side,.10,3.2,z,.24,.16,7.05,std(0x4b4038,.94,.04));
+      frontBox(group,side,.10,.1,z,.3,.14,7.05,std(0x565049,.95,.02));
+
+      var paper = frontPlane(group,side,.14,1.72,z+.95,.5,.66,new THREE.MeshBasicMaterial({map:posterTexture("","#e9e3d3","#666666"),side:THREE.DoubleSide}));
+      paper.rotation.z = .06;
+    }
+
+    function addFacade(group,store,side,z){
+      if(store.style==="fish") addFish(group,side,z,store);
+      else if(store.style==="kura") addKura(group,side,z,store);
+      else if(store.style==="showcase") addShowcase(group,side,z,store);
+      else if(store.style==="cafe") addCafe(group,side,z,store);
+      else if(store.style==="open") addOpen(group,side,z,store);
+      else if(store.style==="booth") addBooth(group,side,z,store);
+      else if(store.style==="bath") addBath(group,side,z,store);
+      else if(store.style==="flower") addFlower(group,side,z,store);
+      else if(store.style==="photo") addPhoto(group,side,z,store);
+      else if(store.style==="darkwood") addDarkwood(group,side,z,store);
+      else if(store.style==="vacant") addVacant(group,side,z,store);
+      else addMachiya(group,side,z,store);
+    }
+
+    function addUpperLiving(group,store,side,z,width){
+      addWindow(group,side,z-2.55,5.46,1.12,1.0,store,true);
+      addWindow(group,side,z+.05,5.46,1.12,1.0,store,false);
+      addWindow(group,side,z+2.55,5.46,1.12,1.0,store,Math.random()<.5);
+
+      var rod = cyl(.035,.035,width+.2,8,std(0x6d655a,.92,.06));
+      rod.rotation.x = Math.PI/2;
+      rod.position.set(fx(side,.7),4.76,z);
+      group.add(rod);
+
+      var clothCols = [0xded6c8,0x9fb6c1,0xc89a88,0xe8e0bd,0xb8c7a7];
+      for(var i=0;i<5;i++){
+        frontBox(group,side,.74,4.5,z-2.05+i*1.0,.07,.54,.48,std(clothCols[i%clothCols.length],.98,0));
+      }
+
+      frontBox(group,side,.62,4.02,z+3.15,.24,.12,.78,std(0x5b4637,.93,.04));
+      for(var p=0;p<3;p++){
+        frontBox(group,side,.72,4.16,z+2.88+p*.26,.22,.18,.2,std(0x8a5941,.88,.04));
+      }
+
+      frontBox(group,side,.90,4.0,z-3.05,.52,.38,.7,new THREE.MeshStandardMaterial({map:metalTexture("#d9d2c7"),roughness:.88,metalness:.06}));
+    }
+
+    /* 空き店舗の二階。洗濯物はない。真ん中の一室だけ、宵の底で灯ることがある */
+    function addUpperVacant(group,store,side,z){
+      addWindow(group,side,z-2.55,5.46,1.12,1.0,store,false);
+      addWindow(group,side,z+.05,5.46,1.12,1.0,store,false);
+      addWindow(group,side,z+2.55,5.46,1.12,1.0,store,false);
+      if(windowGlows.length>=2){
+        windowGlows[windowGlows.length-2].th = .93;
+      }
+    }
+
+    function addThickSign(group,store,side,z,width){
+      /* ひさしより手前に出す */
+      frontBox(group,side,1.10,4.72,z,.46,1.02,width,std(num(store.sign),.8,.06));
+      frontPlane(group,side,1.34,4.72,z,width,.96,new THREE.MeshBasicMaterial({map:signTexture(store.name,store.sign,store.text,720,170,64),side:THREE.DoubleSide}));
+
+      var marks = {
+        liquor:"酒",fish:"魚",rice:"米",meat:"肉",cafe:"喫",hardware:"金",tobacco:"煙",bath:"湯",
+        stationery:"文",flower:"花",bread:"パン",ice:"氷",antique:"古",photo:"写",odd:"爪"
+      };
+      var mark = marks[store.kind] || "店";
+
+      frontBox(group,side,1.26,3.7,z-2.95,.24,1.82,.74,std(num(store.sign),.8,.06));
+      frontPlane(group,side,1.42,3.7,z-2.95,.74,1.82,new THREE.MeshBasicMaterial({map:signTexture(mark,store.sign,store.text,190,440,58),side:THREE.DoubleSide}));
+
+      /* 看板の背後に落ち影 */
+      frontPlane(group,side,.88,4.44,z,width+.3,.56,new THREE.MeshBasicMaterial({
+        color:0x000000,transparent:true,opacity:.18,side:THREE.DoubleSide,depthWrite:false
+      }));
+    }
+
+    /* 空き店舗の看板。板だけあって、屋号がない */
+    function addBlankSign(group,store,side,z,width){
+      frontBox(group,side,1.10,4.72,z,.46,1.02,width,std(num(store.sign),.86,.04));
+      frontPlane(group,side,1.34,4.72,z,width,.96,new THREE.MeshBasicMaterial({map:signTexture("",store.sign,store.text,720,170,64),side:THREE.DoubleSide}));
+      frontPlane(group,side,.88,4.44,z,width+.3,.56,new THREE.MeshBasicMaterial({
+        color:0x000000,transparent:true,opacity:.18,side:THREE.DoubleSide,depthWrite:false
+      }));
+    }
+
+    function addGenericClutter(group, store, side, z){
+      function smallBox(x,y,zz,dx,dy,dz,col,rough,metal){
+        var o = box(dx,dy,dz,std(col,rough===undefined?.92:rough,metal===undefined?.04:metal));
+        o.position.set(x,y,zz);
+        group.add(o);
+        return o;
+      }
+
+      function bucket(x,y,zz,col){
+        var o = cyl(.16,.13,.26,10,std(col,.84,.08));
+        o.position.set(x,y,zz);
+        group.add(o);
+        return o;
+      }
+
+      function broom(x,y,zz){
+        var stick = cyl(.015,.015,.9,6,std(0x7a5a36,.92,.03));
+        stick.position.set(x,y+.42,zz);
+        stick.rotation.z = .15;
+        group.add(stick);
+
+        var head = smallBox(x-.02,y+.05,zz,.1,.12,.18,0xa07a42,.95,.02);
+        head.rotation.z = .15;
+      }
+
+      function plant(x,y,zz,potColor,leafColor){
+        var pot = smallBox(x,y,zz,.24,.22,.24,potColor,.92,.02);
+        var leaf = new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),std(leafColor,.96,0));
+        leaf.scale.set(1.2,.9,1.1);
+        leaf.position.set(x,y+.23,zz);
+        group.add(leaf);
+      }
+
+      function newspaper(x,y,zz){
+        for(var i=0;i<3;i++){
+          smallBox(x,y+i*.03,zz,.28,.025,.22,0xe6e0d2,.98,0);
+        }
+        smallBox(x,y+.05,zz,.04,.06,.24,0xb79256,.9,.02);
+      }
+
+      function stool(x,y,zz,col){
+        smallBox(x,y+.18,zz,.28,.04,.28,col,.9,.02);
+        smallBox(x-.1,y+.09,zz-.1,.03,.18,.03,col,.9,.02);
+        smallBox(x+.1,y+.09,zz-.1,.03,.18,.03,col,.9,.02);
+        smallBox(x-.1,y+.09,zz+.1,.03,.18,.03,col,.9,.02);
+        smallBox(x+.1,y+.09,zz+.1,.03,.18,.03,col,.9,.02);
+      }
+
+      function handSign(x,y,zz,label,bg,fg){
+        smallBox(x,y+.45,zz,.04,.9,.04,0x6b573e,.92,.03);
+        var face = plane(.48,.68,new THREE.MeshBasicMaterial({map:posterTexture(label,bg,fg),side:THREE.DoubleSide}));
+        face.position.set(x,y+.86,zz);
+        face.rotation.y = side<0 ? Math.PI/2 : -Math.PI/2;
+        group.add(face);
+      }
+
+      function umbrellaStand(x,y,zz){
+        smallBox(x,y+.18,zz,.16,.36,.16,0x4c4f52,.86,.08);
+        for(var i=0;i<3;i++){
+          var umb = cyl(.01,.01,.7,5,std(i%2?0x5a4a72:0x3f5d57,.85,.05));
+          umb.position.set(x+(i-1)*.03,y+.52,zz);
+          group.add(umb);
+        }
+      }
+
+      function crateStack(x,y,zz,col){
+        smallBox(x,y+.14,zz,.56,.24,.46,col,.9,.03);
+        smallBox(x,y+.4,zz,.56,.24,.46,col,.9,.03);
+      }
+
+      var x1 = fx(side,1.15);
+      var x2 = fx(side,1.48);
+      var x3 = fx(side,1.72);
+
+      /* 空き店舗の前には、黄ばんだ新聞の束だけが残っている */
+      if(store.kind==="vacant"){
+        newspaper(x2,.05,z-1.4);
+        newspaper(x2,.05,z-1.05);
+        return;
+      }
+
+      newspaper(x2,.05,z-2.1);
+      broom(x3,.02,z+2.4);
+      bucket(x2,.13,z+2.95,0x6b7f84);
+      plant(x3,.12,z-2.85,0x7a5a45,0x4d6e4a);
+      stool(x2,.02,z+.25,0x4f3b2f);
+
+      if(store.kind==="liquor" || store.kind==="cafe"){
+        handSign(x3,.02,z+1.9,"営業中","#e8d6b2","#563621");
+      }
+
+      if(store.kind==="hardware" || store.kind==="rice"){
+        crateStack(x3,.02,z-2.85,0x785834);
+      }
+
+      if(store.kind==="tobacco" || store.kind==="odd"){
+        umbrellaStand(x3,.02,z+2.55);
+      }
+
+      if(store.kind==="flower"){
+        plant(x2,.12,z+2.1,0x7a5a45,0x5d7a52);
+        plant(x3,.12,z+2.65,0x7a5a45,0x6a845d);
+      }
+
+      if(store.kind==="fish"){
+        smallBox(x3,.08,z+2.25,.32,.16,.32,0xdfe5e7,.95,.02);
+      }
+
+      if(store.kind==="photo" || store.kind==="antique"){
+        smallBox(x3,.46,z+2.1,.42,.7,.08,0x342821,.92,.04);
+        var frame = plane(.34,.48,new THREE.MeshBasicMaterial({map:posterTexture("", "#d7c8ae", "#222222"), side:THREE.DoubleSide}));
+        frame.position.set(x3,.68,z+2.1);
+        frame.rotation.y = side<0 ? Math.PI/2 : -Math.PI/2;
+        group.add(frame);
+      }
+    }
+
+    function addGoods(group,store,side,z){
+      function crate(x,y,zz,dx,dy,dz,col){
+        var o = box(dx,dy,dz,std(col,.93,.04));
+        o.position.set(x,y,zz);
+        group.add(o);
+        return o;
+      }
+      function bottle(x,y,zz,col){
+        var b = cyl(.05,.05,.34,10,std(col,.55,.1));
+        b.position.set(x,y,zz);
+        group.add(b);
+        return b;
+      }
+      var x = fx(side,1.02);
+
+      if(store.kind==="liquor"){
+        for(var i=0;i<2;i++){
+          crate(x,.14,z-1.95+i*.62,.6,.26,.5,0x6a4a34);
+          for(var j=0;j<6;j++) bottle(x,.39,z-2.15+i*.62+j*.08,j%2?0x345944:0x6b3f2c);
+        }
+        for(var t=0;t<2;t++){
+          var barrel = cyl(.22,.22,.54,12,std(0x8a6b45,.85,.03));
+          barrel.rotation.z = Math.PI/2;
+          barrel.position.set(x,.32,z+1.65+t*.56);
+          group.add(barrel);
+        }
+      }
+
+      if(store.kind==="fish"){
+        for(var f=0;f<6;f++){
+          crate(x,.14,z-2.5+f*.65,.75,.24,.48,0xe5eeed);
+          crate(x,.28,z-2.5+f*.65,.78,.04,.5,0xf7fbfb);
+        }
+        var bucket1 = cyl(.22,.22,.34,12,std(0x2f6380,.82,.08));
+        bucket1.position.set(x,.18,z+2.1);
+        group.add(bucket1);
+      }
+
+      if(store.kind==="rice"){
+        for(var r=0;r<7;r++){
+          var sack = cyl(.22,.22,.72,12,std(0xc9b58f,.96,0));
+          sack.scale.z = .78;
+          sack.position.set(x,.38,z-2.0+r*.58);
+          group.add(sack);
+        }
+      }
+
+      if(store.kind==="meat"){
+        crate(x,.52,z+1.65,.68,.12,1.6,0xe3d4c5);
+        for(var m=0;m<6;m++) crate(x,.62,z+1.02+m*.23,.52,.05,.16,0xb65d50);
+      }
+
+      if(store.kind==="cafe"){
+        crate(x,.46,z+1.78,.72,.74,1.26,0x2e2722);
+      }
+
+      if(store.kind==="hardware"){
+        for(var h=0;h<10;h++){
+          var tool = crate(x,.45+(h%4)*.22,z-2.2+Math.floor(h/4)*.42,.08,.42,.05,h%2?0x77756e:0x8b7d66);
+          tool.rotation.z = (Math.random()-.5)*.35;
+        }
+      }
+
+      if(store.kind==="tobacco"){
+        crate(x,.83,z+.65,.58,1.3,1.2,0xcaa66e);
+      }
+
+      if(store.kind==="bath"){
+        for(var bt=0;bt<10;bt++){
+          crate(fx(side,.62),.42,z-2.65+bt*.54,.12,.36,.46,bt%2?0xd7d2c2:0xbfc8c2);
+        }
+      }
+
+      if(store.kind==="stationery"){
+        crate(x,.66,z+1.75,.58,1.08,1.18,0x6b5a4a);
+        for(var st=0;st<15;st++){
+          crate(x,.34+(st%4)*.22,z+1.3+Math.floor(st/4)*.26,.23,.05,.18,st%3?0x6a5a8a:0xb07a3a);
+        }
+      }
+
+      if(store.kind==="flower"){
+        for(var p=0;p<16;p++){
+          var zz = z-2.7+(p%8)*.68;
+          var yy = p<8 ? .14 : .5;
+          crate(x,yy,zz,.28,.22,.28,0x7b5240);
+          var leaf = new THREE.Mesh(new THREE.SphereGeometry(.17,8,6),std(p%2?0x4d6e4a:0x5f7c52,.96,0));
+          leaf.scale.set(1.1,.65,1);
+          leaf.position.set(x,yy+.22,zz);
+          group.add(leaf);
+        }
+      }
+
+      if(store.kind==="bread"){
+        crate(x,.38,z+1.2,.66,.22,1.48,0x9b744d);
+        for(var b=0;b<10;b++){
+          var bun = new THREE.Mesh(new THREE.SphereGeometry(.13,10,8),std(0xc68a4a,.93,.02));
+          bun.scale.y = .48;
+          bun.position.set(x,.56,z+.62+b*.13);
+          group.add(bun);
+        }
+      }
+
+      if(store.kind==="ice"){
+        crate(x,.42,z+1.35,.72,.64,1.36,0xdce9ee);
+        frontBox(group,side,1.3,2.1,z-2.08,.12,1.12,.9,std(0xf4fbff,.97,.02));
+        frontPlane(group,side,1.42,2.1,z-2.08,.9,1.12,new THREE.MeshBasicMaterial({map:signTexture("氷","#f4fbff","#286d94",180,250,82),side:THREE.DoubleSide}));
+      }
+
+      if(store.kind==="antique"){
+        crate(x,.8,z+1.2,.58,1.42,1.42,0x4c382b);
+        for(var a=0;a<9;a++){
+          var vase = cyl(.08,.08,.24,12,std(a%2?0x6f5945:0x3d342d,.87,.06));
+          vase.position.set(x,.25+(a%3)*.35,z+.68+Math.floor(a/3)*.32);
+          group.add(vase);
+        }
+      }
+
+      if(store.kind==="photo"){
+        for(var ph=0;ph<8;ph++){
+          crate(x,1.0+(ph%2)*.52,z-2.45+Math.floor(ph/2)*.48,.08,.42,.34,0x2d2520);
+          frontPlane(group,side,1.18,1.0+(ph%2)*.52,z-2.45+Math.floor(ph/2)*.48,.28,.34,new THREE.MeshBasicMaterial({map:posterTexture("","#d7c8ae","#222222"),side:THREE.DoubleSide}));
+        }
+      }
+
+      if(store.kind==="odd"){
+        crate(x,.5,z+1.2,.54,.12,1.35,0xd8cabc);
+        for(var o=0;o<14;o++){
+          var nail = crate(x,.72+(o%3)*.18,z+.64+Math.floor(o/3)*.2,.04,.28,.07,0xe8d8c5);
+          nail.rotation.z = .25;
+        }
+      }
+    }
+
+    function addLife(group,store,side,z){
+      var vac = store.kind==="vacant";
+
+      if(!vac){
+        for(var a=0;a<2;a++){
+          var baseZ = z-3.0+a*6.05;
+          frontBox(group,side,1.02,.14,baseZ,.24,.22,.24,std(0x8a5941,.9,.04));
+          var pole = cyl(.018,.018,1.35,6,std(0x5f513c,.93,.04));
+          pole.position.set(fx(side,1.02),.8,baseZ);
+          group.add(pole);
+          for(var l=0;l<7;l++){
+            var leaf = new THREE.Mesh(new THREE.SphereGeometry(.08,8,6),std(0x4d6e4a,.96,0));
+            leaf.scale.set(1.2,.55,.9);
+            leaf.position.set(fx(side,1.02),.35+l*.13,baseZ+(Math.random()-.5)*.18);
+            group.add(leaf);
+          }
+        }
+
+        var coil = new THREE.Mesh(new THREE.TorusGeometry(.13,.018,8,24),std(0x3f6f45,.96,0));
+        coil.rotation.x = Math.PI/2;
+        coil.position.set(fx(side,1.18),.48,z-1.65);
+        group.add(coil);
+
+        var wet = new THREE.Mesh(
+          new THREE.PlaneGeometry(1.12,2.45),
+          new THREE.MeshBasicMaterial({color:0x7b8f91,transparent:true,opacity:.18,depthWrite:false,side:THREE.DoubleSide})
+        );
+        wet.rotation.x = -Math.PI/2;
+        wet.position.set(fx(side,1.34),.051,z+1.5);
+        group.add(wet);
+      }
+
+      frontBox(group,side,.36,2.56,z+3.18,.22,.7,.48,new THREE.MeshStandardMaterial({map:metalTexture("#d8cfbd"),roughness:.86,metalness:.08}));
+
+      var meter = new THREE.Mesh(new THREE.CircleGeometry(.16,18),new THREE.MeshBasicMaterial({color:0x7b817e,side:THREE.DoubleSide}));
+      meter.position.set(fx(side,.48),2.57,z+3.18);
+      meter.rotation.y = side<0 ? Math.PI/2 : -Math.PI/2;
+      group.add(meter);
+
+      if(!vac){
+        var words = ["ラムネ","冷し中華","蚊取線香","花火","配達","電話","夏物","休業"];
+        for(var i=0;i<6;i++){
+          frontPlane(group,side,.34,2.9-Math.floor(i/3)*.55,z-3.05+(i%3)*.72,.48,.36,new THREE.MeshBasicMaterial({
+            map:posterTexture(words[(i+store.name.length)%words.length],i%2?"#e8d6b2":"#d7e2dc","#563621"),side:THREE.DoubleSide
+          }));
+        }
+      }
+
+      for(var w=0;w<3;w++){
+        var geo = new THREE.BufferGeometry();
+        var pts = new Float32Array([
+          fx(side,.2),3.05+w*.08,z+3.18,
+          fx(side,.34),3.22+w*.08,z+3.56,
+          fx(side,.48),3.40+w*.08,z+3.92
+        ]);
+        geo.setAttribute("position",new THREE.BufferAttribute(pts,3));
+        var line = new THREE.Line(geo,new THREE.LineBasicMaterial({color:0x211914,transparent:true,opacity:.75}));
+        group.add(line);
+      }
+    }
+
+    function addSignLight(group,side,z,idx){
+      var pl = new THREE.PointLight(0xffcf95,0,10);
+      pl.position.set(fx(side,1.18),4.2,z);
+      group.add(pl);
+      signLights.push({
+        light:pl,
+        th:.55+(idx%4)*.03,
+        buzz:(idx%7===3),
+        seed:Math.random()*100
+      });
+    }
+
+    function buildStore(store,side,z,index){
+      var group = new THREE.Group();
+      scene.add(group);
+
+      var depth = 4.55;
+      var width = 8.05;
+      var height = store.style==="bath" ? 7.85 : 7.1;
+      var cx = side*(streetHalf+depth/2);
+
+      var body = box(depth,height,width,new THREE.MeshStandardMaterial({
+        map:dirtyWallTexture(store),roughness:.96,metalness:.02
+      }));
+      body.position.set(cx,height/2,z);
+      group.add(body);
+
+      frontBox(group,side,.08,height/2,z-width/2+.08,.25,height,.16,std(0x4a382f,.94,.04));
+      frontBox(group,side,.08,height/2,z+width/2-.08,.25,height,.16,std(0x4a382f,.94,.04));
+      frontBox(group,side,.18,.25,z,.48,.5,width,std(0x5b5148,.95,.02));
+
+      var roof = box(depth+.75,.4,width+.55,std(store.style==="bath"?0x36454a:0x4c3d34,.88,.05));
+      roof.position.set(cx,height+.2,z);
+      group.add(roof);
+
+      frontBox(group,side,.64,height+.05,z,1.02,.28,width+.76,std(0x332821,.92,.05));
+
+      for(var r=0;r<12;r++){
+        frontBox(group,side,.86,height+.13,z-width/2+.38+r*.62,.19,.06,.28,std(0x5a4a40,.92,.04));
+      }
+
+      /* ひさしを少し建物側に引く */
+      var eave = frontBox(group,side,.50,3.86,z,1.1,.16,width+.06,std(0x584239,.84,.06));
+      eave.rotation.z = side<0 ? .03 : -.03;
+
+      var gutter = cyl(.055,.055,width+.15,10,new THREE.MeshStandardMaterial({map:metalTexture("#4d463f"),roughness:.88,metalness:.1}));
+      gutter.rotation.x = Math.PI/2;
+      gutter.position.set(fx(side,.58),3.77,z);
+      group.add(gutter);
+
+      var pipe = cyl(.04,.04,3.12,8,new THREE.MeshStandardMaterial({map:metalTexture("#5f574e"),roughness:.9,metalness:.08}));
+      pipe.position.set(fx(side,.42),1.98,z+3.5);
+      group.add(pipe);
+
+      for(var b=0;b<5;b++){
+        var br = frontBox(group,side,.48,3.48,z-3.1+b*1.55,.12,.36,.08,std(0x3a312b,.93,.04));
+        br.rotation.z = side<0 ? -.55 : .55;
+      }
+
+      addUnderEaveShadow(group,side,z,width+.2);
+
+      if(store.style==="vacant"){
+        addBlankSign(group,store,side,z,5.45);
+      }else{
+        addThickSign(group,store,side,z,5.45);
+      }
+
+      addFacade(group,store,side,z);
+
+      if(store.style==="vacant"){
+        addUpperVacant(group,store,side,z);
+      }else{
+        addUpperLiving(group,store,side,z,width);
+      }
+
+      addGoods(group,store,side,z);
+      addGenericClutter(group,store,side,z);
+      addLife(group,store,side,z);
+      addGroundAO(group,side,z,2.8,6.2);
+
+      if(store.style!=="vacant"){
+        addSignLight(group,side,z,index);
+      }
+
+      if(index%3===0 && store.style!=="vacant"){
+        var bike = new THREE.Group();
+        var w1 = new THREE.Mesh(new THREE.TorusGeometry(.24,.025,8,20),std(0x202020,.8,.1));
+        var w2 = w1.clone();
+        w1.position.set(-.32,.28,0);
+        w2.position.set(.32,.28,0);
+        bike.add(w1,w2);
+
+        var fr = box(.72,.035,.035,std(0x8a3b34,.78,.08));
+        fr.position.set(0,.45,0);
+        fr.rotation.z = .3;
+        bike.add(fr);
+
+        var handle = box(.18,.035,.035,std(0x333333,.82,.08));
+        handle.position.set(.38,.62,0);
+        bike.add(handle);
+
+        var seat = box(.14,.04,.08,std(0x2c211c,.9,.04));
+        seat.position.set(-.08,.62,0);
+        bike.add(seat);
+
+        bike.position.set(fx(side,1.56),.05,z+3.12);
+        bike.rotation.y = side<0 ? .18 : Math.PI-.18;
+        group.add(bike);
+      }
+
+      applyShadow(group);
+
+      return {
+        group:group,
+        store:store,
+        side:side,
+        z:z,
+        targets:{
+          all:new THREE.Vector3(fx(side,.64),1.65,z),
+          sign:new THREE.Vector3(fx(side,1.18),3.95,z),
+          door:new THREE.Vector3(fx(side,.62),1.45,z),
+          goods:new THREE.Vector3(fx(side,1.08),.78,z+1.0),
+          upper:new THREE.Vector3(fx(side,.64),4.65,z)
+        },
+        heroPos:new THREE.Vector3(-side*2.95,0,z-1.55)
+      };
+    }
+
+    var anchors = [];
+    var startZ = -54;
+    var gap = 8.95;
+
+    for(var i=0;i<SHOP_DATA.length;i++){
+      var z = startZ+i*gap;
+      anchors.push(buildStore(SHOP_DATA[i],-1,z,i));
+      anchors.push(buildStore(SHOP_DATA[(i+7)%SHOP_DATA.length],1,z,i+100));
+    }
+
+    function addLamp(x,z){
+      var pole = cyl(.08,.1,5.4,10,std(0x2a2723,.92,.08));
+      pole.position.set(x,2.7,z);
+      scene.add(pole);
+
+      var head = new THREE.Mesh(
+        new THREE.SphereGeometry(.34,12,10),
+        std(0x3a2c1e,.72,.02,{emissive:new THREE.Color(0xffcf8f),emissiveIntensity:.05})
+      );
+      head.position.set(x,5.2,z);
+      scene.add(head);
+
+      var pl = new THREE.PointLight(0xffd29a,0,14);
+      pl.position.set(x,5,z);
+      scene.add(pl);
+
+      lamps.push({head:head, light:pl, th:.44+Math.random()*.14, t0:-1});
+    }
+    addLamp(-6.75,6);
+    addLamp(6.75,-17);
+    addLamp(-6.75,-31);
+    addLamp(6.75,34);
+    addLamp(-6.75,58);
+
+    function addPole(x,z){
+      var p = cyl(.13,.16,7.2,8,std(0x6b6258,.95,.03));
+      p.position.set(x,3.6,z);
+      scene.add(p);
+
+      var arm = box(.7,.04,.04,std(0x5a5147,.88,.08));
+      arm.position.set(x,6.35,z);
+      arm.rotation.z = x<0 ? -.15 : .15;
+      scene.add(arm);
+    }
+    addPole(-6.95,17);
+    addPole(6.95,2);
+    addPole(-6.95,-12);
+    addPole(6.95,44);
+    addPole(-6.95,70);
+
+    var hero = new THREE.Group();
+    (function(){
+      var skin = std(0xe8b48a,.7,.02);
+      var shirt = std(0xeaf0f2,.95,.02);
+      var pants = std(0x3b4a63,.95,.02);
+      var hat = std(0xd8b46a,.9,.02);
+
+      var legL = box(.22,.62,.22,pants); legL.position.set(-.13,.31,0);
+      var legR = box(.22,.62,.22,pants); legR.position.set(.13,.31,0);
+      var body = box(.52,.6,.3,shirt); body.position.y=.92;
+      var armL = box(.16,.5,.16,shirt); armL.position.set(-.34,.95,0);
+      var armR = box(.16,.5,.16,shirt); armR.position.set(.34,.95,0);
+      var head = new THREE.Mesh(new THREE.SphereGeometry(.26,16,14),skin); head.position.y=1.45;
+      var brim = cyl(.4,.4,.04,16,hat); brim.position.y=1.62;
+      var top = cyl(.24,.27,.2,16,hat); top.position.y=1.7;
+
+      hero.add(legL,legR,body,armL,armR,head,brim,top);
+      hero.userData = {legL:legL,legR:legR,armL:armL,armR:armR};
+
+      /* 観測者は、日が沈むほど薄くなる。影だけは、しばらく残る */
+      hero.traverse(function(o){
+        if(o.isMesh){
+          o.material.transparent = true;
+        }
+      });
+
+      applyShadow(hero);
+    })();
+    scene.add(hero);
+
+    var motes;
+    (function(){
+      var N = 180;
+      var geo = new THREE.BufferGeometry();
+      var pos = new Float32Array(N*3);
+      for(var i=0;i<N;i++){
+        pos[i*3]=(Math.random()-.5)*18;
+        pos[i*3+1]=Math.random()*7.5;
+        pos[i*3+2]=(Math.random()-.5)*90;
+      }
+      geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+      var matp = new THREE.PointsMaterial({color:0xffd8a8,size:.07,transparent:true,opacity:.42,depthWrite:false});
+      motes = new THREE.Points(geo,matp);
+      motes.userData = {pos:pos,N:N};
+      scene.add(motes);
+    })();
+
+    /* 動かない物は行列を固定して負荷を下げる */
+    (function freezeStatic(){
+      var dynamicRoots = [hero, motes, sunDisc];
+      function isDyn(o){
+        for(var q=o;q;q=q.parent){
+          if(dynamicRoots.indexOf(q)>=0) return true;
+        }
+        return false;
+      }
+      scene.traverse(function(o){
+        if((o.isMesh || o.isPoints || o.isLine) && !isDyn(o)){
+          o.updateMatrix();
+          o.matrixAutoUpdate = false;
+        }
+      });
+    })();
+
+    var currentIndex = 0;
+    var currentSide = -1;
+    var focusModes = ["all","sign","door","goods","upper"];
+    var focusLabels = {all:"全体",sign:"看板",door:"入口",goods:"店先",upper:"二階"};
+    var focusIndex = 0;
+
+    function getAnchor(){
+      var z = startZ+currentIndex*gap;
+      var best = null;
+      var bestD = 999;
+      for(var i=0;i<anchors.length;i++){
+        if(anchors[i].side!==currentSide) continue;
+        var d = Math.abs(anchors[i].z-z);
+        if(d<bestD){
+          bestD = d;
+          best = anchors[i];
+        }
+      }
+      return best;
+    }
+
+    var capBox = document.getElementById("captionBox");
+    var capTimer = null;
+
+    function captionTextFor(store){
+      if(DUSK.phase>NIGHT_T && store.whisperNight) return store.whisperNight;
+      return store.whisper;
+    }
+
+    function updateCaption(immediate){
+      var a = getAnchor();
+      if(immediate){
+        document.getElementById("capName").textContent = a.store.name;
+        document.getElementById("capText").textContent = captionTextFor(a.store);
+        return;
+      }
+      if(capTimer) clearTimeout(capTimer);
+      capBox.classList.add("dim");
+      capTimer = setTimeout(function(){
+        var b = getAnchor();
+        document.getElementById("capName").textContent = b.store.name;
+        document.getElementById("capText").textContent = captionTextFor(b.store);
+        capBox.classList.remove("dim");
+      },300);
+    }
+
+    function markVisited(){
+      DUSK.visitedMax = Math.max(DUSK.visitedMax, currentIndex);
+    }
+
+    function goNext(){
+      currentIndex = Math.min(SHOP_DATA.length-1,currentIndex+1);
+      markVisited();
+      resetView(false);
+      updateCaption(false);
+    }
+
+    function goPrev(){
+      currentIndex = Math.max(0,currentIndex-1);
+      resetView(false);
+      updateCaption(false);
+    }
+
+    function flipSide(){
+      currentSide *= -1;
+      resetView(false);
+      updateCaption(false);
+    }
+
+    function cycleFocus(){
+      focusIndex = (focusIndex+1)%focusModes.length;
+      var mode = focusModes[focusIndex];
+      document.getElementById("focusBtn").textContent = "注視 " + focusLabels[mode];
+    }
+
+    document.getElementById("nextBtn").addEventListener("click",goNext);
+    document.getElementById("prevBtn").addEventListener("click",goPrev);
+    document.getElementById("sideBtn").addEventListener("click",flipSide);
+    document.getElementById("focusBtn").addEventListener("click",cycleFocus);
+
+    window.addEventListener("keydown",function(e){
+      var k = e.key.toLowerCase();
+      if(k==="arrowright" || k==="d") goNext();
+      if(k==="arrowleft" || k==="a") goPrev();
+      if(k==="arrowup" || k==="arrowdown" || k==="w" || k==="s") flipSide();
+      if(k===" " || k==="enter") cycleFocus();
+    });
+
+    var cam = {
+      yaw:0,
+      pitch:.10,
+      dist:7.2,
+      target:new THREE.Vector3(),
+      currentTarget:new THREE.Vector3(),
+      currentPos:new THREE.Vector3()
+    };
+    var lookTmp = new THREE.Vector3();
+
+    function baseYawForSide(side){
+      return side<0 ? -0.62 : Math.PI+0.62;
+    }
+
+    function sphericalToCartesian(target,yaw,pitch,dist){
+      var v = new THREE.Vector3();
+      var cosP = Math.cos(pitch);
+      v.x = target.x + Math.cos(yaw)*dist*cosP;
+      v.y = target.y + Math.sin(pitch)*dist;
+      v.z = target.z + Math.sin(yaw)*dist*cosP;
+      return v;
+    }
+
+    function resetView(hard){
+      cam.yaw = 0;
+      cam.pitch = .10;
+      cam.dist = 7.2;
+
+      if(hard){
+        var a = getAnchor();
+        var mode = focusModes[focusIndex];
+        cam.currentTarget.copy(a.targets[mode]);
+        var pos = sphericalToCartesian(cam.currentTarget,baseYawForSide(a.side),cam.pitch,cam.dist);
+        cam.currentPos.copy(pos);
+        camera.position.copy(pos);
+        camera.lookAt(cam.currentTarget);
+      }
+    }
+
+    document.getElementById("resetViewBtn").addEventListener("click",function(){ resetView(false); });
+    document.getElementById("zoomInBtn").addEventListener("click",function(){ cam.dist = clamp(cam.dist-.6,4.6,11.5); });
+    document.getElementById("zoomOutBtn").addEventListener("click",function(){ cam.dist = clamp(cam.dist+.6,4.6,11.5); });
+
+    var dragging = false;
+    var dragId = null;
+    var lastX = 0;
+    var lastY = 0;
+
+    canvas.addEventListener("pointerdown",function(e){
+      dragging = true;
+      dragId = e.pointerId;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+
+    canvas.addEventListener("pointermove",function(e){
+      if(!dragging || e.pointerId!==dragId) return;
+      var dx = e.clientX-lastX;
+      var dy = e.clientY-lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      cam.yaw += dx*.006;
+      cam.pitch -= dy*.0034;
+      cam.pitch = clamp(cam.pitch,.02,.42);
+    });
+
+    function endDrag(e){
+      if(e.pointerId===dragId){
+        dragging = false;
+        dragId = null;
+      }
+    }
+    canvas.addEventListener("pointerup",endDrag);
+    canvas.addEventListener("pointercancel",endDrag);
+
+    window.addEventListener("wheel",function(e){
+      cam.dist += e.deltaY*.004;
+      cam.dist = clamp(cam.dist,4.6,11.5);
+    },{passive:true});
+
+    /* ============ 音 ============ */
+    var actx = null;
+    var soundOn = true;
+    var cicadaGain = null;
+    var airBus = null;
+    var airMaster = null;
+    var higuGain = null;
+    var higuStarted = false;
+
+    function ac(){
+      if(!actx){
+        try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }
+        catch(e){ actx = null; }
+      }
+      if(actx && actx.state==="suspended") actx.resume();
+      return actx;
+    }
+
+    function buildAir(c){
+      if(airBus) return;
+      airMaster = c.createGain();
+      airMaster.gain.value = soundOn ? 1 : 0;
+      airMaster.connect(c.destination);
+
+      airBus = c.createGain();
+      airBus.gain.value = 1;
+
+      var dry = c.createGain();
+      dry.gain.value = .85;
+      airBus.connect(dry);
+      dry.connect(airMaster);
+
+      var dl = c.createDelay(1.2);
+      dl.delayTime.value = .31;
+      var fb = c.createGain();
+      fb.gain.value = .34;
+      var wet = c.createGain();
+      wet.gain.value = .28;
+
+      airBus.connect(dl);
+      dl.connect(fb);
+      fb.connect(dl);
+      dl.connect(wet);
+      wet.connect(airMaster);
+    }
+
+    function startSound(){
+      var c = ac();
+      if(!c || cicadaGain) return;
+
+      buildAir(c);
+
+      /* 油蝉。宵が深まるほど、遠のく */
+      var len = Math.floor(c.sampleRate*2);
+      var buf = c.createBuffer(1,len,c.sampleRate);
+      var d = buf.getChannelData(0);
+      for(var i=0;i<len;i++) d[i] = Math.random()*2-1;
+
+      var src = c.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+
+      var bp = c.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.value = 3850;
+      bp.Q.value = 4;
+
+      var amp = c.createGain();
+      amp.gain.value = .075;
+
+      var lfo = c.createOscillator();
+      lfo.frequency.value = 7.4;
+
+      var lg = c.createGain();
+      lg.gain.value = .025;
+
+      lfo.connect(lg);
+      lg.connect(amp.gain);
+
+      cicadaGain = c.createGain();
+      cicadaGain.gain.value = soundOn ? .48 : 0;
+
+      src.connect(bp);
+      bp.connect(amp);
+      amp.connect(cicadaGain);
+      cicadaGain.connect(c.destination);
+
+      src.start();
+      lfo.start();
+
+      /* 蜩。宵が深まると鳴き始める */
+      higuGain = c.createGain();
+      higuGain.gain.value = 0;
+      var hlp = c.createBiquadFilter();
+      hlp.type = "lowpass";
+      hlp.frequency.value = 5200;
+      higuGain.connect(hlp);
+      hlp.connect(airBus);
+      higuStarted = true;
+
+      scheduleFurin();
+      scheduleHigurashi();
+    }
+
+    function higuPhrase(t0,panV){
+      var c = actx;
+      var o = c.createOscillator();
+      o.type = "sine";
+      var g = c.createGain();
+      g.gain.value = .0001;
+
+      if(c.createStereoPanner){
+        var p = c.createStereoPanner();
+        p.pan.value = panV;
+        o.connect(g);
+        g.connect(p);
+        p.connect(higuGain);
+      }else{
+        o.connect(g);
+        g.connect(higuGain);
+      }
+
+      var n = 9+Math.floor(Math.random()*6);
+      var f0 = 3750+Math.random()*350;
+
+      for(var k=0;k<n;k++){
+        var tp = t0+k*.088;
+        var drop = k>n-4 ? (k-(n-4))*55 : 0;
+        o.frequency.setValueAtTime(f0 - k*16 - drop, tp);
+        g.gain.setValueAtTime(.0001,tp);
+        g.gain.linearRampToValueAtTime(.5,tp+.014);
+        g.gain.exponentialRampToValueAtTime(.0001,tp+.075);
+      }
+
+      o.start(t0);
+      o.stop(t0+n*.088+.25);
+    }
+
+    function scheduleHigurashi(){
+      setTimeout(function(){
+        if(actx && higuStarted && soundOn && DUSK.phase>0.3){
+          var t = actx.currentTime+.05;
+          higuPhrase(t,(Math.random()<.5?-1:1)*(.3+Math.random()*.5));
+          if(Math.random()<.45){
+            higuPhrase(t+.6+Math.random()*1.2,(Math.random()<.5?-1:1)*.6);
+          }
+        }
+        scheduleHigurashi();
+      },2800+Math.random()*4200);
+    }
+
+    /* 街灯が点く頃、どこか遠くで時報が鳴る。一度だけ */
+    function playChime(){
+      if(!actx || !airBus) return;
+      var c = actx;
+      var t = c.currentTime+.4;
+      var seq = [659.25,523.25,587.33,392.0, 392.0,587.33,659.25,523.25];
+
+      for(var i=0;i<seq.length;i++){
+        var tn = t + i*.92 + (i>3 ? .5 : 0);
+        var parts = [1,2.756];
+        for(var j=0;j<parts.length;j++){
+          var o = c.createOscillator();
+          o.type = "sine";
+          o.frequency.value = seq[i]*parts[j];
+          var g = c.createGain();
+          g.gain.setValueAtTime(.0001,tn);
+          g.gain.exponentialRampToValueAtTime(j ? .028 : .09, tn+.02);
+          g.gain.exponentialRampToValueAtTime(.0001, tn+2.6);
+          o.connect(g);
+          g.connect(airBus);
+          o.start(tn);
+          o.stop(tn+2.8);
+        }
+      }
+    }
+
+    function scheduleFurin(){
+      if(!actx) return;
+      setTimeout(function(){
+        if(soundOn && actx && airBus){
+          var c = actx;
+          var t = c.currentTime;
+          [1318,1567].forEach(function(f,i){
+            var o = c.createOscillator();
+            var g = c.createGain();
+            o.type = "sine";
+            o.frequency.value = f*(1+i*.002);
+            g.gain.setValueAtTime(.0001,t);
+            g.gain.exponentialRampToValueAtTime(.11,t+.02);
+            g.gain.exponentialRampToValueAtTime(.0001,t+1.7);
+            o.connect(g);
+            g.connect(airBus);
+            o.start(t);
+            o.stop(t+1.8);
+          });
+        }
+        scheduleFurin();
+      },6000+Math.random()*9000);
+    }
+
+    document.getElementById("soundBtn").addEventListener("click",function(){
+      soundOn = !soundOn;
+      this.textContent = soundOn ? "音 入" : "音 切";
+      if(airMaster) airMaster.gain.value = soundOn ? 1 : 0;
+      if(soundOn) ac();
+    });
+
+    /* ============ 時計 ============ */
+    var clockHud = document.getElementById("clockHud");
+    var lastClockStr = "";
+
+    function updateClock(p){
+      /* 17:40から進む。19:00には、漸近するだけで届かない */
+      var totalMin = Math.floor(80*p);
+      var mm = 40+totalMin;
+      var hh = 17+Math.floor(mm/60);
+      mm = mm%60;
+      var s = "観測時刻 "+hh+":"+(mm<10?"0":"")+mm;
+      if(s!==lastClockStr){
+        lastClockStr = s;
+        clockHud.textContent = s;
+      }
+    }
+
+    var warmLayer = document.getElementById("warmLayer");
+    var last = performance.now();
+    var walkPhase = 0;
+
+    function animate(now){
+      var dt = Math.min(.05,(now-last)/1000);
+      last = now;
+
+      /* ---- 夕暮れの進行。時間と、歩いた店の数で深まる ---- */
+      var elapsed = DUSK.enterTime>0 ? (now-DUSK.enterTime)/1000 : 0;
+      var p = 1 - Math.exp(-(elapsed + DUSK.visitedMax*45)/420);
+      DUSK.phase = p;
+
+      redrawSky(p);
+      scene.fog.color.copy(cFogA).lerp(cFogB,p);
+      scene.fog.near = lerp(24,20,p);
+      scene.fog.far = lerp(155,120,p);
+
+      hemi.color.copy(cHemiA).lerp(cHemiB,p);
+      hemi.groundColor.copy(cGndA).lerp(cGndB,p);
+      hemi.intensity = lerp(.95,.5,p);
+
+      sun.color.copy(cSunA).lerp(cSunB,p);
+      sun.intensity = lerp(1.08,.1,p);
+      sun.position.set(lerp(-14,-10,p), lerp(22,6.5,p), lerp(28,40,p));
+
+      amb.color.copy(cAmbA).lerp(cAmbB,p);
+      amb.intensity = lerp(.34,.3,p);
+
+      sunDisc.position.y = lerp(8.2,-3.5,p);
+      sunDisc.material.opacity = .92*(1-smooth(p,.5,.92));
+      sunDisc.lookAt(0,sunDisc.position.y,0);
+
+      renderer.toneMappingExposure = lerp(1.1,.98,p);
+      warmLayer.style.opacity = (1-p).toFixed(3);
+
+      /* 街灯。閾値を越えた一本ずつが、瞬いてから点く */
+      for(var li=0;li<lamps.length;li++){
+        var L = lamps[li];
+        if(p>=L.th){
+          if(L.t0<0) L.t0 = now;
+          var e = (now-L.t0)/1200;
+          if(e<1){
+            var on = Math.random()<Math.min(.92,e+.15);
+            L.light.intensity = on ? .5+Math.random()*.15 : .02;
+            L.head.material.emissiveIntensity = on ? .9 : .08;
+          }else{
+            L.light.intensity = .58;
+            L.head.material.emissiveIntensity = .95;
+          }
+        }else{
+          L.light.intensity = 0;
+          L.head.material.emissiveIntensity = .05;
+        }
+      }
+
+      /* 看板灯。数本に一本は、切れかけのまま */
+      for(var si=0;si<signLights.length;si++){
+        var S = signLights[si];
+        if(p>=S.th){
+          var base = .4*Math.min(1,(p-S.th)*6);
+          if(S.buzz){
+            var gate = Math.sin(now*.011+S.seed)*Math.sin(now*.0037+S.seed*2);
+            S.light.intensity = base*(gate>-.2 ? 1 : .22);
+          }else{
+            S.light.intensity = base;
+          }
+        }else{
+          S.light.intensity = 0;
+        }
+      }
+
+      /* 窓明かり。一つずつ灯る */
+      for(var wi=0;wi<windowGlows.length;wi++){
+        var W = windowGlows[wi];
+        W.m.material.opacity = p>W.th ? Math.min(1,(p-W.th)*7)*.3 : 0;
+      }
+
+      /* 時報。街灯の頃に、一度だけ */
+      if(!DUSK.chimeDone && p>=.5){
+        DUSK.chimeDone = true;
+        if(soundOn) playChime();
+      }
+
+      /* 蝉から蜩へ */
+      if(cicadaGain){
+        cicadaGain.gain.value = soundOn ? .48*(1-smooth(p,.2,.7)) : 0;
+      }
+      if(higuGain){
+        higuGain.gain.value = smooth(p,.3,.75)*.12;
+      }
+
+      /* 囁きが夜版に変わる瞬間 */
+      if(!DUSK.nightText && p>NIGHT_T){
+        DUSK.nightText = true;
+        updateCaption(false);
+      }
+
+      updateClock(p);
+
+      var a = getAnchor();
+      var mode = focusModes[focusIndex];
+
+      cam.target.copy(a.targets[mode]);
+      cam.currentTarget.lerp(cam.target,Math.min(1,dt*4.8));
+
+      var yaw = baseYawForSide(a.side)+cam.yaw;
+      var desiredPos = sphericalToCartesian(cam.currentTarget,yaw,cam.pitch,cam.dist);
+      cam.currentPos.lerp(desiredPos,Math.min(1,dt*4.0));
+
+      camera.position.copy(cam.currentPos);
+
+      /* わずかな手持ちの揺れ */
+      lookTmp.copy(cam.currentTarget);
+      lookTmp.x += Math.sin(now*.0006)*.05;
+      lookTmp.y += Math.sin(now*.0009+2)*.04;
+      camera.lookAt(lookTmp);
+
+      hero.position.x += (a.heroPos.x-hero.position.x)*Math.min(1,dt*4.6);
+      hero.position.z += (a.heroPos.z-hero.position.z)*Math.min(1,dt*4.6);
+      hero.rotation.y = a.side<0 ? Math.PI*.15 : -Math.PI*.15;
+
+      /* 観測者は薄れていく */
+      var heroOp = 1 - smooth(p,.25,.95)*.93;
+      hero.traverse(function(o){
+        if(o.isMesh) o.material.opacity = heroOp;
+      });
+
+      walkPhase += dt*5;
+      var sw = Math.sin(walkPhase)*.18;
+      hero.userData.legL.rotation.x = sw;
+      hero.userData.legR.rotation.x = -sw;
+      hero.userData.armL.rotation.x = -sw*.85;
+      hero.userData.armR.rotation.x = sw*.85;
+
+      var m = motes.userData;
+      for(var i=0;i<m.N;i++){
+        m.pos[i*3+1] += dt*.22;
+        m.pos[i*3] += dt*.12;
+        if(m.pos[i*3+1]>7.5) m.pos[i*3+1] = 0;
+        if(m.pos[i*3]>9) m.pos[i*3] = -9;
+      }
+      motes.geometry.attributes.position.needsUpdate = true;
+      motes.position.z = hero.position.z;
+      motes.material.opacity = lerp(.42,.16,p);
+
+      renderer.render(scene,camera);
+      requestAnimationFrame(animate);
+    }
+
+    updateCaption(true);
+    resetView(true);
+
+    document.getElementById("enterBtn").addEventListener("click",function(){
+      document.getElementById("veil").classList.add("off");
+      ac();
+      startSound();
+      DUSK.enterTime = performance.now();
+      last = performance.now();
+      requestAnimationFrame(animate);
+    });
+  }
+
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(boot);
+  }else{
+    boot();
+  }
+})();
+</script>
+</body>
+</html>

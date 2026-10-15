@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="referrer" content="no-referrer">
+<title>観測記録 管理画面</title>
+<style>
+:root{
+  --bg:#070b0d;--panel:#0d1518;--panel2:#101c20;--line:#26383e;
+  --ink:#edf3ef;--muted:#93a4a5;--cyan:#79e7ef;--green:#9bffb3;
+  --amber:#ffd083;--red:#ff8b8b;--shadow:0 20px 70px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink);background:
+  radial-gradient(circle at 12% 0%,rgba(121,231,239,.11),transparent 26%),
+  linear-gradient(180deg,#071013 0%,#060a0c 100%);
+  font-family:"Hiragino Sans","Yu Gothic UI","Yu Gothic",system-ui,sans-serif;
+  line-height:1.65;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(980px,calc(100% - 24px));margin:0 auto;padding:18px 0 80px}
+header{
+  position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;
+  gap:16px;align-items:center;padding:14px 16px;margin-bottom:16px;
+  background:rgba(6,12,14,.92);backdrop-filter:blur(16px);
+  border:1px solid rgba(121,231,239,.14);box-shadow:0 10px 40px rgba(0,0,0,.25)
+}
+.brand strong{display:block;letter-spacing:.12em}.brand small{color:var(--muted);font-family:monospace}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px currentColor;margin-right:8px}
+.panel{background:linear-gradient(180deg,rgba(14,27,31,.96),rgba(8,17,20,.97));border:1px solid rgba(121,231,239,.13);box-shadow:var(--shadow);margin-bottom:16px}
+.panel-head{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.panel-head strong{letter-spacing:.08em}.panel-head span{color:var(--muted);font-size:.76rem;font-family:monospace}
+.body{padding:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+label{display:grid;gap:6px;color:var(--muted);font-size:.8rem}
+input,textarea,select{
+  width:100%;border:1px solid rgba(121,231,239,.16);background:#071115;color:var(--ink);
+  padding:12px 13px;outline:none;border-radius:0
+}
+input:focus,textarea:focus,select:focus{border-color:rgba(121,231,239,.48);box-shadow:0 0 0 2px rgba(121,231,239,.06)}
+textarea{min-height:220px;resize:vertical;line-height:1.8}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.035);color:var(--ink);padding:11px 15px;min-height:44px}
+.btn.primary{background:linear-gradient(135deg,rgba(121,231,239,.18),rgba(74,141,255,.12));border-color:rgba(121,231,239,.38)}
+.btn.warn{border-color:rgba(255,208,131,.35);color:#ffe4b5}
+.btn.danger{border-color:rgba(255,139,139,.35);color:#ffb7b7}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.note{padding:11px 13px;border-left:2px solid var(--cyan);background:rgba(121,231,239,.04);color:#bdd0ce;font-size:.8rem;white-space:pre-wrap}
+.settings{display:none}.settings.on{display:block}
+.list-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.list-tools input{flex:1;min-width:180px}.list-tools select{width:auto}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tab{border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--muted);padding:8px 12px}
+.tab.on{color:#001013;background:var(--cyan);border-color:var(--cyan)}
+.records{display:grid;gap:10px}
+.card{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.025);padding:14px}
+.card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.card h3{margin:4px 0 6px;font-size:1rem}.card .meta{font-family:monospace;color:var(--muted);font-size:.72rem}.card p{margin:0;color:#bec9c7;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.badge{display:inline-block;padding:3px 7px;border:1px solid rgba(255,255,255,.12);color:var(--cyan);font-size:.68rem;margin-right:6px}
+.card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.card-actions .btn{padding:8px 10px;min-height:36px;font-size:.78rem}
+.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed rgba(255,255,255,.12)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);z-index:50;max-width:min(90vw,520px);padding:12px 16px;background:#102126;border:1px solid rgba(121,231,239,.34);color:var(--ink);opacity:0;pointer-events:none;transition:.25s;box-shadow:var(--shadow)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.dirty{color:var(--amber)}
+@media(max-width:680px){
+  .wrap{width:min(100% - 14px,980px);padding-top:8px}
+  header{align-items:flex-start;flex-direction:column}
+  .grid{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .actions .btn{flex:1}
+  textarea{min-height:260px}
+  .card-top{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand"><strong>観測記録 管理画面</strong><small>NEOCITIES / GOOGLE SHEETS EDITOR</small></div>
+  <div><span class="status-dot" id="statusDot"></span><span id="connectionLabel">未接続</span></div>
+</header>
+
+<section class="panel">
+  <div class="panel-head"><strong>接続設定</strong><button class="btn" id="toggleSettings">開く</button></div>
+  <div class="body settings" id="settings">
+    <div class="grid">
+      <label class="full">Apps Script URL
+        <input id="apiUrl" type="url" value="https://script.google.com/macros/s/AKfycbxFXojLK9MmBmOHSYKm6faBG2fAtkCEpzvcZlepVq4DzMZg71qg8CRrWCQvTDXfnZ0D/exec" autocomplete="off">
+      </label>
+      <label>管理用合言葉
+        <input id="secret" type="password" placeholder="初回だけ入力" autocomplete="off">
+      </label>
+      <label>自動読込
+        <select id="autoLoad"><option value="1">する</option><option value="0">しない</option></select>
+      </label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="saveSettings">この端末に保存</button>
+      <button class="btn" id="testConnection">接続確認</button>
+      <button class="btn danger" id="clearSettings">保存設定を消す</button>
+    </div>
+    <div class="note">合言葉はこのHTMLへ埋め込まず、この端末の localStorage にだけ保存する。URLを知る人はページを開けるが、合言葉がなければスプレッドシートは変更できない。</div>
+  </div>
+</section>
+
+<section class="panel" id="editorPanel">
+  <div class="panel-head"><strong id="editorTitle">新しい観測記録</strong><span id="draftState">端末内に自動保存</span></div>
+  <div class="body">
+    <input id="recordId" type="hidden">
+    <div class="grid">
+      <label>日付
+        <input id="date" type="text" placeholder="空欄なら現在時刻">
+      </label>
+      <label>分類
+        <input id="kind" type="text" list="kindList" placeholder="つぶやき / 研究 / 制作記録">
+        <datalist id="kindList"></datalist>
+      </label>
+      <label class="full">見出し
+        <input id="head" type="text" placeholder="見出し。本文だけでも保存可能">
+      </label>
+      <label class="full">本文
+        <textarea id="text" placeholder="ここへ書く。改行はそのまま記録される。"></textarea>
+      </label>
+      <label>緯度
+        <input id="lat" type="text" inputmode="decimal" placeholder="任意">
+      </label>
+      <label>経度
+        <input id="lng" type="text" inputmode="decimal" placeholder="任意">
+      </label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="publishBtn">公開記録として保存</button>
+      <button class="btn" id="clearFormBtn">入力を空にする</button>
+      <button class="btn" id="copyTextBtn">本文を複写</button>
+      <button class="btn warn" id="cancelEditBtn" hidden>編集をやめる</button>
+    </div>
+    <div class="note" id="editorNote">見出しか本文のどちらかがあれば保存できる。送信後、公開CSVへの反映には少し時間がかかることがある。</div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><strong>観測記録一覧</strong><span id="countLabel">0件</span></div>
+  <div class="body">
+    <div class="tabs">
+      <button class="tab on" data-status="published">公開中</button>
+      <button class="tab" data-status="trash">ごみ箱</button>
+    </div>
+    <div class="list-tools">
+      <input id="search" placeholder="見出し・本文・分類を検索">
+      <select id="sort"><option value="new">新しい順</option><option value="old">古い順</option></select>
+      <button class="btn" id="reloadBtn">再読込</button>
+    </div>
+    <div class="records" id="records"><div class="empty">接続後、ここに記録が並ぶ。</div></div>
+  </div>
+</section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const STORAGE = 'subeha_admin_settings_v1';
+  const DRAFT = 'subeha_admin_draft_v1';
+  let records = [];
+  let activeStatus = 'published';
+  let saveTimer = null;
+
+  function toast(message){
+    const el=$('toast');el.textContent=message;el.classList.add('on');
+    clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('on'),2600);
+  }
+  function setConnection(ok,label){
+    $('connectionLabel').textContent=label;
+    $('statusDot').style.background=ok?'var(--green)':'var(--amber)';
+  }
+  function settings(){return {url:$('apiUrl').value.trim(),secret:$('secret').value,autoLoad:$('autoLoad').value};}
+  function loadSettings(){
+    try{const s=JSON.parse(localStorage.getItem(STORAGE)||'null');if(!s)return;
+      if(s.url)$('apiUrl').value=s.url;if(s.secret)$('secret').value=s.secret;if(s.autoLoad!=null)$('autoLoad').value=s.autoLoad;
+    }catch(_){ }
+  }
+  function saveSettings(){localStorage.setItem(STORAGE,JSON.stringify(settings()));toast('接続設定をこの端末へ保存した');}
+  function apiBase(){const s=settings();if(!s.url)throw new Error('Apps Script URLを入力してください。');if(!s.secret)throw new Error('管理用合言葉を入力してください。');return s;}
+  async function apiGet(action,extra={}){
+    const s=apiBase();const u=new URL(s.url);u.searchParams.set('action',action);u.searchParams.set('secret',s.secret);u.searchParams.set('_',Date.now());
+    Object.entries(extra).forEach(([k,v])=>u.searchParams.set(k,v));
+    const r=await fetch(u.toString(),{cache:'no-store'});const j=await r.json();if(!j.ok)throw new Error(j.error||'処理に失敗しました。');return j;
+  }
+  async function apiPost(payload){
+    const s=apiBase();const body=new URLSearchParams({...payload,secret:s.secret});
+    const r=await fetch(s.url,{method:'POST',body});const j=await r.json();if(!j.ok)throw new Error(j.error||'処理に失敗しました。');return j;
+  }
+
+  function currentForm(){return {id:$('recordId').value,date:$('date').value,kind:$('kind').value,head:$('head').value,text:$('text').value,lat:$('lat').value,lng:$('lng').value};}
+  function fillForm(d={}){
+    $('recordId').value=d.id||'';$('date').value=d.date||'';$('kind').value=d.kind||'';$('head').value=d.head||'';$('text').value=d.text||'';$('lat').value=d.lat||'';$('lng').value=d.lng||'';
+    const editing=!!d.id;$('editorTitle').textContent=editing?'観測記録を編集':'新しい観測記録';$('publishBtn').textContent=editing?'変更を保存':'公開記録として保存';$('cancelEditBtn').hidden=!editing;
+    $('editorPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function clearForm(confirmFirst=false){
+    if(confirmFirst&&(currentForm().head||currentForm().text)&&!confirm('入力中の内容を消します。よろしいですか？'))return;
+    fillForm({});localStorage.removeItem(DRAFT);$('draftState').textContent='端末内に自動保存';
+  }
+  function saveDraft(){
+    localStorage.setItem(DRAFT,JSON.stringify(currentForm()));$('draftState').textContent='下書き保存 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  }
+  function restoreDraft(){try{const d=JSON.parse(localStorage.getItem(DRAFT)||'null');if(d&&(d.head||d.text||d.kind))fillForm(d);}catch(_){}}
+
+  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function visibleRecords(){
+    const q=$('search').value.trim().toLowerCase();const old=$('sort').value==='old';
+    return records.filter(r=>r.status===activeStatus).filter(r=>!q||`${r.kind} ${r.head} ${r.text}`.toLowerCase().includes(q)).sort((a,b)=>old?(a.time-b.time):(b.time-a.time));
+  }
+  function render(){
+    const list=visibleRecords();$('countLabel').textContent=`${list.length}件`;
+    const kinds=[...new Set(records.filter(r=>r.status==='published').map(r=>r.kind).filter(Boolean))].sort();$('kindList').innerHTML=kinds.map(k=>`<option value="${esc(k)}"></option>`).join('');
+    if(!list.length){$('records').innerHTML='<div class="empty">該当する記録はない。</div>';return;}
+    $('records').innerHTML=list.map(r=>`<article class="card" data-id="${esc(r.id)}">
+      <div class="card-top"><div><div class="meta">${esc(r.date)}　更新 ${esc(r.updatedAt||'')}</div><h3>${esc(r.head||'（無題）')}</h3></div><div><span class="badge">${esc(r.kind||'記録')}</span>${r.status==='trash'?'<span class="badge">ごみ箱</span>':''}</div></div>
+      <p>${esc(r.text||'')}</p>
+      <div class="card-actions">
+        ${r.status==='published'?`<button class="btn" data-act="edit">編集</button><button class="btn" data-act="duplicate">複製</button><button class="btn danger" data-act="trash">ごみ箱へ</button>`:`<button class="btn primary" data-act="restore">復元</button><button class="btn danger" data-act="delete">完全削除</button>`}
+      </div></article>`).join('');
+  }
+  async function loadRecords(){
+    try{setConnection(false,'読込中');const j=await apiGet('list');records=(j.records||[]).map(r=>({...r,time:Number(r.time)||0}));render();setConnection(true,'接続済み');toast(`${records.length}件を読み込んだ`);}
+    catch(e){setConnection(false,'接続失敗');$('records').innerHTML=`<div class="empty">${esc(e.message)}</div>`;toast(e.message);}
+  }
+  async function publish(){
+    const d=currentForm();if(!d.head.trim()&&!d.text.trim()){toast('見出しか本文を入力してください。');return;}
+    const b=$('publishBtn');b.disabled=true;b.textContent='保存中…';
+    try{
+      const action=d.id?'update':'create';await apiPost({action,...d});toast(d.id?'変更を保存した':'観測記録を保存した');clearForm(false);await loadRecords();
+    }catch(e){toast(e.message);$('editorNote').textContent=e.message;}
+    finally{b.disabled=false;b.textContent=$('recordId').value?'変更を保存':'公開記録として保存';}
+  }
+  async function act(id,action){
+    const r=records.find(x=>x.id===id);if(!r)return;
+    if(action==='edit'){fillForm(r);return;}
+    if(action==='duplicate'){fillForm({...r,id:'',head:(r.head||'')+'（複製）',date:''});return;}
+    if(action==='trash'&&!confirm(`「${r.head||'無題'}」をごみ箱へ移します。`))return;
+    if(action==='delete'&&!confirm('完全に削除します。元に戻せません。'))return;
+    try{await apiPost({action,id});toast(action==='restore'?'復元した':action==='trash'?'ごみ箱へ移した':'完全削除した');await loadRecords();}
+    catch(e){toast(e.message);}
+  }
+
+  $('toggleSettings').addEventListener('click',()=>{$('settings').classList.toggle('on');$('toggleSettings').textContent=$('settings').classList.contains('on')?'閉じる':'開く';});
+  $('saveSettings').addEventListener('click',saveSettings);
+  $('testConnection').addEventListener('click',async()=>{try{await apiGet('health');setConnection(true,'接続済み');toast('接続できた');}catch(e){setConnection(false,'接続失敗');toast(e.message);}});
+  $('clearSettings').addEventListener('click',()=>{localStorage.removeItem(STORAGE);$('secret').value='';toast('保存設定を消した');});
+  $('publishBtn').addEventListener('click',publish);
+  $('clearFormBtn').addEventListener('click',()=>clearForm(true));
+  $('cancelEditBtn').addEventListener('click',()=>clearForm(false));
+  $('copyTextBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('text').value);toast('本文を複写した');}catch{toast('複写できなかった');}});
+  ['date','kind','head','text','lat','lng'].forEach(id=>$(id).addEventListener('input',()=>{clearTimeout(saveTimer);$('draftState').textContent='入力中…';saveTimer=setTimeout(saveDraft,500);}));
+  $('reloadBtn').addEventListener('click',loadRecords);$('search').addEventListener('input',render);$('sort').addEventListener('change',render);
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');activeStatus=t.dataset.status;render();}));
+  $('records').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const c=b.closest('[data-id]');act(c.dataset.id,b.dataset.act);});
+
+  loadSettings();restoreDraft();
+  if(settings().autoLoad==='1'&&settings().secret)loadRecords();else $('settings').classList.add('on');
+})();
+</script>
+</body>
+</html>

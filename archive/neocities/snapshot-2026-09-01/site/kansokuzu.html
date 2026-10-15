@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>金印クラフト ── 縄文サバイバル</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000;
+    font-family:-apple-system,'Hiragino Sans','Noto Sans JP',sans-serif;touch-action:none;}
+  canvas{display:block;width:100%;height:100%;}
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:10;}
+  #crosshair{position:absolute;left:50%;top:50%;width:20px;height:20px;transform:translate(-50%,-50%);opacity:.85;}
+  #crosshair::before,#crosshair::after{content:'';position:absolute;background:#fff;box-shadow:0 0 2px #000;}
+  #crosshair::before{left:50%;top:0;width:2px;height:100%;transform:translateX(-50%);}
+  #crosshair::after{top:50%;left:0;height:2px;width:100%;transform:translateY(-50%);}
+  #mineRing{position:absolute;left:50%;top:50%;width:44px;height:6px;transform:translate(-50%,16px);
+    border:1px solid rgba(255,255,255,.7);border-radius:3px;overflow:hidden;display:none;background:rgba(0,0,0,.4);}
+  #mineRing i{display:block;height:100%;width:0%;background:#e8d49a;}
+  #itembar{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);color:#fff;font-size:11px;
+    text-shadow:0 1px 2px #000;background:rgba(0,0,0,.3);padding:3px 10px;border-radius:10px;white-space:nowrap;max-width:90%;overflow:hidden;}
+  #topbar{position:absolute;top:0;left:0;right:0;padding:8px 12px;display:flex;gap:10px;align-items:center;
+    background:linear-gradient(rgba(0,0,0,.45),transparent);font-size:12px;color:#fff;text-shadow:0 1px 2px #000;}
+  .stat{display:flex;align-items:center;gap:4px;}
+  .bar{width:74px;height:9px;border:1px solid rgba(255,255,255,.5);border-radius:2px;overflow:hidden;background:rgba(0,0,0,.3);}
+  .bar>i{display:block;height:100%;}
+  #hpFill{background:#d6453a;}#fdFill{background:#c98a3a;}
+  #spacer{flex:1;}#era{font-weight:700;color:#e8d49a;}#clock{font-variant-numeric:tabular-nums;}
+  #dexBtn{pointer-events:auto;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.3);
+    color:#fff;font-size:11px;padding:3px 8px;border-radius:4px;}
+  #invBtn,#menuBtn{pointer-events:auto;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.3);
+    color:#fff;font-size:13px;padding:3px 9px;border-radius:4px;}
+  #craftBtn{pointer-events:auto;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.3);
+    color:#fff;font-size:13px;padding:3px 9px;border-radius:4px;}
+  #craft{position:fixed;inset:0;z-index:20;background:rgba(8,8,10,.96);display:none;overflow-y:auto;padding:18px;pointer-events:auto;}
+  #craft h2{color:#e8d49a;font-size:16px;margin-bottom:4px;}
+  #craft .sub{color:#888;font-size:11px;margin-bottom:12px;line-height:1.6;}
+  #toolRow{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tool{padding:7px 10px;border:1px solid #444;border-radius:6px;color:#bbb;font-size:12px;background:#14141a;}
+  .tool.have{border-color:#8a7;color:#dec;}
+  .tool.eq{background:#e8d49a;color:#000;border-color:#e8d49a;font-weight:700;}
+  .recipe{display:flex;align-items:center;gap:10px;border:1px solid #333;border-radius:7px;padding:10px;margin-bottom:8px;background:#14141a;}
+  .recipe.ok{border-color:#5a7a55;}
+  .recipe .rinfo{flex:1;}
+  .recipe .rname{color:#eee;font-size:13px;font-weight:600;}
+  .recipe .rcost{color:#999;font-size:11px;margin-top:2px;}
+  .recipe .rnote{color:#7a8;font-size:10px;margin-top:2px;}
+  .recipe button{padding:8px 14px;border-radius:5px;border:1px solid #888;background:#222;color:#ccc;font-size:12px;}
+  .recipe.ok button{background:#e8d49a;color:#000;border-color:#e8d49a;font-weight:700;}
+  /* 共通オーバーレイ */
+  #inv,#menu{position:fixed;inset:0;z-index:20;background:rgba(8,8,10,.96);display:none;overflow-y:auto;padding:18px;pointer-events:auto;}
+  #inv h2,#menu h2{color:#e8d49a;font-size:16px;margin-bottom:10px;}
+  #invGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px;}
+  .icard{border:1px solid #333;border-radius:6px;padding:8px 4px;background:#14141a;text-align:center;position:relative;}
+  .icard canvas{width:40px;height:40px;image-rendering:pixelated;background:#0a0a0e;border-radius:3px;}
+  .icard .nm{font-size:10px;color:#ddd;margin-top:4px;line-height:1.2;}
+  .icard .cnt{position:absolute;top:3px;right:5px;font-size:11px;color:#ffe;font-weight:700;text-shadow:0 1px 1px #000;}
+  #inv .empty{color:#777;font-size:12px;margin-top:20px;}
+  #menu .mrow{margin:14px 0;color:#ccc;font-size:13px;}
+  #menu .opts{display:flex;gap:8px;margin-top:6px;}
+  #menu .mo{flex:1;padding:9px;text-align:center;border:1px solid #444;border-radius:5px;color:#ccc;font-size:13px;}
+  #menu .mo.on{background:#e8d49a;color:#000;border-color:#e8d49a;font-weight:700;}
+  #menu button.big{display:block;width:100%;padding:12px;margin-top:14px;border:1px solid #fff;background:#fff;color:#000;border-radius:6px;font-size:14px;font-weight:700;}
+  .ovClose{position:fixed;top:12px;right:12px;z-index:21;background:#fff;color:#000;border:none;
+    width:34px;height:34px;border-radius:50%;font-size:18px;font-weight:700;pointer-events:auto;}
+  #hotbar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:4px;pointer-events:auto;}
+  .slot{width:44px;height:44px;border:2px solid rgba(255,255,255,.35);background:rgba(20,18,16,.55);
+    border-radius:5px;position:relative;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;text-align:center;}
+  .slot.sel{border-color:#fff;box-shadow:0 0 8px rgba(255,255,255,.5);}
+  .slot .cnt{position:absolute;right:2px;bottom:1px;font-size:10px;color:#ffe;text-shadow:0 1px 1px #000;}
+  .slot .ic{font-size:19px;}
+  #touch{position:absolute;inset:0;pointer-events:none;z-index:9;}
+  #stick{position:absolute;left:18px;bottom:74px;width:118px;height:118px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);pointer-events:auto;}
+  #stickNub{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px;border-radius:50%;
+    background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.4);}
+  #btns{position:absolute;right:16px;bottom:74px;display:flex;flex-direction:column;gap:10px;pointer-events:auto;}
+  .tbtn{width:58px;height:58px;border-radius:50%;border:2px solid rgba(255,255,255,.3);
+    background:rgba(255,255,255,.08);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
+  .tbtn:active{background:rgba(255,255,255,.25);}
+  #hint{position:absolute;left:50%;top:34%;transform:translateX(-50%);color:#fff;background:rgba(0,0,0,.7);
+    padding:16px 18px;border-radius:8px;font-size:13px;line-height:1.7;text-align:center;max-width:310px;pointer-events:auto;}
+  #hint b{color:#e8d49a;}
+  #hint button{margin-top:10px;padding:9px 22px;border:1px solid #fff;background:#fff;color:#000;border-radius:5px;font-size:14px;font-weight:700;}
+  #dbg{position:absolute;left:8px;top:40px;font-size:10px;color:#9f9;text-shadow:0 1px 1px #000;line-height:1.5;font-family:monospace;display:none;}
+  #toast{position:absolute;left:50%;bottom:74px;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;
+    font-size:12px;padding:6px 12px;border-radius:14px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+  .desktop #touch{display:none;}
+  #dex{position:fixed;inset:0;z-index:20;background:rgba(8,8,10,.96);display:none;overflow-y:auto;padding:16px;pointer-events:auto;}
+  #dex h2{color:#e8d49a;font-size:16px;margin-bottom:4px;}
+  #dex .sub{color:#888;font-size:11px;margin-bottom:12px;line-height:1.6;}
+  #dex .tabs{display:flex;gap:8px;margin-bottom:12px;}
+  #dex .tab{flex:1;padding:8px;text-align:center;border:1px solid #444;border-radius:5px;color:#ccc;font-size:13px;}
+  #dex .tab.on{background:#e8d49a;color:#000;border-color:#e8d49a;font-weight:700;}
+  #dexGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px;}
+  .dcard{border:1px solid #333;border-radius:6px;padding:6px;background:#14141a;text-align:center;}
+  .dcard canvas{width:48px;height:48px;image-rendering:pixelated;background:#0a0a0e;border-radius:3px;}
+  .dcard .nm{font-size:10px;color:#ddd;margin-top:4px;line-height:1.2;}
+  .dcard .meta{font-size:9px;color:#888;margin-top:2px;}
+  #dexClose{position:fixed;top:12px;right:12px;z-index:21;background:#fff;color:#000;border:none;
+    width:34px;height:34px;border-radius:50%;font-size:18px;font-weight:700;pointer-events:auto;}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hud">
+  <div id="topbar">
+    <div class="stat">♥<div class="bar"><i id="hpFill" style="width:100%"></i></div></div>
+    <div class="stat">🍖<div class="bar"><i id="fdFill" style="width:100%"></i></div></div>
+    <div id="spacer"></div>
+    <button id="craftBtn">🔨</button>
+    <button id="invBtn">📦</button>
+    <button id="dexBtn">📖図鑑</button>
+    <button id="menuBtn">☰</button>
+    <div id="era">石器以前</div>
+    <div id="clock">朝</div>
+  </div>
+  <div id="crosshair"></div>
+  <div id="mineRing"><i></i></div>
+  <div id="itembar"></div>
+  <div id="dbg"></div>
+  <div id="hotbar"></div>
+  <div id="toast"></div>
+</div>
+
+<div id="touch">
+  <div id="stick"><div id="stickNub"></div></div>
+  <div id="btns">
+    <div class="tbtn" id="btnJump">跳</div>
+    <div class="tbtn" id="btnAct">壊</div>
+    <div class="tbtn" id="btnPlace">置</div>
+    <div class="tbtn" id="btnEat">食</div>
+  </div>
+</div>
+
+<div id="hint">
+  <b>金印クラフト</b><br>
+  縄文の列島で生き延びろ。<br>
+  〔PC〕WASD移動 / Space跳 / マウス視点<br>左クリック破壊・右クリック設置 / 1-5切替<br>
+  〔スマホ〕左スティック移動 / 右側ドラッグで視点<br>跳・壊・置ボタン<br>
+  <button id="startBtn">はじめる</button>
+</div>
+
+<div id="dex">
+  <button id="dexClose">×</button>
+  <h2>縄文図鑑</h2>
+  <div class="sub" id="dexSub">出会った生き物と植物を記録する。</div>
+  <div class="tabs">
+    <div class="tab on" id="tabA">動物 100</div>
+    <div class="tab" id="tabP">植物 100</div>
+  </div>
+  <div id="dexGrid"></div>
+</div>
+
+<div id="craft">
+  <button class="ovClose" id="craftClose">×</button>
+  <h2>道具をつくる</h2>
+  <div class="sub" id="craftSub">草を刈って繊維、丸太を割って板と枝、岩を砕いて石。石器を組んで暮らしを楽にしろ。</div>
+  <div id="toolRow"></div>
+  <div id="recipeList"></div>
+</div>
+
+<div id="inv">
+  <button class="ovClose" id="invClose">×</button>
+  <h2>アイテムボックス</h2>
+  <div id="invGrid"></div>
+  <div class="empty" id="invEmpty">まだ何も持っていない。木や石を掘り、獣を狩れ。</div>
+</div>
+
+<div id="menu">
+  <button class="ovClose" id="menuClose">×</button>
+  <h2>メニュー</h2>
+  <div class="mrow">描画距離
+    <div class="opts">
+      <div class="mo" id="rdNear">近</div>
+      <div class="mo on" id="rdMid">中</div>
+      <div class="mo" id="rdFar">遠</div>
+    </div>
+  </div>
+  <div class="mrow">画質
+    <div class="opts">
+      <div class="mo" id="qLow">軽量</div>
+      <div class="mo on" id="qMid">標準</div>
+      <div class="mo" id="qHigh">高精細</div>
+    </div>
+  </div>
+  <div class="mrow" id="menuStat" style="color:#888;"></div>
+  <button class="big" id="menuResume">ゲームに戻る</button>
+</div>
+
+<script>
+/* ============================================================
+   金印クラフト ── 世界生成エンジン核 (worldgen)
+   史実根拠:
+   - 列島二大植生: 西=照葉樹林(常緑カシ・シイ), 東=ナラ林(落葉ブナ・ナラ・クリ)
+     縄文前期から不変 [国土と人々/水土の礎]
+   - 縄文海進: 最寒冷期後(1.9万年前)から温暖化, ピーク6500-6000年前に
+     平均気温+1〜2℃, 海面上昇 [縄文海進/Wikipedia]
+   - 主食は堅果(ドングリ/クリ/クルミ/トチ), 動物より植物が主 [兵庫県立考古博物館]
+   このファイルはブラウザとnodeの両方で読める純粋ロジック。描画もDOMも含まない。
+============================================================ */
+(function(global){
+'use strict';
+
+/* ---- 決定論の種 ---- */
+function xfnv1a(str){
+  var h=2166136261>>>0;
+  for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+  return h>>>0;
+}
+function mulberry32(a){
+  return function(){
+    a|=0;a=(a+0x6D2B79F5)|0;
+    var t=Math.imul(a^(a>>>15),1|a);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
+
+/* ---- 2D値ノイズ(決定論・種依存) ----
+   格子点に擬似乱数を置き、五次補間で滑らかに繋ぐ。
+   Perlinの勾配ノイズではなく軽量な値ノイズ(モバイル優先)。 */
+function makeNoise(seed){
+  var perm=new Uint8Array(512);
+  var p=new Uint8Array(256),i;
+  for(i=0;i<256;i++)p[i]=i;
+  var rnd=mulberry32(seed);
+  for(i=255;i>0;i--){var j=Math.floor(rnd()*(i+1));var t=p[i];p[i]=p[j];p[j]=t;}
+  for(i=0;i<512;i++)perm[i]=p[i&255];
+  function fade(t){return t*t*t*(t*(t*6-15)+10);}
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function grad(h,x,y){
+    /* 8方向の勾配 */
+    switch(h&7){
+      case 0:return  x+y; case 1:return  x-y;
+      case 2:return -x+y; case 3:return -x-y;
+      case 4:return  x;   case 5:return -x;
+      case 6:return  y;   default:return -y;
+    }
+  }
+  return function(x,y){
+    var X=Math.floor(x)&255,Y=Math.floor(y)&255;
+    var xf=x-Math.floor(x),yf=y-Math.floor(y);
+    var u=fade(xf),v=fade(yf);
+    var aa=perm[perm[X]+Y],ab=perm[perm[X]+Y+1];
+    var ba=perm[perm[X+1]+Y],bb=perm[perm[X+1]+Y+1];
+    var x1=lerp(grad(aa,xf,yf),grad(ba,xf-1,yf),u);
+    var x2=lerp(grad(ab,xf,yf-1),grad(bb,xf-1,yf-1),u);
+    return lerp(x1,x2,v); /* おおよそ [-1,1] */
+  };
+}
+/* 多重ノイズ(fBm) */
+function fbm(noise,x,y,oct,lac,gain){
+  var amp=1,freq=1,sum=0,norm=0,i;
+  for(i=0;i<oct;i++){
+    sum+=amp*noise(x*freq,y*freq);
+    norm+=amp;amp*=gain;freq*=lac;
+  }
+  return sum/norm; /* [-1,1] */
+}
+
+/* ============================================================
+   ブロック体系 ── IDは固定(セーブ互換のため不変)
+============================================================ */
+var BLOCK={
+  AIR:0, WATER:1, STONE:2, DIRT:3, GRASS:4, SAND:5, GRAVEL:6,
+  CLAY:7, SNOW:8, ICE:9, BEDROCK:10,
+  /* 木(東西で樹種が変わる) */
+  OAK_LOG:20, OAK_LEAF:21,      /* ナラ/カシ */
+  CHESTNUT_LOG:22, CHESTNUT_LEAF:23, /* クリ(三内丸山の最重要木) */
+  BEECH_LOG:24, BEECH_LEAF:25,  /* ブナ */
+  CEDAR_LOG:26, CEDAR_LEAF:27,  /* スギ */
+  BAMBOO:28,
+  /* 地物 */
+  ACORN_BUSH:40, /* ドングリのなる低木 */
+  FERN:41, GRASS_TUFT:42, FLOWER:43, MUSHROOM:44, REED:45,
+  /* 人工(クラフト後) */
+  PLANK:60, THATCH:61, HEARTH:62, CLAY_POT:63, STORAGE_PIT:64,
+  STONE_PLATE:65 /* 石皿(アク抜き/製粉) */
+};
+/* 不透明判定(描画の面引きに使う) */
+function isOpaque(id){
+  return !(id===BLOCK.AIR||id===BLOCK.WATER||id===BLOCK.ICE||
+    id===BLOCK.OAK_LEAF||id===BLOCK.CHESTNUT_LEAF||id===BLOCK.BEECH_LEAF||
+    id===BLOCK.CEDAR_LEAF||id===BLOCK.ACORN_BUSH||id===BLOCK.FERN||
+    id===BLOCK.GRASS_TUFT||id===BLOCK.FLOWER||id===BLOCK.MUSHROOM||
+    id===BLOCK.REED||id===BLOCK.BAMBOO);
+}
+function isSolid(id){
+  /* 当たり判定。葉や草はすり抜け、水もすり抜け(遊泳) */
+  return isOpaque(id)&&id!==BLOCK.AIR;
+}
+
+/* ============================================================
+   バイオーム ── 緯度(z)と湿度・高度で決める
+   北(z小)=亜寒帯, 南(z大)=暖温帯 を想定。
+   X方向の東西で照葉樹林/ナラ林を分ける(列島の東西軸の模式)。
+============================================================ */
+var BIOME={
+  OCEAN:0, BEACH:1,
+  LAUREL:2,     /* 照葉樹林(西日本・常緑) */
+  NARA:3,       /* ナラ林(東日本・落葉) */
+  SUBALPINE:4,  /* 亜寒帯/高山(北・高所) */
+  WETLAND:5,    /* 低湿地(貝塚/貯蔵穴の場) */
+  HIGHMOUNT:6   /* 高山岩稜 */
+};
+var SEA_LEVEL=64;
+
+function biomeAt(height, temp, moist, eastWest){
+  if(height<SEA_LEVEL-1) return BIOME.OCEAN;
+  if(height<=SEA_LEVEL+1) return BIOME.BEACH;
+  if(height>96) return BIOME.HIGHMOUNT;
+  if(temp<0.28) return BIOME.SUBALPINE;
+  if(moist>0.62 && height<SEA_LEVEL+5) return BIOME.WETLAND;
+  /* 温暖な平地〜丘陵: 東西軸で樹種分化 */
+  return (eastWest<0.5) ? BIOME.LAUREL : BIOME.NARA;
+}
+
+/* ============================================================
+   高さ場 ── 大陸/丘陵/詳細の三重ノイズ
+============================================================ */
+function makeWorld(seedStr){
+  var seed=xfnv1a(seedStr);
+  var nElev=makeNoise(seed^0x1111);
+  var nHill=makeNoise(seed^0x2222);
+  var nTemp=makeNoise(seed^0x3333);
+  var nMoist=makeNoise(seed^0x4444);
+  var nEW=makeNoise(seed^0x5555);
+  var nTree=makeNoise(seed^0x6666);
+
+  var SCALE_E=0.0035, SCALE_H=0.012, SCALE_C=0.0016, SCALE_R=0.0022;
+
+  function heightAt(x,z){
+    /* 大陸形状: 低周波の大地形 + 中周波の丘 + 尾根(山脈) */
+    var cont=fbm(nElev,x*SCALE_E,z*SCALE_E,5,2.0,0.55); /* [-1,1] */
+    var hill=fbm(nHill,x*SCALE_H,z*SCALE_H,4,2.0,0.5);
+    /* 尾根ノイズ: |noise|を反転して山稜を作る(列島の脊梁山脈) */
+    var rg=fbm(nElev,x*SCALE_R+100,z*SCALE_R-100,3,2.1,0.5);
+    var ridge=1-Math.abs(rg); /* 0..1, 稜線で1 */
+    ridge=ridge*ridge;
+    var base=SEA_LEVEL + cont*46 + hill*14 + ridge*38*Math.max(0,cont+0.1);
+    /* 海は深く、山は高く誇張 */
+    if(base>SEA_LEVEL+20) base+= (base-(SEA_LEVEL+20))*0.7;
+    if(base<SEA_LEVEL-4) base-= (SEA_LEVEL-4-base)*0.5;
+    return Math.max(2, Math.min(124, Math.round(base)));
+  }
+  function climateAt(x,z){
+    /* 緯度勾配(z)で気温, ノイズで湿度。温暖化縄文を反映し全体やや高温 */
+    var latT = 1 - (z*SCALE_C - Math.floor(z*SCALE_C)); /* 疑似緯度0..1 */
+    var tN=(fbm(nTemp,x*0.004,z*0.004,2,2,0.5)+1)/2;
+    var temp = Math.max(0,Math.min(1, latT*0.55 + tN*0.45));
+    var moist=(fbm(nMoist,x*0.005,z*0.005,3,2,0.5)+1)/2;
+    var ew=(fbm(nEW,x*0.002,z*0.002,2,2,0.5)+1)/2;
+    return {temp:temp,moist:moist,ew:ew};
+  }
+  function columnAt(x,z){
+    var h=heightAt(x,z);
+    var c=climateAt(x,z);
+    var b=biomeAt(h,c.temp,c.moist,c.ew);
+    return {height:h,temp:c.temp,moist:c.moist,ew:c.ew,biome:b};
+  }
+  /* ある(x,y,z)のブロックを決める。描画/物理が呼ぶ純関数 */
+  function blockAt(x,y,z){
+    if(y<=0) return BLOCK.BEDROCK;
+    var col=columnAt(x,z);
+    var h=col.height,b=col.biome;
+    if(y>h){
+      if(y<=SEA_LEVEL){
+        /* 水面下: 亜寒帯の最上は氷 */
+        if(b===BIOME.SUBALPINE && y===SEA_LEVEL) return BLOCK.ICE;
+        return BLOCK.WATER;
+      }
+      return BLOCK.AIR;
+    }
+    /* 地表 */
+    if(y===h){
+      if(b===BIOME.OCEAN||b===BIOME.BEACH) return BLOCK.SAND;
+      if(b===BIOME.SUBALPINE) return (h>90?BLOCK.SNOW:BLOCK.GRASS);
+      if(b===BIOME.HIGHMOUNT) return BLOCK.STONE;
+      if(b===BIOME.WETLAND) return BLOCK.CLAY;
+      return BLOCK.GRASS;
+    }
+    /* 表土 */
+    if(y>=h-3){
+      if(b===BIOME.BEACH||b===BIOME.OCEAN) return BLOCK.SAND;
+      if(b===BIOME.WETLAND) return BLOCK.CLAY;
+      return BLOCK.DIRT;
+    }
+    /* 深部: たまに砂利/粘土の層 */
+    var nd=nTree(x*0.1,z*0.1+y*0.05);
+    if(nd>0.78) return BLOCK.GRAVEL;
+    return BLOCK.STONE;
+  }
+  /* 地表の植生(木・草)を決める。描画時に上載せ */
+  function surfaceFeature(x,z){
+    var col=columnAt(x,z);
+    if(col.biome===BIOME.OCEAN||col.biome===BIOME.HIGHMOUNT) return null;
+    var r=mulberry32(xfnv1a(x+":"+z+":feat:"+seed))();
+    var treeN=(nTree(x*0.05,z*0.05)+1)/2;
+    /* 木の分布: バイオームで樹種、密度はノイズ */
+    if(treeN>0.66 && r<0.18){
+      switch(col.biome){
+        case BIOME.LAUREL: return {type:'tree',sp:'oak'};       /* カシ類 */
+        case BIOME.NARA:   return (r<0.09)?{type:'tree',sp:'chestnut'}:{type:'tree',sp:'beech'};
+        case BIOME.SUBALPINE: return {type:'tree',sp:'cedar'};
+        case BIOME.WETLAND: return {type:'plant',sp:'reed'};
+        default: return {type:'tree',sp:'oak'};
+      }
+    }
+    /* 下草 */
+    if(r<0.04) return {type:'bush',sp:'acorn'};
+    if(r<0.10) return {type:'plant',sp:'fern'};
+    if(r<0.18) return {type:'plant',sp:'grass'};
+    if(r<0.205) return {type:'plant',sp:'flower'};
+    if(col.biome===BIOME.WETLAND && r<0.4) return {type:'plant',sp:'reed'};
+    return null;
+  }
+
+  return {
+    seed:seed,
+    SEA_LEVEL:SEA_LEVEL,
+    heightAt:heightAt,
+    climateAt:climateAt,
+    columnAt:columnAt,
+    blockAt:blockAt,
+    surfaceFeature:surfaceFeature
+  };
+}
+
+var API={
+  xfnv1a:xfnv1a, mulberry32:mulberry32, makeNoise:makeNoise, fbm:fbm,
+  BLOCK:BLOCK, BIOME:BIOME, SEA_LEVEL:SEA_LEVEL,
+  isOpaque:isOpaque, isSolid:isSolid, biomeAt:biomeAt, makeWorld:makeWorld
+};
+if(typeof module!=='undefined'&&module.exports){module.exports=API;}
+global.KININ_WORLD=API;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
+/* ============================================================
+   金印クラフト ── エンジン層 (engine)
+   依存ゼロ。Three.js も WebGL も使わない純Canvas2D面ソート方式。
+   理由: Neocities完結(外部CDN不要)・低スペックのスマホでも確実に動く。
+   worldgen.js を読み込んで、見て歩ける3Dボクセル世界にする。
+============================================================ */
+(function(global){
+'use strict';
+var W = global.KININ_WORLD;
+if(!W){ throw new Error("worldgen.js を先に読み込め"); }
+var BLOCK=W.BLOCK;
+
+/* ---- ブロックの色(面の明暗は後で陰影) ---- */
+var COLORS={};
+COLORS[BLOCK.STONE]=[122,120,116];
+COLORS[BLOCK.DIRT]=[110,84,58];
+COLORS[BLOCK.GRASS]=[88,128,58];
+COLORS[BLOCK.SAND]=[214,202,160];
+COLORS[BLOCK.GRAVEL]=[136,132,128];
+COLORS[BLOCK.CLAY]=[150,128,110];
+COLORS[BLOCK.SNOW]=[236,238,242];
+COLORS[BLOCK.ICE]=[150,196,214];
+COLORS[BLOCK.WATER]=[58,96,150];
+COLORS[BLOCK.BEDROCK]=[40,38,36];
+COLORS[BLOCK.OAK_LOG]=[96,68,42];
+COLORS[BLOCK.OAK_LEAF]=[64,104,48];
+COLORS[BLOCK.CHESTNUT_LOG]=[104,76,48];
+COLORS[BLOCK.CHESTNUT_LEAF]=[78,116,54];
+COLORS[BLOCK.BEECH_LOG]=[120,100,72];
+COLORS[BLOCK.BEECH_LEAF]=[96,134,66];
+COLORS[BLOCK.CEDAR_LOG]=[88,58,46];
+COLORS[BLOCK.CEDAR_LEAF]=[48,84,62];
+COLORS[BLOCK.PLANK]=[156,120,72];
+COLORS[BLOCK.THATCH]=[182,158,96];
+COLORS[BLOCK.HEARTH]=[60,56,52];
+COLORS[BLOCK.STONE_PLATE]=[112,110,106];
+COLORS[BLOCK.CLAY_POT]=[150,96,64];
+COLORS[BLOCK.STORAGE_PIT]=[92,72,52];
+
+function colorOf(id){ return COLORS[id]||[200,80,200]; }
+
+/* ============================================================
+   チャンク管理 ── 16x16 平面, 縦は0..127
+============================================================ */
+var CHUNK=16, WORLD_H=128;
+function Chunk(cx,cz){
+  this.cx=cx; this.cz=cz;
+  this.blocks=new Uint8Array(CHUNK*CHUNK*WORLD_H);
+  this.edits=null; /* プレイヤー改変の差分(セーブ対象) */
+  this.built=false;
+}
+Chunk.prototype.idx=function(lx,y,lz){ return (y*CHUNK+lz)*CHUNK+lx; };
+Chunk.prototype.get=function(lx,y,lz){
+  if(y<0||y>=WORLD_H) return BLOCK.AIR;
+  return this.blocks[this.idx(lx,y,lz)];
+};
+Chunk.prototype.set=function(lx,y,lz,id){
+  this.blocks[this.idx(lx,y,lz)]=id;
+};
+
+function World(seedStr){
+  this.gen=W.makeWorld(seedStr);
+  this.seedStr=seedStr;
+  this.chunks={}; /* key "cx,cz" */
+  this.editLog={}; /* "x,y,z": id  プレイヤー改変 */
+}
+World.prototype.key=function(cx,cz){ return cx+","+cz; };
+World.prototype.getChunk=function(cx,cz){
+  var k=this.key(cx,cz);
+  var c=this.chunks[k];
+  if(c) return c;
+  c=new Chunk(cx,cz);
+  this.genChunk(c);
+  this.chunks[k]=c;
+  return c;
+};
+World.prototype.genChunk=function(c){
+  var gen=this.gen, base=c.cx*CHUNK, baseZ=c.cz*CHUNK;
+  for(var lx=0;lx<CHUNK;lx++){
+    for(var lz=0;lz<CHUNK;lz++){
+      var wx=base+lx, wz=baseZ+lz;
+      var col=gen.columnAt(wx,wz);
+      var h=col.height;
+      var top=Math.min(WORLD_H-1, Math.max(h, gen.SEA_LEVEL));
+      for(var y=0;y<=top;y++){
+        c.set(lx,y,lz, gen.blockAt(wx,y,wz));
+      }
+    }
+  }
+  /* 植生(木)を立てる */
+  for(lx=0;lx<CHUNK;lx++){
+    for(lz=0;lz<CHUNK;lz++){
+      var wx2=base+lx, wz2=baseZ+lz;
+      var f=gen.surfaceFeature(wx2,wz2);
+      if(!f) continue;
+      var hh=gen.columnAt(wx2,wz2).height;
+      if(f.type==='tree') this.plantTree(c,lx,hh+1,lz,f.sp);
+    }
+  }
+  /* プレイヤー改変を再適用 */
+  for(var ky in this.editLog){
+    var ps=ky.split(",");
+    var ex=+ps[0], ey=+ps[1], ez=+ps[2];
+    if((ex>>4)===c.cx && (ez>>4)===c.cz){
+      c.set(((ex%CHUNK)+CHUNK)%CHUNK, ey, ((ez%CHUNK)+CHUNK)%CHUNK, this.editLog[ky]);
+    }
+  }
+  c.built=true;
+};
+World.prototype.plantTree=function(c,lx,y,lz,sp){
+  var logId,leafId,hgt;
+  switch(sp){
+    case 'chestnut': logId=BLOCK.CHESTNUT_LOG; leafId=BLOCK.CHESTNUT_LEAF; hgt=5; break;
+    case 'beech':    logId=BLOCK.BEECH_LOG; leafId=BLOCK.BEECH_LEAF; hgt=6; break;
+    case 'cedar':    logId=BLOCK.CEDAR_LOG; leafId=BLOCK.CEDAR_LEAF; hgt=7; break;
+    default:         logId=BLOCK.OAK_LOG; leafId=BLOCK.OAK_LEAF; hgt=5;
+  }
+  for(var i=0;i<hgt;i++){
+    if(y+i<WORLD_H) c.set(lx,y+i,lz,logId);
+  }
+  var cy=y+hgt;
+  for(var dx=-2;dx<=2;dx++)for(var dz=-2;dz<=2;dz++)for(var dy=-1;dy<=1;dy++){
+    var px=lx+dx, py=cy+dy, pz=lz+dz;
+    if(px<0||px>=CHUNK||pz<0||pz>=CHUNK||py<0||py>=WORLD_H) continue;
+    var d=Math.abs(dx)+Math.abs(dz)+Math.abs(dy);
+    if(d>3) continue;
+    if(c.get(px,py,pz)===BLOCK.AIR) c.set(px,py,pz,leafId);
+  }
+};
+World.prototype.getBlock=function(x,y,z){
+  if(y<0||y>=WORLD_H) return (y<0?BLOCK.BEDROCK:BLOCK.AIR);
+  var cx=x>>4, cz=z>>4;
+  var c=this.getChunk(cx,cz);
+  var lx=((x%CHUNK)+CHUNK)%CHUNK, lz=((z%CHUNK)+CHUNK)%CHUNK;
+  return c.get(lx,y,lz);
+};
+World.prototype.setBlock=function(x,y,z,id){
+  if(y<0||y>=WORLD_H) return;
+  var cx=x>>4, cz=z>>4;
+  var c=this.getChunk(cx,cz);
+  var lx=((x%CHUNK)+CHUNK)%CHUNK, lz=((z%CHUNK)+CHUNK)%CHUNK;
+  c.set(lx,y,lz,id);
+  this.editLog[x+","+y+","+z]=id; /* セーブ対象 */
+};
+
+/* ============================================================
+   プレイヤー(AABB) と 物理
+============================================================ */
+function Player(x,y,z){
+  this.x=x; this.y=y; this.z=z;
+  this.vx=0; this.vy=0; this.vz=0;
+  this.yaw=0; this.pitch=0;
+  this.onGround=false;
+  this.w=0.6; this.h=1.8; /* 当たり箱 */
+  this.eye=1.62;
+}
+var GRAV=-28, JUMP=9.2, MOVE=5.0, MAXFALL=-60;
+
+function aabbBlocked(world,x,y,z,w,h){
+  var x0=Math.floor(x-w/2), x1=Math.floor(x+w/2);
+  var y0=Math.floor(y), y1=Math.floor(y+h);
+  var z0=Math.floor(z-w/2), z1=Math.floor(z+w/2);
+  for(var bx=x0;bx<=x1;bx++)for(var by=y0;by<=y1;by++)for(var bz=z0;bz<=z1;bz++){
+    if(W.isSolid(world.getBlock(bx,by,bz))) return true;
+  }
+  return false;
+}
+function stepPhysics(world,p,dt,input){
+  /* 入力→水平速度(yaw基準) */
+  var fwd=0,strafe=0;
+  if(input.f) fwd+=1; if(input.b) fwd-=1;
+  if(input.l) strafe-=1; if(input.r) strafe+=1;
+  var len=Math.hypot(fwd,strafe);
+  if(len>0){ fwd/=len; strafe/=len; }
+  var sin=Math.sin(p.yaw), cos=Math.cos(p.yaw);
+  /* 前方=(sin,cos)平面 */
+  var mx=(fwd*sin + strafe*cos)*MOVE;
+  var mz=(fwd*cos - strafe*sin)*MOVE;
+  p.vx=mx; p.vz=mz;
+  /* 重力 */
+  p.vy+=GRAV*dt;
+  if(p.vy<MAXFALL) p.vy=MAXFALL;
+  if(input.jump && p.onGround){ p.vy=JUMP; p.onGround=false; }
+
+  /* 軸ごとに分けて解決(めり込み防止) */
+  var nx=p.x+p.vx*dt;
+  if(!aabbBlocked(world,nx,p.y,p.z,p.w,p.h)) p.x=nx; else p.vx=0;
+  var nz=p.z+p.vz*dt;
+  if(!aabbBlocked(world,p.x,p.y,nz,p.w,p.h)) p.z=nz; else p.vz=0;
+  var ny=p.y+p.vy*dt;
+  if(!aabbBlocked(world,p.x,ny,p.z,p.w,p.h)){
+    p.y=ny; p.onGround=false;
+  } else {
+    if(p.vy<0) p.onGround=true;
+    p.vy=0;
+  }
+}
+
+/* ============================================================
+   レイキャスト(ブロック選択) ── DDA
+============================================================ */
+function raycast(world,ox,oy,oz,dx,dy,dz,maxDist){
+  var t=0;
+  var ix=Math.floor(ox), iy=Math.floor(oy), iz=Math.floor(oz);
+  var stepX=dx>0?1:-1, stepY=dy>0?1:-1, stepZ=dz>0?1:-1;
+  function tnext(o,i,d,s){
+    if(d===0) return Infinity;
+    var nb=(s>0)?(i+1):i;
+    return (nb-o)/d;
+  }
+  var tMaxX=tnext(ox,ix,dx,stepX), tMaxY=tnext(oy,iy,dy,stepY), tMaxZ=tnext(oz,iz,dz,stepZ);
+  var tDeltaX=dx===0?Infinity:Math.abs(1/dx);
+  var tDeltaY=dy===0?Infinity:Math.abs(1/dy);
+  var tDeltaZ=dz===0?Infinity:Math.abs(1/dz);
+  var face=[0,0,0];
+  for(var guard=0;guard<256 && t<=maxDist;guard++){
+    var b=world.getBlock(ix,iy,iz);
+    if(W.isSolid(b)){
+      return {hit:true,x:ix,y:iy,z:iz,face:face,block:b};
+    }
+    if(tMaxX<tMaxY){
+      if(tMaxX<tMaxZ){ ix+=stepX; t=tMaxX; tMaxX+=tDeltaX; face=[-stepX,0,0]; }
+      else { iz+=stepZ; t=tMaxZ; tMaxZ+=tDeltaZ; face=[0,0,-stepZ]; }
+    } else {
+      if(tMaxY<tMaxZ){ iy+=stepY; t=tMaxY; tMaxY+=tDeltaY; face=[0,-stepY,0]; }
+      else { iz+=stepZ; t=tMaxZ; tMaxZ+=tDeltaZ; face=[0,0,-stepZ]; }
+    }
+  }
+  return {hit:false};
+}
+
+/* ============================================================
+   面の可視判定 ── 隣が透明なら面を立てる(カリング)
+============================================================ */
+var FACES=[
+  {n:[0,1,0], v:[[0,1,0],[1,1,0],[1,1,1],[0,1,1]], shade:1.00}, /* 上 */
+  {n:[0,-1,0],v:[[0,0,1],[1,0,1],[1,0,0],[0,0,0]], shade:0.50}, /* 下 */
+  {n:[0,0,-1],v:[[0,0,0],[1,0,0],[1,1,0],[0,1,0]], shade:0.80}, /* 北 */
+  {n:[0,0,1], v:[[1,0,1],[0,0,1],[0,1,1],[1,1,1]], shade:0.80}, /* 南 */
+  {n:[-1,0,0],v:[[0,0,1],[0,0,0],[0,1,0],[0,1,1]], shade:0.65}, /* 西 */
+  {n:[1,0,0], v:[[1,0,0],[1,0,1],[1,1,1],[1,1,0]], shade:0.65}  /* 東 */
+];
+
+/* 可視面を集める(プレイヤー周囲のみ)。vRadiusで縦の探索を絞り性能を確保 */
+function collectFaces(world,px,py,pz,radius,vRadius){
+  if(vRadius===undefined) vRadius=radius;
+  var faces=[];
+  var x0=Math.floor(px-radius), x1=Math.floor(px+radius);
+  var z0=Math.floor(pz-radius), z1=Math.floor(pz+radius);
+  var y0=Math.max(0,Math.floor(py-vRadius)), y1=Math.min(WORLD_H-1,Math.floor(py+vRadius));
+  var r2=(radius+1)*(radius+1);
+  for(var x=x0;x<=x1;x++){
+    var dxc=x+0.5-px;
+    for(var z=z0;z<=z1;z++){
+      var dzc=z+0.5-pz;
+      if(dxc*dxc+dzc*dzc>r2) continue; /* 円柱外は省く */
+      for(var y=y0;y<=y1;y++){
+        var b=world.getBlock(x,y,z);
+        if(b===BLOCK.AIR) continue;
+        var opaque=W.isOpaque(b);
+        if(!opaque && b!==BLOCK.WATER) continue;
+        for(var fi=0;fi<6;fi++){
+          var f=FACES[fi];
+          var nb=world.getBlock(x+f.n[0],y+f.n[1],z+f.n[2]);
+          if(W.isOpaque(nb)) continue;
+          if(b===BLOCK.WATER && nb===BLOCK.WATER) continue;
+          faces.push({x:x,y:y,z:z,fi:fi,block:b});
+        }
+      }
+    }
+  }
+  return faces;
+}
+
+var API={
+  CHUNK:CHUNK, WORLD_H:WORLD_H,
+  World:World, Chunk:Chunk, Player:Player,
+  colorOf:colorOf, COLORS:COLORS,
+  stepPhysics:stepPhysics, aabbBlocked:aabbBlocked,
+  raycast:raycast, FACES:FACES, collectFaces:collectFaces,
+  GRAV:GRAV, JUMP:JUMP, MOVE:MOVE
+};
+if(typeof module!=='undefined'&&module.exports){module.exports=API;}
+global.KININ_ENGINE=API;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
+/* ============================================================
+   金印クラフト ── 内容モジュール (content)
+   テクスチャ・動物100種・植物100種・モブAI・スプライト生成。
+   描画もDOMも持たない純ロジック(node検証可)。テクスチャ/スプライトは
+   {w,h,data:RGBA} を返し、ブラウザ側で canvas に転写する。
+   生物相は縄文期日本列島の実在種から構成。
+============================================================ */
+(function(global){
+'use strict';
+var W=global.KININ_WORLD;
+if(!W) throw new Error("worldgen.js を先に読め");
+var B=W.BLOCK;
+
+/* ---- 決定論ハッシュ(per-pixel/per-species) ---- */
+function h2(x,y,s){
+  var n=(x|0)*374761393 + (y|0)*668265263 + (s|0)*1274126177;
+  n=(n^(n>>>13))>>>0; n=Math.imul(n,1274126177)>>>0;
+  return ((n^(n>>>16))>>>0)/4294967296;
+}
+function hstr(str){
+  var h=2166136261>>>0;
+  for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+  return h>>>0;
+}
+function clamp8(v){return v<0?0:v>255?255:v|0;}
+
+/* ============================================================
+   テクスチャ ── 16x16, RGBA。基地パターン×色で量産。
+============================================================ */
+var TS=16;
+function newTex(){return {w:TS,h:TS,data:new Uint8ClampedArray(TS*TS*4)};}
+function px(t,x,y,r,g,b,a){
+  var i=(y*TS+x)*4;
+  t.data[i]=clamp8(r);t.data[i+1]=clamp8(g);t.data[i+2]=clamp8(b);t.data[i+3]=a===undefined?255:a;
+}
+/* 土/岩などの粒状面 */
+function fillGrain(t,base,amp,salt){
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){
+    var n=(h2(x,y,salt)-0.5)*amp;
+    px(t,x,y, base[0]+n, base[1]+n, base[2]+n);
+  }
+}
+/* 岩肌(ひび入り) */
+/* 岩肌(石畳ふう。明るい石ブロックを目地で区切り、ひびと粒) */
+function texStone(salt,base){
+  var t=newTex(); var b=base||[128,126,122];
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){
+    var n=(h2(x*2,y*2,salt)-0.5)*22;       /* 細かな粒 */
+    var blob=(h2((x/4)|0,(y/4)|0,salt+7)-0.5)*16; /* 塊ごとの明暗 */
+    px(t,x,y, b[0]+n+blob, b[1]+n+blob, b[2]+n+blob);
+  }
+  /* 目地(モルタル線): 不規則な石畳に */
+  var seamY=[5,11], seamX=[[8],[3,12]];
+  for(var s=0;s<2;s++){ for(var x2=0;x2<TS;x2++) px(t,x2,seamY[s], b[0]-44,b[1]-44,b[2]-42); }
+  for(var r=0;r<2;r++){ var xs=seamX[r]; for(var c=0;c<xs.length;c++){ for(var y2=(r===0?0:seamY[0])+1;y2<(r===0?seamY[0]:r===1?seamY[1]:TS);y2++){} } }
+  for(var x3=0;x3<TS;x3++){} 
+  /* 縦の目地を行ごとにずらして石畳化 */
+  for(var yy=0;yy<TS;yy++){
+    var band = yy<5?0 : yy<11?1 : 2;
+    var vx = band===0?8 : band===1?(yy<8?4:12) : 6;
+    if(yy!==5&&yy!==11) px(t,vx,yy, b[0]-44,b[1]-44,b[2]-42);
+  }
+  /* ひび */
+  for(var k=0;k<3;k++){ var cx=2+Math.floor(h2(k,3,salt)*12), cy=2+Math.floor(h2(k,4,salt)*12);
+    for(var d=0;d<3;d++){ px(t,(cx+d)%TS,(cy+(h2(k+d,5,salt)>0.5?d:0))%TS, b[0]-30,b[1]-30,b[2]-28); } }
+  return t;
+}
+function texDirt(salt){var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=(h2(x*2,y*2,salt)-0.5)*30;px(t,x,y,112+n,84+n*0.8,56+n*0.6);}
+  for(var k=0;k<14;k++){var x=Math.floor(h2(k,5,salt)*TS),y=Math.floor(h2(k,6,salt)*TS);
+    var d=h2(k,9,salt)>0.5; px(t,x,y, d?86:130, d?60:100, d?40:72);} /* 小石 */
+  return t;}
+function texGrassTop(salt){var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=(h2(x*2,y*2,salt)-0.5)*26;
+    var g=h2(x,y,salt+2); px(t,x,y, (g>0.7?104:84)+n, (g>0.7?150:126)+n, (g>0.7?64:54)+n*0.6);}
+  /* 草の斑(明暗の房) */
+  for(var k=0;k<22;k++){var x=Math.floor(h2(k,3,salt)*TS),y=Math.floor(h2(k,4,salt)*TS);
+    var lt=h2(k,8,salt)>0.5; px(t,x,y, lt?120:70, lt?164:108, lt?80:46);}
+  return t;}
+function texGrassSide(salt){
+  var t=texDirt(salt+9);
+  /* 上に草の層、下へ不規則に垂れる草の刃 */
+  for(var x=0;x<TS;x++){
+    var top=3+Math.floor(h2(x,0,salt)*3);
+    for(var y=0;y<top;y++){var n=(h2(x,y,salt)-0.5)*24; px(t,x,y, 86+n,128+n,56+n*0.6);}
+    /* 垂れる刃 */
+    if(h2(x,7,salt)>0.5){ px(t,x,top, 78,118,52); if(h2(x,11,salt)>0.7)px(t,x,top+1,72,110,48); }
+  }
+  return t;
+}
+function texSand(salt){var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=(h2(x*3,y*3,salt)-0.5)*16;px(t,x,y,216+n,202+n,162+n*0.8);}
+  for(var k=0;k<10;k++){var x=Math.floor(h2(k,2,salt)*TS),y=Math.floor(h2(k,5,salt)*TS);px(t,x,y,196,180,140);}
+  return t;}
+function texGravel(salt){var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=(h2(x*2,y*2,salt)-0.5)*40;px(t,x,y,138+n,134+n,128+n);}
+  for(var k=0;k<10;k++){var x=Math.floor(h2(k,2,salt)*TS),y=Math.floor(h2(k,8,salt)*TS);
+    var d=h2(k,3,salt)>0.5; var sz=h2(k,4,salt)>0.6?2:1;
+    for(var a=0;a<sz;a++)for(var b2=0;b2<sz;b2++)px(t,(x+a)%TS,(y+b2)%TS, d?96:170,d?92:164,d?88:158);}
+  return t;}
+function texClay(salt){var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=(h2(x*2,y*2,salt)-0.5)*14;px(t,x,y,152+n,130+n,112+n);}return t;}
+function texSnow(salt){var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=(h2(x*3,y*3,salt)-0.5)*10;px(t,x,y,236+n,239+n,244+n);}
+  for(var k=0;k<6;k++){var x=Math.floor(h2(k,2,salt)*TS),y=Math.floor(h2(k,5,salt)*TS);px(t,x,y,250,251,255);}
+  return t;}
+function texIce(salt){var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=(h2(x*2,y*2,salt)-0.5)*18;px(t,x,y,152+n,196+n,216+n);}
+  for(var k=0;k<4;k++){var x0=Math.floor(h2(k,1,salt)*TS),y0=Math.floor(h2(k,6,salt)*TS);
+    for(var d=0;d<5;d++){px(t,(x0+d)%TS,(y0+(h2(k+d,2,salt)>0.5?d:0))%TS,184,216,230);}} /* 亀裂 */
+  return t;}
+function texWater(salt){var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=Math.sin((x*0.8+y*0.6))*7+Math.sin((x-y)*0.5)*5;px(t,x,y,52+n,98+n,156+n,205);}return t;}
+function texBedrock(salt){var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=(h2(x*2,y*2,salt)-0.5)*54;var v=42+n;px(t,x,y,v,v*0.96,v*0.92);}return t;}
+/* 樹皮(縦の溝＋節) */
+function texLogSide(salt,base){
+  var t=newTex(); var b=base||[100,72,46];
+  for(var x=0;x<TS;x++){
+    var groove=(x%5===0||x%5===3)?-16:0;       /* 縦溝 */
+    for(var y=0;y<TS;y++){var n=(h2(x,y*2,salt)-0.5)*14;px(t,x,y,b[0]+groove+n,b[1]+groove+n,b[2]+groove+n*0.8);}
+  }
+  /* 節(knot) */
+  var kx=Math.floor(h2(0,1,salt)*10)+3, ky=Math.floor(h2(0,2,salt)*10)+3;
+  for(var yy=-2;yy<=2;yy++)for(var xx=-2;xx<=2;xx++){if(xx*xx+yy*yy<=4)px(t,kx+xx,ky+yy,b[0]-26,b[1]-22,b[2]-18);}
+  px(t,kx,ky,b[0]-40,b[1]-34,b[2]-28);
+  return t;
+}
+/* 木口(年輪) */
+function texLogTop(salt,base){
+  var t=newTex(); var b=base||[152,122,86];
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){
+    var dx=x-7.5,dy=y-7.5,d=Math.sqrt(dx*dx+dy*dy);
+    var ring=Math.sin(d*1.7)*13 + (h2(x,y,salt)-0.5)*6;
+    px(t,x,y,b[0]+ring,b[1]+ring,b[2]+ring*0.7);
+  }
+  px(t,7,7,b[0]-30,b[1]-26,b[2]-20); px(t,8,7,b[0]-30,b[1]-26,b[2]-20);
+  return t;
+}
+/* 葉(房の塊＋透け) */
+function texLeaf(salt,base){
+  var t=newTex(); var b=base||[64,104,48];
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){
+    var cl=h2((x/3)|0,(y/3)|0,salt+5);          /* 房ごとの明暗 */
+    var n=(h2(x,y,salt)-0.5)*26 + (cl-0.5)*30;
+    if(h2(x,y,salt+3)>0.84){ px(t,x,y,0,0,0,0); } /* 透ける穴 */
+    else px(t,x,y,b[0]+n,b[1]+n,b[2]+n*0.7);
+  }
+  /* 明るい葉先の点 */
+  for(var k=0;k<10;k++){var x2=Math.floor(h2(k,2,salt)*TS),y2=Math.floor(h2(k,7,salt)*TS);px(t,x2,y2,b[0]+34,b[1]+40,b[2]+24);}
+  return t;
+}
+function texPlank(salt){
+  var t=newTex(); var b=[160,122,74];
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){
+    var board=Math.floor(y/4); var sh=(board%2)*-8;
+    var grain=Math.sin(x*0.9+board*2)*5;
+    var n=(h2(x,y,salt)-0.5)*10; px(t,x,y,b[0]+sh+n+grain,b[1]+sh+n+grain,b[2]+sh+n+grain*0.6);
+  }
+  for(var yb=0;yb<TS;yb+=4){ for(var x2=0;x2<TS;x2++) px(t,x2,yb,118,90,52); } /* 板の継ぎ目 */
+  /* 縦の継ぎ目を板ごとにずらす */
+  for(var board2=0;board2<4;board2++){ var vx=(board2%2)?11:5; for(var y2=board2*4+1;y2<board2*4+4;y2++) px(t,vx,y2,128,98,58); }
+  return t;
+}
+function texThatch(salt){
+  var t=newTex();
+  for(var y=0;y<TS;y++)for(var x=0;x<TS;x++){var n=(h2(x*3,y,salt)-0.5)*30;px(t,x,y,182+n,158+n,96+n);}
+  return t;
+}
+function texHearth(salt){var t=texStone(salt,[60,56,52]);
+  /* 中央に熾火 */
+  for(var y=6;y<10;y++)for(var x=6;x<10;x++){if(h2(x,y,salt)>0.4)px(t,x,y,200,90,30);}return t;}
+function texPot(salt){var t=newTex();fillGrain(t,[150,96,64],22,salt);
+  for(var y=2;y<TS;y+=4)for(var x=0;x<TS;x++)px(t,x,y,120,74,48);return t;}
+
+/* ブロックID → テクスチャ束(面ごとに違うものは {top,side,bottom}) */
+function buildTextures(){
+  var T={};
+  function set(id,t){ T[id]={all:t}; }
+  function set3(id,top,side,bot){ T[id]={top:top,side:side,bottom:bot||side}; }
+  var s=1;
+  set(B.STONE, texStone(s++));
+  set(B.DIRT, texDirt(s++));
+  set3(B.GRASS, texGrassTop(s++), texGrassSide(s++), texDirt(s++));
+  set(B.SAND, texSand(s++));
+  set(B.GRAVEL, texGravel(s++));
+  set(B.CLAY, texClay(s++));
+  set(B.SNOW, texSnow(s++));
+  set(B.ICE, texIce(s++));
+  set(B.WATER, texWater(s++));
+  set(B.BEDROCK, texBedrock(s++));
+  set3(B.OAK_LOG, texLogTop(s++,[150,120,84]), texLogSide(s++,[96,68,42]));
+  set(B.OAK_LEAF, texLeaf(s++,[64,104,48]));
+  set3(B.CHESTNUT_LOG, texLogTop(s++,[156,126,88]), texLogSide(s++,[104,76,48]));
+  set(B.CHESTNUT_LEAF, texLeaf(s++,[78,116,54]));
+  set3(B.BEECH_LOG, texLogTop(s++,[168,150,116]), texLogSide(s++,[120,100,72]));
+  set(B.BEECH_LEAF, texLeaf(s++,[96,134,66]));
+  set3(B.CEDAR_LOG, texLogTop(s++,[140,96,72]), texLogSide(s++,[88,58,46]));
+  set(B.CEDAR_LEAF, texLeaf(s++,[48,84,62]));
+  set(B.PLANK, texPlank(s++));
+  set(B.THATCH, texThatch(s++));
+  set(B.HEARTH, texHearth(s++));
+  set(B.STONE_PLATE, texStone(s++,[112,110,106]));
+  set(B.CLAY_POT, texPot(s++));
+  set(B.STORAGE_PIT, texDirt(s++));
+  return T;
+}
+
+/* ============================================================
+   動物 100種 ── [名, 類, 生態[], 体高(ブロック), 行動, 危険(0-3), 色]
+   生態: 0海 1浜 2照葉樹林 3ナラ林 4亜寒帯 5低湿地 6高山
+   行動: graze/skittish/predator/fly/swim/crawl/amphi
+============================================================ */
+var CAT={MAMMAL:'獣',BIRD:'鳥',FISH:'魚',SHELL:'貝',BUG:'蟲',HERP:'両爬',SEA:'海獣'};
+var ANIMALS=[
+ ["ナウマンゾウ",CAT.MAMMAL,[4],3.4,"graze",1,[120,104,92]],
+ ["ヤベオオツノジカ",CAT.MAMMAL,[3,4],2.4,"skittish",1,[150,120,84]],
+ ["ニホンジカ",CAT.MAMMAL,[2,3],1.4,"skittish",0,[160,124,86]],
+ ["イノシシ",CAT.MAMMAL,[2,3],1.0,"skittish",1,[96,80,68]],
+ ["ツキノワグマ",CAT.MAMMAL,[2,3],1.5,"predator",2,[40,38,40]],
+ ["ヒグマ",CAT.MAMMAL,[4],1.8,"predator",3,[78,56,40]],
+ ["ニホンオオカミ",CAT.MAMMAL,[3,4],0.9,"predator",2,[120,112,100]],
+ ["ニホンザル",CAT.MAMMAL,[2,3],0.9,"skittish",0,[140,108,80]],
+ ["タヌキ",CAT.MAMMAL,[2,3],0.5,"skittish",0,[120,100,78]],
+ ["キツネ",CAT.MAMMAL,[3,4],0.5,"skittish",0,[190,120,70]],
+ ["ノウサギ",CAT.MAMMAL,[3,4,6],0.4,"skittish",0,[170,150,128]],
+ ["ニホンカモシカ",CAT.MAMMAL,[4,6],1.1,"skittish",0,[120,110,96]],
+ ["ニホンアナグマ",CAT.MAMMAL,[2,3],0.4,"graze",0,[150,140,124]],
+ ["テン",CAT.MAMMAL,[3,4],0.3,"skittish",0,[200,150,70]],
+ ["イタチ",CAT.MAMMAL,[3,5],0.25,"skittish",0,[170,120,72]],
+ ["ニホンリス",CAT.MAMMAL,[2,3],0.25,"skittish",0,[160,110,70]],
+ ["ムササビ",CAT.MAMMAL,[2,3],0.4,"skittish",0,[140,120,100]],
+ ["ヤマネ",CAT.MAMMAL,[3],0.15,"crawl",0,[180,150,110]],
+ ["アカネズミ",CAT.MAMMAL,[2,3,5],0.12,"crawl",0,[150,120,90]],
+ ["ニホンモグラ",CAT.MAMMAL,[3,5],0.15,"crawl",0,[80,76,72]],
+ ["カワウソ",CAT.SEA,[0,5],0.4,"amphi",0,[120,100,80]],
+ ["ニホンアシカ",CAT.SEA,[0,1],1.2,"amphi",1,[110,96,82]],
+ ["トド",CAT.SEA,[0],2.2,"swim",1,[120,108,96]],
+ ["ゴマフアザラシ",CAT.SEA,[0],1.1,"swim",0,[180,176,168]],
+ ["ハンドウイルカ",CAT.SEA,[0],1.6,"swim",0,[120,140,160]],
+ ["ミンククジラ",CAT.SEA,[0],5.0,"swim",0,[70,84,100]],
+ ["キジ",CAT.BIRD,[2,3],0.6,"skittish",0,[60,110,80]],
+ ["ヤマドリ",CAT.BIRD,[2,3],0.6,"skittish",0,[150,90,50]],
+ ["マガモ",CAT.BIRD,[0,5],0.4,"amphi",0,[60,90,70]],
+ ["オシドリ",CAT.BIRD,[5],0.35,"amphi",0,[180,120,60]],
+ ["ヒシクイ",CAT.BIRD,[0,5],0.7,"fly",0,[110,96,80]],
+ ["オオハクチョウ",CAT.BIRD,[0,5],1.0,"amphi",0,[238,238,240]],
+ ["タンチョウ",CAT.BIRD,[5],1.4,"skittish",0,[240,240,240]],
+ ["アオサギ",CAT.BIRD,[5,0],1.0,"amphi",0,[150,160,170]],
+ ["オジロワシ",CAT.BIRD,[0,4],0.9,"fly",1,[110,90,70]],
+ ["クマタカ",CAT.BIRD,[2,3,6],0.8,"fly",1,[120,100,80]],
+ ["フクロウ",CAT.BIRD,[3],0.5,"fly",0,[150,130,100]],
+ ["ハシブトガラス",CAT.BIRD,[2,3,1],0.5,"fly",0,[30,30,36]],
+ ["カワセミ",CAT.BIRD,[5],0.15,"fly",0,[40,140,180]],
+ ["アカゲラ",CAT.BIRD,[3],0.25,"fly",0,[200,60,60]],
+ ["ウミウ",CAT.BIRD,[0,1],0.7,"amphi",0,[40,44,50]],
+ ["ウミネコ",CAT.BIRD,[0,1],0.45,"fly",0,[220,220,224]],
+ ["ウグイス",CAT.BIRD,[2,3],0.12,"fly",0,[120,130,80]],
+ ["スズメ",CAT.BIRD,[2,3,1],0.1,"fly",0,[150,110,70]],
+ ["クロマグロ",CAT.FISH,[0],2.0,"swim",0,[60,80,120]],
+ ["マダイ",CAT.FISH,[0],0.6,"swim",0,[200,120,120]],
+ ["スズキ",CAT.FISH,[0,5],0.8,"swim",0,[150,160,170]],
+ ["ブリ",CAT.FISH,[0],1.0,"swim",0,[120,140,150]],
+ ["サケ",CAT.FISH,[0,5],0.8,"swim",0,[180,110,90]],
+ ["サクラマス",CAT.FISH,[5],0.5,"swim",0,[170,130,110]],
+ ["マコイ",CAT.FISH,[5],0.7,"swim",0,[120,110,70]],
+ ["フナ",CAT.FISH,[5],0.4,"swim",0,[140,130,90]],
+ ["ナマズ",CAT.FISH,[5],0.6,"swim",0,[90,90,70]],
+ ["ニホンウナギ",CAT.FISH,[5,0],0.6,"swim",0,[70,80,70]],
+ ["アユ",CAT.FISH,[5],0.3,"swim",0,[160,170,140]],
+ ["ホホジロザメ",CAT.FISH,[0],3.0,"predator",3,[110,120,128]],
+ ["アカエイ",CAT.FISH,[0,1],0.8,"swim",1,[150,130,100]],
+ ["ハマグリ",CAT.SHELL,[1],0.2,"crawl",0,[200,180,150]],
+ ["アサリ",CAT.SHELL,[1],0.12,"crawl",0,[170,160,140]],
+ ["ヤマトシジミ",CAT.SHELL,[5,1],0.1,"crawl",0,[60,60,60]],
+ ["サザエ",CAT.SHELL,[1,0],0.18,"crawl",0,[110,100,70]],
+ ["アワビ",CAT.SHELL,[0,1],0.2,"crawl",0,[120,110,90]],
+ ["マガキ",CAT.SHELL,[1],0.2,"crawl",0,[180,176,160]],
+ ["マダコ",CAT.SHELL,[0,1],0.5,"swim",0,[170,110,100]],
+ ["スルメイカ",CAT.SHELL,[0],0.4,"swim",0,[200,180,170]],
+ ["ズワイガニ",CAT.SHELL,[0],0.3,"crawl",0,[190,110,90]],
+ ["クルマエビ",CAT.SHELL,[0,1],0.2,"swim",0,[180,160,140]],
+ ["バフンウニ",CAT.SHELL,[0,1],0.15,"crawl",0,[90,70,50]],
+ ["アカトンボ",CAT.BUG,[5,3],0.1,"fly",0,[200,80,60]],
+ ["オニヤンマ",CAT.BUG,[5],0.15,"fly",0,[60,80,40]],
+ ["アゲハチョウ",CAT.BUG,[2,3],0.1,"fly",0,[240,220,80]],
+ ["モンシロチョウ",CAT.BUG,[2,3,5],0.08,"fly",0,[240,240,230]],
+ ["アブラゼミ",CAT.BUG,[2,3],0.1,"crawl",0,[90,70,50]],
+ ["カブトムシ",CAT.BUG,[3],0.1,"crawl",0,[60,40,30]],
+ ["ノコギリクワガタ",CAT.BUG,[2,3],0.1,"crawl",0,[70,45,30]],
+ ["トノサマバッタ",CAT.BUG,[3,5],0.08,"crawl",0,[110,130,70]],
+ ["オオカマキリ",CAT.BUG,[2,3],0.1,"crawl",0,[120,140,80]],
+ ["ゲンジボタル",CAT.BUG,[5],0.06,"fly",0,[180,200,120]],
+ ["ニホンミツバチ",CAT.BUG,[2,3],0.05,"fly",1,[180,150,60]],
+ ["オオスズメバチ",CAT.BUG,[2,3],0.06,"fly",2,[200,160,40]],
+ ["クロオオアリ",CAT.BUG,[2,3,1],0.03,"crawl",0,[40,40,44]],
+ ["ジョロウグモ",CAT.BUG,[2,3],0.08,"crawl",0,[120,100,40]],
+ ["トビズムカデ",CAT.BUG,[2,3],0.1,"crawl",1,[120,60,40]],
+ ["ミスジマイマイ",CAT.BUG,[2,3,5],0.06,"crawl",0,[150,130,90]],
+ ["ナメクジ",CAT.BUG,[5,2],0.04,"crawl",0,[110,100,90]],
+ ["ニホンアマガエル",CAT.HERP,[5,2,3],0.06,"amphi",0,[110,160,80]],
+ ["トノサマガエル",CAT.HERP,[5],0.08,"amphi",0,[90,130,70]],
+ ["ウシガエル",CAT.HERP,[5],0.15,"amphi",0,[100,120,80]],
+ ["アオダイショウ",CAT.HERP,[2,3],0.3,"crawl",1,[110,130,90]],
+ ["ニホンマムシ",CAT.HERP,[2,3],0.2,"predator",2,[150,130,90]],
+ ["シマヘビ",CAT.HERP,[2,3,5],0.25,"crawl",1,[170,160,120]],
+ ["ニホントカゲ",CAT.HERP,[2,3],0.08,"skittish",0,[90,90,110]],
+ ["ニホンカナヘビ",CAT.HERP,[2,3],0.07,"skittish",0,[120,110,80]],
+ ["アカハライモリ",CAT.HERP,[5],0.06,"amphi",0,[60,50,50]],
+ ["オオサンショウウオ",CAT.HERP,[5],0.6,"amphi",0,[80,80,70]],
+ ["スッポン",CAT.HERP,[5],0.3,"amphi",0,[90,90,80]],
+ ["イシガメ",CAT.HERP,[5],0.2,"amphi",0,[100,90,70]],
+ ["ヤマカガシ",CAT.HERP,[5,3],0.2,"crawl",1,[120,140,80]],
+ ["ヒミズ",CAT.MAMMAL,[2,3],0.1,"crawl",0,[60,56,54]],
+ ["カヤネズミ",CAT.MAMMAL,[5],0.06,"crawl",0,[170,140,100]]
+];
+
+/* ============================================================
+   植物 100種 ── [名, 類, 生態[], 高さ(ブロック), 色, 食/有用]
+   類: 木/低木/草/羊歯/苔/茸/花/水草/作物
+============================================================ */
+var PLANTS=[
+ ["コナラ","木",[3],5,[110,140,70],1],["ミズナラ","木",[3,4],6,[100,134,66],1],
+ ["クヌギ","木",[2,3],5,[96,128,60],1],["アラカシ","木",[2],5,[70,110,60],1],
+ ["シラカシ","木",[2],5,[74,114,62],1],["スダジイ","木",[2],6,[78,116,66],1],
+ ["ブナ","木",[3,4],7,[120,150,80],1],["クリ","木",[3],5,[120,150,76],1],
+ ["オニグルミ","木",[3,5],5,[110,130,70],1],["トチノキ","木",[3,5],6,[100,130,72],1],
+ ["スギ","木",[4,3],8,[60,90,70],0],["ヒノキ","木",[2,4],7,[70,100,80],0],
+ ["アカマツ","木",[2,4,6],6,[90,110,70],0],["カラマツ","木",[4,6],7,[140,160,90],0],
+ ["ケヤキ","木",[3],7,[120,150,90],0],["カツラ","木",[3,5],6,[130,160,100],0],
+ ["ヤナギ","木",[5],4,[140,170,100],0],["ハンノキ","木",[5],5,[100,130,80],0],
+ ["イロハモミジ","木",[2,3],4,[180,90,60],0],["ヤマウルシ","木",[2,3],3,[180,100,60],1],
+ ["ヤマザクラ","木",[2,3],5,[230,200,210],0],["ウメ","木",[2],3,[230,210,220],1],
+ ["ヤマグワ","低木",[2,3],3,[120,140,70],1],["エノキ","木",[2,3],6,[120,150,80],1],
+ ["ムクノキ","木",[2,3],6,[110,140,76],0],["タブノキ","木",[2],6,[70,110,64],0],
+ ["クスノキ","木",[2],7,[80,120,70],0],["ヤマモモ","木",[2],4,[90,120,70],1],
+ ["ヤマブドウ","低木",[3],1.5,[90,70,120],1],["アケビ","低木",[2,3],1.2,[150,130,170],1],
+ ["ガマズミ","低木",[3],1.5,[180,60,60],1],["ニワトコ","低木",[2,3],2,[120,140,80],1],
+ ["クマイチゴ","低木",[3],1,[200,80,80],1],["ナワシロイチゴ","低木",[2,3],0.6,[200,90,90],1],
+ ["サンショウ","低木",[2,3],1.5,[110,140,70],1],["タラノキ","低木",[3],2,[120,150,80],1],
+ ["ウツギ","低木",[2,3],1.5,[200,210,200],0],["ヤマツツジ","低木",[2,3,6],1,[220,90,120],0],
+ ["ワラビ","羊歯",[3,2],0.5,[110,140,70],1],["ゼンマイ","羊歯",[3,5],0.5,[120,130,80],1],
+ ["クサソテツ","羊歯",[3,5],0.5,[100,140,80],1],["ヤマドリゼンマイ","羊歯",[5],0.5,[110,140,76],1],
+ ["イノデ","羊歯",[2],0.6,[80,120,70],0],["ベニシダ","羊歯",[2,3],0.5,[120,110,80],0],
+ ["フキ","草",[3,5],0.6,[120,150,80],1],["ウド","草",[3],1,[130,160,90],1],
+ ["ヨモギ","草",[2,3,5],0.5,[130,150,90],1],["ノアザミ","草",[3,5],0.8,[160,90,140],1],
+ ["ミツバ","草",[2,3,5],0.3,[110,150,80],1],["セリ","草",[5],0.3,[110,150,84],1],
+ ["ノビル","草",[2,3],0.3,[120,150,80],1],["オオバギボウシ","草",[3,5],0.5,[120,150,90],1],
+ ["カタクリ","花",[3],0.2,[180,120,180],1],["ヤマユリ","花",[2,3],1,[240,230,200],1],
+ ["ヒガンバナ","花",[2,3,5],0.5,[220,40,40],0],["クズ","草",[2,3],0.4,[110,140,70],1],
+ ["ヤマノイモ","草",[2,3],0.6,[120,150,80],1],["ワサビ","草",[5],0.3,[110,150,90],1],
+ ["ドクダミ","草",[2,5],0.3,[140,160,120],1],["スギナ","草",[3,5],0.3,[120,150,90],0],
+ ["ススキ","草",[3,5],1.5,[190,180,120],0],["ヨシ","水草",[5,0],2,[160,170,110],0],
+ ["ガマ","水草",[5],1.8,[120,100,60],0],["マコモ","水草",[5],1.5,[150,170,100],1],
+ ["ヒシ","水草",[5],0.2,[100,130,80],1],["ジュンサイ","水草",[5],0.2,[90,120,80],1],
+ ["コウホネ","水草",[5],0.4,[200,200,80],0],["ハス","水草",[5],1,[200,180,200],1],
+ ["マイタケ","茸",[3],0.3,[150,120,80],1],["シイタケ","茸",[2,3],0.2,[120,90,60],1],
+ ["ナメコ","茸",[3],0.15,[180,140,60],1],["ホンシメジ","茸",[2,3],0.2,[160,140,110],1],
+ ["マツタケ","茸",[2,4],0.2,[150,110,70],1],["クリタケ","茸",[3],0.15,[180,120,70],1],
+ ["キクラゲ","茸",[2,3],0.1,[80,60,60],1],["ベニテングタケ","茸",[4,3],0.25,[210,60,50],0],
+ ["タマゴタケ","茸",[2,3],0.2,[220,120,50],1],["ドクツルタケ","茸",[3],0.25,[240,240,235],0],
+ ["スミレ","花",[2,3],0.1,[140,100,180],0],["タンポポ","花",[1,2,3,5],0.15,[240,200,60],1],
+ ["リンドウ","花",[3,6],0.3,[80,90,180],0],["フジ","低木",[2,3],3,[170,140,200],0],
+ ["ヤマブキ","低木",[2,3],1.5,[240,200,60],0],["アジサイ","低木",[2,5],1.5,[140,160,200],0],
+ ["ハマヒルガオ","花",[1],0.1,[220,150,180],0],["ハマナス","低木",[1,4],1,[220,100,130],1],
+ ["スギゴケ","苔",[3,5],0.05,[80,120,70],0],["ゼニゴケ","苔",[5,2],0.04,[90,120,80],0],
+ ["ヒノキゴケ","苔",[2,3],0.05,[90,130,80],0],["ミズゴケ","苔",[5],0.05,[120,150,110],0],
+ ["ハイゴケ","苔",[2,3],0.04,[100,130,80],0],["タチゴケ","苔",[3],0.05,[90,120,76],0],
+ ["ヒョウタン","作物",[2,3],0.5,[180,200,120],1],["エゴマ","作物",[2,3],0.6,[120,150,90],1],
+ ["アワ","作物",[2,3],1,[200,190,110],1],["ヒエ","作物",[2,3,5],1,[180,180,110],1],
+ ["ダイズ","作物",[2,3],0.6,[150,170,100],1],["アズキ","作物",[2,3],0.5,[150,160,90],1],
+ ["ソバ","作物",[3,6],0.7,[220,220,210],1],["イネ","作物",[5,2],1,[200,200,120],1]
+];
+
+/* ============================================================
+   モブAI ── 表に基づき生成・更新(純ロジック)
+============================================================ */
+function biomeName(b){return ['海','浜','照葉樹林','ナラ林','亜寒帯','低湿地','高山'][b];}
+function makeMob(specIdx,x,y,z){
+  var s=ANIMALS[specIdx];
+  return {spec:specIdx,name:s[0],cat:s[1],behavior:s[4],danger:s[5],size:s[3],
+    x:x,y:y,z:z,vx:0,vz:0,heading:Math.random()*Math.PI*2,
+    timer:Math.random()*3,alive:true};
+}
+/* 種が生態 b に出るか */
+function spawnsIn(specIdx,b){return ANIMALS[specIdx][2].indexOf(b)>=0;}
+/* スポーン候補を選ぶ。world:gen, 中心(cx,cz), 半径r */
+function trySpawn(gen,cx,cz,rng){
+  var ang=rng()*Math.PI*2, dist=24+rng()*40;
+  var x=Math.floor(cx+Math.cos(ang)*dist), z=Math.floor(cz+Math.sin(ang)*dist);
+  var col=gen.columnAt(x,z);
+  var b=col.biome;
+  /* この生態に出る種を絞る */
+  var cands=[];
+  for(var i=0;i<ANIMALS.length;i++) if(spawnsIn(i,b)) cands.push(i);
+  if(cands.length===0) return null;
+  var idx=cands[Math.floor(rng()*cands.length)];
+  var beh=ANIMALS[idx][4];
+  var y;
+  if(beh==='swim'){ if(b!==W.BIOME.OCEAN && b!==W.BIOME.WETLAND) return null; y=gen.SEA_LEVEL-1-rng()*3; }
+  else if(beh==='fly'){ y=col.height+3+rng()*5; }
+  else { if(b===W.BIOME.OCEAN) return null; y=col.height+1; }
+  return makeMob(idx, x+0.5, y, z+0.5);
+}
+/* 一体更新 */
+function stepMob(m,gen,dt,px,py,pz){
+  m.timer-=dt;
+  if(m.timer<=0){ m.heading+=(Math.random()-0.5)*1.6; m.timer=1+Math.random()*3; }
+  var spd, b=m.behavior;
+  var dx=px-m.x, dz=pz-m.z, distToP=Math.hypot(dx,dz);
+  if(b==='predator'){
+    spd=2.2;
+    if(distToP<22){ m.heading=Math.atan2(dz,dx); } /* 追う */
+  } else if(b==='skittish'){
+    spd=2.6;
+    if(distToP<10){ m.heading=Math.atan2(-dz,-dx); spd=4.0; } /* 逃げる */
+    else spd=1.2;
+  } else if(b==='predator'){ spd=2.0; }
+  else if(b==='graze'){ spd=0.8; }
+  else if(b==='crawl'){ spd=0.4; }
+  else if(b==='fly'){ spd=2.2; }
+  else if(b==='swim'){ spd=1.8; }
+  else if(b==='amphi'){ spd=1.2; }
+  else spd=1.0;
+  m.x+=Math.cos(m.heading)*spd*dt;
+  m.z+=Math.sin(m.heading)*spd*dt;
+  /* 地面追従 */
+  var col=gen.columnAt(Math.floor(m.x),Math.floor(m.z));
+  if(b==='swim'){ if(col.biome!==W.BIOME.OCEAN&&col.biome!==W.BIOME.WETLAND){ m.heading+=Math.PI; } m.y=gen.SEA_LEVEL-1; }
+  else if(b==='fly'){ m.y=col.height+3+Math.sin(Date.now()*0.002+m.x)*1.2; }
+  else { m.y=col.height+1; }
+  return m;
+}
+
+/* ============================================================
+   スプライト生成 ── 類ごとの簡易ピクセル獣。色は種固有。
+   返り値 {w,h,data:RGBA}。透明は a=0。
+============================================================ */
+function blankSprite(w,h){return {w:w,h:h,data:new Uint8ClampedArray(w*h*4)};}
+function sp(t,x,y,c,a){ if(x<0||y<0||x>=t.w||y>=t.h)return; var i=(y*t.w+x)*4;
+  t.data[i]=clamp8(c[0]);t.data[i+1]=clamp8(c[1]);t.data[i+2]=clamp8(c[2]);t.data[i+3]=a===undefined?255:a; }
+function rect(t,x0,y0,w,h,c){for(var y=0;y<h;y++)for(var x=0;x<w;x++)sp(t,x0+x,y0+y,c);}
+function shade(c,f){return [c[0]*f,c[1]*f,c[2]*f];}
+function mix(a,b,p){return [a[0]+(b[0]-a[0])*p,a[1]+(b[1]-a[1])*p,a[2]+(b[2]-a[2])*p];}
+var WHITE=[238,238,235], BLACK=[26,26,30];
+
+/* 種ごとの見た目フラグと色を名から導く。検索で確認した実物の特徴を反映。 */
+function featuresOf(idx){
+  var s=ANIMALS[idx], nm=s[0], cat=s[1], base=s[6];
+  var f={cat:cat, back:base, belly:mix(base,WHITE,0.42), dark:shade(base,0.62), eye:BLACK,
+    beak:[230,170,60], leg:shade(base,0.6)};
+  function has(x){return nm.indexOf(x)>=0;}
+  /* --- 哺乳類の特徴 --- */
+  if(has('ジカ')){ f.back=[164,126,86]; f.belly=mix(f.back,WHITE,0.5); f.antler=true; f.spots=true; f.rump=true; }
+  if(has('カモシカ')){ f.back=[124,114,98]; f.horn='short'; }
+  if(has('ゾウ')){ f.back=[120,104,92]; f.dark=shade(f.back,0.7); f.tusk=true; f.trunk=true; f.dome=true; f.hairy=true; }
+  if(has('イノシシ')){ f.back=[92,78,66]; f.bristle=true; f.snout=true; }
+  if(has('クマ')||has('グマ')){ f.back=(has('ヒグマ')?[78,56,40]:[40,38,42]); f.bulk=true; if(has('ツキノワ'))f.crescent=true; }
+  if(has('オオカミ')){ f.back=[122,116,104]; f.belly=mix(f.back,WHITE,0.4); f.canine=true; }
+  if(has('キツネ')){ f.back=[196,120,66]; f.belly=WHITE; f.bushy=true; f.ear='point'; }
+  if(has('タヌキ')){ f.back=[120,100,78]; f.mask=true; f.ear='point'; }
+  if(has('サル')){ f.back=[140,112,84]; f.face=[210,140,120]; }
+  if(has('ウサギ')){ f.back=[178,160,138]; f.belly=WHITE; f.longear=true; }
+  if(has('リス')||has('ムササビ')){ f.back=[160,110,70]; f.bushy=true; }
+  if(has('アナグマ')){ f.back=[150,144,130]; f.stripe=true; }
+  if(has('テン')||has('イタチ')){ f.back=[196,150,80]; f.belly=mix(f.back,WHITE,0.5); f.slim=true; }
+  /* 海獣 */
+  if(cat===CAT.SEA){ f.flipper=true; f.belly=mix(f.back,WHITE,0.35);
+    if(has('イルカ')){f.back=[120,140,160];f.dolphin=true;} if(has('クジラ')){f.back=[70,84,100];f.whale=true;}
+    if(has('アザラシ')){f.back=[180,176,168];f.spots=true;} }
+  /* --- 鳥の特徴 --- */
+  if(cat===CAT.BIRD){
+    f.belly=mix(base,WHITE,0.5);
+    if(has('キジ')){ f.back=[60,120,86]; f.head=[40,120,150]; f.wattle=[200,40,40]; f.longtail=true; }
+    if(has('ヤマドリ')){ f.back=[150,90,50]; f.longtail=true; }
+    if(has('マガモ')){ f.head=[50,150,90]; f.back=[120,110,90]; }
+    if(has('オシドリ')){ f.head=[200,120,60]; f.back=[150,110,80]; f.crest=true; }
+    if(has('ハクチョウ')||has('サギ')||has('ツル')||has('タンチョウ')){ f.back=WHITE; f.belly=WHITE; f.longneck=true; if(has('ツル')||has('タンチョウ'))f.crown=[210,40,40]; if(has('サギ'))f.legcol=[60,60,60]; }
+    if(has('ワシ')||has('タカ')){ f.hook=true; f.back=[110,92,70]; }
+    if(has('フクロウ')){ f.owl=true; f.back=[150,130,100]; }
+    if(has('カラス')||has('ウミウ')||has('ウ')){ f.back=BLACK; f.belly=shade(BLACK,1.3); f.beak=[40,40,44]; }
+    if(has('カワセミ')){ f.back=[40,140,190]; f.belly=[220,130,60]; f.beak=[30,30,30]; }
+    if(has('ゲラ')){ f.back=[60,60,64]; f.belly=WHITE; f.cap=[210,60,60]; }
+    if(has('カモメ')||has('ウミネコ')){ f.back=mix(WHITE,[120,120,130],0.3); f.belly=WHITE; }
+  }
+  /* --- 魚 --- */
+  if(cat===CAT.FISH){
+    f.belly=mix(base,WHITE,0.55);
+    if(has('マグロ')||has('ブリ')){ f.back=[70,90,130]; f.tuna=true; }
+    if(has('タイ')){ f.back=[210,120,120]; }
+    if(has('サケ')||has('マス')){ f.back=[170,120,100]; f.stripe2=true; }
+    if(has('サメ')){ f.back=[120,128,136]; f.shark=true; }
+    if(has('エイ')){ f.ray=true; f.back=[150,130,100]; }
+    if(has('ウナギ')){ f.eel=true; f.back=[70,80,70]; }
+  }
+  return f;
+}
+
+function spriteOf(specIdx){
+  var s=ANIMALS[specIdx], cat=s[1], seed=hstr(s[0]);
+  var f=featuresOf(specIdx);
+  var t, x, y, k;
+  var back=f.back, belly=f.belly, dk=f.dark, eye=f.eye;
+
+  if(cat===CAT.MAMMAL){
+    t=blankSprite(24,18);
+    var bodyY=7, bodyH=5;
+    if(f.bulk){ bodyY=6; bodyH=7; }
+    /* 胴(背は濃く腹は淡い) */
+    rect(t,4,bodyY,14,bodyH,back);
+    rect(t,4,bodyY+bodyH-1,14,1,belly);
+    rect(t,4,bodyY+1,14,1,mix(back,WHITE,0.12));
+    /* 尻 */
+    rect(t,3,bodyY,3,bodyH,back);
+    /* 首と頭 */
+    var hx=16, hy=bodyY-2;
+    if(f.longneck) hy-=2;
+    rect(t,hx-1,hy+1,4,3,back);                 /* 首 */
+    rect(t,hx,hy,5,5,back);                      /* 頭 */
+    if(f.face) rect(t,hx+2,hy+1,3,3,f.face);     /* 猿の顔 */
+    /* 鼻面 */
+    if(f.snout){ rect(t,hx+4,hy+2,2,2,mix(back,WHITE,0.3)); }
+    /* 脚 */
+    var legY=bodyY+bodyH, legH=18-legY;
+    rect(t,5,legY,2,legH,f.leg); rect(t,8,legY,2,legH,f.leg);
+    rect(t,13,legY,2,legH,f.leg); rect(t,16,legY,2,legH,f.leg);
+    /* 目 */
+    sp(t,hx+3,hy+1,eye);
+    /* 耳 */
+    if(f.ear==='point'){ sp(t,hx+1,hy-1,back); sp(t,hx+3,hy-1,back); }
+    else if(f.longear){ rect(t,hx+1,hy-3,1,3,back); rect(t,hx+3,hy-3,1,3,back); }
+    else { sp(t,hx+1,hy-1,back); }
+    /* 尾 */
+    if(f.bushy){ rect(t,1,bodyY-1,3,4,back); }
+    else if(f.rump){ rect(t,2,bodyY,2,3,WHITE); rect(t,2,bodyY,1,3,BLACK); } /* 白い尻に黒縁 */
+    else if(!f.bulk){ rect(t,2,bodyY+1,2,1,back); }
+    /* 鹿の白斑 */
+    if(f.spots){ for(k=0;k<6;k++){ var sx=6+(k%3)*4, sy=bodyY+1+((k/3|0)*2); sp(t,sx,sy,WHITE);} }
+    /* 角 */
+    if(f.antler){ rect(t,hx+1,hy-4,1,4,dk); sp(t,hx,hy-4,dk); sp(t,hx+2,hy-5,dk);
+      rect(t,hx+3,hy-4,1,4,dk); sp(t,hx+4,hy-5,dk); }
+    else if(f.horn==='short'){ sp(t,hx+1,hy-1,dk); sp(t,hx+3,hy-1,dk); }
+    /* 熊の胸の月の輪 */
+    if(f.crescent){ for(k=0;k<5;k++) sp(t,12+k,bodyY+1+Math.abs(k-2)%2,WHITE); }
+    /* 縞(アナグマ) */
+    if(f.stripe){ rect(t,hx,hy,5,1,BLACK); rect(t,hx+1,hy,1,4,BLACK); rect(t,hx+3,hy,1,4,BLACK); rect(t,hx,hy,5,5,WHITE); rect(t,hx+1,hy,1,5,BLACK); rect(t,hx+3,hy,1,5,BLACK);
+      rect(t,hx+2,hy,1,5,WHITE); }
+    /* タヌキの黒い目周り */
+    if(f.mask){ rect(t,hx+1,hy+1,4,2,BLACK); sp(t,hx+3,hy+1,WHITE); }
+    /* 象: 隆起頭・牙・鼻・毛 */
+    if(f.dome){ rect(t,hx,hy-2,5,2,back); }              /* 頭頂の隆起(ベレー帽) */
+    if(f.trunk){ rect(t,hx+4,hy+2,2,7,back); sp(t,hx+5,hy+9,back); } /* 鼻 */
+    if(f.tusk){ rect(t,hx+3,hy+4,3,1,WHITE); sp(t,hx+5,hy+5,WHITE); sp(t,hx+6,hy+5,WHITE);} /* ねじれ牙 */
+    if(f.hairy){ for(k=0;k<14;k++){ var hxp=4+k, hh=bodyY+(h2(hxp,1,seed)>0.5?-1:0); if(h2(hxp,3,seed)>0.6) sp(t,hxp,bodyY-1,dk);} }
+    if(f.bristle){ for(k=0;k<12;k++) if(h2(k,2,seed)>0.5) sp(t,5+k,bodyY-1,dk); } /* 猪の剛毛 */
+
+  } else if(cat===CAT.SEA){
+    t=blankSprite(24,14);
+    rect(t,3,4,16,6,back); rect(t,3,9,16,1,belly);
+    rect(t,17,4,5,4,back);                 /* 頭 */
+    sp(t,20,5,eye);
+    if(f.dolphin||f.whale){ rect(t,18,4,4,2,back); rect(t,0,4,4,5,back); /* 尾びれ */ rect(t,8,2,3,2,back);} /* 背びれ */
+    else { rect(t,1,5,3,4,back); rect(t,6,10,3,2,f.leg); rect(t,12,10,3,2,f.leg); } /* 鰭脚 */
+    if(f.spots){ for(k=0;k<8;k++) sp(t,5+k*2,5+(k%2),dk); }
+
+  } else if(cat===CAT.BIRD){
+    t=blankSprite(16,16);
+    var hd=f.head||back;
+    rect(t,3,6,8,6,back); rect(t,3,10,8,2,belly);   /* 胴 */
+    rect(t,2,6,4,5,shade(back,0.85));                /* 翼 */
+    /* 首・頭 */
+    var by=5;
+    if(f.longneck){ rect(t,9,2,2,5,back); by=1; }
+    rect(t,9,by,5,4,hd);                             /* 頭 */
+    sp(t,12,by+1,eye);
+    sp(t,14,by+2,f.beak); sp(t,15,by+2,f.beak);      /* 嘴 */
+    if(f.hook){ sp(t,15,by+3,f.beak); }              /* 猛禽の鉤 */
+    if(f.owl){ sp(t,10,by+1,WHITE); sp(t,12,by+1,WHITE); rect(t,9,by,5,1,shade(back,0.7)); }
+    /* 脚 */
+    var lc=f.legcol||[210,170,60];
+    rect(t,5,12,1,3,lc); rect(t,8,12,1,3,lc);
+    if(f.longneck){ rect(t,5,12,1,4,lc); rect(t,8,12,1,4,lc); } /* 鶴・鷺の長い脚 */
+    /* 冠・肉垂 */
+    if(f.crown){ rect(t,10,by-1,3,1,f.crown); }
+    if(f.wattle){ sp(t,13,by+2,f.wattle); }
+    if(f.crest){ sp(t,9,by-1,hd); sp(t,8,by,hd); }
+    if(f.cap){ rect(t,9,by,5,1,f.cap); }
+    /* 長い尾(キジ・ヤマドリ) */
+    if(f.longtail){ for(k=0;k<5;k++) rect(t,0,7+k,3-(k>2?1:0),1,shade(back,0.8)); rect(t,0,8,2,2,back); }
+    else rect(t,1,8,3,2,shade(back,0.8));
+
+  } else if(cat===CAT.FISH){
+    t=blankSprite(18,11);
+    /* 紡錘形の体 */
+    for(y=0;y<7;y++)for(x=0;x<13;x++){ var dxp=(x-6)/6, dyp=(y-3)/3.5; if(dxp*dxp+dyp*dyp<1){ sp(t,x+2,y+2, y<3?back:belly);} }
+    rect(t,0,3,3,4,back);                 /* 尾びれ */
+    rect(t,6,1,3,2,shade(back,0.9)); /* 背びれ */
+    sp(t,13,4,eye);
+    if(f.stripe2){ rect(t,3,4,11,1,mix(back,[220,90,90],0.5)); } /* 鮭の側線 */
+    if(f.shark){ rect(t,7,0,2,3,back); }   /* 鮫の高い背びれ */
+    if(f.eel){ t=blankSprite(20,8); for(x=0;x<18;x++){var yy=3+Math.round(Math.sin(x*0.5)*1.5);rect(t,x,yy,2,2,back);} sp(t,18,3,eye); }
+    if(f.ray){ t=blankSprite(16,12); for(y=0;y<9;y++)for(x=0;x<12;x++){var d=Math.hypot((x-6)/6,(y-4)/4.5); if(d<1)sp(t,x+2,y+1,back);} rect(t,7,9,1,3,back); sp(t,4,3,eye);sp(t,9,3,eye);} /* エイ */
+
+  } else if(cat===CAT.SHELL){
+    var nm=s[0];
+    if(nm.indexOf('タコ')>=0){ t=blankSprite(14,14); for(y=0;y<6;y++)for(x=0;x<8;x++){if(Math.hypot(x-4,y-3)<4.2)sp(t,x+3,y+1,back);} sp(t,5,3,eye);sp(t,7,3,eye); for(k=0;k<5;k++){rect(t,2+k*2,7,1,6,back);} }
+    else if(nm.indexOf('イカ')>=0){ t=blankSprite(12,15); rect(t,3,1,6,8,back); for(k=0;k<5;k++)rect(t,3+k,9,1,5,back); sp(t,4,3,eye);sp(t,7,3,eye); }
+    else if(nm.indexOf('カニ')>=0){ t=blankSprite(14,11); for(y=0;y<5;y++)for(x=0;x<10;x++){if(Math.hypot((x-5)/5,(y-2)/2.5)<1)sp(t,x+2,y+3,back);} rect(t,0,4,3,2,back);rect(t,11,4,3,2,back); sp(t,1,3,back);sp(t,12,3,back); for(k=0;k<3;k++){sp(t,3+k*2,8,back);sp(t,9-k*2,8,back);} sp(t,5,4,eye);sp(t,8,4,eye); }
+    else if(nm.indexOf('エビ')>=0){ t=blankSprite(15,10); for(k=0;k<6;k++){var ex=2+k*2,ey=3+Math.round(Math.abs(k-3)*0.6);rect(t,ex,ey,2,3,back);} rect(t,0,3,2,2,back); rect(t,13,3,2,4,shade(back,0.8)); sp(t,2,4,eye); }
+    else if(nm.indexOf('ウニ')>=0){ t=blankSprite(14,14); for(y=0;y<10;y++)for(x=0;x<10;x++){if(Math.hypot(x-5,y-5)<5)sp(t,x+2,y+2,back);} for(k=0;k<12;k++){var a=k*0.52;sp(t,7+Math.round(Math.cos(a)*7),7+Math.round(Math.sin(a)*7),dk);} }
+    else if(nm.indexOf('サザエ')>=0){ t=blankSprite(13,12); var cx=6,cy=6,r=1; for(var a2=0;a2<14;a2+=0.3){r+=0.18;sp(t,cx+Math.round(Math.cos(a2)*r),cy+Math.round(Math.sin(a2)*r),back);} for(k=0;k<5;k++){var a3=k*1.25;sp(t,cx+Math.round(Math.cos(a3)*5.5),cy+Math.round(Math.sin(a3)*5.5),dk);} } /* 螺旋＋突起 */
+    else { t=blankSprite(13,11); for(y=0;y<7;y++)for(x=0;x<11;x++){var d=Math.hypot((x-5)/5.5,(y)/6.5);if(d<1)sp(t,x+1,y+2,back);} for(k=0;k<5;k++){rect(t,1+k*2,3,1,5,shade(back,0.8));} rect(t,1,8,11,1,dk);} /* 二枚貝(扇状の筋) */
+
+  } else if(cat===CAT.BUG){
+    var nm2=s[0];
+    if(nm2.indexOf('チョウ')>=0){ t=blankSprite(14,12); rect(t,6,3,2,7,dk); /* 体 */ for(y=0;y<5;y++)for(x=0;x<5;x++){if(x+y<6){sp(t,5-x,3+y,back);sp(t,8+x,3+y,back);sp(t,5-x,8-y,shade(back,0.85));sp(t,8+x,8-y,shade(back,0.85));}} sp(t,6,2,dk);sp(t,7,2,dk); }
+    else if(nm2.indexOf('トンボ')>=0||nm2.indexOf('ヤンマ')>=0){ t=blankSprite(16,10); rect(t,2,4,12,2,back); rect(t,12,3,3,4,back); /* 頭 */ for(k=0;k<2;k++){rect(t,4+k*5,1,4,2,mix(WHITE,back,0.3));rect(t,4+k*5,7,4,2,mix(WHITE,back,0.3));} sp(t,14,4,eye); }
+    else if(nm2.indexOf('カブト')>=0||nm2.indexOf('クワガタ')>=0){ t=blankSprite(12,12); rect(t,4,5,5,5,back); rect(t,5,3,3,2,back); /* 角/大顎 */ if(nm2.indexOf('カブト')>=0){rect(t,6,0,1,4,dk);sp(t,6,0,dk);} else {rect(t,4,1,1,3,dk);rect(t,8,1,1,3,dk);} for(k=0;k<3;k++){sp(t,3,6+k,dk);sp(t,9,6+k,dk);} }
+    else if(nm2.indexOf('ホタル')>=0){ t=blankSprite(10,10); rect(t,3,3,4,5,dk); rect(t,3,7,4,2,[200,230,140]); /* 光る尾 */ sp(t,4,2,dk); }
+    else if(nm2.indexOf('カマキリ')>=0){ t=blankSprite(14,10); rect(t,3,4,7,2,back); rect(t,10,3,3,2,back); rect(t,1,3,3,1,back);rect(t,1,3,1,3,back); /* 鎌 */ for(k=0;k<3;k++)sp(t,4+k*2,6,dk); sp(t,12,3,eye); }
+    else if(nm2.indexOf('クモ')>=0){ t=blankSprite(12,11); for(y=0;y<5;y++)for(x=0;x<6;x++){if(Math.hypot(x-3,y-2)<3)sp(t,x+3,y+3,back);} for(k=0;k<4;k++){sp(t,1,3+k,dk);sp(t,2,3+k,dk);sp(t,9,3+k,dk);sp(t,10,3+k,dk);} }
+    else if(nm2.indexOf('ムカデ')>=0){ t=blankSprite(18,7); for(x=0;x<16;x++){rect(t,x,2,1,3,(x%2?back:dk));} for(k=0;k<8;k++){sp(t,k*2,1,dk);sp(t,k*2,5,dk);} sp(t,15,2,eye); }
+    else if(nm2.indexOf('マイマイ')>=0){ t=blankSprite(13,10); rect(t,1,6,8,3,mix(back,WHITE,0.3)); var cx=9,cy=4,r=1;for(var a4=0;a4<10;a4+=0.4){r+=0.22;sp(t,cx+Math.round(Math.cos(a4)*r),cy+Math.round(Math.sin(a4)*r),back);} rect(t,0,5,1,2,dk);sp(t,0,4,dk); }
+    else if(nm2.indexOf('ナメクジ')>=0){ t=blankSprite(13,7); for(x=0;x<11;x++){var yy=3+Math.round(Math.sin(x*0.4));rect(t,x+1,yy,1,2,back);} sp(t,1,2,back);sp(t,2,1,dk); }
+    else if(nm2.indexOf('セミ')>=0){ t=blankSprite(11,12); rect(t,3,2,4,6,back); rect(t,2,3,7,4,mix(back,WHITE,0.25)); /* 透明翅 */ rect(t,4,2,3,3,dk); sp(t,4,3,eye);sp(t,6,3,eye); }
+    else { t=blankSprite(12,9); rect(t,4,3,5,3,back); rect(t,8,2,3,3,back); for(k=0;k<3;k++){sp(t,4+k*2,6,dk);sp(t,4+k*2,2,dk);} sp(t,10,3,eye); } /* バッタ・蜂・蟻等 */
+    if(nm2.indexOf('ハチ')>=0){ rect(t,4,3,5,1,BLACK); rect(t,4,5,5,1,BLACK); } /* 蜂の縞 */
+
+  } else { /* 両爬 */
+    var nm3=s[0];
+    if(nm3.indexOf('ヘビ')>=0||nm3.indexOf('マムシ')>=0||nm3.indexOf('ダイショウ')>=0||nm3.indexOf('カガシ')>=0){
+      t=blankSprite(20,9); for(x=0;x<18;x++){var yy=4+Math.round(Math.sin(x*0.6)*2.5);rect(t,x,yy,2,2,back); if(h2(x,1,seed)>0.6)sp(t,x,yy,dk);} sp(t,18,4,eye);
+    } else if(nm3.indexOf('カエル')>=0){
+      t=blankSprite(13,11); for(y=0;y<5;y++)for(x=0;x<9;x++){if(Math.hypot((x-4)/4.5,(y-2)/2.8)<1)sp(t,x+2,y+4,back);} rect(t,3,2,2,2,back);rect(t,8,2,2,2,back); sp(t,3,2,eye);sp(t,9,2,eye); rect(t,1,8,2,2,f.leg||dk);rect(t,10,8,2,2,f.leg||dk);
+    } else if(nm3.indexOf('カメ')>=0||nm3.indexOf('スッポン')>=0){
+      t=blankSprite(15,9); for(y=0;y<6;y++)for(x=0;x<10;x++){if(Math.hypot((x-5)/5.5,(y-2)/3)<1)sp(t,x+2,y+1,back);} for(k=0;k<6;k++)sp(t,4+(k%3)*2,3+((k/3|0)*2),dk); rect(t,12,3,3,2,shade(back,1.2)); sp(t,14,3,eye); rect(t,3,7,2,2,f.leg);rect(t,9,7,2,2,f.leg);
+    } else if(nm3.indexOf('サンショウウオ')>=0||nm3.indexOf('イモリ')>=0){
+      t=blankSprite(18,8); rect(t,2,3,11,3,back); rect(t,2,5,11,1,belly); rect(t,12,3,3,2,back); rect(t,0,4,2,1,back); /* 尾 */ for(k=0;k<2;k++){sp(t,4+k*5,6,dk);sp(t,4+k*5,2,dk);} sp(t,14,3,eye); if(nm3.indexOf('イモリ')>=0)rect(t,2,5,11,1,[180,60,50]);
+    } else { /* トカゲ・カナヘビ */
+      t=blankSprite(18,7); rect(t,3,3,8,2,back); rect(t,10,2,3,2,back); rect(t,0,3,3,1,back); /* 長い尾 */ for(k=0;k<2;k++){sp(t,4+k*4,5,dk);sp(t,4+k*4,1,dk);} sp(t,12,2,eye);
+    }
+  }
+  return t;
+}
+
+/* 植物スプライト ── 実物の姿に寄せる(樹形・果実・花・苔) */
+function plantSprite(plIdx){
+  var p=PLANTS[plIdx], col=p[4], cat=p[1], nm=p[0], seed=hstr(nm);
+  var t=blankSprite(16,16), dk=shade(col,0.66), lt=mix(col,WHITE,0.25);
+  var x,y,k;
+  if(cat==='木'){
+    var trunk=[96,68,42];
+    rect(t,7,9,2,7,trunk);
+    if(nm.indexOf('スギ')>=0||nm.indexOf('ヒノキ')>=0||nm.indexOf('マツ')>=0){ /* 針葉樹=円錐 */
+      for(y=0;y<10;y++){var wdt=1+y*0.7;for(x=-wdt;x<=wdt;x++){if(h2(8+x|0,y,seed)>0.2)sp(t,8+Math.round(x),y,(h2(8+x|0,y,seed)>0.6?col:dk));}}
+    } else { /* 広葉樹=丸い樹冠 */
+      for(y=0;y<9;y++)for(x=0;x<16;x++){var d=Math.hypot((x-8)/6,(y-4)/4.5);if(d<1&&h2(x,y,seed)>0.22)sp(t,x,y,(h2(x,y,seed)>0.62?col:dk));}
+      if(p[5]===1 && nm.indexOf('クリ')<0){ for(k=0;k<3;k++)sp(t,5+k*3,4+(k%2)*2,nm.indexOf('サクラ')>=0||nm.indexOf('ウメ')>=0?[235,200,210]:[180,60,60]); } /* 実/花 */
+    }
+  } else if(cat==='茸'){
+    var stalk=[224,214,196];
+    rect(t,7,9,2,5,stalk);
+    for(x=3;x<13;x++){var cap=9-Math.round(Math.sqrt(Math.max(0,25-(x-8)*(x-8))));for(y=cap;y<10;y++)sp(t,x,y,(y===cap?lt:col));}
+    if(nm.indexOf('テング')>=0||nm.indexOf('ベニ')>=0){ for(k=0;k<5;k++)sp(t,4+k*2,6+(k%2),WHITE); } /* 毒キノコの斑点 */
+  } else if(cat==='花'){
+    rect(t,7,9,1,6,[90,130,66]);
+    /* 花弁5枚 */
+    var cx=7,cy=5;
+    for(k=0;k<5;k++){var a=k*1.256;sp(t,cx+Math.round(Math.cos(a)*2.5),cy+Math.round(Math.sin(a)*2.5),col);sp(t,cx+Math.round(Math.cos(a)*1.6),cy+Math.round(Math.sin(a)*1.6),lt);}
+    sp(t,cx,cy,[250,230,110]);
+    if(nm.indexOf('ヒガンバナ')>=0){ for(k=0;k<6;k++){var a2=k*1.05;rect(t,cx+Math.round(Math.cos(a2)*2),cy+Math.round(Math.sin(a2)*2),1,2,col);} }
+  } else if(cat==='低木'){
+    rect(t,7,11,2,5,[96,72,48]);
+    for(y=2;y<12;y++)for(x=2;x<14;x++){var d=Math.hypot((x-8)/5,(y-6)/4.5);if(d<1&&h2(x,y,seed)>0.4)sp(t,x,y,(h2(x,y,seed)>0.66?col:dk));}
+    if(p[5]===1){ for(k=0;k<4;k++)sp(t,5+k*2,6+(k%2)*2, nm.indexOf('ブドウ')>=0?[90,60,120]:[180,50,50]); } /* 果実 */
+  } else if(cat==='羊歯'){
+    rect(t,7,12,1,4,dk);
+    for(k=0;k<7;k++){var ang=(k-3)*0.34-Math.PI/2;for(var r=1;r<9;r++){var fx=8+Math.round(Math.cos(ang)*r),fy=13+Math.round(Math.sin(ang)*r);sp(t,fx,fy,(r>5?lt:col));}}
+  } else if(cat==='水草'){
+    for(k=0;k<5;k++){var bx=3+k*2;for(y=4;y<15;y++){if(h2(bx,y,seed)>0.25)sp(t,bx,y,col);}}
+    if(nm.indexOf('ハス')>=0||nm.indexOf('コウホネ')>=0){ rect(t,4,3,8,2,lt); }
+    if(nm.indexOf('ガマ')>=0){ rect(t,7,3,2,5,[120,90,56]); } /* 穂 */
+  } else if(cat==='作物'){
+    for(k=0;k<4;k++){var sx=4+k*2;rect(t,sx,5,1,10,[110,150,80]);}
+    if(nm.indexOf('イネ')>=0||nm.indexOf('アワ')>=0||nm.indexOf('ヒエ')>=0){ for(k=0;k<4;k++)rect(t,4+k*2,4,1,3,[210,200,120]); } /* 穂 */
+    else if(p[5]===1){ for(k=0;k<3;k++)sp(t,5+k*2,7,col); }
+  } else if(cat==='草'){
+    for(k=0;k<6;k++){var gx=3+k*2;for(y=6;y<15;y++){if(h2(gx,y,seed)>0.2)sp(t,gx,y,(y<9?lt:col));}}
+  } else { /* 苔 */
+    for(x=0;x<16;x++)for(y=11;y<16;y++)if(h2(x,y,seed)>0.32)sp(t,x,y,(h2(x,y,seed)>0.6?col:dk));
+  }
+  return t;
+}
+
+/* ============================================================
+   本家マイクラ差分 ── 硬さ・採掘時間・モブHP・ドロップ・食料
+   採掘: 道具と硬さで時間が変わる(Minecraft Wiki: 硬さ×係数)。
+   素手は柔らかい物だけ速く、岩や木は道具がないと遅い(Hardcore型)。
+============================================================ */
+/* ブロック硬さ(相対秒。Infinityは破壊不可) */
+var HARDNESS={};
+HARDNESS[B.AIR]=0;
+HARDNESS[B.GRASS]=0.6; HARDNESS[B.DIRT]=0.6; HARDNESS[B.SAND]=0.5; HARDNESS[B.GRAVEL]=0.7;
+HARDNESS[B.CLAY]=0.7; HARDNESS[B.SNOW]=0.2; HARDNESS[B.ICE]=0.5;
+HARDNESS[B.STONE]=2.2; HARDNESS[B.BEDROCK]=Infinity;
+HARDNESS[B.OAK_LOG]=2.0; HARDNESS[B.CHESTNUT_LOG]=2.0; HARDNESS[B.BEECH_LOG]=2.2; HARDNESS[B.CEDAR_LOG]=1.8;
+HARDNESS[B.OAK_LEAF]=0.2; HARDNESS[B.CHESTNUT_LEAF]=0.2; HARDNESS[B.BEECH_LEAF]=0.2; HARDNESS[B.CEDAR_LEAF]=0.2;
+HARDNESS[B.PLANK]=1.8; HARDNESS[B.THATCH]=0.5; HARDNESS[B.HEARTH]=2.0;
+HARDNESS[B.STONE_PLATE]=2.0; HARDNESS[B.CLAY_POT]=0.8; HARDNESS[B.STORAGE_PIT]=0.6;
+/* 道具種別と適性。tool: 'hand'|'axe'|'pick'|'shovel' */
+function isWood(b){return b===B.OAK_LOG||b===B.CHESTNUT_LOG||b===B.BEECH_LOG||b===B.CEDAR_LOG||b===B.PLANK||b===B.THATCH;}
+function isStone(b){return b===B.STONE||b===B.STONE_PLATE||b===B.HEARTH;}
+function isSoft(b){return b===B.DIRT||b===B.GRASS||b===B.SAND||b===B.GRAVEL||b===B.CLAY||b===B.SNOW||b===B.STORAGE_PIT;}
+function isLeafy(b){return b===B.OAK_LEAF||b===B.CHESTNUT_LEAF||b===B.BEECH_LEAF||b===B.CEDAR_LEAF;}
+/* 採掘にかかる秒。tool が適性なら速い。素手で岩/木は重い。 */
+function mineSeconds(block, tool){
+  var h=HARDNESS[block]; if(h===undefined) h=1.0;
+  if(!isFinite(h)) return Infinity;
+  if(isLeafy(block)) return 0.25;            /* 葉は何でも即 */
+  var mult=4.0;                              /* 素手の基準 */
+  if(tool==='axe' && isWood(block)) mult=1.0;
+  else if(tool==='pick' && isStone(block)) mult=1.0;
+  else if(tool==='shovel' && isSoft(block)) mult=1.0;
+  else if(tool==='hand' && isSoft(block)) mult=2.0; /* 素手でも土砂はそこそこ */
+  else if(isStone(block) && tool!=='pick') mult=8.0; /* 道具違いの岩は重い */
+  return h*mult*0.5;
+}
+/* モブの最大HP(体高から導く。大型ほど硬い) */
+function mobMaxHP(idx){
+  var size=ANIMALS[idx][3];
+  return Math.max(3, Math.round(4+size*8));
+}
+/* 撃破ドロップ。{item:blockIdまたは擬似ID, label, food} */
+var DROP_MEAT=200, DROP_HIDE=201, DROP_BONE=202, DROP_FISH=203, DROP_SHELL=204, DROP_FEATHER=205, DROP_FIBER=206, DROP_STICK=207;
+function dropOf(idx){
+  var s=ANIMALS[idx], cat=s[1], size=s[3];
+  if(cat===CAT.FISH) return {item:DROP_FISH,label:'魚',food:Math.round(3+size*2),n:1};
+  if(cat===CAT.SHELL) return {item:DROP_SHELL,label:'貝',food:2,n:1};
+  if(cat===CAT.BUG) return {item:DROP_FIBER,label:'虫',food:1,n:1};
+  if(cat===CAT.HERP) return {item:DROP_MEAT,label:'肉',food:2,n:1};
+  if(cat===CAT.BIRD) return {item:DROP_MEAT,label:'肉',food:Math.round(2+size*3),n:1};
+  /* 獣・海獣: 肉と皮と骨 */
+  return {item:DROP_MEAT,label:'肉',food:Math.round(3+size*4),n:Math.max(1,Math.round(size*2)),hide:size>=0.5,bone:size>=1};
+}
+/* 食料を食べたときの空腹回復量(擬似ID別) */
+function foodValue(item){
+  if(item===DROP_MEAT) return 26;
+  if(item===DROP_FISH) return 18;
+  if(item===DROP_SHELL) return 10;
+  return 0;
+}
+
+/* ============================================================
+   クラフト ── 縄文の道具づくり(石器)。純ロジックで検証可。
+   資源種別 kind: 'block'(実ブロックID) / 'item'(擬似ID) / 'wood'(丸太合算) / 'tool'(道具所持)
+   採れる道具を装備すると mineSeconds が速くなる(既存の硬さ系と接続)。
+============================================================ */
+var WOOD_IDS=[B.OAK_LOG,B.CHESTNUT_LOG,B.BEECH_LOG,B.CEDAR_LOG];
+var RECIPES=[
+  {id:'plank', name:'板',        out:{kind:'block',id:B.PLANK,n:4}, cost:[{kind:'wood',n:1}], note:'丸太を割る'},
+  {id:'stick', name:'枝',        out:{kind:'item', id:DROP_STICK,n:4}, cost:[{kind:'block',id:B.PLANK,n:1}], note:'板から枝'},
+  {id:'cord',  name:'縄(繊維束)', out:{kind:'item', id:DROP_FIBER,n:1}, cost:[{kind:'item',id:DROP_FIBER,n:2}], note:'※将来の結束用', hidden:true},
+  {id:'axe',   name:'石の斧',     out:{kind:'tool', id:'axe'},   cost:[{kind:'block',id:B.STONE,n:3},{kind:'item',id:DROP_STICK,n:2}], note:'木が速く伐れる'},
+  {id:'pick',  name:'石のツルハシ',out:{kind:'tool', id:'pick'},  cost:[{kind:'block',id:B.STONE,n:3},{kind:'item',id:DROP_STICK,n:2}], note:'岩が速く掘れる'},
+  {id:'shovel',name:'石のシャベル',out:{kind:'tool', id:'shovel'},cost:[{kind:'block',id:B.STONE,n:1},{kind:'item',id:DROP_STICK,n:2}], note:'土砂が速く掘れる'},
+  {id:'spear', name:'石の槍',     out:{kind:'tool', id:'spear'}, cost:[{kind:'block',id:B.STONE,n:2},{kind:'item',id:DROP_STICK,n:2},{kind:'item',id:DROP_FIBER,n:2}], note:'狩りの一撃が強い'},
+  {id:'plate', name:'石皿',       out:{kind:'block',id:B.STONE_PLATE,n:1}, cost:[{kind:'block',id:B.STONE,n:2}], note:'木の実をすり潰す(将来)'},
+  {id:'hearth',name:'炉',         out:{kind:'block',id:B.HEARTH,n:1}, cost:[{kind:'block',id:B.STONE,n:4}], note:'火を熾す(将来)'},
+  {id:'pot',   name:'土器',       out:{kind:'block',id:B.CLAY_POT,n:1}, cost:[{kind:'block',id:B.CLAY,n:3}], note:'縄文の発明・煮炊き(将来)'}
+];
+/* 在庫から資源量を数える */
+function countRes(kind,id, inv,items){
+  if(kind==='wood'){ var s=0; for(var i=0;i<WOOD_IDS.length;i++) s+=(inv[WOOD_IDS[i]]||0); return s; }
+  if(kind==='block'){ return inv[id]||0; }
+  if(kind==='item'){ return (items[id]&&items[id].count)||0; }
+  return 0;
+}
+function canCraft(recipe, inv, items, tools){
+  if(recipe.out.kind==='tool' && tools && tools[recipe.out.id]) return false; /* 既に所持 */
+  for(var i=0;i<recipe.cost.length;i++){ var c=recipe.cost[i];
+    if(countRes(c.kind,c.id,inv,items) < c.n) return false; }
+  return true;
+}
+/* 資源を引いて成果物を渡す(plain object を破壊的に更新)。成功でtrue */
+function applyCraft(recipe, inv, items, tools){
+  if(!canCraft(recipe,inv,items,tools)) return false;
+  for(var i=0;i<recipe.cost.length;i++){ var c=recipe.cost[i], need=c.n;
+    if(c.kind==='wood'){ for(var w=0;w<WOOD_IDS.length && need>0;w++){ var have=inv[WOOD_IDS[w]]||0; var take=Math.min(have,need); inv[WOOD_IDS[w]]=have-take; need-=take; } }
+    else if(c.kind==='block'){ inv[c.id]=(inv[c.id]||0)-c.n; }
+    else if(c.kind==='item'){ items[c.id].count-=c.n; }
+  }
+  var o=recipe.out;
+  if(o.kind==='block'){ inv[o.id]=(inv[o.id]||0)+o.n; }
+  else if(o.kind==='item'){ if(!items[o.id])items[o.id]={label:recipe.name,count:0}; items[o.id].count+=o.n; }
+  else if(o.kind==='tool'){ tools[o.id]=true; }
+  return true;
+}
+/* 道具による攻撃力(槍を持つと強い) */
+function attackDamage(tools){ return (tools && tools.spear)?55:22; }
+
+
+/* ---- 検証用: テクスチャ束のアフィン写像行列(テスト用ユーティリティ) ---- */
+function affineMatrix(x0,y0,x1,y1,x2,y2, u0,v0,u1,v1,u2,v2){
+  u1-=u0;v1-=v0;u2-=u0;v2-=v0; x1-=x0;y1-=y0;x2-=x0;y2-=y0;
+  var det=u1*v2-u2*v1; if(det===0)return null;
+  var a=(v2*x1-v1*x2)/det, b=(v2*y1-v1*y2)/det;
+  var c=(u1*x2-u2*x1)/det, d=(u1*y2-u2*y1)/det;
+  var e=x0-a*u0-c*v0, f=y0-b*u0-d*v0;
+  return {a:a,b:b,c:c,d:d,e:e,f:f};
+}
+function applyAffine(M,u,v){return [M.a*u+M.c*v+M.e, M.b*u+M.d*v+M.f];}
+
+var API={
+  TS:TS, buildTextures:buildTextures,
+  CAT:CAT, ANIMALS:ANIMALS, PLANTS:PLANTS,
+  makeMob:makeMob, trySpawn:trySpawn, stepMob:stepMob, spawnsIn:spawnsIn, biomeName:biomeName,
+  spriteOf:spriteOf, plantSprite:plantSprite, featuresOf:featuresOf,
+  HARDNESS:HARDNESS, mineSeconds:mineSeconds, mobMaxHP:mobMaxHP, dropOf:dropOf, foodValue:foodValue,
+  RECIPES:RECIPES, countRes:countRes, canCraft:canCraft, applyCraft:applyCraft, attackDamage:attackDamage, WOOD_IDS:WOOD_IDS,
+  DROP_MEAT:DROP_MEAT, DROP_HIDE:DROP_HIDE, DROP_BONE:DROP_BONE, DROP_FISH:DROP_FISH,
+  DROP_SHELL:DROP_SHELL, DROP_FEATHER:DROP_FEATHER, DROP_FIBER:DROP_FIBER, DROP_STICK:DROP_STICK,
+  affineMatrix:affineMatrix, applyAffine:applyAffine,
+  hstr:hstr, h2:h2
+};
+if(typeof module!=='undefined'&&module.exports){module.exports=API;}
+global.KININ_CONTENT=API;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
+(function(){
+'use strict';
+var W=window.KININ_WORLD, E=window.KININ_ENGINE, C=window.KININ_CONTENT;
+var cv=document.getElementById('cv'), ctx=cv.getContext('2d',{alpha:false});
+var RES=0.62, VW=0,VH=0, FOV=72*Math.PI/180;
+var renderDist=16; /* 近景ブロックの距離(設定で変更可) */
+var farDist=120, farFogStart=42; /* 遠景メッシュの到達距離と霧の開始 */
+function syncFar(){ farDist=Math.round(renderDist*7); farFogStart=Math.round(renderDist*2.6); }
+syncFar();
+function resize(){
+  VW=Math.floor(window.innerWidth*RES); VH=Math.floor(window.innerHeight*RES);
+  cv.width=VW; cv.height=VH; cv.style.width=window.innerWidth+'px'; cv.style.height=window.innerHeight+'px';
+}
+window.addEventListener('resize',resize); resize();
+var isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+if(!isTouch) document.body.classList.add('desktop');
+
+function imgToCanvas(img){
+  var c=document.createElement('canvas'); c.width=img.w; c.height=img.h;
+  var x=c.getContext('2d'); var id=x.createImageData(img.w,img.h);
+  id.data.set(img.data); x.putImageData(id,0,0); return c;
+}
+var TEXC={};
+(function(){
+  var T=C.buildTextures();
+  for(var id in T){
+    var t=T[id]; var o={};
+    if(t.all){ var ca=imgToCanvas(t.all); o.top=o.side=o.bottom=ca; }
+    else { o.top=imgToCanvas(t.top); o.side=imgToCanvas(t.side); o.bottom=imgToCanvas(t.bottom); }
+    TEXC[id]=o;
+  }
+})();
+var SPRC=[], PLSPRC=[];
+for(var i=0;i<C.ANIMALS.length;i++) SPRC.push(imgToCanvas(C.spriteOf(i)));
+for(i=0;i<C.PLANTS.length;i++) PLSPRC.push(imgToCanvas(C.plantSprite(i)));
+
+var world=new E.World("ウホウホ君"); var gen=world.gen;
+function findSpawn(){
+  for(var r=0;r<3000;r++){
+    var x=Math.floor((Math.random()-0.5)*200), z=Math.floor((Math.random()-0.5)*200);
+    var col=gen.columnAt(x,z);
+    if(col.biome!==W.BIOME.OCEAN && col.height>gen.SEA_LEVEL+1) return {x:x+0.5,y:col.height+2,z:z+0.5};
+  }
+  return {x:0.5,y:80,z:0.5};
+}
+var sp=findSpawn(); var player=new E.Player(sp.x,sp.y,sp.z);
+var state={hp:100,food:100,time:0.28}; var DAY_LEN=600;
+var dexSeenA={}, dexSeenP={};
+
+var input={f:false,b:false,l:false,r:false,jump:false}; var keys={};
+window.addEventListener('keydown',function(e){keys[e.code]=true;updKey();if(e.code==='Space')e.preventDefault();});
+window.addEventListener('keyup',function(e){keys[e.code]=false;updKey();});
+function updKey(){input.f=!!(keys['KeyW']||keys['ArrowUp']);input.b=!!(keys['KeyS']||keys['ArrowDown']);
+  input.l=!!(keys['KeyA']||keys['ArrowLeft']);input.r=!!(keys['KeyD']||keys['ArrowRight']);input.jump=!!keys['Space'];}
+var running=false;
+var miningHeld=false;
+cv.addEventListener('mousedown',function(e){
+  if(!running)return;
+  if(!isTouch&&document.pointerLockElement!==cv){cv.requestPointerLock&&cv.requestPointerLock();return;}
+  if(e.button===2){ doAction(false); return; } /* 右=設置 */
+  miningHeld=true; doAction(true);             /* 左=攻撃 or 採掘開始 */
+});
+window.addEventListener('mouseup',function(e){ if(e.button!==2){ miningHeld=false; mining.active=false; } });
+cv.addEventListener('click',function(){
+  if(!running && !isTouch){ cv.requestPointerLock&&cv.requestPointerLock(); }
+});
+cv.addEventListener('contextmenu',function(e){e.preventDefault();if(running)doAction(false);});
+document.addEventListener('mousemove',function(e){
+  if(document.pointerLockElement===cv){player.yaw-=e.movementX*0.0025;player.pitch-=e.movementY*0.0025;clampPitch();}
+});
+function clampPitch(){var l=Math.PI/2-0.05;if(player.pitch>l)player.pitch=l;if(player.pitch<-l)player.pitch=-l;}
+
+var stick=document.getElementById('stick'),nub=document.getElementById('stickNub');
+var stickId=null,scx=0,scy=0,lookId=null,lookX=0,lookY=0;
+stick.addEventListener('touchstart',function(e){var t=e.changedTouches[0];stickId=t.identifier;
+  var r=stick.getBoundingClientRect();scx=r.left+r.width/2;scy=r.top+r.height/2;e.preventDefault();},{passive:false});
+window.addEventListener('touchmove',function(e){
+  for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i];
+    if(t.identifier===stickId){var dx=t.clientX-scx,dy=t.clientY-scy,d=Math.hypot(dx,dy),mx=50;
+      if(d>mx){dx=dx/d*mx;dy=dy/d*mx;}nub.style.transform='translate('+dx+'px,'+dy+'px)';
+      var nx=dx/mx,ny=dy/mx;input.f=ny<-0.3;input.b=ny>0.3;input.l=nx<-0.3;input.r=nx>0.3;}
+    else if(t.identifier===lookId){player.yaw-=(t.clientX-lookX)*0.005;player.pitch-=(t.clientY-lookY)*0.005;
+      lookX=t.clientX;lookY=t.clientY;clampPitch();}}
+  e.preventDefault();},{passive:false});
+window.addEventListener('touchend',function(e){
+  for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i];
+    if(t.identifier===stickId){stickId=null;nub.style.transform='translate(0,0)';input.f=input.b=input.l=input.r=false;}
+    if(t.identifier===lookId)lookId=null;}});
+cv.addEventListener('touchstart',function(e){var t=e.changedTouches[0];
+  if(t.clientX>window.innerWidth*0.45){lookId=t.identifier;lookX=t.clientX;lookY=t.clientY;}e.preventDefault();},{passive:false});
+function bindHold(id,dn,up){var el=document.getElementById(id);
+  el.addEventListener('touchstart',function(e){dn();e.preventDefault();},{passive:false});
+  el.addEventListener('touchend',function(e){if(up)up();e.preventDefault();},{passive:false});}
+bindHold('btnJump',function(){input.jump=true;},function(){input.jump=false;});
+document.getElementById('btnAct').addEventListener('touchstart',function(e){miningHeld=true;doAction(true);e.preventDefault();},{passive:false});
+document.getElementById('btnAct').addEventListener('touchend',function(e){miningHeld=false;mining.active=false;e.preventDefault();},{passive:false});
+document.getElementById('btnPlace').addEventListener('touchstart',function(e){doAction(false);e.preventDefault();},{passive:false});
+var eb=document.getElementById('btnEat');
+if(eb) eb.addEventListener('touchstart',function(e){eatBest();e.preventDefault();},{passive:false});
+if(eb) eb.addEventListener('click',function(){eatBest();});
+window.addEventListener('keydown',function(e){ if(e.code==='KeyE'){ eatBest(); } });
+
+var HOT=[{id:W.BLOCK.DIRT,name:'土',ic:'🟫'},{id:W.BLOCK.OAK_LOG,name:'丸太',ic:'🪵'},
+  {id:W.BLOCK.STONE,name:'石',ic:'🪨'},{id:W.BLOCK.PLANK,name:'板',ic:'🟧'},{id:W.BLOCK.SAND,name:'砂',ic:'🟨'}];
+var hotSel=0, inv={}; var FREE_BUILD=true;
+function buildHotbar(){var hb=document.getElementById('hotbar');hb.innerHTML='';
+  for(var i=0;i<HOT.length;i++){var s=document.createElement('div');s.className='slot'+(i===hotSel?' sel':'');
+    s.innerHTML='<span class="ic">'+HOT[i].ic+'</span><span class="cnt">'+(inv[HOT[i].id]||0)+'</span>';
+    (function(idx){s.addEventListener('click',function(){hotSel=idx;buildHotbar();});
+      s.addEventListener('touchstart',function(e){hotSel=idx;buildHotbar();e.preventDefault();},{passive:false});})(i);
+    hb.appendChild(s);}}
+window.addEventListener('keydown',function(e){var n=parseInt(e.key,10);if(n>=1&&n<=HOT.length){hotSel=n-1;buildHotbar();}});
+buildHotbar();
+
+function lookDir(){var cp=Math.cos(player.pitch),sp2=Math.sin(player.pitch),sy=Math.sin(player.yaw),cy=Math.cos(player.yaw);
+  return {x:sy*cp,y:sp2,z:cy*cp};}
+
+/* 現在装備中の道具(ホットバーの道具スロット由来)。今は素手のみ→将来クラフトで拡張 */
+var equippedTool='hand';
+var tools={}; /* axe/pick/shovel/spear → true */
+/* 採掘の進行状態 */
+var mining={active:false,x:0,y:0,z:0,prog:0,need:0};
+
+/* 視線上で一番近いモブを拾う(球との交差近似) */
+function pickMob(maxDist){
+  var d=lookDir(); var ox=player.x,oy=player.y+player.eye,oz=player.z;
+  var best=-1,bestT=maxDist;
+  for(var i=0;i<mobs.length;i++){
+    var m=mobs[i];
+    var cx=m.x-ox, cy=(m.y+m.size*0.5)-oy, cz=m.z-oz;
+    var t=cx*d.x+cy*d.y+cz*d.z; if(t<0||t>bestT)continue;
+    var px=ox+d.x*t,py=oy+d.y*t,pz=oz+d.z*t;
+    var dd=Math.hypot(m.x-px,(m.y+m.size*0.5)-py,m.z-pz);
+    var r=Math.max(0.5,m.size*0.5);
+    if(dd<r){ best=i; bestT=t; }
+  }
+  return best;
+}
+
+/* 破壊/設置/攻撃の起点。destroy=true時はまずモブ攻撃を試す */
+function doAction(destroy){
+  if(!running)return;
+  if(destroy){
+    /* モブが照準内なら殴る */
+    var mi=pickMob(4);
+    if(mi>=0){ hitMob(mi); return; }
+    /* でなければ採掘開始(長押しで進む) */
+    startMining();
+  } else {
+    placeBlock();
+  }
+}
+function startMining(){
+  var d=lookDir();
+  var rc=E.raycast(world,player.x,player.y+player.eye,player.z,d.x,d.y,d.z,6);
+  if(!rc.hit){ mining.active=false; return; }
+  var need=C.mineSeconds(rc.block,equippedTool);
+  if(!isFinite(need)){ toast('壊せない'); mining.active=false; return; }
+  if(mining.active && mining.x===rc.x && mining.y===rc.y && mining.z===rc.z){ return; } /* 継続 */
+  mining={active:true,x:rc.x,y:rc.y,z:rc.z,prog:0,need:need,block:rc.block};
+}
+function placeBlock(){
+  var d=lookDir();
+  var rc=E.raycast(world,player.x,player.y+player.eye,player.z,d.x,d.y,d.z,6);
+  if(!rc.hit)return;
+  var nx=rc.x+rc.face[0],ny=rc.y+rc.face[1],nz=rc.z+rc.face[2],id=HOT[hotSel].id;
+  if((inv[id]||0)<=0&&!FREE_BUILD)return;
+  if(!overlapsPlayer(nx,ny,nz)){world.setBlock(nx,ny,nz,id);if(!FREE_BUILD){inv[id]--;buildHotbar();}}
+}
+/* 毎フレーム呼ぶ: 採掘の進行 */
+function tickMining(dt){
+  if(!mining.active)return;
+  if(!miningHeld){ mining.active=false; return; }
+  /* 照準が外れたら中断 */
+  var d=lookDir();
+  var rc=E.raycast(world,player.x,player.y+player.eye,player.z,d.x,d.y,d.z,6);
+  if(!rc.hit || rc.x!==mining.x || rc.y!==mining.y || rc.z!==mining.z){ mining.active=false; return; }
+  mining.prog+=dt;
+  if(mining.prog>=mining.need){
+    var b=mining.block;
+    world.setBlock(mining.x,mining.y,mining.z,W.BLOCK.AIR);
+    /* 採れた素材をインベントリへ(葉以外) */
+    if(!isLeaf(b)){ inv[b]=(inv[b]||0)+1; }
+    /* 草・砂利からは繊維/石のかけらが採れる(縄文の素材集め) */
+    if(b===W.BLOCK.GRASS){ addItem(C.DROP_FIBER,'草の繊維',1); }
+    if(b===W.BLOCK.GRAVEL && Math.random()<0.4){ addItem(W.BLOCK.STONE,'石',1); }
+    buildHotbar();
+    mining.active=false;
+  }
+}
+function isLeaf(b){return b===W.BLOCK.OAK_LEAF||b===W.BLOCK.CHESTNUT_LEAF||b===W.BLOCK.BEECH_LEAF||b===W.BLOCK.CEDAR_LEAF;}
+
+/* モブを攻撃 */
+function hitMob(i){
+  var m=mobs[i];
+  if(m.hp===undefined) m.hp=C.mobMaxHP(m.spec);
+  m.hp-=C.attackDamage(tools); /* 素手22 / 石槍は強い */
+  m.hurt=0.2;               /* 点滅用 */
+  /* 攻撃されたら逃げ/反撃の気を強める */
+  m.heading=Math.atan2(m.z-player.z, m.x-player.x);
+  if(m.hp<=0){
+    var dp=C.dropOf(m.spec);
+    addItem(dp.item, dp.label, dp.n||1);
+    if(dp.hide) addItem(C.DROP_HIDE,'皮',1);
+    if(dp.bone) addItem(C.DROP_BONE,'骨',1);
+    if(!dexSeenA[m.spec]){ dexSeenA[m.spec]=1; }
+    toast(m.name+'を仕留めた');
+    mobs.splice(i,1);
+  }
+}
+
+/* 素材インベントリ(ブロック以外の擬似ID含む) */
+var items={}; /* id -> {label,count} */
+function addItem(id,label,n){ if(!items[id])items[id]={label:label,count:0}; items[id].count+=n; updateItemBar(); }
+function eatBest(){
+  /* 食べられる物のうち一番回復が大きいものを食う */
+  var bestId=-1,bestV=0;
+  for(var id in items){ if(items[id].count<=0)continue; var v=C.foodValue(+id); if(v>bestV){bestV=v;bestId=+id;} }
+  if(bestId<0){ toast('食べ物がない'); return; }
+  items[bestId].count--;
+  state.food=Math.min(100, state.food+bestV);
+  toast(items[bestId].label+'を食べた (+'+bestV+')');
+  updateItemBar();
+}
+function updateItemBar(){
+  var el=document.getElementById('itembar'); if(!el)return;
+  var parts=[];
+  var names={}; names[C.DROP_MEAT]='肉🍖';names[C.DROP_FISH]='魚🐟';names[C.DROP_SHELL]='貝';
+  names[C.DROP_HIDE]='皮';names[C.DROP_BONE]='骨';names[C.DROP_FIBER]='繊維';
+  for(var id in items){ if(items[id].count>0) parts.push((names[id]||items[id].label)+'×'+items[id].count); }
+  el.textContent=parts.join('  ');
+}
+
+function overlapsPlayer(x,y,z){return (player.x+player.w/2>x&&player.x-player.w/2<x+1&&
+  player.y+player.h>y&&player.y<y+1&&player.z+player.w/2>z&&player.z-player.w/2<z+1);}
+
+var mobs=[]; var MOB_CAP=26; var spawnTimer=0;
+function updateMobs(dt){
+  spawnTimer-=dt;
+  if(spawnTimer<=0 && mobs.length<MOB_CAP){
+    var m=C.trySpawn(gen,player.x,player.z,function(){return Math.random();});
+    if(m) mobs.push(m);
+    spawnTimer=0.5;
+  }
+  for(var i=mobs.length-1;i>=0;i--){
+    var m=mobs[i];
+    var dx=m.x-player.x, dz=m.z-player.z, dist=Math.hypot(dx,dz);
+    if(dist>90){ mobs.splice(i,1); continue; }
+    C.stepMob(m,gen,dt,player.x,player.y,player.z);
+    if(m.hurt>0) m.hurt-=dt;
+    if(m.danger>0 && dist<1.4){ state.hp=Math.max(0, state.hp - m.danger*8*dt); }
+    if(dist<28 && !dexSeenA[m.spec]){ dexSeenA[m.spec]=1; toast('図鑑に記録: '+m.name); }
+  }
+}
+
+function plantSpeciesAt(x,z,biome){
+  var hsh=C.hstr(x+":"+z+":pl");
+  var cands=[];
+  for(var i=0;i<C.PLANTS.length;i++){ if(C.PLANTS[i][2].indexOf(biome)>=0 && C.PLANTS[i][1]!=='木') cands.push(i); }
+  if(cands.length===0) return -1;
+  return cands[hsh % cands.length];
+}
+
+function drawTexTri(img,x0,y0,x1,y1,x2,y2,u0,v0,u1,v1,u2,v2){
+  ctx.save();ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.lineTo(x2,y2);ctx.closePath();ctx.clip();
+  u1-=u0;v1-=v0;u2-=u0;v2-=v0;x1-=x0;y1-=y0;x2-=x0;y2-=y0;
+  var det=u1*v2-u2*v1;if(det===0){ctx.restore();return;}
+  var a=(v2*x1-v1*x2)/det,b=(v2*y1-v1*y2)/det,c=(u1*x2-u2*x1)/det,d=(u1*y2-u2*y1)/det;
+  ctx.transform(a,b,c,d, x0-a*u0-c*v0, y0-b*u0-d*v0);
+  ctx.drawImage(img,0,0);ctx.restore();
+}
+function faceTexKind(fi){ return fi===0?'top':(fi===1?'bottom':'side'); }
+/* 直前面で多角形を切る(Sutherland-Hodgman, 1平面)。頂点=[camx,camy,camz,u,v] */
+var NEAR=0.12;
+function clipNear(poly){
+  var out=[],n=poly.length;
+  for(var i=0;i<n;i++){
+    var a=poly[i], b=poly[(i+1)%n];
+    var aIn=a[2]>=NEAR, bIn=b[2]>=NEAR;
+    if(aIn) out.push(a);
+    if(aIn!==bIn){
+      var t=(NEAR-a[2])/(b[2]-a[2]);
+      out.push([a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, NEAR, a[3]+(b[3]-a[3])*t, a[4]+(b[4]-a[4])*t]);
+    }
+  }
+  return out;
+}
+var UVC=[[0,0],[1,0],[1,1],[0,1]];
+
+function render(){
+  var daylight=skyLight(state.time); paintSky(daylight);
+  var cp=Math.cos(player.pitch),sp2=Math.sin(player.pitch),cy=Math.cos(player.yaw),sy=Math.sin(player.yaw);
+  var ex=player.x, ey=player.y+player.eye, ez=player.z;
+  var fx=sy*cp,fy=sp2,fz=cy*cp;
+  var rx=fz,ry=0,rz=-fx; var rl=Math.hypot(rx,rz)||1; rx/=rl;rz/=rl;
+  var ux=fy*rz-fz*ry, uy=fz*rx-fx*rz, uz=fx*ry-fy*rx;
+  var f2=1/Math.tan(FOV/2), aspect=VW/VH;
+  var RAD=renderDist, VRAD=Math.min(13,renderDist), TEX_DIST=7.5;
+  var sky=skyColor(daylight);
+  var draws=[];
+
+  var faces=E.collectFaces(world,player.x,player.y,player.z,RAD,VRAD);
+  var FACES=E.FACES;
+  for(var i=0;i<faces.length;i++){
+    var fc=faces[i], fdef=FACES[fc.fi];
+    var dot=fdef.n[0]*fx+fdef.n[1]*fy+fdef.n[2]*fz; if(dot>0) continue; /* 背面 */
+    /* 中心の深度(ソート鍵)と距離カリング */
+    var cxw=fc.x+0.5+fdef.n[0]*0.5, cyw=fc.y+0.5+fdef.n[1]*0.5, czw=fc.z+0.5+fdef.n[2]*0.5;
+    var ddx=cxw-ex,ddy=cyw-ey,ddz=czw-ez;
+    var rcz=ddx*fx+ddy*fy+ddz*fz;
+    var distC=Math.sqrt(ddx*ddx+ddy*ddy+ddz*ddz);
+    if(distC>RAD+1.5) continue;
+    /* 4隅をカメラ空間へ */
+    var poly=[];
+    for(var v=0;v<4;v++){var vv=fdef.v[v];var dx=fc.x+vv[0]-ex,dy=fc.y+vv[1]-ey,dz=fc.z+vv[2]-ez;
+      poly.push([dx*rx+dy*ry+dz*rz, dx*ux+dy*uy+dz*uz, dx*fx+dy*fy+dz*fz, UVC[v][0], UVC[v][1]]);}
+    /* 直前面で切る → 透けが消える */
+    var cl=clipNear(poly); if(cl.length<3) continue;
+    var spts=[],suvs=[];
+    for(var c2=0;c2<cl.length;c2++){var p=cl[c2];
+      spts.push([(p[0]*f2/aspect/p[2]*0.5+0.5)*VW, (-p[1]*f2/p[2]*0.5+0.5)*VH]);
+      suvs.push([p[3],p[4]]);}
+    draws.push({t:0, z:rcz, spts:spts, suvs:suvs, block:fc.block, fi:fc.fi, sh:fdef.shade, dl:daylight, sky:sky, rad:RAD, texd:TEX_DIST, dist:distC});
+  }
+
+  var pr=Math.min(10,RAD);
+  for(var px=Math.floor(player.x-pr);px<=player.x+pr;px++){
+    for(var pz=Math.floor(player.z-pr);pz<=player.z+pr;pz++){
+      var feat=gen.surfaceFeature(px,pz); if(!feat || feat.type==='tree') continue;
+      var col=gen.columnAt(px,pz);
+      var spIdx=plantSpeciesAt(px,pz,col.biome); if(spIdx<0) continue;
+      var bx=px+0.5, bz=pz+0.5;
+      var dx=bx-ex,dy=(col.height+1)-ey,dz=bz-ez; var cz=dx*fx+dy*fy+dz*fz;
+      if(cz<NEAR||cz>pr) continue;
+      var sx=(dx*rx+dy*ry+dz*rz)*f2/aspect/cz*0.5+0.5;
+      var h=C.PLANTS[spIdx][3]; if(h<0.1)h=0.3; if(h>3)h=3;
+      var topY=(-(((bx-ex)*ux+((col.height+1+h)-ey)*uy+(bz-ez)*uz))*f2/cz*0.5+0.5)*VH;
+      var botY=(-(((bx-ex)*ux+((col.height+1)-ey)*uy+(bz-ez)*uz))*f2/cz*0.5+0.5)*VH;
+      var ph=Math.abs(botY-topY);
+      if(ph<1.5||ph>VH*1.5) continue;
+      draws.push({t:2, z:cz, img:PLSPRC[spIdx], cx:sx*VW, top:Math.min(topY,botY), w:ph, h:ph, dl:daylight});
+      if(cz<10 && !dexSeenP[spIdx]){ dexSeenP[spIdx]=1; toast('図鑑に記録: '+C.PLANTS[spIdx][0]); }
+    }
+  }
+
+  for(i=0;i<mobs.length;i++){
+    var m=mobs[i]; var dx2=m.x-ex,dy2=m.y-ey,dz2=m.z-ez; var cz2=dx2*fx+dy2*fy+dz2*fz;
+    if(cz2<NEAR||cz2>RAD+6) continue;
+    var sxc=(dx2*rx+dy2*ry+dz2*rz)*f2/aspect/cz2*0.5+0.5;
+    if(sxc<-0.3||sxc>1.3) continue;
+    var topY2=(-(((m.x-ex)*ux+((m.y+m.size)-ey)*uy+(m.z-ez)*uz))*f2/cz2*0.5+0.5)*VH;
+    var botY2=(-(((m.x-ex)*ux+(m.y-ey)*uy+(m.z-ez)*uz))*f2/cz2*0.5+0.5)*VH;
+    var mh=Math.abs(botY2-topY2); var img=SPRC[m.spec]; var mw=mh*(img.width/img.height);
+    if(mh<1||mh>VH*2) continue;
+    draws.push({t:1, z:cz2, img:img, cx:sxc*VW, top:Math.min(topY2,botY2), w:mw, h:mh, dl:daylight, heading:m.heading, yaw:player.yaw, hurt:(m.hurt>0)});
+  }
+
+  collectFar(draws, ex,ey,ez, fx,fy,fz, rx,ry,rz, ux,uy,uz, f2,aspect, Math.max(6,RAD-2), sky);
+
+  draws.sort(function(a,b){return b.z-a.z;});
+  for(i=0;i<draws.length;i++){ var d=draws[i]; if(d.t===0) drawFace(d); else if(d.t===3) drawFar(d); else drawBillboard(d); }
+  highlightTarget(ex,ey,ez,fx,fy,fz,rx,ry,rz,ux,uy,uz,f2,aspect);
+  lastDrawCount=draws.length;
+}
+
+/* ============================================================
+   遠景地形 ── 高さマップを粗グリッドでサンプルし低ポリ面に。
+   近景ブロックの外側から地平線まで。遠いほど粗く(LOD)、霧で溶かす。
+   毎フレーム数千の単純塗りで地平線まで見通せる。
+============================================================ */
+function biomeFarColor(b,height){
+  switch(b){
+    case W.BIOME.OCEAN: return [54,92,150];
+    case W.BIOME.BEACH: return [206,194,154];
+    case W.BIOME.LAUREL: return [70,104,58];
+    case W.BIOME.NARA: return [96,120,64];
+    case W.BIOME.SUBALPINE: return height>90?[226,230,236]:[110,128,96];
+    case W.BIOME.WETLAND: return [120,134,96];
+    case W.BIOME.HIGHMOUNT: return [120,116,110];
+    default: return [90,116,70];
+  }
+}
+function collectFar(draws, ex,ey,ez, fx,fy,fz, rx,ry,rz, ux,uy,uz, f2,aspect, startR, sky){
+  /* LODリング: [内,外,刻み] */
+  var rings=[[startR, startR+24, 3],[startR+24, startR+56, 6],[startR+56, farDist, 12]];
+  var SEA=gen.SEA_LEVEL;
+  for(var ri=0;ri<rings.length;ri++){
+    var r0=rings[ri][0], r1=rings[ri][1], st=rings[ri][2];
+    if(r1<=r0) continue;
+    var gx0=Math.floor((ex-r1)/st)*st, gx1=Math.ceil((ex+r1)/st)*st;
+    var gz0=Math.floor((ez-r1)/st)*st, gz1=Math.ceil((ez+r1)/st)*st;
+    for(var gx=gx0; gx<=gx1; gx+=st){
+      var ddx=gx+st*0.5-ex;
+      for(var gz=gz0; gz<=gz1; gz+=st){
+        var ddz=gz+st*0.5-ez;
+        var d2=ddx*ddx+ddz*ddz;
+        if(d2 < r0*r0 || d2 > r1*r1) continue;          /* リング帯の外 */
+        /* 視野方向の粗いカリング(背後は捨てる) */
+        if(ddx*fx+ddz*fz < -st) continue;
+        /* 4隅の高さ */
+        var h00=gen.heightAt(gx,gz), h10=gen.heightAt(gx+st,gz), h11=gen.heightAt(gx+st,gz+st), h01=gen.heightAt(gx,gz+st);
+        var col=gen.columnAt(gx+(st>>1),gz+(st>>1));
+        var water = col.biome===W.BIOME.OCEAN;
+        var y00=water?SEA:h00, y10=water?SEA:h10, y11=water?SEA:h11, y01=water?SEA:h01;
+        var corners=[[gx,y00,gz],[gx+st,y10,gz],[gx+st,y11,gz+st],[gx,y11?y01:y01,gz+st]];
+        corners[3][1]=y01;
+        /* カメラ空間へ + ニアクリップ */
+        var poly=[];
+        for(var v=0;v<4;v++){var c=corners[v];var dx=c[0]-ex,dy=c[1]-ey,dz=c[2]-ez;
+          poly.push([dx*rx+dy*ry+dz*rz, dx*ux+dy*uy+dz*uz, dx*fx+dy*fy+dz*fz, 0,0]);}
+        var cl=clipNear(poly); if(cl.length<3) continue;
+        var spts=[],minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9,sumz=0;
+        for(var q=0;q<cl.length;q++){var p=cl[q];
+          var sx=(p[0]*f2/aspect/p[2]*0.5+0.5)*VW, sy=(-p[1]*f2/p[2]*0.5+0.5)*VH;
+          spts.push([sx,sy]); if(sx<minx)minx=sx; if(sx>maxx)maxx=sx; if(sy<miny)miny=sy; if(sy>maxy)maxy=sy; sumz+=p[2];}
+        if(maxx<0||minx>VW||maxy<0||miny>VH) continue;   /* 画面外 */
+        var dist=Math.sqrt(d2);
+        var base=biomeFarColor(col.biome, col.height);
+        draws.push({t:3, z:sumz/cl.length+0.5, spts:spts, col:base, dist:dist, sky:sky});
+      }
+    }
+  }
+}
+function drawFar(d){
+  var fog=Math.min(0.92, Math.max(0,(d.dist-farFogStart)/(farDist-farFogStart)));
+  var lt=0.62 + 0.38*Math.max(0, Math.min(1,(d.col[1])/150)); /* 緑が明るいほどやや明るく(簡易) */
+  var dl=skyLight(state.time);
+  var r=d.col[0]*dl, g=d.col[1]*dl, b=d.col[2]*dl;
+  r=r*(1-fog)+d.sky[0]*fog; g=g*(1-fog)+d.sky[1]*fog; b=b*(1-fog)+d.sky[2]*fog;
+  var p=d.spts; ctx.beginPath();ctx.moveTo(p[0][0],p[0][1]);
+  for(var i=1;i<p.length;i++)ctx.lineTo(p[i][0],p[i][1]); ctx.closePath();
+  ctx.fillStyle='rgb('+(r|0)+','+(g|0)+','+(b|0)+')'; ctx.fill();
+}
+
+function polyPath(p){ ctx.beginPath();ctx.moveTo(p[0][0],p[0][1]);for(var i=1;i<p.length;i++)ctx.lineTo(p[i][0],p[i][1]);ctx.closePath(); }
+function drawFace(d){
+  var p=d.spts, n=p.length;
+  var fog=Math.min(1, Math.max(0,(d.dist-(d.rad*0.45))/(d.rad*0.6)));
+  if(d.dist<d.texd && TEXC[d.block] && d.block!==W.BLOCK.WATER){
+    var img=TEXC[d.block][faceTexKind(d.fi)]||TEXC[d.block].side;
+    var TW=img.width-0.01, TH=img.height-0.01;
+    /* 切られた多角形を扇状に三角形分割してテクスチャを貼る(UVも補間済) */
+    for(var k=1;k<n-1;k++){
+      var u0=d.suvs[0],u1=d.suvs[k],u2=d.suvs[k+1];
+      drawTexTri(img, p[0][0],p[0][1], p[k][0],p[k][1], p[k+1][0],p[k+1][1],
+        u0[0]*TW,u0[1]*TH, u1[0]*TW,u1[1]*TH, u2[0]*TW,u2[1]*TH);
+    }
+    var lt=d.dl*d.sh;
+    if(lt<1){ polyPath(p); ctx.globalAlpha=(1-lt)*0.55; ctx.fillStyle='#000'; ctx.fill(); ctx.globalAlpha=1; }
+    if(fog>0.02){ polyPath(p); ctx.globalAlpha=fog; ctx.fillStyle='rgb('+(d.sky[0]|0)+','+(d.sky[1]|0)+','+(d.sky[2]|0)+')'; ctx.fill(); ctx.globalAlpha=1; }
+  } else {
+    var col=E.colorOf(d.block), lt2=d.dl*d.sh;
+    var r=col[0]*lt2,g=col[1]*lt2,b=col[2]*lt2;
+    r=r*(1-fog)+d.sky[0]*fog; g=g*(1-fog)+d.sky[1]*fog; b=b*(1-fog)+d.sky[2]*fog;
+    polyPath(p);
+    var al=(d.block===W.BLOCK.WATER)?0.74:1;
+    if(al<1)ctx.globalAlpha=al;
+    ctx.fillStyle='rgb('+(r|0)+','+(g|0)+','+(b|0)+')'; ctx.fill();
+    ctx.globalAlpha=1;
+  }
+}
+function drawBillboard(d){
+  var img=d.img, w=d.w, h=d.h, x=d.cx-w/2, y=d.top;
+  ctx.save();
+  if(d.t===1){
+    var rel=Math.atan2(Math.sin(d.heading-d.yaw),Math.cos(d.heading-d.yaw));
+    if(rel<0){ ctx.translate(d.cx,0); ctx.scale(-1,1); ctx.translate(-d.cx,0); }
+  }
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(img,x,y,w,h);
+  if(d.hurt){ ctx.globalAlpha=0.5; ctx.globalCompositeOperation='source-atop';
+    ctx.fillStyle='#f33'; ctx.fillRect(x,y,w,h);
+    ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=1; }
+  if(d.dl<0.95){
+    ctx.globalAlpha=(1-d.dl)*0.7; ctx.globalCompositeOperation='source-atop';
+    ctx.fillStyle='#001'; ctx.fillRect(x,y,w,h);
+    ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=1;
+  }
+  ctx.restore();
+}
+function highlightTarget(ex,ey,ez,fx,fy,fz,rx,ry,rz,ux,uy,uz,f2,aspect){
+  var d=lookDir();var rc=E.raycast(world,ex,ey,ez,d.x,d.y,d.z,6);if(!rc.hit)return;
+  var corners=[[0,0,0],[1,0,0],[1,0,1],[0,0,1],[0,1,0],[1,1,0],[1,1,1],[0,1,1]],pr=[];
+  for(var i=0;i<8;i++){var wx=rc.x+corners[i][0],wy=rc.y+corners[i][1],wz=rc.z+corners[i][2];
+    var dx=wx-ex,dy=wy-ey,dz=wz-ez,cz=dx*fx+dy*fy+dz*fz;if(cz<0.05){pr.push(null);continue;}
+    pr.push([((dx*rx+dy*ry+dz*rz)*f2/aspect/cz*0.5+0.5)*VW,((-(dx*ux+dy*uy+dz*uz))*f2/cz*0.5+0.5)*VH]);}
+  var edges=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=1.5;ctx.beginPath();
+  for(i=0;i<edges.length;i++){var a=pr[edges[i][0]],b=pr[edges[i][1]];if(!a||!b)continue;ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);}
+  ctx.stroke();
+}
+
+function skyLight(t){var x=Math.sin(t*Math.PI*2-Math.PI/2);return 0.28+0.72*Math.max(0,(x+1)/2);}
+function skyColor(l){var n=[18,22,40],day=[135,178,222];return [n[0]+(day[0]-n[0])*l,n[1]+(day[1]-n[1])*l,n[2]+(day[2]-n[2])*l];}
+function paintSky(l){var s=skyColor(l);var g=ctx.createLinearGradient(0,0,0,VH);
+  g.addColorStop(0,'rgb('+(s[0]|0)+','+(s[1]|0)+','+(s[2]|0)+')');
+  g.addColorStop(0.62,'rgb('+(Math.min(255,s[0]*1.1+18)|0)+','+(Math.min(255,s[1]*1.05+16)|0)+','+(Math.min(255,s[2]*0.95+8)|0)+')');
+  g.addColorStop(1,'rgb('+(s[0]*0.7|0)+','+(s[1]*0.7|0)+','+(s[2]*0.7|0)+')');
+  ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);}
+
+var lastDrawCount=0,lastT=0,fps=0,acc=0,frames=0;
+function loop(ts){
+  if(!running)return;
+  var dt=(ts-lastT)/1000;lastT=ts;if(dt>0.1)dt=0.1;
+  E.stepPhysics(world,player,dt,inp

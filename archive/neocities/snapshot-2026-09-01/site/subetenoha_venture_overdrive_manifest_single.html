@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>すべての歯が見える｜Oracle Venture OS</title>
+<meta name="description" content="霊感、診断、都市採集、遊戯、苦情、観測記録を接続する民間オラクル・インターフェイス。">
+<meta name="theme-color" content="#05030d">
+<meta property="og:title" content="すべての歯が見える｜Oracle Venture OS">
+<meta property="og:description" content="未分類の不安と違和感を、診断・記録・遊戯・交信へ変換する実験的ブランドOS。">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#05030d;
+    --bg2:#0b0619;
+    --ink:#fffaf2;
+    --muted:#b8adc8;
+    --dim:#746a86;
+    --line:rgba(255,255,255,.16);
+    --line2:rgba(255,255,255,.08);
+    --glass:rgba(255,255,255,.075);
+    --glass2:rgba(255,255,255,.115);
+    --black:#030207;
+    --acid:#cfff2e;
+    --mint:#54ffd8;
+    --cyan:#6bdcff;
+    --blue:#5266ff;
+    --violet:#a15cff;
+    --pink:#ff4cc9;
+    --red:#ff3737;
+    --gold:#ffe08b;
+    --shadow:0 32px 140px rgba(0,0,0,.52);
+    --sans:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;
+    --serif:"Yu Mincho","Hiragino Mincho ProN","Shippori Mincho",serif;
+    --mono:"SFMono-Regular","Cascadia Code","IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+    --radius:32px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;background:var(--bg);color:var(--ink);font-family:var(--sans);}
+  body{min-height:100%;overflow-x:hidden;background:
+    radial-gradient(circle at 14% 8%,rgba(255,76,201,.28),transparent 32rem),
+    radial-gradient(circle at 92% 0%,rgba(84,255,216,.18),transparent 30rem),
+    radial-gradient(circle at 46% 42%,rgba(82,102,255,.18),transparent 40rem),
+    linear-gradient(180deg,#05030d 0%,#0a0618 40%,#04030a 100%);
+  }
+  body::before{content:"";position:fixed;inset:0;z-index:-5;pointer-events:none;background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+    background-size:54px 54px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.95),rgba(0,0,0,.55) 62%,transparent 100%);}
+  body::after{content:"";position:fixed;inset:0;z-index:-3;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.68'/%3E%3C/svg%3E");mix-blend-mode:screen;}
+  a{color:inherit;text-decoration:none}
+  button,input,select,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+  ::selection{background:var(--acid);color:#05030d}
+  #field{position:fixed;inset:0;z-index:-4;pointer-events:none;opacity:.9}
+  .aura{position:fixed;width:360px;height:360px;border-radius:999px;left:0;top:0;transform:translate(-50%,-50%);z-index:-2;pointer-events:none;background:radial-gradient(circle,rgba(84,255,216,.16),rgba(255,76,201,.10) 38%,transparent 70%);filter:blur(8px);opacity:.0;transition:opacity .35s ease}
+  body.pointer .aura{opacity:1}
+  .progress{position:fixed;left:0;top:0;height:3px;width:0;background:linear-gradient(90deg,var(--pink),var(--cyan),var(--acid));box-shadow:0 0 26px rgba(84,255,216,.8);z-index:200}
+  .shell{width:min(1220px,calc(100vw - 32px));margin:0 auto}
+  .nav{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:100;width:min(1220px,calc(100vw - 24px));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px;border:1px solid var(--line);border-radius:999px;background:rgba(5,3,13,.54);backdrop-filter:blur(24px) saturate(1.35);box-shadow:0 18px 80px rgba(0,0,0,.34)}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0;padding-left:6px}
+  .brand-mark{width:38px;height:38px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--acid),var(--mint) 38%,var(--pink));color:#05030d;font-family:var(--serif);font-weight:900;box-shadow:0 0 34px rgba(84,255,216,.32);position:relative;overflow:hidden}
+  .brand-mark::after{content:"";position:absolute;inset:-50%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent);transform:rotate(35deg) translateX(-80%);animation:shine 5.8s ease-in-out infinite}
+  @keyframes shine{40%,100%{transform:rotate(35deg) translateX(80%)}}
+  .brand-copy{min-width:0;line-height:1.05}.brand-copy b{font-family:var(--serif);font-size:.95rem;letter-spacing:.05em;white-space:nowrap}.brand-copy span{display:block;font-family:var(--mono);font-size:.54rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);white-space:nowrap;margin-top:3px}
+  .navlinks{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end}.navlinks a,.navlinks button{border:1px solid transparent;border-radius:999px;background:transparent;color:var(--muted);font-family:var(--mono);font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;padding:10px 12px;transition:.22s ease;white-space:nowrap}.navlinks a:hover,.navlinks button:hover{color:var(--ink);border-color:var(--line);background:rgba(255,255,255,.08)}.navlinks .cta{background:var(--ink);color:#05030d;border-color:var(--ink);font-weight:900}
+  .tickerbar{position:fixed;left:0;right:0;top:78px;z-index:80;border-block:1px solid rgba(255,255,255,.08);background:rgba(5,3,13,.28);backdrop-filter:blur(14px);overflow:hidden;height:34px;display:flex;align-items:center;mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+  .tickerbar span{display:inline-flex;gap:24px;white-space:nowrap;font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;animation:runline 34s linear infinite}.tickerbar i{font-style:normal;color:var(--acid)}@keyframes runline{to{transform:translateX(-50%)}}
+  section{position:relative;padding:110px 0}.hero{min-height:100svh;display:grid;align-items:center;padding-top:148px;padding-bottom:70px}.hero-grid{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(360px,.96fr);gap:28px;align-items:stretch}.kicker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:26px}.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:9px 12px;background:rgba(255,255,255,.065);backdrop-filter:blur(10px);font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase}.live-dot{width:8px;height:8px;border-radius:50%;background:var(--acid);box-shadow:0 0 20px var(--acid);animation:pulse 1.6s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.75);opacity:.42}}
+  h1{font-size:clamp(3.4rem,11.6vw,10.5rem);line-height:.8;letter-spacing:-.105em;font-weight:1000;margin-left:-.075em;max-width:980px}.h-ja{display:block;font-family:var(--serif);font-weight:800;letter-spacing:-.09em}.h-grad{display:inline-block;background:linear-gradient(95deg,#fff 0%,#b9b4ff 20%,var(--cyan) 38%,var(--acid) 58%,var(--pink) 80%,#fff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 30px rgba(84,255,216,.18));animation:hue 10s linear infinite}@keyframes hue{to{filter:hue-rotate(360deg) drop-shadow(0 0 30px rgba(84,255,216,.18))}}
+  .subcopy{margin-top:32px;max-width:790px;font-family:var(--serif);font-size:clamp(1.05rem,2.35vw,1.55rem);line-height:1.9;color:#e4deea;letter-spacing:.04em}.subcopy strong{font-weight:900;color:#fff;text-decoration:underline;text-decoration-color:rgba(207,255,46,.65);text-decoration-thickness:.18em;text-underline-offset:.12em}.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:36px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:15px 18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.08);font-family:var(--mono);font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink);box-shadow:0 16px 70px rgba(0,0,0,.22);transition:.24s ease}.btn:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.34);background:rgba(255,255,255,.13)}.btn.primary{background:linear-gradient(135deg,var(--acid),#fff0a4);color:#05030d;border-color:rgba(255,255,255,.5);font-weight:1000}.btn.hot{background:linear-gradient(135deg,var(--pink),var(--blue));color:#fff;font-weight:900}
+  .hero-system{position:relative;min-height:610px;border:1px solid var(--line);border-radius:42px;background:linear-gradient(150deg,rgba(255,255,255,.13),rgba(255,255,255,.045));backdrop-filter:blur(28px) saturate(1.25);box-shadow:var(--shadow);overflow:hidden;transform-style:preserve-3d}.hero-system::before{content:"";position:absolute;inset:-1px;background:radial-gradient(circle at var(--mx,55%) var(--my,32%),rgba(255,255,255,.36),transparent 16rem),linear-gradient(135deg,rgba(207,255,46,.15),transparent 42%,rgba(255,76,201,.16));pointer-events:none}.hero-system::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.038),rgba(255,255,255,.038) 1px,transparent 1px,transparent 8px);mix-blend-mode:screen;opacity:.55;pointer-events:none}.sys-inner{position:relative;z-index:2;padding:24px;height:100%;display:flex;flex-direction:column;gap:16px}.sys-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.sys-label{font-family:var(--mono);font-size:.62rem;line-height:1.65;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}.eye-core{width:146px;height:146px;flex:0 0 auto;border-radius:38px;background:radial-gradient(circle at 42% 36%,#fff 0 7%,var(--mint) 10%,var(--pink) 28%,transparent 60%),conic-gradient(from 180deg,var(--acid),var(--cyan),var(--blue),var(--pink),var(--acid));box-shadow:0 0 70px rgba(255,76,201,.36);position:relative;animation:float 7s ease-in-out infinite}.eye-core::before{content:"";position:absolute;inset:26%;border-radius:50%;background:rgba(2,2,8,.78);box-shadow:inset 0 0 20px rgba(255,255,255,.35),0 0 20px rgba(255,255,255,.14)}.eye-core::after{content:"";position:absolute;left:50%;top:50%;width:26%;height:26%;border-radius:50%;transform:translate(-50%,-50%);background:#05030d;box-shadow:0 0 0 1px rgba(255,255,255,.35),0 0 18px rgba(84,255,216,.7)}@keyframes float{50%{transform:translateY(16px) rotate(8deg)}}.terminal{border:1px solid var(--line);border-radius:26px;background:rgba(2,1,7,.72);padding:18px;font-family:var(--mono);box-shadow:inset 0 0 34px rgba(255,255,255,.035)}.terminal p{font-size:.68rem;line-height:1.85;color:#e6dff2}.terminal em{font-style:normal;color:var(--acid)}.terminal code{color:var(--cyan)}.sys-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto}.metric{border:1px solid var(--line2);border-radius:22px;padding:16px;background:rgba(0,0,0,.25);position:relative;overflow:hidden}.metric::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--pink),var(--cyan),var(--acid))}.metric span{display:block;font-family:var(--mono);font-size:.54rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}.metric b{font-size:clamp(1.55rem,4.6vw,2.7rem);letter-spacing:-.08em}.mini-orbit{position:absolute;inset:auto 24px 24px 24px;height:78px;border:1px solid var(--line2);border-radius:999px;background:rgba(255,255,255,.035);overflow:hidden;display:flex;align-items:center;padding:0 18px}.mini-orbit i{display:block;width:12px;height:12px;border-radius:50%;background:var(--acid);box-shadow:0 0 26px var(--acid);offset-path:path("M 0 38 C 130 0, 260 0, 390 38 S 650 76, 780 38");animation:orbitDot 6s linear infinite}@keyframes orbitDot{to{offset-distance:100%}}
+  .strip{overflow:hidden;border-block:1px solid var(--line);background:rgba(255,255,255,.045);padding:18px 0;white-space:nowrap;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}.strip-track{display:inline-flex;gap:28px;animation:marquee 28s linear infinite}.strip-track b{font-family:var(--mono);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}.strip-track span{color:var(--muted);font-family:var(--serif)}@keyframes marquee{to{transform:translateX(-50%)}}
+  .section-head{display:grid;grid-template-columns:minmax(0,.92fr) minmax(280px,.72fr);gap:26px;align-items:end;margin-bottom:34px}.eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--acid);margin-bottom:12px}.section-head h2{font-size:clamp(2.2rem,7vw,6rem);letter-spacing:-.09em;line-height:.92}.section-head p{font-family:var(--serif);font-size:1.08rem;line-height:1.85;color:#d8d0e6}.bento{display:grid;grid-template-columns:1.1fr .9fr .9fr;gap:14px}.panel{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(150deg,rgba(255,255,255,.105),rgba(255,255,255,.045));box-shadow:0 22px 90px rgba(0,0,0,.25);position:relative;overflow:hidden}.panel::before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle at 30% 10%,rgba(84,255,216,.16),transparent 30%),radial-gradient(circle at 80% 70%,rgba(255,76,201,.13),transparent 32%);opacity:.75;pointer-events:none}.panel>*{position:relative}.module{min-height:360px;padding:26px;display:flex;flex-direction:column;gap:22px;transition:.25s ease}.module:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.26)}.module.large{grid-row:span 2;min-height:734px}.module-tag{display:flex;justify-content:space-between;gap:10px;align-items:center;font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}.module-tag i{font-style:normal;color:var(--acid)}.module h3{font-size:clamp(1.6rem,3.5vw,3.1rem);letter-spacing:-.06em;line-height:1}.module p{color:#d6cfdf;line-height:1.75;font-size:.96rem}.module .glyph{margin-top:auto;font-family:var(--serif);font-size:clamp(6rem,12vw,10rem);line-height:.76;color:rgba(255,255,255,.11);letter-spacing:-.13em}.module .mini{margin-top:auto;display:grid;gap:8px;font-family:var(--mono);font-size:.63rem;color:var(--muted);letter-spacing:.12em}.bar{height:8px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--pink),var(--cyan),var(--acid));width:var(--w,40%);box-shadow:0 0 18px rgba(84,255,216,.42)}.lattice{height:270px;border:1px solid var(--line2);border-radius:28px;background:radial-gradient(circle at 50% 50%,rgba(207,255,46,.12),transparent 36%),repeating-linear-gradient(60deg,rgba(255,255,255,.06) 0 1px,transparent 1px 18px),repeating-linear-gradient(-60deg,rgba(255,255,255,.04) 0 1px,transparent 1px 18px);position:relative;overflow:hidden}.lattice::before{content:"歯 歯 歯 歯 歯 歯 歯 歯";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-12deg);font-family:var(--serif);font-size:clamp(2.4rem,6vw,4.8rem);white-space:nowrap;color:rgba(255,255,255,.16)}.lattice::after{content:"";position:absolute;inset:18%;border:1px dashed rgba(255,255,255,.2);border-radius:50%;animation:spinSlow 28s linear infinite}@keyframes spinSlow{to{transform:rotate(360deg)}}
+  .demo-wrap{display:grid;grid-template-columns:minmax(0,.86fr) minmax(320px,1.14fr);gap:16px}.demo-card{padding:24px}.switches{display:grid;gap:10px}.switches button{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.06);padding:16px;text-align:left;transition:.22s ease}.switches button:hover,.switches button.on{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.3);transform:translateX(4px)}.switches b{display:block;font-family:var(--serif);font-size:1.22rem;margin-bottom:4px}.switches span{font-family:var(--mono);font-size:.61rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}.sense-box{display:grid;gap:14px}.sense-box textarea{width:100%;min-height:128px;resize:vertical;border:1px solid var(--line);border-radius:22px;background:rgba(0,0,0,.28);padding:16px;outline:none;line-height:1.75}.sense-box textarea:focus{border-color:rgba(84,255,216,.5);box-shadow:0 0 0 4px rgba(84,255,216,.08)}.sliders{display:grid;grid-template-columns:1fr 1fr;gap:12px}.slider{border:1px solid var(--line2);border-radius:18px;background:rgba(0,0,0,.22);padding:12px}.slider label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}.slider input{width:100%;accent-color:var(--acid)}.result{border:1px solid var(--line);border-radius:28px;background:rgba(3,2,7,.72);overflow:hidden}.result-top{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:14px 16px;font-family:var(--mono);font-size:.62rem;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}.result-body{padding:20px;display:grid;gap:18px}.result-body h3{font-family:var(--serif);font-size:clamp(1.5rem,4vw,2.35rem);line-height:1.2}.result-body p{line-height:1.85;color:#ddd6e6}.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.gauge{border:1px solid var(--line2);border-radius:20px;padding:12px;background:rgba(255,255,255,.045)}.gauge span{display:block;font-family:var(--mono);font-size:.52rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}.gauge b{font-size:1.6rem;letter-spacing:-.07em}.wave{height:76px;border:1px solid var(--line2);border-radius:20px;background:rgba(255,255,255,.035)}
+  .deck{display:grid;grid-template-columns:1fr;gap:14px}.pitch-card{display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:18px;align-items:center;padding:18px;border:1px solid var(--line);border-radius:28px;background:rgba(255,255,255,.06);transition:.24s ease}.pitch-card:hover{transform:translateY(-3px);background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28)}.num{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;color:var(--acid);text-transform:uppercase}.pitch-card h3{font-size:clamp(1.45rem,3vw,2.35rem);letter-spacing:-.06em}.pitch-card p{color:#d7d0df;line-height:1.7}.arrow{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#05030d;font-weight:900}
+  .culture-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.culture{min-height:290px;padding:24px}.culture::after{content:attr(data-glyph);position:absolute;right:12px;bottom:-20px;font-family:var(--serif);font-size:10rem;color:rgba(255,255,255,.085);line-height:1}.culture b{display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;color:var(--acid);margin-bottom:14px}.culture h3{font-size:1.7rem;letter-spacing:-.05em;margin-bottom:12px}.culture p{color:#d8d0e2;line-height:1.78}
+  .records-wrap{border:1px solid var(--line);border-radius:38px;background:rgba(255,255,255,.055);box-shadow:var(--shadow);overflow:hidden}.records-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:16px;background:rgba(0,0,0,.24)}.filters{display:flex;gap:10px;flex-wrap:wrap}.filters input,.filters select{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.28);padding:12px 13px;outline:none;min-width:142px}.filters input::placeholder{color:var(--dim)}.record-count{font-family:var(--mono);font-size:.66rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase}.records{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line)}.record{min-height:254px;background:rgba(5,3,13,.94);padding:22px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:.24s ease;position:relative;overflow:hidden}.record::before{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--pink),var(--cyan),var(--acid));opacity:0;transition:.24s}.record:hover{background:#111020;transform:translateY(-2px)}.record:hover::before{opacity:1}.record-meta{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}.record h3{font-family:var(--serif);font-size:1.28rem;line-height:1.38}.record p{margin-top:auto;color:#cfc7db;line-height:1.72;font-size:.92rem;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}.load-state{padding:28px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;background:rgba(5,3,13,.92)}
+  .contact-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;padding:34px;border-radius:42px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(255,76,201,.18),rgba(84,255,216,.12),rgba(207,255,46,.08));box-shadow:var(--shadow);overflow:hidden;position:relative}.contact-card::before{content:"";position:absolute;inset:-60%;background:conic-gradient(from 80deg,transparent,rgba(255,255,255,.18),transparent,rgba(255,76,201,.14),transparent);animation:spinSlow 18s linear infinite}.contact-card>*{position:relative}.contact-card h2{font-size:clamp(2rem,7vw,6.6rem);line-height:.9;letter-spacing:-.09em}.contact-card p{font-family:var(--serif);max-width:760px;line-height:1.85;color:#ece7f2;margin-top:18px}.contact-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  .modal{position:fixed;inset:0;z-index:300;display:none;place-items:center;padding:22px;background:rgba(0,0,0,.72);backdrop-filter:blur(18px)}.modal.on{display:grid}.modal-card{width:min(820px,100%);max-height:86svh;overflow:auto;border:1px solid var(--line);border-radius:34px;background:#0b0619;box-shadow:0 42px 160px rgba(0,0,0,.75)}.modal-top{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:16px 18px;font-family:var(--mono);font-size:.66rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase}.modal-close{border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.08);padding:9px 12px}.modal-body{padding:32px}.modal-body h3{font-family:var(--serif);font-size:clamp(1.8rem,5vw,3.2rem);line-height:1.25;margin-bottom:20px}.modal-body p{white-space:pre-wrap;font-family:var(--serif);font-size:1.08rem;line-height:2;color:#e4deeb}.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,26px);z-index:400;opacity:0;pointer-events:none;border:1px solid var(--line);border-radius:999px;background:rgba(5,3,13,.86);backdrop-filter:blur(18px);padding:12px 16px;font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;color:var(--ink);transition:.3s}.toast.on{opacity:1;transform:translate(-50%,0)}.command{position:fixed;right:18px;bottom:18px;z-index:120;display:flex;gap:8px;padding:10px;border:1px solid var(--line);border-radius:24px;background:rgba(5,3,13,.62);backdrop-filter:blur(18px);box-shadow:0 22px 80px rgba(0,0,0,.38)}.command button{width:44px;height:44px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.08);font-size:1.05rem}.command button:hover{background:var(--ink);color:#05030d}.footer{border-top:1px solid var(--line);padding:44px 0 70px;color:var(--muted)}.footer-grid{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end}.footer b{display:block;font-family:var(--serif);font-size:1.6rem;color:var(--ink);margin-bottom:8px}.footer p{line-height:1.7}.footer-links{display:flex;gap:10px;flex-wrap:wrap}.footer-links a{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:10px 12px;background:rgba(255,255,255,.05)}.reveal{opacity:0;transform:translateY(26px);filter:blur(10px);transition:opacity .76s ease,transform .76s ease,filter .76s ease}.reveal.on{opacity:1;transform:none;filter:none}
+  body.paper{--bg:#f5efe4;--bg2:#e8ddcf;--ink:#111019;--muted:#625a6d;--dim:#908797;--line:rgba(15,12,22,.16);--line2:rgba(15,12,22,.08);--glass:rgba(255,255,255,.58);--glass2:rgba(255,255,255,.75);background:radial-gradient(circle at 14% 8%,rgba(255,76,201,.16),transparent 32rem),radial-gradient(circle at 92% 0%,rgba(84,255,216,.14),transparent 30rem),linear-gradient(#f5efe4,#e8ddcf)}body.paper .nav{background:rgba(245,239,228,.72)}body.paper .hero-system,body.paper .panel,body.paper .records-wrap,body.paper .contact-card{background:rgba(255,255,255,.58)}body.paper .terminal,body.paper .result{background:rgba(255,255,255,.56)}body.paper .record{background:#f8f2e8;color:#111019}body.paper .record p,body.paper .module p,body.paper .section-head p,body.paper .culture p,body.paper .pitch-card p{color:#403848}body.paper .filters input,body.paper .filters select,body.paper textarea{background:rgba(255,255,255,.64);color:#111019}body.paper .modal-card{background:#f8f2e8}body.paper .modal-body p{color:#302a37}body.paper .subcopy,body.paper .contact-card p{color:#302a37}
+  @media(max-width:1030px){.hero-grid,.section-head,.demo-wrap{grid-template-columns:1fr}.bento{grid-template-columns:1fr 1fr}.module.large{grid-row:auto;grid-column:1/-1;min-height:520px}.records,.culture-grid{grid-template-columns:1fr 1fr}.navlinks a:not(.cta){display:none}.hero-system{min-height:560px}}
+  @media(max-width:680px){.shell{width:min(100vw - 22px,1220px)}.nav{top:10px;width:calc(100vw - 16px);border-radius:24px}.brand-copy span{display:none}.navlinks a:not(.cta){display:none}.navlinks .cta{padding:10px}.tickerbar{top:72px}.hero{padding-top:128px}.hero-grid{gap:18px}.hero-system{border-radius:30px;min-height:610px}.sys-grid,.sliders,.gauge-grid,.bento,.records,.culture-grid{grid-template-columns:1fr}.module.large{min-height:500px}.pitch-card{grid-template-columns:1fr}.arrow{display:none}.records-head{align-items:stretch}.filters{width:100%}.filters input,.filters select{width:100%;min-width:0}.contact-card{grid-template-columns:1fr;border-radius:30px}.contact-actions{justify-content:flex-start}.footer-grid{grid-template-columns:1fr}.command{left:50%;right:auto;transform:translateX(-50%);bottom:12px;border-radius:999px}section{padding:82px 0}.eye-core{width:108px;height:108px;border-radius:30px}.tickerbar span{animation-duration:26s}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none;filter:none}.aura{display:none}}
+</style>
+</head>
+<body>
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="aura" id="aura" aria-hidden="true"></div>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<header class="nav" aria-label="主要ナビゲーション">
+  <a href="#top" class="brand" aria-label="ページ上部へ">
+    <span class="brand-mark">歯</span>
+    <span class="brand-copy"><b>すべての歯が見える</b><span>Oracle Venture OS</span></span>
+  </a>
+  <nav class="navlinks">
+    <a href="#products">Products</a>
+    <a href="#demo">Demo</a>
+    <a href="#deck">Deck</a>
+    <a href="#records">Records</a>
+    <a class="cta" href="#contact">交信</a>
+    <button type="button" id="themeBtn" aria-label="表示テーマを切り替え">◐</button>
+  </nav>
+</header>
+<div class="tickerbar" aria-hidden="true"><span id="tickerText"></span></div>
+<main id="top">
+  <section class="hero shell">
+    <div class="hero-grid">
+      <div class="hero-copy reveal on">
+        <div class="kicker">
+          <span class="pill"><span class="live-dot"></span> private oracle infrastructure</span>
+          <span class="pill">prototype / public beta</span>
+          <span class="pill">Tokyo / liminal venture</span>
+        </div>
+        <h1><span class="h-ja">すべての歯が</span><span class="h-grad">見える</span></h1>
+        <p class="subcopy">不安、霊感、遊戯、苦情、観測記録をひとつの<strong>民間オラクルOS</strong>へ接続する。占い、研究、プロダクト、儀式の境界に立ち、言葉になる前の違和感へ操作可能な輪郭を与える。</p>
+        <div class="actions">
+          <a class="btn primary" href="#demo">デモを起動 →</a>
+          <a class="btn hot" href="#products">プロダクトを見る</a>
+          <button class="btn" type="button" id="copyBtn">紹介文をコピー</button>
+        </div>
+      </div>
+      <aside class="hero-system reveal on tilt" aria-label="ライブ指標">
+        <div class="sys-inner">
+          <div class="sys-top">
+            <div class="sys-label">HA-ORACLE KERNEL<br>REI-LAYER: ONLINE<br>UX: MEMETIC / HIGH TRUST</div>
+            <div class="eye-core" aria-hidden="true"></div>
+          </div>
+          <div class="terminal" aria-label="端末表示">
+            <p>&gt; interface initialized: <em>願望 / 怨念 / 遊戯</em></p>
+            <p>&gt; loading product modules: <code>sixteen_sense</code>, <code>bakemongo</code>, <code>yaniv</code></p>
+            <p>&gt; complaint router: <em>listening</em> / ethics lock: <code>active</code></p>
+            <p>&gt; market category: <em>not yet invented</em></p>
+          </div>
+          <div class="sys-grid">
+            <div class="metric"><span>Signal Integrity</span><b data-count="97">0</b></div>
+            <div class="metric"><span>Memory Retention</span><b data-count="84">0</b></div>
+            <div class="metric"><span>Ritual Throughput</span><b data-count="16">0</b></div>
+            <div class="metric"><span>Ethics Lock</span><b data-count="3">0</b></div>
+          </div>
+          <div class="mini-orbit" aria-hidden="true"><i></i></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+  <div class="strip" aria-hidden="true"><div class="strip-track" id="stripTrack"></div></div>
+  <section id="products" class="shell">
+    <div class="section-head reveal">
+      <div><div class="eyebrow">Product Modules</div><h2>霊感を、プロダクトとして実装する。</h2></div>
+      <p>診断、捕獲、遊戯、苦情処理、公開記録をひとつのブランドOSとして束ねる。入口は明快に、奥行きは不可解に。民間信仰とプロダクトデザインの境界で動作する実験群。</p>
+    </div>
+    <div class="bento">
+      <article class="panel module large reveal tilt">
+        <div class="module-tag"><span>01 / Core Engine</span><i>diagnosis</i></div>
+        <h3>十六霊感診断</h3>
+        <p>霊感を性格診断の形式で分類し、結果ページから世界観へ接続する。軽い操作感を保ちながら、記録、手記、鑑定への導線を形成する。</p>
+        <div class="lattice" aria-hidden="true"></div>
+        <div class="mini">
+          <span>conversion gravity</span><div class="bar"><i style="--w:92%"></i></div>
+          <span>occult clarity</span><div class="bar"><i style="--w:78%"></i></div>
+          <span>share impulse</span><div class="bar"><i style="--w:86%"></i></div>
+        </div>
+      </article>
+      <article class="panel module reveal tilt">
+        <div class="module-tag"><span>02 / Field App</span><i>hunt</i></div>
+        <h3>バケモンGO</h3>
+        <p>街の違和感を捕獲するフィールドアプリ。場所、写真、噂、気配を紐づけ、散歩を都市民俗の採集行為へ変換する。</p>
+        <div class="glyph">怪</div>
+      </article>
+      <article class="panel module reveal tilt">
+        <div class="module-tag"><span>03 / Game Layer</span><i>cards</i></div>
+        <h3>ヤニブ</h3>
+        <p>偶然、読み、手札、沈黙を扱うゲームレイヤー。場の変化を観察するための小さな訓練装置として設計する。</p>
+        <div class="glyph">札</div>
+      </article>
+      <article class="panel module reveal tilt">
+        <div class="module-tag"><span>04 / Support</span><i>claims</i></div>
+        <h3>苦情受付</h3>
+        <p>怒り、不満、違和感を受け取り、分類可能な記録へ変換する窓口。対処ではなく、まず観測するための支援系。</p>
+        <div class="glyph">訴</div>
+      </article>
+      <article class="panel module reveal tilt">
+        <div class="module-tag"><span>05 / Publishing</span><i>signal</i></div>
+        <h3>交信と手記</h3>
+        <p>Xとnoteを研究ログとして接続する。断片的な発信、記録、補遺を束ね、プロジェクトの時間軸を外部化する。</p>
+        <div class="glyph">録</div>
+      </article>
+    </div>
+  </section>
+  <section id="demo" class="shell">
+    <div class="section-head reveal">
+      <div><div class="eyebrow">Touchable Demo</div><h2>操作できるオラクル・プロトタイプ。</h2></div>
+      <p>入力された違和感を、選択したプロトコルに応じて仮説、導線、記憶強度へ変換する。情報は送信されず、ブラウザ内で完結する。</p>
+    </div>
+    <div class="demo-wrap">
+      <aside class="panel demo-card reveal">
+        <div class="module-tag"><span>Protocol Switch</span><i id="activeProto">A / diagnosis</i></div>
+        <div class="switches" id="protocolBtns">
+          <button type="button" class="on" data-proto="診断核" data-sub="sixteen sense kernel"><b>診断核</b><span>霊感を分類し、入口を作る</span></button>
+          <button type="button" data-proto="捕獲核" data-sub="urban anomaly hunt"><b>捕獲核</b><span>街の違和感をゲーム化する</span></button>
+          <button type="button" data-proto="苦情核" data-sub="complaint oracle"><b>苦情核</b><span>怒りを観測記録に変換する</span></button>
+          <button type="button" data-proto="遊戯核" data-sub="card ritual layer"><b>遊戯核</b><span>偶然をUIとして扱う</span></button>
+        </div>
+      </aside>
+      <div class="panel demo-card reveal">
+        <div class="sense-box">
+          <div class="module-tag"><span>Oracle Simulator</span><i>local only</i></div>
+          <textarea id="senseInput" placeholder="今の悩み、違和感、企画、怒り、夢の断片を書く。例：霊視配信の停滞を、事業として再設計したい。">霊視配信の停滞を、事業として再設計したい。</textarea>
+          <div class="sliders">
+            <div class="slider"><label><span>違和感濃度</span><b id="vDread">72</b></label><input id="dread" type="range" min="0" max="100" value="72"></div>
+            <div class="slider"><label><span>事業解像度</span><b id="vVenture">88</b></label><input id="venture" type="range" min="0" max="100" value="88"></div>
+          </div>
+          <div class="actions"><button class="btn primary" type="button" id="runOracle">プロトコルを実行</button><button class="btn" type="button" id="copyResult">結果をコピー</button></div>
+          <div class="result" aria-live="polite">
+            <div class="result-top"><span id="resultMode">診断核 / sixteen sense kernel</span><span id="resultId">#0000</span></div>
+            <div class="result-body">
+              <canvas class="wave" id="wave" width="720" height="120" aria-label="観測波形"></canvas>
+              <h3 id="resultTitle">未定義領域の編集者</h3>
+              <p id="resultText">入力された違和感は、解決策としてではなく、観測可能なプロトコルとして扱われる。分類、命名、導線化の順に変換することで、個人の不安は共有可能な設計対象へ移る。</p>
+              <div class="gauge-grid">
+                <div class="gauge"><span>異常信号</span><b id="g1">86</b></div>
+                <div class="gauge"><span>導線強度</span><b id="g2">74</b></div>
+                <div class="gauge"><span>記憶残存</span><b id="g3">91</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="deck" class="shell">
+    <div class="section-head reveal">
+      <div><div class="eyebrow">Venture Deck / Anomalous Interface</div><h2>未分類領域に、先に構造を置く。</h2></div>
+      <p>ピッチ資料の文法を使い、霊感、遊戯、記録、苦情受付をひとつの事業仮説として配置する。信仰ではなく、体験設計として提示する。</p>
+    </div>
+    <div class="deck">
+      <article class="pitch-card reveal"><div class="num">Problem</div><div><h3>不安は、既存のUIでは扱いにくい。</h3><p>悩みや違和感は、相談、占い、遊び、怒りの形で断片化する。入口が分断されるほど、体験は記録に残らない。</p></div><div class="arrow">→</div></article>
+      <article class="pitch-card reveal"><div class="num">Solution</div><div><h3>霊感を、操作可能なインターフェイスへ。</h3><p>診断、捕獲、遊戯、苦情受付を同じ語彙で接続し、個人の感覚を記録と導線へ変換する。</p></div><div class="arrow">→</div></article>
+      <article class="pitch-card reveal"><div class="num">Moat</div><div><h3>世界観が、模倣困難な構造になる。</h3><p>機能単体は複製できる。歯列、観測、都市採集、手記が同時に成立する編集密度が差別化になる。</p></div><div class="arrow">→</div></article>
+      <article class="pitch-card reveal"><div class="num">Go To Market</div><div><h3>無料体験から、手記、鑑定、儀式物へ。</h3><p>軽い操作から入り、記録を読み、思想を理解し、必要な人だけが深い依頼へ進む。</p></div><div class="arrow">→</div></article>
+    </div>
+  </section>
+  <section id="culture" class="shell">
+    <div class="section-head reveal">
+      <div><div class="eyebrow">Operating Principles</div><h2>運用原則は、美しく異常である。</h2></div>
+      <p>信用のために整え、記憶のために逸脱する。倫理、導線、奇妙さを同じ画面上で管理する。</p>
+    </div>
+    <div class="culture-grid">
+      <article class="panel culture reveal" data-glyph="視"><b>01 / Observe</b><h3>見えないものを、まず表示する。</h3><p>悩み、空気、違和感をすぐに救済しない。まず輪郭を与え、観測できる状態へ移す。</p></article>
+      <article class="panel culture reveal" data-glyph="工"><b>02 / Design</b><h3>鳴かぬなら、工夫の世界。</h3><p>反応が起きないなら、構造、文言、導線、見せ方を変える。神秘を言い訳にせず、設計で更新する。</p></article>
+      <article class="panel culture reveal" data-glyph="歯"><b>03 / Remain</b><h3>記憶に残る形へ圧縮する。</h3><p>正しさだけでは届かない。色、余白、命名、違和感を設計し、閲覧後にも残る印象へ固定する。</p></article>
+    </div>
+  </section>
+  <section id="records" class="shell">
+    <div class="section-head reveal">
+      <div><div class="eyebrow">Observation Records</div><h2>記録が、事業の輪郭を更新する。</h2></div>
+      <p>公開スプレッドシートから記録を読み込み、接続できない場合は内蔵標本を表示する。更新されるログが、プロジェクトを静的な作品から運用中の体系へ変える。</p>
+    </div>
+    <div class="records-wrap reveal">
+      <div class="records-head">
+        <div class="filters">
+          <input id="q" type="search" placeholder="記録を検索">
+          <select id="kind"><option value="">すべての分類</option></select>
+          <select id="sort"><option value="new">新しい順</option><option value="old">古い順</option></select>
+        </div>
+        <div class="record-count" id="recordCount">loading records</div>
+      </div>
+      <div id="recordsGrid" class="records" aria-live="polite"></div>
+      <div id="loadState" class="load-state">記録層へ接続中…</div>
+    </div>
+  </section>
+  <section id="contact" class="shell">
+    <div class="contact-card reveal">
+      <div>
+        <div class="eyebrow">Contact / Signal</div>
+        <h2>未分類の領域に、先に名前を置く。</h2>
+        <p>診断、手記、交信、苦情受付を複数の入口として開きながら、全体はひとつの民間オラクル・インターフェイスとして提示する。</p>
+      </div>
+      <div class="contact-actions">
+        <a class="btn primary" href="https://x.com/subetenoha" target="_blank" rel="noopener">Xで交信</a>
+        <a class="btn hot" href="https://note.com/light_dill8112" target="_blank" rel="noopener">noteを読む</a>
+        <button class="btn" type="button" id="randomRecord">記録を一件開く</button>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="footer">
+  <div class="shell footer-grid">
+    <div><b>すべての歯が見える</b><p>Private oracle interface. Static single HTML. Public records only. No hidden write endpoint.</p></div>
+    <div class="footer-links"><a href="#top">Top</a><a href="#products">Products</a><a href="#records">Records</a></div>
+  </div>
+</footer>
+<div class="command" aria-label="補助操作"><button type="button" id="toTop" aria-label="先頭へ">↑</button><button type="button" id="themeBtn2" aria-label="表示テーマを切り替え">◐</button><button type="button" id="sparkBtn" aria-label="演出を再起動">✦</button></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-card"><div class="modal-top"><span id="modalMeta">record</span><button class="modal-close" id="modalClose" type="button">閉じる</button></div><div class="modal-body"><h3 id="modalTitle"></h3><p id="modalText"></p></div></div></div>
+<div class="toast" id="toast">コピーした</div>
+<script>
+(function(){
+  'use strict';
+  var CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRA1AuFPfz23AiuyNHirTIn8pslZOn8UHyaFzB0SaBWewcErvPV6YIMBy_6tA6MyNTMLjEY11jwDL0w/pub?output=csv';
+  var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var toast=$('#toast');
+  function showToast(t){toast.textContent=t;toast.classList.add('on');clearTimeout(showToast._t);showToast._t=setTimeout(function(){toast.classList.remove('on')},1600)}
+  function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function norm(s){return String(s||'').normalize('NFKC').toLowerCase().replace(/\s+/g,'')}
+  function parseT(s){var m=String(s||'').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})(?:\D+(\d{1,2})\D+(\d{1,2})(?:\D+(\d{1,2}))?)?/);if(!m)return NaN;return new Date(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0)).getTime()}
+  function parseCSV(text){var rows=[],row=[],cur='',q=false;for(var i=0;i<text.length;i++){var c=text[i],n=text[i+1];if(q){if(c==='"'&&n==='"'){cur+='"';i++}else if(c==='"'){q=false}else{cur+=c}}else{if(c==='"'){q=true}else if(c===','){row.push(cur);cur=''}else if(c==='\r'){}else if(c==='\n'){row.push(cur);rows.push(row);row=[];cur=''}else{cur+=c}}}if(cur!==''||row.length){row.push(cur);rows.push(row)}return rows}
+  function copy(text){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){showToast('コピーした')}).catch(function(){fallbackCopy(text)})}else{fallbackCopy(text)}}
+  function fallbackCopy(text){var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('コピーした')}catch(e){showToast('コピーできなかった')}ta.remove()}
+  var tickerWords=['ORACLE VENTURE OS','SIXTEEN SENSE KERNEL','COMPLAINT ROUTER ACTIVE','BAKEMON GO FIELD OPS','YANIV CARD LAYER','NOT YET INVENTED MARKET','HA-INTERFACE CO.','ALL TEETH VISIBLE'];
+  $('#tickerText').innerHTML=(tickerWords.concat(tickerWords).concat(tickerWords)).map(function(w,i){return '<em>'+String(i+1).padStart(2,'0')+'</em> <i>'+esc(w)+'</i>'}).join('　/　');
+  $('#stripTrack').innerHTML=(['診断を入口にする','違和感を捕獲する','苦情を観測する','遊びを儀式化する','記録を資産化する','不穏を美しくする'].concat(['診断を入口にする','違和感を捕獲する','苦情を観測する','遊びを儀式化する','記録を資産化する','不穏を美しくする'])).map(function(w){return '<b>'+esc(w)+'</b><span> / oracle pipeline</span>'}).join('');
+  window.addEventListener('scroll',function(){var max=document.documentElement.scrollHeight-innerHeight;$('#progress').style.width=(max>0?(scrollY/max*100):0)+'%'},{passive:true});
+  var aura=$('#aura');window.addEventListener('pointermove',function(e){document.body.classList.add('pointer');aura.style.left=e.clientX+'px';aura.style.top=e.clientY+'px'},{passive:true});
+  var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');if(e.target.querySelectorAll){animateCounts(e.target)}}})},{threshold:.16});$$('.reveal').forEach(function(el){io.observe(el)});
+  function animateCounts(root){$('[data-count]',root)&&$$('[data-count]',root).forEach(function(el){if(el.dataset.done)return;el.dataset.done='1';var target=+el.dataset.count||0;var start=performance.now();function step(t){var k=Math.min(1,(t-start)/1200);var v=Math.round(target*(1-Math.pow(1-k,3)));el.textContent=v+(target>20?'%':'');if(k<1&&!reduce)requestAnimationFrame(step)}step(start)})}
+  function bindTilt(){if(reduce)return;$$('.tilt').forEach(function(card){card.addEventListener('pointermove',function(e){var r=card.getBoundingClientRect();var x=(e.clientX-r.left)/r.width;var y=(e.clientY-r.top)/r.height;card.style.setProperty('--mx',(x*100)+'%');card.style.setProperty('--my',(y*100)+'%');card.style.transform='perspective(900px) rotateX('+((.5-y)*5)+'deg) rotateY('+((x-.5)*-7)+'deg) translateY(-2px)'});card.addEventListener('pointerleave',function(){card.style.transform='';})})}
+  bindTilt();
+  function themeToggle(){document.body.classList.toggle('paper');showToast(document.body.classList.contains('paper')?'紙テーマ':'夜テーマ')}$('#themeBtn').addEventListener('click',themeToggle);$('#themeBtn2').addEventListener('click',themeToggle);$('#toTop').addEventListener('click',function(){scrollTo({top:0,behavior:'smooth'})});
+  $('#copyBtn').addEventListener('click',function(){copy('すべての歯が見える。霊感、診断、遊戯、苦情、観測記録を接続する民間オラクルOS。未分類の不安と違和感に、操作可能な輪郭を与える実験的インターフェイス。')});
+  var active={name:'診断核',sub:'sixteen sense kernel'};$('#protocolBtns').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$$('button',this).forEach(function(x){x.classList.remove('on')});b.classList.add('on');active.name=b.dataset.proto;active.sub=b.dataset.sub;$('#activeProto').textContent=active.name+' / '+active.sub;$('#resultMode').textContent=active.name+' / '+active.sub;runOracle()});
+  ['dread','venture'].forEach(function(id){$('#'+id).addEventListener('input',function(){ $('#v'+(id==='dread'?'Dread':'Venture')).textContent=this.value; drawWave(+$('#dread').value,+$('#venture').value); })});
+  function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h+=(h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)}return h>>>0}
+  var titles=['未定義領域の編集者','違和感のプロトコル設計者','霊感指標のオペレーター','苦情を記録化する観測者','偶然性のプロダクト管理者','記憶に残る異常信号の構築者'];
+  var advices=['商品説明ではなく観測プロトコルとして提示する。悩みを即時解決せず、分類・命名・記録の順に処理することで、体験の輪郭が立ち上がる。','無料診断で入口を軽くし、手記で思想を深め、個人鑑定で濃度を上げる。導線は明快に、体験は奥へ向かう構造にする。','不穏さを恐怖演出に寄せすぎず、管理画面、指標、ログ、規約の顔つきで提示する。異常を制度化して見せるほど、ブランドの強度が上がる。','ユーザーの怒りや違和感は、未整理の信号として扱える。苦情受付をフォームで終わらせず、観測記録へ変換する設計が有効。','遊びは警戒心を下げる。カードや捕獲ゲームの形式を使い、世界観へ入るための小さな操作点を作る。','見た目の強さは入口であり、継続的な記録が信頼を作る。更新されるログが、架空性と実在感の境界を支える。'];
+  function runOracle(){var text=$('#senseInput').value||'';var dread=+$('#dread').value;var venture=+$('#venture').value;var h=hash(text+active.name+dread+venture);var idx=h%titles.length;var g1=(h%31)+Math.floor(dread*.62)+18;var g2=((h>>3)%28)+Math.floor(venture*.58)+14;var g3=((h>>5)%32)+Math.floor((dread+venture)*.36)+18;g1=Math.min(99,g1);g2=Math.min(99,g2);g3=Math.min(99,g3);$('#resultTitle').textContent=titles[idx];$('#resultText').textContent=advices[idx];$('#g1').textContent=g1;$('#g2').textContent=g2;$('#g3').textContent=g3;$('#resultId').textContent='#'+String(h%10000).padStart(4,'0');drawWave(dread,venture,h);}
+  $('#runOracle').addEventListener('click',runOracle);$('#copyResult').addEventListener('click',function(){copy($('#resultTitle').textContent+'\n'+$('#resultText').textContent+'\n異常信号 '+$('#g1').textContent+' / 導線強度 '+$('#g2').textContent+' / 記憶残存 '+$('#g3').textContent)});
+  function drawWave(d,v,seed){var c=$('#wave'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='rgba(255,255,255,.025)';ctx.fillRect(0,0,w,h);ctx.strokeStyle='rgba(84,255,216,.78)';ctx.lineWidth=2;ctx.beginPath();var ph=(seed||hash($('#senseInput').value))*0.0001;for(var x=0;x<w;x++){var y=h/2+Math.sin(x*.025+ph)*(d/100)*h*.28+Math.sin(x*.075+ph*1.7)*(v/100)*h*.18+Math.sin(x*.19+ph)*h*.035;if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke();ctx.strokeStyle='rgba(255,76,201,.48)';ctx.lineWidth=1;ctx.beginPath();for(var x2=0;x2<w;x2++){var y2=h/2+Math.cos(x2*.033+ph)*(v/100)*h*.22+Math.sin(x2*.11+ph)*(d/100)*h*.09;if(x2===0)ctx.moveTo(x2,y2);else ctx.lineTo(x2,y2)}ctx.stroke()}
+  drawWave(72,88,1234);runOracle();
+  var ALL=[],VIEW=[];var fallback=[{date:'2026.07.09',kind:'事業',head:'未分類領域には、まず外形が必要になる',text:'まだ市場が分類できていない領域では、機能より先に輪郭が必要になる。霊感、診断、遊戯、苦情受付をひとつの企業体のように配置し、未知の体験領域として提示する。',_t:Date.now()},{date:'2026.07.08',kind:'診断',head:'十六霊感診断は軽い入口であり、深い導線である',text:'診断は警戒心を下げる。結果文に人格と理論を滲ませることで、閲覧者は娯楽から観測記録へ移動する。入口は軽く、奥行きは静かに深くする。',_t:Date.now()-86400000},{date:'2026.07.07',kind:'苦情',head:'苦情受付は、未整理の信号を受け取る装置である',text:'怒りや違和感には熱量がある。熱量があるものは記録できる。記録できるものは、プロジェクトの体系へ組み込める。',_t:Date.now()-86400000*2},{date:'2026.07.06',kind:'遊戯',head:'遊びは、世界観へ入るための操作点である',text:'カード、捕獲、選択、偶然。閲覧者が触れる瞬間に、説明は体験へ変わる。操作できる場所を持つサイトは、読むだけのサイトより長く記憶に残る。',_t:Date.now()-86400000*3}];
+  function rowsToRecords(rows){var start=0;if(rows.length){var h=(rows[0][0]||'')+(rows[0][1]||'')+(rows[0][2]||'');if(/タイムスタンプ|日付|コンテンツ|見出し|本文/.test(h))start=1}var out=[];for(var r=start;r<rows.length;r++){var row=rows[r]||[];var date=(row[0]||'').trim(),kind=(row[1]||'').trim(),head=(row[2]||'').trim(),text=(row[3]||'').trim();if(!head&&!text)continue;var t=parseT(date);out.push({date:date,kind:kind||'記録',head:head||'（無題）',text:text,_t:isNaN(t)?r:t})}return out}
+  function setupKinds(){var sel=$('#kind');sel.innerHTML='<option value="">すべての分類</option>';var ks=[];ALL.forEach(function(d){if(ks.indexOf(d.kind)<0)ks.push(d.kind)});ks.sort().forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=k;sel.appendChild(o)})}
+  function applyView(){var q=norm($('#q').value),k=$('#kind').value,sort=$('#sort').value;VIEW=ALL.filter(function(d){if(k&&d.kind!==k)return false;if(q&&!norm(d.head+' '+d.text+' '+d.kind).includes(q))return false;return true});VIEW.sort(function(a,b){return sort==='new'?b._t-a._t:a._t-b._t});renderRecords()}
+  function renderRecords(){var grid=$('#recordsGrid');grid.innerHTML='';VIEW.slice(0,18).forEach(function(d,i){var a=document.createElement('article');a.className='record';a.tabIndex=0;a.innerHTML='<div class="record-meta"><span>'+esc(d.kind)+'</span><span>'+esc(d.date||'no date')+'</span></div><h3>'+esc(d.head)+'</h3><p>'+esc(d.text)+'</p>';a.addEventListener('click',function(){openRecord(d)});a.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openRecord(d)}});grid.appendChild(a)});$('#recordCount').textContent=VIEW.length+' records / '+ALL.length+' total';$('#loadState').style.display=VIEW.length?'none':'block';$('#loadState').textContent=ALL.length?'該当する記録がない':'記録が空です'}
+  function openRecord(d){$('#modalMeta').textContent=(d.kind||'記録')+' / '+(d.date||'no date');$('#modalTitle').textContent=d.head||'（無題）';$('#modalText').textContent=d.text||'';$('#modal').classList.add('on')}
+  $('#modalClose').addEventListener('click',function(){$('#modal').classList.remove('on')});$('#modal').addEventListener('click',function(e){if(e.target.id==='modal')$('#modal').classList.remove('on')});document.addEventListener('keydown',function(e){if(e.key==='Escape')$('#modal').classList.remove('on')});['q','kind','sort'].forEach(function(id){$('#'+id).addEventListener(id==='q'?'input':'change',applyView)});$('#randomRecord').addEventListener('click',function(){if(!VIEW.length)return showToast('記録がない');openRecord(VIEW[Math.floor(Math.random()*VIEW.length)])});
+  fetch(CSV_URL,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text()}).then(function(txt){ALL=rowsToRecords(parseCSV(txt));if(!ALL.length)ALL=fallback;setupKinds();applyView();showToast('記録層に接続')}).catch(function(){ALL=fallback;setupKinds();applyView();showToast('内蔵標本を表示')});
+  var cv=$('#field'),ctx=cv.getContext('2d'),W=0,H=0,DPR=1,pts=[];function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0);makePts()}function makePts(){pts=[];var n=W<700?42:72;for(var i=0;i<n;i++){pts.push({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*2,v:.2+Math.random()*.6,a:Math.random()*6.28})}}function drawField(){ctx.clearRect(0,0,W,H);ctx.globalCompositeOperation='lighter';for(var i=0;i<pts.length;i++){var p=pts[i];p.a+=.006+p.v*.004;p.x+=Math.cos(p.a)*.18;p.y+=Math.sin(p.a*.7)*.15-p.v*.08;if(p.y<-20)p.y=H+20;if(p.x<-20)p.x=W+20;if(p.x>W+20)p.x=-20;var g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,38+p.r*16);g.addColorStop(0,'rgba(84,255,216,.22)');g.addColorStop(.34,'rgba(255,76,201,.09)');g.addColorStop(1,'rgba(84,255,216,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,38+p.r*16,0,Math.PI*2);ctx.fill();for(var j=i+1;j<pts.length;j++){var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<120){ctx.strokeStyle='rgba(255,255,255,'+(0.045*(1-dist/120))+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}}}ctx.globalCompositeOperation='source-over';if(!reduce)requestAnimationFrame(drawField)}
+  resize();window.addEventListener('resize',resize);if(!reduce)drawField();$('#sparkBtn').addEventListener('click',function(){makePts();showToast('信号を再起動')});
+})();
+</script>
+</body>
+</html>

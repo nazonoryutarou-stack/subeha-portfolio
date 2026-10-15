@@ -1,0 +1,11 @@
+{
+  "prefix": "g",
+  "rootLabel": "一般",
+  "categories": [
+    {"name":"仮商品種 01","meta":"分類 01","products":[{"name":"仮商品 01-01","code":"G-01-01","version":"仮版"},{"name":"仮商品 01-02","code":"G-01-02","version":"仮版"},{"name":"仮商品 01-03","code":"G-01-03","version":"仮版"},{"name":"仮商品 01-04","code":"G-01-04","version":"仮版"},{"name":"仮商品 01-05","code":"G-01-05","version":"仮版"}]},
+    {"name":"仮商品種 02","meta":"分類 02","products":[{"name":"仮商品 02-01","code":"G-02-01","version":"仮版"},{"name":"仮商品 02-02","code":"G-02-02","version":"仮版"},{"name":"仮商品 02-03","code":"G-02-03","version":"仮版"},{"name":"仮商品 02-04","code":"G-02-04","version":"仮版"},{"name":"仮商品 02-05","code":"G-02-05","version":"仮版"}]},
+    {"name":"仮商品種 03","meta":"分類 03","products":[{"name":"仮商品 03-01","code":"G-03-01","version":"仮版"},{"name":"仮商品 03-02","code":"G-03-02","version":"仮版"},{"name":"仮商品 03-03","code":"G-03-03","version":"仮版"},{"name":"仮商品 03-04","code":"G-03-04","version":"仮版"},{"name":"仮商品 03-05","code":"G-03-05","version":"仮版"}]},
+    {"name":"仮商品種 04","meta":"分類 04","products":[{"name":"仮商品 04-01","code":"G-04-01","version":"仮版"},{"name":"仮商品 04-02","code":"G-04-02","version":"仮版"},{"name":"仮商品 04-03","code":"G-04-03","version":"仮版"},{"name":"仮商品 04-04","code":"G-04-04","version":"仮版"},{"name":"仮商品 04-05","code":"G-04-05","version":"仮版"}]},
+    {"name":"仮商品種 05","meta":"分類 05","products":[{"name":"仮商品 05-01","code":"G-05-01","version":"仮版"},{"name":"仮商品 05-02","code":"G-05-02","version":"仮版"},{"name":"仮商品 05-03","code":"G-05-03","version":"仮版"},{"name":"仮商品 05-04","code":"G-05-04","version":"仮版"},{"name":"仮商品 05-05","code":"G-05-05","version":"仮版"}]}
+  ]
+}
