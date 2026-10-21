@@ -24,6 +24,7 @@ button,a{font:inherit;color:inherit}
   text-align:center;
 }
 .crest-stage{
+  position:relative;
   display:grid;
   place-items:center;
   width:min(68vw,310px);
@@ -31,6 +32,8 @@ button,a{font:inherit;color:inherit}
 }
 .crest-button{
   appearance:none;
+  position:relative;
+  isolation:isolate;
   border:0;
   margin:0;
   padding:0;
@@ -42,15 +45,42 @@ button,a{font:inherit;color:inherit}
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
   touch-action:manipulation;
+  transform-origin:50% 52%;
+}
+.crest-button::before,
+.crest-button::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:18%;
+  border:1px solid rgba(17,17,15,.13);
+  border-radius:50%;
+  opacity:0;
+  pointer-events:none;
 }
 .crest-button:focus-visible{outline:1px solid var(--ink);outline-offset:14px}
 .crest-canvas{
+  position:relative;
+  z-index:1;
   display:block;
   width:100%;
   height:100%;
-  transition:opacity 150ms ease,transform 220ms cubic-bezier(.2,.7,.2,1),filter 220ms ease;
+  will-change:transform,opacity,filter;
+  transition:opacity 150ms ease,filter 180ms ease;
 }
-.crest-button.is-changing .crest-canvas{opacity:.35;transform:scale(.965) rotate(-1deg);filter:blur(.7px)}
+.crest-button.is-beating{
+  animation:double-heartbeat 760ms cubic-bezier(.22,.72,.2,1) both;
+}
+.crest-button.is-beating::before{
+  animation:first-ripple 760ms ease-out both;
+}
+.crest-button.is-beating::after{
+  animation:second-ripple 760ms ease-out both;
+}
+.crest-button.is-changing .crest-canvas{
+  opacity:.18;
+  filter:blur(1.1px) contrast(1.8);
+}
 .enter-wrap{
   align-self:start;
   margin-top:clamp(30px,7vh,72px);
@@ -77,11 +107,36 @@ button,a{font:inherit;color:inherit}
 }
 .enter-link:hover::after,.enter-link:focus-visible::after{transform:scaleX(1);opacity:1}
 .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+@keyframes double-heartbeat{
+  0%,100%{transform:scale(1) rotate(0deg)}
+  10%{transform:scale(1.075) rotate(-.35deg)}
+  22%{transform:scale(.988) rotate(.15deg)}
+  36%{transform:scale(1.045) rotate(.22deg)}
+  51%{transform:scale(.996) rotate(0deg)}
+  68%{transform:scale(1.008)}
+}
+@keyframes first-ripple{
+  0%{opacity:0;transform:scale(.72)}
+  10%{opacity:.34}
+  34%{opacity:0;transform:scale(1.22)}
+  100%{opacity:0;transform:scale(1.22)}
+}
+@keyframes second-ripple{
+  0%,25%{opacity:0;transform:scale(.78)}
+  36%{opacity:.22}
+  65%{opacity:0;transform:scale(1.34)}
+  100%{opacity:0;transform:scale(1.34)}
+}
+
 @media (max-height:620px){
   .site-title{margin-bottom:20px}
   .crest-stage{width:min(48vh,240px)}
   .enter-wrap{margin-top:20px}
 }
 @media (prefers-reduced-motion:reduce){
+  .crest-button.is-beating,
+  .crest-button.is-beating::before,
+  .crest-button.is-beating::after{animation:none}
   .crest-canvas,.enter-link::after{transition:none}
 }
