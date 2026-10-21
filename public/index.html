@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="すべての歯が見える。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#0f0d0a">
+<meta name="theme-color" content="#f3f0e7">
 <title>すべての歯が見える</title>
 <link rel="stylesheet" href="./home.css">
 </head>
@@ -14,10 +14,10 @@
   <h1 class="site-title">すべての歯が見える</h1>
 
   <div class="crest-stage">
-    <button class="crest-button" id="crestButton" type="button" aria-describedby="crestMode" aria-label="一つ折れ丁子。自動で脈動し、姿を変え続けます。タップすると変化が早まります。">
+    <button class="crest-button" id="crestButton" type="button" aria-describedby="crestMode" aria-label="一つ折れ丁子。脈打ちながら輪郭が変形し続けます。タップすると変化が進みます。">
       <canvas class="crest-canvas" id="crestCanvas" width="640" height="640" aria-hidden="true"></canvas>
     </button>
-    <span class="visually-hidden" id="crestMode">一つ折れ丁子。脈動しながら姿を変え続けています。</span>
+    <span class="visually-hidden" id="crestMode">一つ折れ丁子。脈打ちながら輪郭が変形し続けています。</span>
   </div>
 
   <div class="enter-wrap">
@@ -26,16 +26,7 @@
 </main>
 
 <noscript>
-  <style>
-    .crest-canvas{display:none}
-    .crest-button::before{
-      content:"";
-      display:block;
-      width:70%;height:70%;margin:auto;
-      background:url('./hitotsu-ore-choji.png') center/contain no-repeat;
-      filter:drop-shadow(0 0 18px rgba(255,255,255,.14));
-    }
-  </style>
+  <style>.crest-canvas{display:none}.crest-button::before{content:"";display:block;width:70%;height:70%;margin:auto;background:url('./hitotsu-ore-choji.png') center/contain no-repeat}</style>
 </noscript>
 <script src="./home.js" defer></script>
 </body>
