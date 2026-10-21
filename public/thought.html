@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、断章と分岐として読むサイト。">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#f4f1e8">
+<title>すべての歯が見える</title>
+<link rel="stylesheet" href="./thought.css">
+</head>
+<body>
+<a class="skip-link" href="#thought">本文へ</a>
+
+<header class="topbar">
+  <a class="crest-home" href="./" aria-label="入口に戻る"><img src="./hitotsu-ore-choji.png" alt=""></a>
+  <button class="map-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">全体を見る</button>
+</header>
+
+<main id="thought" class="thought-shell" aria-live="polite">
+  <section class="rail-wrap" aria-label="思考の流れ">
+    <div class="rail" id="rail"></div>
+  </section>
+
+  <nav class="branch-nav" id="branchNav" aria-label="次の分岐"></nav>
+
+  <p class="gesture-note">横へ送る / 矢印キーでも移動できます</p>
+</main>
+
+<aside class="utility-panel" id="utilityPanel" hidden>
+  <div class="utility-inner">
+    <div class="utility-head">
+      <p>INDEX</p>
+      <button id="closePanel" type="button">閉じる</button>
+    </div>
+    <div id="nodeIndex" class="node-index"></div>
+  </div>
+</aside>
+
+<noscript>この閲覧画面にはJavaScriptが必要です。</noscript>
+<script src="./thought.js" defer></script>
+</body>
+</html>
