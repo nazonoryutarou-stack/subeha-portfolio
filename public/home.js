@@ -16,8 +16,17 @@ const MODES = [
   '複写機'
 ];
 
-let mode = 0;
+// ただ順番に回すより、印が別の媒体へ転生していくように見える順序。
+const MODE_SEQUENCE = [0, 5, 1, 6, 3, 2, 7, 4];
+const HEARTBEAT_MS = 2400;
+const CHANGE_AT_MS = 310;
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+let sequenceIndex = 0;
 let basePixels = null;
+let heartbeatTimer = 0;
+let changeTimer = 0;
+let releaseTimer = 0;
 
 function fitSize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -78,11 +87,11 @@ function renderInvert() {
 }
 
 function renderHalftone() {
-  renderClean();
   const w = canvas.width;
   const h = canvas.height;
   const tmp = document.createElement('canvas');
-  tmp.width = w; tmp.height = h;
+  tmp.width = w;
+  tmp.height = h;
   const t = tmp.getContext('2d');
   t.putImageData(basePixels, 0, 0);
   ctx.clearRect(0, 0, w, h);
@@ -146,7 +155,8 @@ function renderRgbSplit() {
   };
   ctx.clearRect(0, 0, w, h);
   const temp = document.createElement('canvas');
-  temp.width = w; temp.height = h;
+  temp.width = w;
+  temp.height = h;
   const tc = temp.getContext('2d');
   [0, 1, 2].forEach((channel, idx) => {
     tc.clearRect(0, 0, w, h);
@@ -161,7 +171,8 @@ function renderGhost() {
   const w = canvas.width;
   const h = canvas.height;
   const temp = document.createElement('canvas');
-  temp.width = w; temp.height = h;
+  temp.width = w;
+  temp.height = h;
   temp.getContext('2d').putImageData(basePixels, 0, 0);
   ctx.clearRect(0, 0, w, h);
   const offsets = [[-18, 8, .10], [-9, 4, .16], [0, 0, .65], [9, -4, .16], [18, -8, .10]];
@@ -194,36 +205,77 @@ function renderCopy() {
 
 const renderers = [renderClean, renderInk, renderInvert, renderHalftone, renderEdges, renderRgbSplit, renderGhost, renderCopy];
 
-function renderMode(index) {
+function currentMode() {
+  return MODE_SEQUENCE[sequenceIndex];
+}
+
+function renderMode(index, announce = false) {
   if (!basePixels) return;
   renderers[index]();
   live.textContent = `一つ折れ丁子・${MODES[index]}`;
+  if (announce) button.setAttribute('aria-label', `一つ折れ丁子・${MODES[index]}。押すと次の姿へ`);
 }
 
-function nextMode() {
-  button.classList.add('is-changing');
-  mode = (mode + 1) % MODES.length;
-  window.setTimeout(() => {
-    renderMode(mode);
-    button.classList.remove('is-changing');
-  }, 110);
+function advanceMode(announce = false) {
+  sequenceIndex = (sequenceIndex + 1) % MODE_SEQUENCE.length;
+  renderMode(currentMode(), announce);
+}
+
+function pulseOnce({ manual = false } = {}) {
+  clearTimeout(changeTimer);
+  clearTimeout(releaseTimer);
+
+  if (!reduceMotion.matches) {
+    button.classList.remove('is-beating');
+    void button.offsetWidth;
+    button.classList.add('is-beating');
+  }
+
+  changeTimer = window.setTimeout(() => {
+    button.classList.add('is-changing');
+    advanceMode(manual);
+    releaseTimer = window.setTimeout(() => button.classList.remove('is-changing'), 190);
+  }, reduceMotion.matches ? 0 : CHANGE_AT_MS);
+}
+
+function startHeartbeat() {
+  clearInterval(heartbeatTimer);
+  pulseOnce();
+  heartbeatTimer = window.setInterval(() => pulseOnce(), HEARTBEAT_MS);
+}
+
+function restartHeartbeatAfterManualPulse() {
+  clearInterval(heartbeatTimer);
+  pulseOnce({ manual: true });
+  heartbeatTimer = window.setInterval(() => pulseOnce(), HEARTBEAT_MS);
 }
 
 source.addEventListener('load', () => {
   drawBase();
-  renderMode(mode);
+  renderMode(currentMode(), true);
+  startHeartbeat();
 });
 
-button.addEventListener('click', nextMode);
+button.addEventListener('click', restartHeartbeatAfterManualPulse);
 button.addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
-    nextMode();
+    restartHeartbeatAfterManualPulse();
   }
 });
+
+reduceMotion.addEventListener?.('change', startHeartbeat);
 
 window.addEventListener('resize', () => {
   if (!source.complete) return;
   drawBase();
-  renderMode(mode);
+  renderMode(currentMode());
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(heartbeatTimer);
+  } else if (basePixels) {
+    startHeartbeat();
+  }
 });
