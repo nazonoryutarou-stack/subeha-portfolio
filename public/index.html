@@ -3,41 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、断章と分岐として読むサイト。">
+<meta name="description" content="すべての歯が見える。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#f4f1e8">
+<meta name="theme-color" content="#f3f0e7">
 <title>すべての歯が見える</title>
-<link rel="stylesheet" href="./thought.css">
+<link rel="stylesheet" href="./home.css">
 </head>
 <body>
-<a class="skip-link" href="#thought">本文へ</a>
+<main class="entrance">
+  <h1 class="site-title">すべての歯が見える</h1>
 
-<header class="topbar">
-  <a class="crest-home" href="./#node-1-1" aria-label="1-1 すべての歯が見える に戻る"><img src="./hitotsu-ore-choji.png" alt=""></a>
-  <button class="map-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">全体を見る</button>
-</header>
+  <div class="crest-stage">
+    <button class="crest-button" id="crestButton" type="button" aria-describedby="crestMode" aria-label="一つ折れ丁子の表現を変える">
+      <canvas class="crest-canvas" id="crestCanvas" width="640" height="640" aria-hidden="true"></canvas>
+    </button>
+    <span class="visually-hidden" id="crestMode" aria-live="polite">一つ折れ丁子・原型</span>
+  </div>
 
-<main id="thought" class="thought-shell" aria-live="polite">
-  <section class="rail-wrap" aria-label="思考の流れ">
-    <div class="rail" id="rail"></div>
-  </section>
-
-  <nav class="branch-nav" id="branchNav" aria-label="次の分岐"></nav>
-
-  <p class="gesture-note">横へ送る / 矢印キーでも移動できます</p>
+  <div class="enter-wrap">
+    <a class="enter-link" href="./thought.html#node-1-1">入場</a>
+  </div>
 </main>
 
-<aside class="utility-panel" id="utilityPanel" hidden>
-  <div class="utility-inner">
-    <div class="utility-head">
-      <p>INDEX</p>
-      <button id="closePanel" type="button">閉じる</button>
-    </div>
-    <div id="nodeIndex" class="node-index"></div>
-  </div>
-</aside>
-
-<noscript>この閲覧画面にはJavaScriptが必要です。</noscript>
-<script src="./thought.js" defer></script>
+<noscript>
+  <style>.crest-canvas{display:none}.crest-button::before{content:"";display:block;width:70%;height:70%;margin:auto;background:url('./hitotsu-ore-choji.png') center/contain no-repeat}</style>
+</noscript>
+<script src="./home.js" defer></script>
 </body>
 </html>
