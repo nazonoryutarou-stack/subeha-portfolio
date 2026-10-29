@@ -1,4 +1,6 @@
 const DATA_URL = "./data/thought-nodes.json";
+const CLOVE_IMG = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png";
+const EYE_IMG = "https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg";
 
 const rail = document.querySelector("#rail");
 const branchNav = document.querySelector("#branchNav");
@@ -41,6 +43,12 @@ function render(){
           ${node.body.map(p => `<p>${linkifyText(p)}</p>`).join("")}
         </div>
         <p class="card-note"><strong>取扱上の注意</strong>　この記録は閲覧用です。内容に異常がなければ、そのまま次へお進みください。</p>
+        <div class="scrap-strip" aria-hidden="true">
+          <span class="scrap-label">SPECIMEN / FILE ${escapeHTML(node.id)}</span>
+          <img src="${CLOVE_IMG}" alt="">
+          <img class="scrap-eye" src="${EYE_IMG}" alt="">
+          <span class="scrap-stamp">検</span>
+        </div>
       </div>
     </article>
   `).join("");
