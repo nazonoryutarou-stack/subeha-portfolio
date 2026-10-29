@@ -30,4 +30,11 @@ Date: 1790
 Status: Public Domain
 Direct image used: https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png
 
+6. Doll
+Source page: https://www.metmuseum.org/art/collection/search/17767
+Institution: The Metropolitan Museum of Art
+Date: 1830–35
+Status: Public Domain / Open Access
+Direct image used: https://collectionapi.metmuseum.org/api/collection/v1/iiif/17767/25401/main-image
+
 These images are used decoratively. Site text, the 一つ折れ丁子 mark, and project-specific labels remain separate project content.
