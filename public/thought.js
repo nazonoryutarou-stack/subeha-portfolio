@@ -1,6 +1,4 @@
 const DATA_URL = "./data/thought-nodes.json";
-const CLOVE_IMG = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png";
-const EYE_IMG = "https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg";
 
 const rail = document.querySelector("#rail");
 const branchNav = document.querySelector("#branchNav");
@@ -8,6 +6,9 @@ const panel = document.querySelector("#utilityPanel");
 const mapButton = document.querySelector("#mapButton");
 const closePanel = document.querySelector("#closePanel");
 const nodeIndex = document.querySelector("#nodeIndex");
+const trinketPanel = document.querySelector("#trinketPanel");
+const trinketButton = document.querySelector("#trinketButton");
+const closeTrinketPanel = document.querySelector("#closeTrinketPanel");
 
 let nodes = [];
 let current = 0;
@@ -31,7 +32,7 @@ function linkifyText(value=""){
 }
 
 function render(){
-  rail.innerHTML = nodes.map((node, i) => `
+  rail.innerHTML = nodes.map(node => `
     <article class="node" data-id="${escapeHTML(node.id)}" id="node-${escapeHTML(node.id)}">
       <div class="card">
         <div class="card-head">
@@ -43,12 +44,6 @@ function render(){
           ${node.body.map(p => `<p>${linkifyText(p)}</p>`).join("")}
         </div>
         <p class="card-note"><strong>取扱上の注意</strong>　この記録は閲覧用です。内容に異常がなければ、そのまま次へお進みください。</p>
-        <div class="scrap-strip" aria-hidden="true">
-          <span class="scrap-label">SPECIMEN / FILE ${escapeHTML(node.id)}</span>
-          <img src="${CLOVE_IMG}" alt="">
-          <img class="scrap-eye" src="${EYE_IMG}" alt="">
-          <span class="scrap-stamp">検</span>
-        </div>
       </div>
     </article>
   `).join("");
@@ -63,8 +58,7 @@ function render(){
   document.querySelectorAll("[data-index-id]").forEach(a=>{
     a.addEventListener("click", e=>{
       e.preventDefault();
-      panel.hidden = true;
-      mapButton.setAttribute("aria-expanded","false");
+      closeOverlay(panel, mapButton);
       jumpTo(a.dataset.indexId);
     });
   });
@@ -96,7 +90,7 @@ function jumpTo(id){
   const i = nodes.findIndex(n=>n.id===id);
   if(i<0)return;
   current=i;
-  document.querySelector(`[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
+  document.querySelector(`[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({behavior:"smooth",inline:"center",block:"start"});
   history.replaceState(null,"",`#node-${id}`);
   updateBranches();
 }
@@ -114,13 +108,42 @@ function syncFromScroll(){
   if(best!==current){current=best;updateBranches();}
 }
 
-mapButton.addEventListener("click",()=>{panel.hidden=false;mapButton.setAttribute("aria-expanded","true")});
-closePanel.addEventListener("click",()=>{panel.hidden=true;mapButton.setAttribute("aria-expanded","false")});
+function closeAllOverlays(){
+  closeOverlay(panel,mapButton,false);
+  closeOverlay(trinketPanel,trinketButton,false);
+  document.body.classList.remove("panel-open");
+}
+
+function openOverlay(target,button){
+  closeAllOverlays();
+  target.hidden=false;
+  button.setAttribute("aria-expanded","true");
+  document.body.classList.add("panel-open");
+  target.querySelector("button")?.focus({preventScroll:true});
+}
+
+function closeOverlay(target,button,manageBody=true){
+  if(!target) return;
+  target.hidden=true;
+  button?.setAttribute("aria-expanded","false");
+  if(manageBody && panel.hidden && trinketPanel.hidden) document.body.classList.remove("panel-open");
+}
+
+mapButton.addEventListener("click",()=>openOverlay(panel,mapButton));
+closePanel.addEventListener("click",()=>{closeOverlay(panel,mapButton);mapButton.focus()});
+trinketButton.addEventListener("click",()=>openOverlay(trinketPanel,trinketButton));
+closeTrinketPanel.addEventListener("click",()=>{closeOverlay(trinketPanel,trinketButton);trinketButton.focus()});
+
 window.addEventListener("keydown",e=>{
-  if(!panel.hidden && e.key==="Escape"){panel.hidden=true;mapButton.setAttribute("aria-expanded","false");return}
+  if(e.key==="Escape" && (!panel.hidden || !trinketPanel.hidden)){
+    closeAllOverlays();
+    return;
+  }
+  if(!panel.hidden || !trinketPanel.hidden) return;
   if(e.key==="ArrowRight" && current<nodes.length-1) jumpTo(nodes[current+1].id);
   if(e.key==="ArrowLeft" && current>0) jumpTo(nodes[current-1].id);
 });
+
 document.querySelector(".rail-wrap").addEventListener("scroll",()=>{
   clearTimeout(window.__syncTimer);
   window.__syncTimer=setTimeout(syncFromScroll,80);

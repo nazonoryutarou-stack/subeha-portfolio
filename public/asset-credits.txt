@@ -1,13 +1,18 @@
-Visual material sources used in the fancy × horror collage
+Visual material sources used in the fancy × horror cabinet collage
 
-1. Victorian frame
-Source page: https://www.publicdomainpictures.net/en/view-image.php?image=430601&picture=vintage-frame-victorian-old
-License/status: Public Domain (as stated on source page)
-
-2. Honiton lace fragment
-Source page: https://www.metmuseum.org/art/collection/search/212662
+1. Decorative paper with an overall floral pattern
+Source page: https://www.metmuseum.org/art/collection/search/824468
 Institution: The Metropolitan Museum of Art
+Date: 18th century
 Status: Public Domain / Open Access
+Direct image used: https://collectionapi.metmuseum.org/api/collection/v1/iiif/824468/1905621/main-image
+
+2. Valentine - Mechanical nosegay (tussy mussy)
+Source page: https://www.metmuseum.org/art/collection/search/785070
+Institution: The Metropolitan Museum of Art
+Date: ca. 1875
+Status: Public Domain / Open Access
+Direct image used: https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image
 
 3. George Engleheart, A Lady's Right Eye
 Source page: https://commons.wikimedia.org/wiki/File:George_Engleheart_-_A_Lady%27s_Right_Eye_-_NMB_2766_-_Nationalmuseum.jpg
@@ -18,4 +23,11 @@ Source page: https://commons.wikimedia.org/wiki/File:Clove_(PSF).png
 Author/source: Pearson Scott Foresman
 Status: Public Domain
 
-These images are used decoratively. Site text and the 一つ折れ丁子 mark remain separate project content.
+5. Printer's ornament from A New and Complete Illustration of the Occult Sciences
+Source page: https://commons.wikimedia.org/wiki/File:A_new_and_complete_illustration_of_the_occult_sciences-_or_Fleuron_T196383-24.png
+Original ornament database: https://fleuron.lib.cam.ac.uk/ornament/090550010202500_1
+Date: 1790
+Status: Public Domain
+Direct image used: https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png
+
+These images are used decoratively. Site text, the 一つ折れ丁子 mark, and project-specific labels remain separate project content.
