@@ -11,30 +11,42 @@
 </head>
 <body>
 <div class="wallpaper" aria-hidden="true"></div>
-<div class="cabinet-scene" aria-hidden="true">
-  <figure class="ephemera bouquet-card">
-    <span class="tape tape-pink"></span>
-    <img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt="">
+
+<div class="cabinet-scene" id="cabinetScene">
+  <figure class="doll-card" aria-hidden="true">
+    <img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/17767/25401/main-image" alt="">
   </figure>
 
-  <figure class="ephemera eye-locket">
-    <span class="locket-loop"></span>
+  <button class="ephemera bouquet-card mechanical-card" id="mechanicalCard" type="button" aria-label="紙飾りを開く" aria-expanded="false">
+    <span class="tape tape-pink" aria-hidden="true"></span>
+    <img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt="">
+    <span class="paper-tab" aria-hidden="true">↟</span>
+  </button>
+
+  <button class="ephemera eye-locket" id="eyeLocket" type="button" aria-label="ロケットを開閉する" aria-pressed="false">
+    <span class="locket-loop" aria-hidden="true"></span>
+    <span class="locket-lid" aria-hidden="true"></span>
     <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt="">
-  </figure>
+  </button>
 
   <figure class="ephemera clove-specimen">
-    <span class="tape tape-blue"></span>
+    <span class="tape tape-blue" aria-hidden="true"></span>
     <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt="">
     <figcaption>SPECIMEN / CLOVE</figcaption>
   </figure>
 
-  <img class="occult-flourish" src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt="">
+  <img class="occult-flourish" src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt="" aria-hidden="true">
 
-  <div class="paper-tag linda-tag"><b>LINDA</b><span>おだいじに</span></div>
-  <div class="paper-tag salt-tag"><b>祓塩</b><span>非食用</span></div>
-  <div class="paper-tag jimotsu-tag"><b>持物</b><span>NO.01</span></div>
-  <div class="tiny-stickers">♡　✦　☾　✧　♡</div>
+  <button class="paper-tag linda-tag drag-item" type="button"><b>LINDA</b><span>おだいじに</span></button>
+  <button class="paper-tag salt-tag drag-item" type="button"><b>祓塩</b><span>非食用</span></button>
+  <button class="paper-tag jimotsu-tag drag-item" type="button"><b>持物</b><span>NO.01</span></button>
+  <div class="tiny-stickers" aria-hidden="true">♡　✦　☾　✧　♡</div>
+
+  <button class="secret-star" id="secretStar" type="button" aria-label="星のシール">✦</button>
+  <div class="secret-eye" aria-hidden="true"><i></i></div>
 </div>
+
+<button class="cabinet-reset" id="resetCabinet" type="button">整頓</button>
 
 <main class="entrance">
   <section class="portal-card" aria-label="入口">
@@ -53,5 +65,6 @@
     </div>
   </section>
 </main>
+<script src="./home.js" defer></script>
 </body>
 </html>
