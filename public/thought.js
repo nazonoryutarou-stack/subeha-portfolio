@@ -9,6 +9,13 @@ const nodeIndex = document.querySelector("#nodeIndex");
 const trinketPanel = document.querySelector("#trinketPanel");
 const trinketButton = document.querySelector("#trinketButton");
 const closeTrinketPanel = document.querySelector("#closeTrinketPanel");
+const readingModeButton = document.querySelector("#readingModeButton");
+const playValentine = document.querySelector("#playValentine");
+const playEye = document.querySelector("#playEye");
+const drawerHandle = document.querySelector("#drawerHandle");
+const trinketDrawer = document.querySelector("#trinketDrawer");
+const tidyTrinkets = document.querySelector("#tidyTrinkets");
+const moveableTrinkets = [...document.querySelectorAll(".moveable-trinket")];
 
 let nodes = [];
 let current = 0;
@@ -133,6 +140,67 @@ mapButton.addEventListener("click",()=>openOverlay(panel,mapButton));
 closePanel.addEventListener("click",()=>{closeOverlay(panel,mapButton);mapButton.focus()});
 trinketButton.addEventListener("click",()=>openOverlay(trinketPanel,trinketButton));
 closeTrinketPanel.addEventListener("click",()=>{closeOverlay(trinketPanel,trinketButton);trinketButton.focus()});
+
+readingModeButton?.addEventListener("click",()=>{
+  const active = document.body.classList.toggle("reading-mode");
+  readingModeButton.setAttribute("aria-pressed",String(active));
+  readingModeButton.textContent = active ? "装飾" : "読書";
+});
+
+playValentine?.addEventListener("click",()=>{
+  const open = trinketPanel.classList.toggle("valentine-open");
+  playValentine.setAttribute("aria-expanded",String(open));
+});
+
+playEye?.addEventListener("click",()=>{
+  const closed = trinketPanel.classList.toggle("eye-closed");
+  playEye.setAttribute("aria-pressed",String(closed));
+});
+
+drawerHandle?.addEventListener("click",()=>{
+  const open = trinketPanel.classList.toggle("drawer-open");
+  drawerHandle.setAttribute("aria-expanded",String(open));
+  trinketDrawer.setAttribute("aria-hidden",String(!open));
+});
+
+function px(value){
+  const n = Number.parseFloat(value || "0");
+  return Number.isFinite(n) ? n : 0;
+}
+
+moveableTrinkets.forEach(item=>{
+  let state = null;
+  item.addEventListener("pointerdown",event=>{
+    state={id:event.pointerId,x:event.clientX,y:event.clientY,dx:px(item.style.getPropertyValue("--dx")),dy:px(item.style.getPropertyValue("--dy"))};
+    item.setPointerCapture(event.pointerId);
+  });
+  item.addEventListener("pointermove",event=>{
+    if(!state || state.id!==event.pointerId) return;
+    item.style.setProperty("--dx",`${state.dx + event.clientX - state.x}px`);
+    item.style.setProperty("--dy",`${state.dy + event.clientY - state.y}px`);
+  });
+  const end=event=>{
+    if(!state || state.id!==event.pointerId) return;
+    if(item.hasPointerCapture(event.pointerId)) item.releasePointerCapture(event.pointerId);
+    state=null;
+  };
+  item.addEventListener("pointerup",end);
+  item.addEventListener("pointercancel",end);
+});
+
+function resetTrinkets(){
+  trinketPanel.classList.remove("valentine-open","eye-closed","drawer-open");
+  playValentine?.setAttribute("aria-expanded","false");
+  playEye?.setAttribute("aria-pressed","false");
+  drawerHandle?.setAttribute("aria-expanded","false");
+  trinketDrawer?.setAttribute("aria-hidden","true");
+  moveableTrinkets.forEach(item=>{
+    item.style.removeProperty("--dx");
+    item.style.removeProperty("--dy");
+  });
+}
+
+tidyTrinkets?.addEventListener("click",resetTrinkets);
 
 window.addEventListener("keydown",e=>{
   if(e.key==="Escape" && (!panel.hidden || !trinketPanel.hidden)){
