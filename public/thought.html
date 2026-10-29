@@ -5,28 +5,31 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、断章と分岐として読むサイト。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#f7edf3">
+<meta name="theme-color" content="#f4e5ec">
 <title>すべての歯が見える</title>
 <link rel="stylesheet" href="./thought.css">
 </head>
 <body>
 <a class="skip-link" href="#thought">本文へ</a>
+<div class="wallpaper" aria-hidden="true"></div>
 
-<div class="material-collage" aria-hidden="true">
-  <img class="mat mat-frame" src="https://www.publicdomainpictures.net/pictures/440000/velka/vintage-rahmen-viktorianisch-alt.jpg" alt="">
-  <img class="mat mat-lace mat-lace-left" src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/212662/446286/main-image" alt="">
-  <img class="mat mat-lace mat-lace-right" src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/212662/446286/main-image" alt="">
-  <figure class="mat-card mat-eye"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt=""><figcaption>観測用</figcaption></figure>
-  <figure class="mat-card mat-clove"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt=""><figcaption>丁子標本</figcaption></figure>
-  <div class="mat-sticker mat-linda"><b>LINDA</b><span>おだいじに</span></div>
-  <div class="mat-sticker mat-salt"><b>祓塩</b><span>非食用</span></div>
-  <div class="mat-sticker mat-tag"><b>持物</b><span>NO.01</span></div>
+<div class="desk-scene" aria-hidden="true">
+  <figure class="desk-piece bouquet-piece"><span class="tape tape-pink"></span><img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt=""></figure>
+  <figure class="desk-piece eye-piece"><span class="locket-loop"></span><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt=""></figure>
+  <figure class="desk-piece clove-piece"><span class="tape tape-blue"></span><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt=""><figcaption>丁子標本</figcaption></figure>
+  <img class="occult-piece" src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt="">
+  <div class="desk-tag linda-tag"><b>LINDA</b><span>おだいじに</span></div>
+  <div class="desk-tag salt-tag"><b>祓塩</b><span>非食用</span></div>
+  <div class="desk-tag jimotsu-tag"><b>持物</b><span>NO.01</span></div>
 </div>
 
 <header class="topbar">
   <a class="crest-home" href="./" aria-label="入口に戻る"><img src="./hitotsu-ore-choji.png" alt=""></a>
-  <div class="record-ribbon"><p>生活霊具記録<small>FANCY OCCULT OBSERVATION FILE</small></p></div>
-  <button class="map-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">記録一覧</button>
+  <div class="record-title"><span>生活霊具記録</span><small>PERSONAL OCCULT CABINET</small></div>
+  <div class="top-actions">
+    <button class="top-button" id="trinketButton" type="button" aria-expanded="false" aria-controls="trinketPanel">小物箱</button>
+    <button class="top-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">記録一覧</button>
+  </div>
 </header>
 
 <main id="thought" class="thought-shell" aria-live="polite">
@@ -39,9 +42,25 @@
 </main>
 
 <aside class="utility-panel" id="utilityPanel" hidden>
-  <div class="utility-inner">
-    <div class="utility-head"><div><p>記録一覧</p><small>INDEX / OBSERVATION FILE</small></div><button id="closePanel" type="button">閉じる</button></div>
+  <div class="panel-inner">
+    <div class="panel-head"><div><p>記録一覧</p><small>INDEX / OBSERVATION FILE</small></div><button id="closePanel" type="button">閉じる</button></div>
     <div id="nodeIndex" class="node-index"></div>
+  </div>
+</aside>
+
+<aside class="trinket-panel" id="trinketPanel" hidden>
+  <div class="trinket-inner">
+    <div class="panel-head"><div><p>小物箱</p><small>TRINKETS / MATERIALS</small></div><button id="closeTrinketPanel" type="button">閉じる</button></div>
+    <div class="trinket-grid">
+      <figure class="trinket-card trinket-valentine"><img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt=""><figcaption>VALENTINE / 1875</figcaption></figure>
+      <figure class="trinket-card trinket-eye"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt=""><figcaption>観測用</figcaption></figure>
+      <figure class="trinket-card trinket-clove"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt=""><figcaption>丁子標本</figcaption></figure>
+      <figure class="trinket-card trinket-occult"><img src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt=""><figcaption>ORNAMENT / 1790</figcaption></figure>
+      <article class="trinket-note note-linda"><b>LINDA</b><span>おだいじに</span><small>生活霊具</small></article>
+      <article class="trinket-note note-salt"><b>祓塩</b><span>非食用</span><small>生活霊具</small></article>
+      <article class="trinket-note note-jimotsu"><b>持物</b><span>NO.01</span><small>携帯用</small></article>
+      <article class="trinket-note note-unknown"><b>?</b><span>未確認</span><small>開封しない</small></article>
+    </div>
   </div>
 </aside>
 
