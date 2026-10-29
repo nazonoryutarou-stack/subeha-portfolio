@@ -28,6 +28,7 @@
   <div class="record-title"><span>生活霊具記録</span><small>PERSONAL OCCULT CABINET</small></div>
   <div class="top-actions">
     <button class="top-button" id="trinketButton" type="button" aria-expanded="false" aria-controls="trinketPanel">小物箱</button>
+    <button class="top-button" id="readingModeButton" type="button" aria-pressed="false">読書</button>
     <button class="top-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">記録一覧</button>
   </div>
 </header>
@@ -50,16 +51,41 @@
 
 <aside class="trinket-panel" id="trinketPanel" hidden>
   <div class="trinket-inner">
-    <div class="panel-head"><div><p>小物箱</p><small>TRINKETS / MATERIALS</small></div><button id="closeTrinketPanel" type="button">閉じる</button></div>
-    <div class="trinket-grid">
-      <figure class="trinket-card trinket-valentine"><img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt=""><figcaption>VALENTINE / 1875</figcaption></figure>
-      <figure class="trinket-card trinket-eye"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt=""><figcaption>観測用</figcaption></figure>
-      <figure class="trinket-card trinket-clove"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt=""><figcaption>丁子標本</figcaption></figure>
-      <figure class="trinket-card trinket-occult"><img src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt=""><figcaption>ORNAMENT / 1790</figcaption></figure>
-      <article class="trinket-note note-linda"><b>LINDA</b><span>おだいじに</span><small>生活霊具</small></article>
-      <article class="trinket-note note-salt"><b>祓塩</b><span>非食用</span><small>生活霊具</small></article>
-      <article class="trinket-note note-jimotsu"><b>持物</b><span>NO.01</span><small>携帯用</small></article>
-      <article class="trinket-note note-unknown"><b>?</b><span>未確認</span><small>開封しない</small></article>
+    <div class="panel-head">
+      <div><p>小物箱</p><small>TRINKETS / MATERIALS</small></div>
+      <div class="panel-actions"><button id="tidyTrinkets" type="button">整頓</button><button id="closeTrinketPanel" type="button">閉じる</button></div>
+    </div>
+
+    <div class="playboard" id="playboard">
+      <figure class="play-doll" aria-hidden="true"><img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/17767/25401/main-image" alt=""></figure>
+
+      <button class="play-paper play-valentine" id="playValentine" type="button" aria-label="紙飾りを開く" aria-expanded="false">
+        <span class="tape tape-pink" aria-hidden="true"></span>
+        <img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt="">
+        <i class="pull-tab" aria-hidden="true">↟</i>
+      </button>
+
+      <button class="play-paper play-eye" id="playEye" type="button" aria-label="眼のロケットを開閉する" aria-pressed="false">
+        <span class="locket-loop" aria-hidden="true"></span>
+        <span class="play-eye-lid" aria-hidden="true"></span>
+        <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt="">
+      </button>
+
+      <figure class="play-paper play-clove"><span class="tape tape-blue"></span><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt=""><figcaption>SPECIMEN / CLOVE</figcaption></figure>
+      <img class="play-occult" src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt="" aria-hidden="true">
+
+      <button class="trinket-note moveable-trinket note-linda" type="button"><b>LINDA</b><span>おだいじに</span><small>生活霊具</small></button>
+      <button class="trinket-note moveable-trinket note-salt" type="button"><b>祓塩</b><span>非食用</span><small>生活霊具</small></button>
+      <button class="trinket-note moveable-trinket note-jimotsu" type="button"><b>持物</b><span>NO.01</span><small>携帯用</small></button>
+      <button class="trinket-note moveable-trinket note-unknown" type="button"><b>?</b><span>未確認</span><small>未登録</small></button>
+
+      <button class="drawer-handle" id="drawerHandle" type="button" aria-expanded="false" aria-controls="trinketDrawer">引き出し</button>
+      <div class="trinket-drawer" id="trinketDrawer" aria-hidden="true">
+        <span class="drawer-lining" aria-hidden="true"></span>
+        <img class="drawer-occult" src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt="">
+        <img class="drawer-clove" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt="">
+        <span class="drawer-stickers" aria-hidden="true">♡　✧　☾　✦</span>
+      </div>
     </div>
   </div>
 </aside>
