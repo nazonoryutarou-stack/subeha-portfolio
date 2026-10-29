@@ -32,11 +32,15 @@ function render(){
   rail.innerHTML = nodes.map((node, i) => `
     <article class="node" data-id="${escapeHTML(node.id)}" id="node-${escapeHTML(node.id)}">
       <div class="card">
-        <p class="node-id">${escapeHTML(node.id)}</p>
+        <div class="card-head">
+          <p class="node-id">記録 ${escapeHTML(node.id)}</p>
+          <p class="status-chip">記録済</p>
+        </div>
         <h1>${escapeHTML(node.title)}</h1>
         <div class="body">
           ${node.body.map(p => `<p>${linkifyText(p)}</p>`).join("")}
         </div>
+        <p class="card-note"><strong>取扱上の注意</strong>　この記録は閲覧用です。内容に異常がなければ、そのまま次へお進みください。</p>
       </div>
     </article>
   `).join("");
@@ -52,6 +56,7 @@ function render(){
     a.addEventListener("click", e=>{
       e.preventDefault();
       panel.hidden = true;
+      mapButton.setAttribute("aria-expanded","false");
       jumpTo(a.dataset.indexId);
     });
   });
@@ -104,7 +109,7 @@ function syncFromScroll(){
 mapButton.addEventListener("click",()=>{panel.hidden=false;mapButton.setAttribute("aria-expanded","true")});
 closePanel.addEventListener("click",()=>{panel.hidden=true;mapButton.setAttribute("aria-expanded","false")});
 window.addEventListener("keydown",e=>{
-  if(!panel.hidden && e.key==="Escape"){panel.hidden=true;return}
+  if(!panel.hidden && e.key==="Escape"){panel.hidden=true;mapButton.setAttribute("aria-expanded","false");return}
   if(e.key==="ArrowRight" && current<nodes.length-1) jumpTo(nodes[current+1].id);
   if(e.key==="ArrowLeft" && current>0) jumpTo(nodes[current-1].id);
 });
@@ -122,5 +127,5 @@ fetch(DATA_URL)
     if(initial && nodes.some(n=>n.id===initial)) requestAnimationFrame(()=>jumpTo(initial));
   })
   .catch(err=>{
-    rail.innerHTML=`<article class="node"><div class="card"><p class="node-id">ERROR</p><h1>記録を読み込めませんでした。</h1><div class="body"><p>${escapeHTML(String(err))}</p></div></div></article>`;
+    rail.innerHTML=`<article class="node"><div class="card"><div class="card-head"><p class="node-id">ERROR</p></div><h1>記録を読み込めませんでした。</h1><div class="body"><p>${escapeHTML(String(err))}</p></div></div></article>`;
   });

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、断章と分岐として読むサイト。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#f4f1e8">
+<meta name="theme-color" content="#f6efe8">
 <title>すべての歯が見える</title>
 <link rel="stylesheet" href="./thought.css">
 </head>
@@ -14,7 +14,8 @@
 
 <header class="topbar">
   <a class="crest-home" href="./" aria-label="入口に戻る"><img src="./hitotsu-ore-choji.png" alt=""></a>
-  <button class="map-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">全体を見る</button>
+  <p class="record-label"><span>生活霊具記録</span><small>SUBETENOHA GA MIERU</small></p>
+  <button class="map-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">記録一覧</button>
 </header>
 
 <main id="thought" class="thought-shell" aria-live="polite">
@@ -24,13 +25,16 @@
 
   <nav class="branch-nav" id="branchNav" aria-label="次の分岐"></nav>
 
-  <p class="gesture-note">横へ送る / 矢印キーでも移動できます</p>
+  <div class="reader-footer">
+    <p class="gesture-note">横へ送る / 記録をめくる</p>
+    <p class="system-note"><span class="status-dot" aria-hidden="true"></span>表示に異常がなければ、そのままお読みください。</p>
+  </div>
 </main>
 
 <aside class="utility-panel" id="utilityPanel" hidden>
   <div class="utility-inner">
     <div class="utility-head">
-      <p>INDEX</p>
+      <div><p>記録一覧</p><small>INDEX / OBSERVATION FILE</small></div>
       <button id="closePanel" type="button">閉じる</button>
     </div>
     <div id="nodeIndex" class="node-index"></div>
