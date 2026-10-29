@@ -42,7 +42,72 @@ button{color:inherit}
 .record-label small{display:block;margin-top:5px;color:var(--muted);font-size:8px;letter-spacing:.15em}
 .map-button{border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:rgba(255,250,247,.82);cursor:pointer;font-size:11px;letter-spacing:.08em;box-shadow:0 5px 18px rgba(50,39,35,.05)}
 
-.thought-shell{min-height:100svh;display:grid;grid-template-rows:1fr auto auto;overflow:hidden}
+.prop-layer{position:fixed;inset:0;z-index:12;pointer-events:none;overflow:hidden}
+.prop{position:absolute;user-select:none;filter:drop-shadow(0 5px 8px rgba(57,42,37,.08))}
+.prop-linda{
+  top:108px;right:-12px;width:104px;height:64px;padding:10px 12px;
+  background:#eef7f8;border:1px solid #a9d0d8;border-radius:10px;
+  transform:rotate(7deg);font-family:"Yu Mincho","Hiragino Mincho ProN",serif;
+}
+.prop-linda::before{content:"";position:absolute;inset:5px;border:1px dashed rgba(82,105,110,.25);border-radius:7px}
+.prop-linda .prop-kicker{position:relative;display:block;font:700 8px/1 system-ui,sans-serif;letter-spacing:.18em;color:#6c8c91}
+.prop-linda strong{position:relative;display:block;margin-top:8px;font-size:14px;font-weight:500;letter-spacing:.08em}
+.prop-linda i{position:absolute;right:11px;bottom:9px;width:13px;height:13px;border:2px solid var(--red);border-radius:50%;opacity:.65}
+.prop-linda i::after{content:"丁";position:absolute;inset:0;display:grid;place-items:center;font:8px/1 serif;color:var(--red)}
+
+.prop-salt{
+  left:-8px;bottom:84px;width:68px;height:78px;padding-top:24px;
+  background:linear-gradient(180deg,#f8f5ff 0,#efe8f5 100%);
+  border:1px solid #cdb9df;border-radius:7px 7px 15px 15px;transform:rotate(-8deg);text-align:center;
+}
+.prop-salt::before{content:"";position:absolute;left:7px;right:7px;top:11px;border-top:2px dotted #baa5cf}
+.prop-salt::after{content:"";position:absolute;left:10px;right:10px;bottom:9px;height:7px;background:repeating-linear-gradient(90deg,transparent 0 4px,rgba(169,54,72,.16) 4px 6px)}
+.prop-salt span{display:block;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:18px;letter-spacing:.1em}
+.prop-salt small{display:block;margin-top:4px;font-size:7px;letter-spacing:.12em;color:var(--muted)}
+
+.prop-talisman{
+  left:-10px;top:35%;width:42px;height:116px;padding:16px 7px 8px;
+  background:#fff7e9;border:1px solid #dfcfb0;transform:rotate(4deg);text-align:center;
+}
+.prop-talisman::before{content:"";position:absolute;top:7px;left:50%;width:13px;height:4px;border-radius:50%;border:1px solid #bf9f75;transform:translateX(-50%)}
+.prop-talisman b{display:block;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:20px;font-weight:500;line-height:1.25;color:#6e4b3a}
+.prop-talisman small{position:absolute;left:2px;right:2px;bottom:8px;font-size:6px;letter-spacing:.08em;color:#a27d6b}
+
+.prop-clove{
+  top:21%;left:8%;display:flex;align-items:center;gap:5px;padding:5px 8px 5px 6px;
+  background:rgba(255,250,247,.9);border:1px solid var(--line);border-radius:999px;transform:rotate(-9deg);
+}
+.prop-clove span{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:#ead5c4;color:#7a4c36;font-size:14px}
+.prop-clove small{font-size:7px;letter-spacing:.08em;color:#766861}
+
+.prop-jimotsu{
+  right:6%;bottom:22%;width:76px;height:42px;padding:7px 8px;
+  background:#fffaf7;border:1px solid #cabfba;border-radius:5px;transform:rotate(-5deg);
+}
+.prop-jimotsu::before{content:"";position:absolute;left:-9px;top:18px;width:13px;border-top:1px solid #8d8581}
+.prop-jimotsu span{display:block;font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:11px;letter-spacing:.12em}
+.prop-jimotsu i{position:absolute;right:9px;top:9px;width:9px;height:9px;border-radius:50%;border:1px solid #7e7773;box-shadow:inset 0 0 0 2px #fffaf7;background:#a7a09c}
+.prop-jimotsu small{display:block;margin-top:4px;font-size:6px;letter-spacing:.12em;color:var(--muted)}
+
+.prop-trumpet{
+  right:-30px;bottom:82px;width:132px;padding:7px 8px 5px;
+  background:rgba(255,245,220,.88);border:1px solid #d7c59f;border-radius:9px;transform:rotate(8deg);
+}
+.prop-trumpet svg{display:block;width:100%;height:auto;fill:none;stroke:#8d6f32;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.prop-trumpet small{display:block;margin-top:1px;font-size:6px;letter-spacing:.08em;color:#917c52;text-align:center}
+
+.prop-seal{
+  top:28%;right:7%;display:grid;place-items:center;width:31px;height:31px;border:2px solid rgba(169,54,72,.55);border-radius:50%;
+  color:rgba(169,54,72,.72);font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:13px;transform:rotate(13deg);
+}
+.prop-seal::after{content:"";position:absolute;inset:3px;border:1px solid rgba(169,54,72,.35);border-radius:50%}
+
+.prop-thread{left:12%;bottom:18%;width:56px;height:34px;transform:rotate(12deg);opacity:.6}
+.prop-thread::before{content:"";position:absolute;left:4px;right:3px;top:16px;border-top:1px solid #b97c8b;transform:rotate(-8deg)}
+.prop-thread span{position:absolute;width:7px;height:7px;border-radius:50%;background:#f3c7d4;border:1px solid #c796a4}
+.prop-thread span:nth-child(1){left:2px;top:11px}.prop-thread span:nth-child(2){left:24px;top:15px}.prop-thread span:nth-child(3){right:1px;top:8px}
+
+.thought-shell{position:relative;z-index:10;min-height:100svh;display:grid;grid-template-rows:1fr auto auto;overflow:hidden}
 .rail-wrap{display:flex;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;padding:86px 0 20px}
 .rail-wrap::-webkit-scrollbar{display:none}
 .rail{display:flex;align-items:stretch;min-width:max-content}
@@ -117,6 +182,15 @@ button{color:inherit}
   .card::after{right:18px;top:17px;width:31px;height:31px}
   .body p{font-size:17px;line-height:1.9}
   .index-row{grid-template-columns:54px 1fr;padding:15px}
+
+  .prop-linda{top:92px;right:-30px;transform:rotate(9deg) scale(.9)}
+  .prop-salt{left:-24px;bottom:68px;transform:rotate(-9deg) scale(.9)}
+  .prop-talisman{left:-19px;top:43%;transform:rotate(5deg) scale(.9)}
+  .prop-clove{top:18%;left:1%;transform:rotate(-10deg) scale(.88)}
+  .prop-jimotsu{right:-20px;bottom:29%;transform:rotate(-6deg) scale(.9)}
+  .prop-trumpet{right:-47px;bottom:94px;transform:rotate(8deg) scale(.86)}
+  .prop-seal{top:29%;right:2%;transform:rotate(13deg) scale(.9)}
+  .prop-thread{left:4%;bottom:21%;transform:rotate(12deg) scale(.9)}
 }
 @media (min-width:900px){
   .node{width:84vw}
