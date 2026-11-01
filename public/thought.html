@@ -3,79 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、装飾された断章として読むサイト。">
+<meta name="description" content="すべての歯が見えるの断章。">
 <meta name="robots" content="index,follow">
 <meta name="theme-color" content="#120d10">
-<title>すべての歯が見える</title>
-<link rel="stylesheet" href="./thought.css">
+<title>断章｜すべての歯が見える</title>
+<script>
+(() => {
+  const q = new URL(location.href).searchParams.get('node');
+  const h = location.hash.replace(/^#node-/, '');
+  const id = (q || h || '1-1').replace(/[^0-9A-Za-z_-]/g, '');
+  location.replace(`./thought/${id}.html`);
+})();
+</script>
 </head>
 <body>
-<a class="skip-link" href="#journalContent">本文へ</a>
-<div class="page-stage">
-  <header class="ornate-header" aria-label="すべての歯が見える">
-    <span class="header-moon" aria-hidden="true">☾</span>
-    <span class="header-stars stars-left" aria-hidden="true">✦　·　✧</span>
-    <span class="header-stars stars-right" aria-hidden="true">✧　·　✦</span>
-    <div class="header-title-wrap">
-      <span class="tiny-crown" aria-hidden="true">♛</span>
-      <a class="header-title" href="./">すべての歯が見える</a>
-      <p>WORDS / OCCULT NOTE</p>
-    </div>
-    <button class="menu-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel" aria-label="記録一覧を開く">
-      <span></span><span></span><span></span><small>MENU</small>
-    </button>
-    <div class="header-lace" aria-hidden="true"></div>
-  </header>
-
-  <div class="journal-frame">
-    <aside class="ornament-rail left-rail" aria-hidden="true">
-      <div class="flower-cluster"><i></i><i></i><i></i><b></b></div>
-      <div class="moth">◇</div>
-      <div class="wax-seal seal-tooth">歯</div>
-      <div class="vertical-ribbon">OCCULT NOTE <em>✦</em></div>
-      <figure class="moon-scrap"><img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt=""></figure>
-      <div class="scribble-card">きっと<br>どこかで<br>視えている</div>
-      <div class="eye-charm"><span></span></div>
-      <div class="tooth-charm">♢</div>
-      <div class="hanging-star">✦</div>
-      <div class="side-ribbon ribbon-l"></div>
-      <div class="lace-vertical lace-l"></div>
-    </aside>
-
-    <article class="paper" aria-label="思考の断章">
-      <div class="paper-top-trim" aria-hidden="true"></div>
-      <main id="journalContent" class="journal-content" aria-live="polite"></main>
-      <footer class="paper-footer">
-        <span>☾</span><p>この世界の、どうでもいいものたちへ</p><span>☽</span>
-      </footer>
-    </article>
-
-    <aside class="ornament-rail right-rail" aria-hidden="true">
-      <div class="hanging-tag"><span class="tag-eye"></span><b>すべての<br>歯が見える</b></div>
-      <div class="charm-star star-one">✦</div>
-      <div class="charm-star star-two">✧</div>
-      <div class="tiny-ghost ghost-r"><i></i><i></i></div>
-      <div class="crystal-ball"><span>✦</span></div>
-      <div class="book-stack"><i></i><i></i><i></i></div>
-      <div class="vertical-note">見えるもの、<br>見えないもの、<br>それでも、</div>
-      <div class="specimen-jar"><span>物語はまだ<br>終わって<br>いない</span></div>
-      <div class="side-ribbon ribbon-r"></div>
-      <div class="lace-vertical lace-r"></div>
-    </aside>
-  </div>
-</div>
-
-<aside class="utility-panel" id="utilityPanel" hidden>
-  <div class="panel-inner">
-    <div class="panel-head">
-      <div><p>記録一覧</p><small>INDEX / OCCULT NOTE</small></div>
-      <button id="closePanel" type="button">閉じる</button>
-    </div>
-    <div id="nodeIndex" class="node-index"></div>
-  </div>
-</aside>
-
-<noscript>この閲覧画面にはJavaScriptが必要です。</noscript>
-<script src="./thought.js" defer></script>
+<p><a href="./thought/1-1.html">断章を読む</a></p>
 </body>
 </html>
