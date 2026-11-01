@@ -9,6 +9,7 @@ on:
       - 'hitotsu-ore-choji.png'
       - '.github/workflows/neocities.yml'
       - 'scripts/build-komonjo.mjs'
+      - 'scripts/build-thought-pages.mjs'
   workflow_dispatch:
 
 permissions:
@@ -35,6 +36,12 @@ jobs:
           test -f hitotsu-ore-choji.png
           cp hitotsu-ore-choji.png public/hitotsu-ore-choji.png
 
+      - name: Build thought pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/build-thought-pages.mjs public/data/thought-nodes.json
+
       - name: Build komonjo transcriptions
         shell: bash
         run: |
@@ -46,6 +53,8 @@ jobs:
         run: |
           set -euo pipefail
           test -f public/index.html
+          test -f public/thought/1-1.html
+          test -f public/thought/generated.css
           test -f public/tree.js
           test -f public/tree.css
           test -f public/data/trade.json
