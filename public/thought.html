@@ -5,76 +5,70 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、装飾された断章として読むサイト。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#171114">
+<meta name="theme-color" content="#120d10">
 <title>すべての歯が見える</title>
 <link rel="stylesheet" href="./thought.css">
 </head>
 <body>
-<a class="skip-link" href="#thought">本文へ</a>
-
-<header class="site-header">
-  <a class="site-name" href="./">すべての歯が見える</a>
-  <div class="site-kicker">WORDS / OCCULT NOTE</div>
-  <button class="menu-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel" aria-label="記録一覧を開く">
-    <span></span><span></span><span></span><small>MENU</small>
-  </button>
-</header>
-
-<main id="thought" class="journal-shell">
-  <div class="outer-ornaments" aria-hidden="true">
-    <span class="moon">☾</span>
-    <span class="star star-a">✦</span>
-    <span class="star star-b">✧</span>
-    <span class="star star-c">✦</span>
-    <span class="ribbon ribbon-left"></span>
-    <span class="ribbon ribbon-right"></span>
-    <span class="wax wax-left">歯</span>
-    <span class="wax wax-right">丁</span>
-  </div>
-
-  <article class="paper" aria-label="思考の断章">
-    <div class="paper-top" aria-hidden="true">
-      <div class="lace lace-top"></div>
-      <div class="paper-crown">♛</div>
-      <div class="paper-stars">✦　✧　✦　✧　✦</div>
+<a class="skip-link" href="#journalContent">本文へ</a>
+<div class="page-stage">
+  <header class="ornate-header" aria-label="すべての歯が見える">
+    <span class="header-moon" aria-hidden="true">☾</span>
+    <span class="header-stars stars-left" aria-hidden="true">✦　·　✧</span>
+    <span class="header-stars stars-right" aria-hidden="true">✧　·　✦</span>
+    <div class="header-title-wrap">
+      <span class="tiny-crown" aria-hidden="true">♛</span>
+      <a class="header-title" href="./">すべての歯が見える</a>
+      <p>WORDS / OCCULT NOTE</p>
     </div>
+    <button class="menu-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel" aria-label="記録一覧を開く">
+      <span></span><span></span><span></span><small>MENU</small>
+    </button>
+    <div class="header-lace" aria-hidden="true"></div>
+  </header>
 
-    <div class="margin-collage left-collage" aria-hidden="true">
-      <figure class="collage-photo moon-photo">
-        <img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt="">
-      </figure>
-      <div class="eye-charm"><span class="eye-iris"></span></div>
+  <div class="journal-frame">
+    <aside class="ornament-rail left-rail" aria-hidden="true">
+      <div class="flower-cluster"><i></i><i></i><i></i><b></b></div>
+      <div class="moth">◇</div>
+      <div class="wax-seal seal-tooth">歯</div>
+      <div class="vertical-ribbon">OCCULT NOTE <em>✦</em></div>
+      <figure class="moon-scrap"><img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt=""></figure>
+      <div class="scribble-card">きっと<br>どこかで<br>視えている</div>
+      <div class="eye-charm"><span></span></div>
       <div class="tooth-charm">♢</div>
-      <div class="bow bow-left"></div>
-    </div>
+      <div class="hanging-star">✦</div>
+      <div class="side-ribbon ribbon-l"></div>
+      <div class="lace-vertical lace-l"></div>
+    </aside>
 
-    <div class="margin-collage right-collage" aria-hidden="true">
-      <figure class="eye-locket">
-        <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt="">
-      </figure>
-      <div class="tiny-ghost"><i></i><i></i></div>
-      <div class="crystal-ball"><span></span></div>
-      <div class="bow bow-right"></div>
-    </div>
+    <article class="paper" aria-label="思考の断章">
+      <div class="paper-top-trim" aria-hidden="true"></div>
+      <main id="journalContent" class="journal-content" aria-live="polite"></main>
+      <footer class="paper-footer">
+        <span>☾</span><p>この世界の、どうでもいいものたちへ</p><span>☽</span>
+      </footer>
+    </article>
 
-    <div class="journal-intro">
-      <p class="journal-label">WORDS / OCCULT NOTE</p>
-      <div class="ornamental-rule"><span>✦</span></div>
-    </div>
-
-    <div id="journalContent" class="journal-content" aria-live="polite"></div>
-
-    <footer class="journal-footer" aria-hidden="true">
-      <div class="footer-rule"><span>☾</span><span>✦</span><span>☽</span></div>
-      <div class="lace lace-bottom"></div>
-    </footer>
-  </article>
-</main>
+    <aside class="ornament-rail right-rail" aria-hidden="true">
+      <div class="hanging-tag"><span class="tag-eye"></span><b>すべての<br>歯が見える</b></div>
+      <div class="charm-star star-one">✦</div>
+      <div class="charm-star star-two">✧</div>
+      <div class="tiny-ghost ghost-r"><i></i><i></i></div>
+      <div class="crystal-ball"><span>✦</span></div>
+      <div class="book-stack"><i></i><i></i><i></i></div>
+      <div class="vertical-note">見えるもの、<br>見えないもの、<br>それでも、</div>
+      <div class="specimen-jar"><span>物語はまだ<br>終わって<br>いない</span></div>
+      <div class="side-ribbon ribbon-r"></div>
+      <div class="lace-vertical lace-r"></div>
+    </aside>
+  </div>
+</div>
 
 <aside class="utility-panel" id="utilityPanel" hidden>
   <div class="panel-inner">
     <div class="panel-head">
-      <div><p>記録一覧</p><small>INDEX / OBSERVATION FILE</small></div>
+      <div><p>記録一覧</p><small>INDEX / OCCULT NOTE</small></div>
       <button id="closePanel" type="button">閉じる</button>
     </div>
     <div id="nodeIndex" class="node-index"></div>
