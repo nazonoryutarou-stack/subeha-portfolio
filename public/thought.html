@@ -3,90 +3,81 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、断章と分岐として読むサイト。">
+<meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、装飾された断章として読むサイト。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#f4e5ec">
+<meta name="theme-color" content="#171114">
 <title>すべての歯が見える</title>
 <link rel="stylesheet" href="./thought.css">
 </head>
 <body>
 <a class="skip-link" href="#thought">本文へ</a>
-<div class="wallpaper" aria-hidden="true"></div>
 
-<div class="desk-scene" aria-hidden="true">
-  <figure class="desk-piece bouquet-piece"><span class="tape tape-pink"></span><img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt=""></figure>
-  <figure class="desk-piece eye-piece"><span class="locket-loop"></span><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt=""></figure>
-  <figure class="desk-piece clove-piece"><span class="tape tape-blue"></span><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt=""><figcaption>丁子標本</figcaption></figure>
-  <img class="occult-piece" src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt="">
-  <div class="desk-tag linda-tag"><b>LINDA</b><span>おだいじに</span></div>
-  <div class="desk-tag salt-tag"><b>祓塩</b><span>非食用</span></div>
-  <div class="desk-tag jimotsu-tag"><b>持物</b><span>NO.01</span></div>
-</div>
-
-<header class="topbar">
-  <a class="crest-home" href="./" aria-label="入口に戻る"><img src="./hitotsu-ore-choji.png" alt=""></a>
-  <div class="record-title"><span>生活霊具記録</span><small>PERSONAL OCCULT CABINET</small></div>
-  <div class="top-actions">
-    <button class="top-button" id="trinketButton" type="button" aria-expanded="false" aria-controls="trinketPanel">小物箱</button>
-    <button class="top-button" id="readingModeButton" type="button" aria-pressed="false">読書</button>
-    <button class="top-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">記録一覧</button>
-  </div>
+<header class="site-header">
+  <a class="site-name" href="./">すべての歯が見える</a>
+  <div class="site-kicker">WORDS / OCCULT NOTE</div>
+  <button class="menu-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel" aria-label="記録一覧を開く">
+    <span></span><span></span><span></span><small>MENU</small>
+  </button>
 </header>
 
-<main id="thought" class="thought-shell" aria-live="polite">
-  <section class="rail-wrap" aria-label="思考の流れ"><div class="rail" id="rail"></div></section>
-  <nav class="branch-nav" id="branchNav" aria-label="次の分岐"></nav>
-  <div class="reader-footer">
-    <p class="gesture-note">横へ送る / 記録をめくる</p>
-    <p class="system-note"><span class="status-dot" aria-hidden="true"></span>表示に異常がなければ、そのままお読みください。</p>
+<main id="thought" class="journal-shell">
+  <div class="outer-ornaments" aria-hidden="true">
+    <span class="moon">☾</span>
+    <span class="star star-a">✦</span>
+    <span class="star star-b">✧</span>
+    <span class="star star-c">✦</span>
+    <span class="ribbon ribbon-left"></span>
+    <span class="ribbon ribbon-right"></span>
+    <span class="wax wax-left">歯</span>
+    <span class="wax wax-right">丁</span>
   </div>
+
+  <article class="paper" aria-label="思考の断章">
+    <div class="paper-top" aria-hidden="true">
+      <div class="lace lace-top"></div>
+      <div class="paper-crown">♛</div>
+      <div class="paper-stars">✦　✧　✦　✧　✦</div>
+    </div>
+
+    <div class="margin-collage left-collage" aria-hidden="true">
+      <figure class="collage-photo moon-photo">
+        <img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt="">
+      </figure>
+      <div class="eye-charm"><span class="eye-iris"></span></div>
+      <div class="tooth-charm">♢</div>
+      <div class="bow bow-left"></div>
+    </div>
+
+    <div class="margin-collage right-collage" aria-hidden="true">
+      <figure class="eye-locket">
+        <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt="">
+      </figure>
+      <div class="tiny-ghost"><i></i><i></i></div>
+      <div class="crystal-ball"><span></span></div>
+      <div class="bow bow-right"></div>
+    </div>
+
+    <div class="journal-intro">
+      <p class="journal-label">WORDS / OCCULT NOTE</p>
+      <div class="ornamental-rule"><span>✦</span></div>
+    </div>
+
+    <div id="journalContent" class="journal-content" aria-live="polite"></div>
+
+    <footer class="journal-footer" aria-hidden="true">
+      <div class="footer-rule"><span>☾</span><span>✦</span><span>☽</span></div>
+      <div class="lace lace-bottom"></div>
+    </footer>
+  </article>
 </main>
 
 <aside class="utility-panel" id="utilityPanel" hidden>
   <div class="panel-inner">
-    <div class="panel-head"><div><p>記録一覧</p><small>INDEX / OBSERVATION FILE</small></div><button id="closePanel" type="button">閉じる</button></div>
-    <div id="nodeIndex" class="node-index"></div>
-  </div>
-</aside>
-
-<aside class="trinket-panel" id="trinketPanel" hidden>
-  <div class="trinket-inner">
     <div class="panel-head">
-      <div><p>小物箱</p><small>TRINKETS / MATERIALS</small></div>
-      <div class="panel-actions"><button id="tidyTrinkets" type="button">整頓</button><button id="closeTrinketPanel" type="button">閉じる</button></div>
+      <div><p>記録一覧</p><small>INDEX / OBSERVATION FILE</small></div>
+      <button id="closePanel" type="button">閉じる</button>
     </div>
-
-    <div class="playboard" id="playboard">
-      <figure class="play-doll" aria-hidden="true"><img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/17767/25401/main-image" alt=""></figure>
-
-      <button class="play-paper play-valentine" id="playValentine" type="button" aria-label="紙飾りを開く" aria-expanded="false">
-        <span class="tape tape-pink" aria-hidden="true"></span>
-        <img src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/785070/1892773/main-image" alt="">
-        <i class="pull-tab" aria-hidden="true">↟</i>
-      </button>
-
-      <button class="play-paper play-eye" id="playEye" type="button" aria-label="眼のロケットを開閉する" aria-pressed="false">
-        <span class="locket-loop" aria-hidden="true"></span>
-        <span class="play-eye-lid" aria-hidden="true"></span>
-        <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/George%20Engleheart%20-%20A%20Lady%27s%20Right%20Eye%20-%20NMB%202766%20-%20Nationalmuseum.jpg" alt="">
-      </button>
-
-      <figure class="play-paper play-clove"><span class="tape tape-blue"></span><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt=""><figcaption>SPECIMEN / CLOVE</figcaption></figure>
-      <img class="play-occult" src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt="" aria-hidden="true">
-
-      <button class="trinket-note moveable-trinket note-linda" type="button"><b>LINDA</b><span>おだいじに</span><small>生活霊具</small></button>
-      <button class="trinket-note moveable-trinket note-salt" type="button"><b>祓塩</b><span>非食用</span><small>生活霊具</small></button>
-      <button class="trinket-note moveable-trinket note-jimotsu" type="button"><b>持物</b><span>NO.01</span><small>携帯用</small></button>
-      <button class="trinket-note moveable-trinket note-unknown" type="button"><b>?</b><span>未確認</span><small>未登録</small></button>
-
-      <button class="drawer-handle" id="drawerHandle" type="button" aria-expanded="false" aria-controls="trinketDrawer">引き出し</button>
-      <div class="trinket-drawer" id="trinketDrawer" aria-hidden="true">
-        <span class="drawer-lining" aria-hidden="true"></span>
-        <img class="drawer-occult" src="https://fleuron.lib.cam.ac.uk/static/ornament_images/090550010202500_1.png" alt="">
-        <img class="drawer-clove" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Clove%20(PSF).png" alt="">
-        <span class="drawer-stickers" aria-hidden="true">♡　✧　☾　✦</span>
-      </div>
-    </div>
+    <div id="nodeIndex" class="node-index"></div>
   </div>
 </aside>
 
