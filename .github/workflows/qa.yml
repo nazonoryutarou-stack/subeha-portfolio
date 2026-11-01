@@ -25,6 +25,9 @@ jobs:
       - name: Test DeepDream v21 runtime contract
         run: node deepdream/test-v21.mjs
 
+      - name: Build thought pages for QA
+        run: node scripts/build-thought-pages.mjs public/data/thought-nodes.json
+
       - name: Run static QA
         shell: python
         run: |
