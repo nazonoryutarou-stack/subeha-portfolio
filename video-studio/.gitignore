@@ -1,0 +1,7 @@
+# Local production jobs and private exports must not be committed.
+jobs/
+outputs/
+*.m4a
+*.wav
+*.mp4
+*.jsonl
