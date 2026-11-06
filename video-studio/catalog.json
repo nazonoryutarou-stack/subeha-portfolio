@@ -440,6 +440,774 @@
           "confidential": false
         }
       ]
+    },
+    {
+      "name": "video-scrap-slit-scan",
+      "phase": "experimental-optics",
+      "status": "idea-unverified",
+      "description": "スリット走査で時間を空間に引き延ばすの実験スキル。移動する横一列の画素を毎フレーム蓄積し、数秒の移動を1枚の横長画像にする。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-slit-scan/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-anamorphic-leak",
+      "phase": "experimental-optics",
+      "status": "idea-unverified",
+      "description": "アナモルフィック風の光条と横伸びの実験スキル。光源の方向に横方向のブルームと青色収差を重ねる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-anamorphic-leak/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-tiltshift-fake",
+      "phase": "experimental-optics",
+      "status": "idea-unverified",
+      "description": "ミニチュア風チルトシフトの実験スキル。画面中央の帯以外に段階的ぼけとコントラストを施す。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-tiltshift-fake/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-lens-breath",
+      "phase": "experimental-optics",
+      "status": "idea-unverified",
+      "description": "レンズ呼吸の焦点移動の実験スキル。焦点距離の変化に伴う微弱な画角拡大をキーフレームで付ける。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-lens-breath/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-lens-dirt",
+      "phase": "experimental-optics",
+      "status": "idea-unverified",
+      "description": "レンズ汚れと逆光フレアの合成の実験スキル。透過ダストマスクをハイライトにのみ合成し光源に追従させる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-lens-dirt/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-prism-chromatic",
+      "phase": "experimental-optics",
+      "status": "idea-unverified",
+      "description": "プリズム色分解の局所効果の実験スキル。RGB各チャネルを位置と回転を変えて合成する。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-prism-chromatic/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-lightfield-cheat",
+      "phase": "experimental-optics",
+      "status": "idea-unverified",
+      "description": "疑似ライトフィールド視差の実験スキル。深度マップをレイヤーごとにずらし仮想カメラを左右移動。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-lightfield-cheat/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-water-lens",
+      "phase": "experimental-optics",
+      "status": "idea-unverified",
+      "description": "水滴を通した屈折映像の実験スキル。水滴形の屈折マップを複数の速度で動かす。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-water-lens/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-vhs-head-switch",
+      "phase": "experimental-analog",
+      "status": "idea-unverified",
+      "description": "VHSヘッド切替ノイズの実験スキル。画面下のノイズ帯と水平位相ズレを組み合わせる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-vhs-head-switch/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-crt-phosphor",
+      "phase": "experimental-analog",
+      "status": "idea-unverified",
+      "description": "CRT蛍光体の残像の実験スキル。低速減衰の前フレーム合成と走査線を重ねる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-crt-phosphor/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-ntsc-dotcrawl",
+      "phase": "experimental-analog",
+      "status": "idea-unverified",
+      "description": "NTSCドットクロールの実験スキル。彩度境界にサブピクセル揺れとクロマにじみを付ける。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-ntsc-dotcrawl/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-sync-roll",
+      "phase": "experimental-analog",
+      "status": "idea-unverified",
+      "description": "垂直同期外れロールの実験スキル。映像を周期的に縦方向へ巻き戻すようにずらす。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-sync-roll/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-interlace-jitter",
+      "phase": "experimental-analog",
+      "status": "idea-unverified",
+      "description": "インターレース揺れの実験スキル。偶数/奇数フィールドの時刻をずらして交互に表示する。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-interlace-jitter/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-solarization",
+      "phase": "experimental-analog",
+      "status": "idea-unverified",
+      "description": "フィルムのソラリゼーションの実験スキル。輝度カーブを高輝度域で反転し一部だけネガへ遷移。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-solarization/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-film-gate-weave",
+      "phase": "experimental-analog",
+      "status": "idea-unverified",
+      "description": "フィルムゲートの微小揺れの実験スキル。フレーム位置・回転・露光を微弱に不規則変化させる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-film-gate-weave/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-xerox-motion",
+      "phase": "experimental-analog",
+      "status": "idea-unverified",
+      "description": "コピー機の多重露光の実験スキル。閾値二値化と微小位置ずれを重ねインク感を作る。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-xerox-motion/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-datamosh-pframes",
+      "phase": "experimental-codec-glitch",
+      "status": "idea-unverified",
+      "description": "Pフレーム流用のデータモッシュの実験スキル。一時コピーを使ってキーフレームと動きベクトルの関係を実験。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-datamosh-pframes/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-pixel-sort",
+      "phase": "experimental-codec-glitch",
+      "status": "idea-unverified",
+      "description": "画素を輝度順に並び替えるの実験スキル。輝度閾値内の画素列だけをソートしフレーム間で閾値を変える。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-pixel-sort/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-rgb-slice-tear",
+      "phase": "experimental-codec-glitch",
+      "status": "idea-unverified",
+      "description": "RGB横裂けの実験スキル。フレーム内の横帯だけを左右に移動しRGBを別位相にする。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-rgb-slice-tear/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-compression-ladder",
+      "phase": "experimental-codec-glitch",
+      "status": "idea-unverified",
+      "description": "再圧縮の世代劣化の実験スキル。元画像を異なるビットレートで複数回変換して差分を映像化。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-compression-ladder/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-jpeg-bytebend",
+      "phase": "experimental-codec-glitch",
+      "status": "idea-unverified",
+      "description": "JPEGのバイト破損アートの実験スキル。複製ファイルの画像データ区間のみ改変しデコーダの振舞いを観察。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-jpeg-bytebend/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-bitplane-movie",
+      "phase": "experimental-codec-glitch",
+      "status": "idea-unverified",
+      "description": "色のビット平面を可視化の実験スキル。各RGBの上位/下位ビットをフレーム別に二値表示。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-bitplane-movie/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-time-feedback",
+      "phase": "experimental-codec-glitch",
+      "status": "idea-unverified",
+      "description": "時間帰還の映像残像の実験スキル。直前出力を減衰係数つきで次フレームに再投入。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-time-feedback/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-frame-scramble",
+      "phase": "experimental-codec-glitch",
+      "status": "idea-unverified",
+      "description": "フレーム順序の破壊の実験スキル。同一原音に対し短い区間だけフレーム順を入れ替える。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-frame-scramble/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-mandelbrot-flight",
+      "phase": "experimental-math",
+      "status": "idea-unverified",
+      "description": "マンデルブロ集合の飛行の実験スキル。複素平面の拡大位置を時間に沿って動かす。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-mandelbrot-flight/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-rule110-tapestry",
+      "phase": "experimental-math",
+      "status": "idea-unverified",
+      "description": "ルール110の布を育てるの実験スキル。1次元セルオートマトンの各世代を縦に積み連ねる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-rule110-tapestry/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-conway-life",
+      "phase": "experimental-math",
+      "status": "idea-unverified",
+      "description": "Game of Lifeを都市の窓にするの実験スキル。二次元セル盤をビル窓の点滅パターンへ投影。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-conway-life/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-voronoi-faces",
+      "phase": "experimental-math",
+      "status": "idea-unverified",
+      "description": "ボロノイで顔を分割の実験スキル。画像上の特徴点を種にセル分割し各セルに代表色を塗る。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-voronoi-faces/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-reaction-diffusion",
+      "phase": "experimental-math",
+      "status": "idea-unverified",
+      "description": "反応拡散で皮膚の模様を作るの実験スキル。Gray-Scott系の濃度場をテクスチャとして時間発展。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-reaction-diffusion/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-l-system-roots",
+      "phase": "experimental-math",
+      "status": "idea-unverified",
+      "description": "L-systemで地下根を伸ばすの実験スキル。再帰文法から枝の角度と長さを成長率に応じて更新。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-l-system-roots/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-strange-attractor",
+      "phase": "experimental-math",
+      "status": "idea-unverified",
+      "description": "奇妙なアトラクタをカメラ化の実験スキル。軌道の点列を数値積分しカメラを点群に沿って移動。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-strange-attractor/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-quasicrystal",
+      "phase": "experimental-math",
+      "status": "idea-unverified",
+      "description": "非周期格子の万華鏡の実験スキル。複数方向のサイン波を重ねて準結晶模様を描画。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-quasicrystal/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-boids-flock",
+      "phase": "experimental-simulation",
+      "status": "idea-unverified",
+      "description": "群れアルゴリズムを背景にの実験スキル。分離/整列/結合のベクトル場で多数の個体を動かす。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-boids-flock/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-cloth-shadow",
+      "phase": "experimental-simulation",
+      "status": "idea-unverified",
+      "description": "布の揺れから字幕背景を作るの実験スキル。頂点群をばね拘束し波面の陰影をレンダーする。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-cloth-shadow/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-rigid-body-props",
+      "phase": "experimental-simulation",
+      "status": "idea-unverified",
+      "description": "物が勝手に並ぶCMの実験スキル。剛体物理の落下と衝突を撮影可能な反復動作へ変換。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-rigid-body-props/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-volumetric-fog",
+      "phase": "experimental-simulation",
+      "status": "idea-unverified",
+      "description": "体積霧の光柱の実験スキル。霧密度フィールドに光線追跡風の段階積分を行う。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-volumetric-fog/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-erosion-landscape",
+      "phase": "experimental-simulation",
+      "status": "idea-unverified",
+      "description": "浸食シミュレーションの風景の実験スキル。高さマップに水滴移動と土砂堆積を反復適用。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-erosion-landscape/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-nbody-starfield",
+      "phase": "experimental-simulation",
+      "status": "idea-unverified",
+      "description": "多体重力で星図を動かすの実験スキル。多数の点質量から加速度を計算して星雲風の軌道を描く。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-nbody-starfield/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-crowd-simulation",
+      "phase": "experimental-simulation",
+      "status": "idea-unverified",
+      "description": "群衆の流れから都市の動きを作るの実験スキル。経路探索と衝突回避で点群の人流を生成。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-crowd-simulation/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-navmesh-camera",
+      "phase": "experimental-simulation",
+      "status": "idea-unverified",
+      "description": "ゲームのナビメッシュでカメラの実験スキル。障害物を避ける経路探索をカメラドリーに転用。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-navmesh-camera/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-spectrogram-type",
+      "phase": "experimental-audio",
+      "status": "idea-unverified",
+      "description": "スペクトログラムをタイポグラフィへの実験スキル。音声FFTの周波数帯ごとに文字の太さと方向を変える。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-spectrogram-type/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-phoneme-kinetic",
+      "phase": "experimental-audio",
+      "status": "idea-unverified",
+      "description": "母音ごとの文字運動の実験スキル。token/phoneme時刻であいうえおの文字レイヤーを選択。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-phoneme-kinetic/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-silence-sculpture",
+      "phase": "experimental-audio",
+      "status": "idea-unverified",
+      "description": "無音の形を彫刻にの実験スキル。無音区間の長さを高さに変換して立体地形に配置。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-silence-sculpture/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-formant-ribbons",
+      "phase": "experimental-audio",
+      "status": "idea-unverified",
+      "description": "フォルマントを帯状CGにの実験スキル。音声のF1/F2推定値を帯の曲率・太さへ対応付ける。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-formant-ribbons/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-beat-camera",
+      "phase": "experimental-audio",
+      "status": "idea-unverified",
+      "description": "拍にだけ反応するカメラの実験スキル。オンセット位置でカット・ズーム・回転のタイミングを生成。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-beat-camera/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-spectral-mirror",
+      "phase": "experimental-audio",
+      "status": "idea-unverified",
+      "description": "左右周波数帯の鏡像の実験スキル。左右チャンネルのスペクトル差を対称図形として描画。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-spectral-mirror/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-granular-audio-video",
+      "phase": "experimental-audio",
+      "status": "idea-unverified",
+      "description": "音の粒を映像の粒への実験スキル。音声グラニュラー処理の窓位置と画像タイルを同期。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-granular-audio-video/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-sonic-oscilloscope",
+      "phase": "experimental-audio",
+      "status": "idea-unverified",
+      "description": "オシロスコープ画面を映像化の実験スキル。音声サンプルをXY軌跡に投影し残光で重ねる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-sonic-oscilloscope/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-microscope-cosmos",
+      "phase": "experimental-science",
+      "status": "idea-unverified",
+      "description": "顕微鏡画像を宇宙に転用の実験スキル。合法的な微小構造画像に色変換・深度擬似化を施す。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-microscope-cosmos/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-weather-radar",
+      "phase": "experimental-science",
+      "status": "idea-unverified",
+      "description": "気象レーダーを物語の地図への実験スキル。公開条件を満たす降水格子を時系列でアニメーション。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-weather-radar/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-star-catalog",
+      "phase": "experimental-science",
+      "status": "idea-unverified",
+      "description": "星表から架空航路を作るの実験スキル。恒星の座標と等級を点群にしカメラの航路を生成。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-star-catalog/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-gis-ghost-map",
+      "phase": "experimental-science",
+      "status": "idea-unverified",
+      "description": "地理情報の亡霊図の実験スキル。公開可能な道路ベクトルを時間帯別の線画に変換。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-gis-ghost-map/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-lidar-dust",
+      "phase": "experimental-science",
+      "status": "idea-unverified",
+      "description": "LiDAR点群を粉塵にするの実験スキル。点群の位置と反射強度を粒子の明暗に割り当てる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-lidar-dust/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-xray-fantasy",
+      "phase": "experimental-science",
+      "status": "idea-unverified",
+      "description": "X線風レイヤー合成の実験スキル。自作模型をレイヤー分解して内部構造図風にレンダー。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-xray-fantasy/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-ultrasound-fiction",
+      "phase": "experimental-science",
+      "status": "idea-unverified",
+      "description": "超音波風の偽計測映像の実験スキル。走査扇形と疑似反射ノイズをオブジェクトの上に重ねる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-ultrasound-fiction/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-seismograph-rhythm",
+      "phase": "experimental-science",
+      "status": "idea-unverified",
+      "description": "地震波形をリズム動画にの実験スキル。公開条件を確認した波形を折れ線と点滅へ写像。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-seismograph-rhythm/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-ocr-decay",
+      "phase": "experimental-archive-text",
+      "status": "idea-unverified",
+      "description": "OCR誤認識を詩的破損への実験スキル。文字画像の閾値を変えてOCR結果を数世代伝播させる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-ocr-decay/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-subtitle-disintegration",
+      "phase": "experimental-archive-text",
+      "status": "idea-unverified",
+      "description": "字幕が文章としてほどけるの実験スキル。逐語字幕の文字座標を一字ずつ物理粒子へ変える。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-subtitle-disintegration/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-typewriter-ghost",
+      "phase": "experimental-archive-text",
+      "status": "idea-unverified",
+      "description": "打鍵痕のある霊的タイプの実験スキル。文字出現時に位置ズレ・色のズレ・打鍵音を重ねる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-typewriter-ghost/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-translation-telephone",
+      "phase": "experimental-archive-text",
+      "status": "idea-unverified",
+      "description": "多言語翻訳の連鎖変形の実験スキル。同一文の翻訳と逆翻訳を版ごとに比較表示。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-translation-telephone/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-cipher-reveal",
+      "phase": "experimental-archive-text",
+      "status": "idea-unverified",
+      "description": "暗号表をタイトル演出にの実験スキル。文字を符号化し順に復号するステップを時間化。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-cipher-reveal/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-manuscript-parallax",
+      "phase": "experimental-archive-text",
+      "status": "idea-unverified",
+      "description": "古文書を奥行きのある空間への実験スキル。権利確認済みの紙画像を行・余白・落款に分離。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-manuscript-parallax/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-flipbook-warp",
+      "phase": "experimental-archive-text",
+      "status": "idea-unverified",
+      "description": "フリップブックの抜けフレームの実験スキル。各ページ画像のわずかなズレを生かして動画化。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-flipbook-warp/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-edl-as-poem",
+      "phase": "experimental-archive-text",
+      "status": "idea-unverified",
+      "description": "編集決定表を詩として表示の実験スキル。cutのタイムコード・音声理由をそのまま映像文字にする。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-edl-as-poem/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-latent-walk",
+      "phase": "experimental-ai",
+      "status": "idea-unverified",
+      "description": "潜在空間を歩く映像の実験スキル。同じモデルのseed固定で2点間を補間し中間像を作る。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-latent-walk/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-diffusion-noise-reverse",
+      "phase": "experimental-ai",
+      "status": "idea-unverified",
+      "description": "ノイズから像への逆生成の実験スキル。拡散モデルの各ステップの中間結果を順に映像化。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-diffusion-noise-reverse/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-depth-parallax",
+      "phase": "experimental-ai",
+      "status": "idea-unverified",
+      "description": "深度推定で静止画を立体化の実験スキル。推定深度で分割し視点の小移動に合わせて変形。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-depth-parallax/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-segmentation-collage",
+      "phase": "experimental-ai",
+      "status": "idea-unverified",
+      "description": "セグメンテーションの切り絵の実験スキル。人物・空・地面などのマスクごとに異なる質感で合成。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-segmentation-collage/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-flow-morph",
+      "phase": "experimental-ai",
+      "status": "idea-unverified",
+      "description": "オプティカルフローの融解の実験スキル。映像の運動ベクトルで前フレームの座標を移送。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-flow-morph/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-dream-recursion",
+      "phase": "experimental-ai",
+      "status": "idea-unverified",
+      "description": "画像を何度も夢化するの実験スキル。DeepDream生成物を再入力し各段階の差分を記録。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-dream-recursion/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-model-disagreement",
+      "phase": "experimental-ai",
+      "status": "idea-unverified",
+      "description": "認識器の不一致を演出にの実験スキル。異なる分類器の出力ラベルの不一致を画面のノイズにする。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-model-disagreement/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-embedding-constellation",
+      "phase": "experimental-ai",
+      "status": "idea-unverified",
+      "description": "語句の埋め込みを星座にの実験スキル。文ベクトルを2D/3Dに射影し近接性を線で結ぶ。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-embedding-constellation/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-webgpu-fragments",
+      "phase": "experimental-interactive",
+      "status": "idea-unverified",
+      "description": "GPUシェーダで画面を粒にするの実験スキル。WebGPU/WGSLのフラグメントshaderをオフライン撮影する。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-webgpu-fragments/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-css-strobe-typography",
+      "phase": "experimental-interactive",
+      "status": "idea-unverified",
+      "description": "CSSアニメーションを映像素材にの実験スキル。DOMで文字のタイミングを設計しブラウザキャプチャ。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-css-strobe-typography/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-dom-camera",
+      "phase": "experimental-interactive",
+      "status": "idea-unverified",
+      "description": "Webページをカメラとして使うの実験スキル。画面スクロール・CSS遠近変形をキーフレーム制御。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-dom-camera/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-cursor-ghost",
+      "phase": "experimental-interactive",
+      "status": "idea-unverified",
+      "description": "マウスポインタの残像群の実験スキル。カーソル軌跡を複製し遅延配置して踊らせる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-cursor-ghost/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-chat-constellation",
+      "phase": "experimental-interactive",
+      "status": "idea-unverified",
+      "description": "チャットを星空にするの実験スキル。匿名化したコメントの時間を位置に、長さを半径へ変換。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-chat-constellation/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-web-audio-lightshow",
+      "phase": "experimental-interactive",
+      "status": "idea-unverified",
+      "description": "ブラウザ音声でリアクティブ映像の実験スキル。Web Audio FFTの低/中/高帯域をWebGL色・形に対応。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-web-audio-lightshow/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-browser-pointcloud",
+      "phase": "experimental-interactive",
+      "status": "idea-unverified",
+      "description": "ブラウザに点群の幽霊を表示の実験スキル。three.js等で自作点群をロードし軌道カメラを動かす。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-browser-pointcloud/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-interactive-branch-cinema",
+      "phase": "experimental-interactive",
+      "status": "idea-unverified",
+      "description": "選択肢で分岐する短編映画の実験スキル。分岐IDを映像ショットと結び各分岐を個別にレンダー。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-interactive-branch-cinema/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-eink-afterimage",
+      "phase": "experimental-hardware",
+      "status": "idea-unverified",
+      "description": "電子ペーパー残像を撮るの実験スキル。電子インク画面の書き換え跡をマクロ撮影して素材化。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-eink-afterimage/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-led-matrix-moire",
+      "phase": "experimental-hardware",
+      "status": "idea-unverified",
+      "description": "LED行列のモアレを使うの実験スキル。自作光源の点密度とカメラの距離・シャッターを変える。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-led-matrix-moire/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-oscilloscope-xy",
+      "phase": "experimental-hardware",
+      "status": "idea-unverified",
+      "description": "XYオシロスコープで図形を描くの実験スキル。低電圧の音響波形を安全な対応機材のXY入力へ与える。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-oscilloscope-xy/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-crt-rephotography",
+      "phase": "experimental-hardware",
+      "status": "idea-unverified",
+      "description": "CRTの走査を再撮影の実験スキル。低輝度の古いCRTを異なるシャッター速度で撮影。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-crt-rephotography/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-thermal-printer-film",
+      "phase": "experimental-hardware",
+      "status": "idea-unverified",
+      "description": "感熱印字をコマ撮りにの実験スキル。印刷したコマごとの階調をスキャナーで取り込み動画化。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-thermal-printer-film/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-plotter-choreography",
+      "phase": "experimental-hardware",
+      "status": "idea-unverified",
+      "description": "プロッタの描画をタイムラプスの実験スキル。ペンプロッタでベクトル軌跡を描き撮影する。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-plotter-choreography/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-scanner-distortion",
+      "phase": "experimental-hardware",
+      "status": "idea-unverified",
+      "description": "スキャナ走査中の変形の実験スキル。スキャン中の安全な自作オブジェクトの位置変化を作品化。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-scanner-distortion/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-projector-feedback",
+      "phase": "experimental-hardware",
+      "status": "idea-unverified",
+      "description": "投影と再撮影の映像帰還の実験スキル。低照度の投影像をカメラで再撮影し数世代積み重ねる。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-projector-feedback/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-ritual-state-machine",
+      "phase": "experimental-weird",
+      "status": "idea-unverified",
+      "description": "儀式を状態機械として撮影の実験スキル。札・動作・声の順番を有限状態遷移として絵コンテにする。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-ritual-state-machine/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-seal-compiler",
+      "phase": "experimental-weird",
+      "status": "idea-unverified",
+      "description": "御札の構文をCGへ翻訳の実験スキル。抽象的な記号文法をパーサーで線・形・時間軸に変える。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-seal-compiler/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-useless-compass",
+      "phase": "experimental-weird",
+      "status": "idea-unverified",
+      "description": "方位と関係ない羅針盤の実験スキル。意味のない座標系から架空の方向矢印を計算して動かす。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-useless-compass/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-ghost-typography",
+      "phase": "experimental-weird",
+      "status": "idea-unverified",
+      "description": "視界に残るはずのない文字の実験スキル。透明度と前フレーム残差を操作して半透明文字を残す。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-ghost-typography/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-recursive-catalog",
+      "phase": "experimental-weird",
+      "status": "idea-unverified",
+      "description": "目録が自分を分類する映像の実験スキル。分類表の行を次の分類の入力として反復アニメ化する。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-recursive-catalog/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-almost-silence",
+      "phase": "experimental-weird",
+      "status": "idea-unverified",
+      "description": "ほぼ無音の超接写映画の実験スキル。大きな画の変化を避け微弱な光・環境音の変化だけを記録。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-almost-silence/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-narrative-bug",
+      "phase": "experimental-weird",
+      "status": "idea-unverified",
+      "description": "物語のバグを表示するの実験スキル。演出上のタイムコード逆転・矛盾するラベルを規則で配置。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-narrative-bug/SKILL.md",
+      "sources": []
+    },
+    {
+      "name": "video-scrap-dream-atlas",
+      "phase": "experimental-weird",
+      "status": "idea-unverified",
+      "description": "夢の地図を自己増殖させるの実験スキル。シーンIDと象徴物をノードとし未知の道を映像分岐へ変換。映像制作に使えるか未知の素材を試すときに使用。",
+      "path": ".github/skills/video-scrap-dream-atlas/SKILL.md",
+      "sources": []
     }
   ]
 }

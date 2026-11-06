@@ -1,0 +1,1831 @@
+{
+  "schema": "subeha-video-junkyard-ideas-v1",
+  "date": "2026-11-07",
+  "policy": "Keep unproven and failed ideas; do not claim dependency installed or effect rendered.",
+  "ideas": [
+    {
+      "id": "video-scrap-slit-scan",
+      "category": "optics",
+      "title": "スリット走査で時間を空間に引き延ばす",
+      "mechanism": "移動する横一列の画素を毎フレーム蓄積し、数秒の移動を1枚の横長画像にする",
+      "trial": "単純なパン動画と比較し、時間的な歪みが見えるか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-anamorphic-leak",
+      "category": "optics",
+      "title": "アナモルフィック風の光条と横伸び",
+      "mechanism": "光源の方向に横方向のブルームと青色収差を重ねる",
+      "trial": "点光源を使い、被写体の輪郭を壊さない強さを探す",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-tiltshift-fake",
+      "category": "optics",
+      "title": "ミニチュア風チルトシフト",
+      "mechanism": "画面中央の帯以外に段階的ぼけとコントラストを施す",
+      "trial": "街の俯瞰静止画を2秒パンし模型に見えるか比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-lens-breath",
+      "category": "optics",
+      "title": "レンズ呼吸の焦点移動",
+      "mechanism": "焦点距離の変化に伴う微弱な画角拡大をキーフレームで付ける",
+      "trial": "無人の廊下で2秒の焦点移動を模擬する",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-lens-dirt",
+      "category": "optics",
+      "title": "レンズ汚れと逆光フレアの合成",
+      "mechanism": "透過ダストマスクをハイライトにのみ合成し光源に追従させる",
+      "trial": "黒背景でなく逆光ショットに置いて自然さを比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-prism-chromatic",
+      "category": "optics",
+      "title": "プリズム色分解の局所効果",
+      "mechanism": "RGB各チャネルを位置と回転を変えて合成する",
+      "trial": "白い文字の輪郭を残して周辺のみ色ずれを加える",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-lightfield-cheat",
+      "category": "optics",
+      "title": "疑似ライトフィールド視差",
+      "mechanism": "深度マップをレイヤーごとにずらし仮想カメラを左右移動",
+      "trial": "静止画から3秒で動きが破綻する境界を観察",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-water-lens",
+      "category": "optics",
+      "title": "水滴を通した屈折映像",
+      "mechanism": "水滴形の屈折マップを複数の速度で動かす",
+      "trial": "表面の円形マスクの縁が不自然に浮かないか検証",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-vhs-head-switch",
+      "category": "analog",
+      "title": "VHSヘッド切替ノイズ",
+      "mechanism": "画面下のノイズ帯と水平位相ズレを組み合わせる",
+      "trial": "読みづらくない字幕あり/なしを比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-crt-phosphor",
+      "category": "analog",
+      "title": "CRT蛍光体の残像",
+      "mechanism": "低速減衰の前フレーム合成と走査線を重ねる",
+      "trial": "暗い文字の後ろに残光が立つか確認",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-ntsc-dotcrawl",
+      "category": "analog",
+      "title": "NTSCドットクロール",
+      "mechanism": "彩度境界にサブピクセル揺れとクロマにじみを付ける",
+      "trial": "赤青の縦縞で滲み量の変化を検査",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-sync-roll",
+      "category": "analog",
+      "title": "垂直同期外れロール",
+      "mechanism": "映像を周期的に縦方向へ巻き戻すようにずらす",
+      "trial": "切替点の上下継ぎ目が演出として成立するか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-interlace-jitter",
+      "category": "analog",
+      "title": "インターレース揺れ",
+      "mechanism": "偶数/奇数フィールドの時刻をずらして交互に表示する",
+      "trial": "動く手の輪郭を観察し錯視と見辛さを評価",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-solarization",
+      "category": "analog",
+      "title": "フィルムのソラリゼーション",
+      "mechanism": "輝度カーブを高輝度域で反転し一部だけネガへ遷移",
+      "trial": "白い被写体の輪郭の残り方を調べる",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-film-gate-weave",
+      "category": "analog",
+      "title": "フィルムゲートの微小揺れ",
+      "mechanism": "フレーム位置・回転・露光を微弱に不規則変化させる",
+      "trial": "3秒の固定画で自然な揺れと手振れを比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-xerox-motion",
+      "category": "analog",
+      "title": "コピー機の多重露光",
+      "mechanism": "閾値二値化と微小位置ずれを重ねインク感を作る",
+      "trial": "人物ではなく単純図形で白黒情報の残存を観察",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-datamosh-pframes",
+      "category": "codec-glitch",
+      "title": "Pフレーム流用のデータモッシュ",
+      "mechanism": "一時コピーを使ってキーフレームと動きベクトルの関係を実験",
+      "trial": "デコード不能にならない範囲で5秒のテスト映像を作る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-pixel-sort",
+      "category": "codec-glitch",
+      "title": "画素を輝度順に並び替える",
+      "mechanism": "輝度閾値内の画素列だけをソートしフレーム間で閾値を変える",
+      "trial": "1秒の縦横スキャンを生成し変形方向を評価",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-rgb-slice-tear",
+      "category": "codec-glitch",
+      "title": "RGB横裂け",
+      "mechanism": "フレーム内の横帯だけを左右に移動しRGBを別位相にする",
+      "trial": "早口字幕に重ねず画の中央だけに限定して試す",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-compression-ladder",
+      "category": "codec-glitch",
+      "title": "再圧縮の世代劣化",
+      "mechanism": "元画像を異なるビットレートで複数回変換して差分を映像化",
+      "trial": "初代/第5世代/第10世代を同フレームで比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-jpeg-bytebend",
+      "category": "codec-glitch",
+      "title": "JPEGのバイト破損アート",
+      "mechanism": "複製ファイルの画像データ区間のみ改変しデコーダの振舞いを観察",
+      "trial": "破損原本は保存せず生成物の復元可能率を測定",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-bitplane-movie",
+      "category": "codec-glitch",
+      "title": "色のビット平面を可視化",
+      "mechanism": "各RGBの上位/下位ビットをフレーム別に二値表示",
+      "trial": "8枚のビット平面を短いシーケンスで示す",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-time-feedback",
+      "category": "codec-glitch",
+      "title": "時間帰還の映像残像",
+      "mechanism": "直前出力を減衰係数つきで次フレームに再投入",
+      "trial": "係数別に3秒ループを作り焼き付き/振動を記録",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-frame-scramble",
+      "category": "codec-glitch",
+      "title": "フレーム順序の破壊",
+      "mechanism": "同一原音に対し短い区間だけフレーム順を入れ替える",
+      "trial": "1秒内で逆行・リピート・正常再生を交替",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-mandelbrot-flight",
+      "category": "math",
+      "title": "マンデルブロ集合の飛行",
+      "mechanism": "複素平面の拡大位置を時間に沿って動かす",
+      "trial": "3秒で異なるスケールをつなぎ数値精度を測る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-rule110-tapestry",
+      "category": "math",
+      "title": "ルール110の布を育てる",
+      "mechanism": "1次元セルオートマトンの各世代を縦に積み連ねる",
+      "trial": "256世代を動画化し周期性と発生構造を見る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-conway-life",
+      "category": "math",
+      "title": "Game of Lifeを都市の窓にする",
+      "mechanism": "二次元セル盤をビル窓の点滅パターンへ投影",
+      "trial": "同じ初期seedで毎回同じ映像になるか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-voronoi-faces",
+      "category": "math",
+      "title": "ボロノイで顔を分割",
+      "mechanism": "画像上の特徴点を種にセル分割し各セルに代表色を塗る",
+      "trial": "点密度8・32・128で認識可能性を比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-reaction-diffusion",
+      "category": "math",
+      "title": "反応拡散で皮膚の模様を作る",
+      "mechanism": "Gray-Scott系の濃度場をテクスチャとして時間発展",
+      "trial": "固定seedで5秒の斑紋変化を記録",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-l-system-roots",
+      "category": "math",
+      "title": "L-systemで地下根を伸ばす",
+      "mechanism": "再帰文法から枝の角度と長さを成長率に応じて更新",
+      "trial": "3世代と6世代で画面密度と計算負荷を比べる",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-strange-attractor",
+      "category": "math",
+      "title": "奇妙なアトラクタをカメラ化",
+      "mechanism": "軌道の点列を数値積分しカメラを点群に沿って移動",
+      "trial": "Lorenz軌道の同じ初期値から再現できるか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-quasicrystal",
+      "category": "math",
+      "title": "非周期格子の万華鏡",
+      "mechanism": "複数方向のサイン波を重ねて準結晶模様を描画",
+      "trial": "波数の違いを同じ4秒ループで比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-boids-flock",
+      "category": "simulation",
+      "title": "群れアルゴリズムを背景に",
+      "mechanism": "分離/整列/結合のベクトル場で多数の個体を動かす",
+      "trial": "100体と1000体でフレーム時間を比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-cloth-shadow",
+      "category": "simulation",
+      "title": "布の揺れから字幕背景を作る",
+      "mechanism": "頂点群をばね拘束し波面の陰影をレンダーする",
+      "trial": "文字との重なりで可読性が落ちないか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-rigid-body-props",
+      "category": "simulation",
+      "title": "物が勝手に並ぶCM",
+      "mechanism": "剛体物理の落下と衝突を撮影可能な反復動作へ変換",
+      "trial": "固定seed・重力条件の再現性を調べる",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-volumetric-fog",
+      "category": "simulation",
+      "title": "体積霧の光柱",
+      "mechanism": "霧密度フィールドに光線追跡風の段階積分を行う",
+      "trial": "低解像度で3秒の霧を描き輪郭が潰れないか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-erosion-landscape",
+      "category": "simulation",
+      "title": "浸食シミュレーションの風景",
+      "mechanism": "高さマップに水滴移動と土砂堆積を反復適用",
+      "trial": "同じ地形の浸食前後をカメラ移動で比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-nbody-starfield",
+      "category": "simulation",
+      "title": "多体重力で星図を動かす",
+      "mechanism": "多数の点質量から加速度を計算して星雲風の軌道を描く",
+      "trial": "32天体でエネルギー保存と描画負荷を測る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-crowd-simulation",
+      "category": "simulation",
+      "title": "群衆の流れから都市の動きを作る",
+      "mechanism": "経路探索と衝突回避で点群の人流を生成",
+      "trial": "入口2つ・出口1つでボトルネックを見る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-navmesh-camera",
+      "category": "simulation",
+      "title": "ゲームのナビメッシュでカメラ",
+      "mechanism": "障害物を避ける経路探索をカメラドリーに転用",
+      "trial": "小街区の通過経路を2種類比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-spectrogram-type",
+      "category": "audio",
+      "title": "スペクトログラムをタイポグラフィへ",
+      "mechanism": "音声FFTの周波数帯ごとに文字の太さと方向を変える",
+      "trial": "同じ5秒音声で高域と低域の見え方を比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-phoneme-kinetic",
+      "category": "audio",
+      "title": "母音ごとの文字運動",
+      "mechanism": "token/phoneme時刻であいうえおの文字レイヤーを選択",
+      "trial": "実音声と同期した1秒で母音遅延を測る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-silence-sculpture",
+      "category": "audio",
+      "title": "無音の形を彫刻に",
+      "mechanism": "無音区間の長さを高さに変換して立体地形に配置",
+      "trial": "会話の間と息継ぎの違いを見分けられるか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-formant-ribbons",
+      "category": "audio",
+      "title": "フォルマントを帯状CGに",
+      "mechanism": "音声のF1/F2推定値を帯の曲率・太さへ対応付ける",
+      "trial": "発声サンプルでフォルマント誤推定の影響を観察",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-beat-camera",
+      "category": "audio",
+      "title": "拍にだけ反応するカメラ",
+      "mechanism": "オンセット位置でカット・ズーム・回転のタイミングを生成",
+      "trial": "無音/テンポ一定/変拍子を同じ実装で比べる",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-spectral-mirror",
+      "category": "audio",
+      "title": "左右周波数帯の鏡像",
+      "mechanism": "左右チャンネルのスペクトル差を対称図形として描画",
+      "trial": "モノラルとステレオ音源で変化量を測る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-granular-audio-video",
+      "category": "audio",
+      "title": "音の粒を映像の粒へ",
+      "mechanism": "音声グラニュラー処理の窓位置と画像タイルを同期",
+      "trial": "100ms単位で映像が破綻しない粒度を探す",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-sonic-oscilloscope",
+      "category": "audio",
+      "title": "オシロスコープ画面を映像化",
+      "mechanism": "音声サンプルをXY軌跡に投影し残光で重ねる",
+      "trial": "サイン波と声で図形の違いを作る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-microscope-cosmos",
+      "category": "science",
+      "title": "顕微鏡画像を宇宙に転用",
+      "mechanism": "合法的な微小構造画像に色変換・深度擬似化を施す",
+      "trial": "細胞の参考画像と星雲を並べて境界の類似を比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-weather-radar",
+      "category": "science",
+      "title": "気象レーダーを物語の地図へ",
+      "mechanism": "公開条件を満たす降水格子を時系列でアニメーション",
+      "trial": "実測と演出を明示し、時刻表記を残す",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-star-catalog",
+      "category": "science",
+      "title": "星表から架空航路を作る",
+      "mechanism": "恒星の座標と等級を点群にしカメラの航路を生成",
+      "trial": "座標系を固定して同じ星図を再レンダー",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-gis-ghost-map",
+      "category": "science",
+      "title": "地理情報の亡霊図",
+      "mechanism": "公開可能な道路ベクトルを時間帯別の線画に変換",
+      "trial": "緯度経度から投影する変換の歪みを検査",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-lidar-dust",
+      "category": "science",
+      "title": "LiDAR点群を粉塵にする",
+      "mechanism": "点群の位置と反射強度を粒子の明暗に割り当てる",
+      "trial": "単一室内スキャンで3秒の視点移動を試す",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-xray-fantasy",
+      "category": "science",
+      "title": "X線風レイヤー合成",
+      "mechanism": "自作模型をレイヤー分解して内部構造図風にレンダー",
+      "trial": "実在の医療画像と誤認されない表示を確認",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-ultrasound-fiction",
+      "category": "science",
+      "title": "超音波風の偽計測映像",
+      "mechanism": "走査扇形と疑似反射ノイズをオブジェクトの上に重ねる",
+      "trial": "『演出』表示を付けたうえで質感のみ評価",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-seismograph-rhythm",
+      "category": "science",
+      "title": "地震波形をリズム動画に",
+      "mechanism": "公開条件を確認した波形を折れ線と点滅へ写像",
+      "trial": "時刻と計測単位が視覚化の中で消えないか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-ocr-decay",
+      "category": "archive-text",
+      "title": "OCR誤認識を詩的破損へ",
+      "mechanism": "文字画像の閾値を変えてOCR結果を数世代伝播させる",
+      "trial": "元文を保持し誤読ログと差分を動画化",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-subtitle-disintegration",
+      "category": "archive-text",
+      "title": "字幕が文章としてほどける",
+      "mechanism": "逐語字幕の文字座標を一字ずつ物理粒子へ変える",
+      "trial": "語句を読む時間を確保できるか検証",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-typewriter-ghost",
+      "category": "archive-text",
+      "title": "打鍵痕のある霊的タイプ",
+      "mechanism": "文字出現時に位置ズレ・色のズレ・打鍵音を重ねる",
+      "trial": "実際の配信字幕と重ねて情報量を確認",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-translation-telephone",
+      "category": "archive-text",
+      "title": "多言語翻訳の連鎖変形",
+      "mechanism": "同一文の翻訳と逆翻訳を版ごとに比較表示",
+      "trial": "翻訳の事実と演出文章を明確に区別",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-cipher-reveal",
+      "category": "archive-text",
+      "title": "暗号表をタイトル演出に",
+      "mechanism": "文字を符号化し順に復号するステップを時間化",
+      "trial": "符号表と復号後の文字が一致するか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-manuscript-parallax",
+      "category": "archive-text",
+      "title": "古文書を奥行きのある空間へ",
+      "mechanism": "権利確認済みの紙画像を行・余白・落款に分離",
+      "trial": "転記本文と原本画像の対応を壊さないか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-flipbook-warp",
+      "category": "archive-text",
+      "title": "フリップブックの抜けフレーム",
+      "mechanism": "各ページ画像のわずかなズレを生かして動画化",
+      "trial": "2秒分の連続フレームを並べて動きの粗さを評価",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-edl-as-poem",
+      "category": "archive-text",
+      "title": "編集決定表を詩として表示",
+      "mechanism": "cutのタイムコード・音声理由をそのまま映像文字にする",
+      "trial": "タイムコードが視聴者に読める密度か",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-latent-walk",
+      "category": "ai",
+      "title": "潜在空間を歩く映像",
+      "mechanism": "同じモデルのseed固定で2点間を補間し中間像を作る",
+      "trial": "フレーム間の対象の同一性と突然変異を観察",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-diffusion-noise-reverse",
+      "category": "ai",
+      "title": "ノイズから像への逆生成",
+      "mechanism": "拡散モデルの各ステップの中間結果を順に映像化",
+      "trial": "固定seedで同じ中間系列が得られるか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-depth-parallax",
+      "category": "ai",
+      "title": "深度推定で静止画を立体化",
+      "mechanism": "推定深度で分割し視点の小移動に合わせて変形",
+      "trial": "遮蔽解除部分の破綻を測定",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-segmentation-collage",
+      "category": "ai",
+      "title": "セグメンテーションの切り絵",
+      "mechanism": "人物・空・地面などのマスクごとに異なる質感で合成",
+      "trial": "境界の髪や透過部分が破綻しないか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-flow-morph",
+      "category": "ai",
+      "title": "オプティカルフローの融解",
+      "mechanism": "映像の運動ベクトルで前フレームの座標を移送",
+      "trial": "移動物と背景の境界で残像破綻を見る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-dream-recursion",
+      "category": "ai",
+      "title": "画像を何度も夢化する",
+      "mechanism": "DeepDream生成物を再入力し各段階の差分を記録",
+      "trial": "元図・第3世代・第6世代を並べて比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-model-disagreement",
+      "category": "ai",
+      "title": "認識器の不一致を演出に",
+      "mechanism": "異なる分類器の出力ラベルの不一致を画面のノイズにする",
+      "trial": "事実判定として断定せず差だけを表示",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-embedding-constellation",
+      "category": "ai",
+      "title": "語句の埋め込みを星座に",
+      "mechanism": "文ベクトルを2D/3Dに射影し近接性を線で結ぶ",
+      "trial": "軸に意味を捏造せず再現可能なseedを残す",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-webgpu-fragments",
+      "category": "interactive",
+      "title": "GPUシェーダで画面を粒にする",
+      "mechanism": "WebGPU/WGSLのフラグメントshaderをオフライン撮影する",
+      "trial": "機種差があるため静止基準とFPSを保存",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-css-strobe-typography",
+      "category": "interactive",
+      "title": "CSSアニメーションを映像素材に",
+      "mechanism": "DOMで文字のタイミングを設計しブラウザキャプチャ",
+      "trial": "スクリーンリーダーと点滅リスクを考慮し弱い変化から",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-dom-camera",
+      "category": "interactive",
+      "title": "Webページをカメラとして使う",
+      "mechanism": "画面スクロール・CSS遠近変形をキーフレーム制御",
+      "trial": "固定viewportで録画し同じ軌跡を再現",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-cursor-ghost",
+      "category": "interactive",
+      "title": "マウスポインタの残像群",
+      "mechanism": "カーソル軌跡を複製し遅延配置して踊らせる",
+      "trial": "1本の操作ログから3本の異なる遅延映像を作る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-chat-constellation",
+      "category": "interactive",
+      "title": "チャットを星空にする",
+      "mechanism": "匿名化したコメントの時間を位置に、長さを半径へ変換",
+      "trial": "個人や発言が追跡できないか検査",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-web-audio-lightshow",
+      "category": "interactive",
+      "title": "ブラウザ音声でリアクティブ映像",
+      "mechanism": "Web Audio FFTの低/中/高帯域をWebGL色・形に対応",
+      "trial": "録音を再生して1秒の固定seed動画を検証",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-browser-pointcloud",
+      "category": "interactive",
+      "title": "ブラウザに点群の幽霊を表示",
+      "mechanism": "three.js等で自作点群をロードし軌道カメラを動かす",
+      "trial": "モバイルで1000/10000点のfpsを比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-interactive-branch-cinema",
+      "category": "interactive",
+      "title": "選択肢で分岐する短編映画",
+      "mechanism": "分岐IDを映像ショットと結び各分岐を個別にレンダー",
+      "trial": "無限ループ分岐を検出し未定義ノードを止める",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-eink-afterimage",
+      "category": "hardware",
+      "title": "電子ペーパー残像を撮る",
+      "mechanism": "電子インク画面の書き換え跡をマクロ撮影して素材化",
+      "trial": "端末ごとのリフレッシュ違いを記録",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-led-matrix-moire",
+      "category": "hardware",
+      "title": "LED行列のモアレを使う",
+      "mechanism": "自作光源の点密度とカメラの距離・シャッターを変える",
+      "trial": "強い点滅を避け通常速度で模様を比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-oscilloscope-xy",
+      "category": "hardware",
+      "title": "XYオシロスコープで図形を描く",
+      "mechanism": "低電圧の音響波形を安全な対応機材のXY入力へ与える",
+      "trial": "機材定格と絶縁を守って単純なリサジュー図形を試す",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-crt-rephotography",
+      "category": "hardware",
+      "title": "CRTの走査を再撮影",
+      "mechanism": "低輝度の古いCRTを異なるシャッター速度で撮影",
+      "trial": "フリッカーと過露光のない設定を測定",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-thermal-printer-film",
+      "category": "hardware",
+      "title": "感熱印字をコマ撮りに",
+      "mechanism": "印刷したコマごとの階調をスキャナーで取り込み動画化",
+      "trial": "感熱退色を含め3パターン比較",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-plotter-choreography",
+      "category": "hardware",
+      "title": "プロッタの描画をタイムラプス",
+      "mechanism": "ペンプロッタでベクトル軌跡を描き撮影する",
+      "trial": "画材と線密度別の描画時間を記録",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-scanner-distortion",
+      "category": "hardware",
+      "title": "スキャナ走査中の変形",
+      "mechanism": "スキャン中の安全な自作オブジェクトの位置変化を作品化",
+      "trial": "機器を破損せず歪みの向きを再現",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-projector-feedback",
+      "category": "hardware",
+      "title": "投影と再撮影の映像帰還",
+      "mechanism": "低照度の投影像をカメラで再撮影し数世代積み重ねる",
+      "trial": "白飛び・映り込みを確認しスクリーンのみ撮る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-ritual-state-machine",
+      "category": "weird",
+      "title": "儀式を状態機械として撮影",
+      "mechanism": "札・動作・声の順番を有限状態遷移として絵コンテにする",
+      "trial": "不正遷移で別映像へ分岐する短編を作る",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-seal-compiler",
+      "category": "weird",
+      "title": "御札の構文をCGへ翻訳",
+      "mechanism": "抽象的な記号文法をパーサーで線・形・時間軸に変える",
+      "trial": "構文エラーを演出として明示し実害ある効能は主張しない",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-useless-compass",
+      "category": "weird",
+      "title": "方位と関係ない羅針盤",
+      "mechanism": "意味のない座標系から架空の方向矢印を計算して動かす",
+      "trial": "東西南北を示さない旨を表示して2秒テスト",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-ghost-typography",
+      "category": "weird",
+      "title": "視界に残るはずのない文字",
+      "mechanism": "透明度と前フレーム残差を操作して半透明文字を残す",
+      "trial": "字幕と混同しない別レイヤーで認識限界を調べる",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-recursive-catalog",
+      "category": "weird",
+      "title": "目録が自分を分類する映像",
+      "mechanism": "分類表の行を次の分類の入力として反復アニメ化する",
+      "trial": "循環参照を一定深さで止める",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-almost-silence",
+      "category": "weird",
+      "title": "ほぼ無音の超接写映画",
+      "mechanism": "大きな画の変化を避け微弱な光・環境音の変化だけを記録",
+      "trial": "視聴者が無音と誤認する閾値をテスト",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-narrative-bug",
+      "category": "weird",
+      "title": "物語のバグを表示する",
+      "mechanism": "演出上のタイムコード逆転・矛盾するラベルを規則で配置",
+      "trial": "事実と演出の境界が説明なく誤解されないか",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    },
+    {
+      "id": "video-scrap-dream-atlas",
+      "category": "weird",
+      "title": "夢の地図を自己増殖させる",
+      "mechanism": "シーンIDと象徴物をノードとし未知の道を映像分岐へ変換",
+      "trial": "閉路と孤立ノードを見つけ観客の導線を試す",
+      "status": "idea-unverified",
+      "license": "original-description",
+      "inputs": [
+        "self-owned short source or synthetic sample"
+      ],
+      "outputs": [
+        "short test clip",
+        "parameters",
+        "observation"
+      ],
+      "lane": "sandbox",
+      "source_refs": []
+    }
+  ]
+}
