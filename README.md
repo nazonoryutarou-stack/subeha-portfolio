@@ -34,3 +34,11 @@
 - [Agent Skills](.github/skills/video-production-director/SKILL.md)：映像制作の総合ディレクター。専門スキルは `.github/skills/` に格納。
 - [制作ツール](video-studio/cli.mjs)：索引検査・非公開job雛形作成・ffprobe構造QC。実レンダーや公開の完了を意味しない。
 
+
+## 📱 SUBEHA CUT — スマホ用動画編集アプリ（試作）
+
+- [アプリのソース／インストール案内](public/cut/README.md)
+- [Webアプリ本体](public/cut/index.html)（GitHub Pagesで配信されている場合はAndroid ChromeからPWAとして追加可能）
+- クリップの追加・分割・並べ替え・速度変更・フィルター・文字レイヤー・BGM・端末内動画書き出しを実装。
+- ブラウザ機能と端末の制約により出力コーデックは異なる。ネイティブAPKではなくPWA。
+

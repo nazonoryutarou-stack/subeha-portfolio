@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+  <meta name="theme-color" content="#111318">
+  <meta name="description" content="SUBEHA CUT — ローカルで編集する映像実験室">
+  <title>SUBEHA CUT | Mobile Video Studio</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">◈</span><span>SUBEHA<span class="brand-light">CUT</span><small>PERSONAL VIDEO LAB</small></span></div>
+    <div class="top-actions"><button id="new-project" class="icon-button" title="新規プロジェクト" aria-label="新規プロジェクト">↺</button><button id="project-save" class="icon-button" title="プロジェクト情報を書き出す" aria-label="プロジェクト情報を書き出す">⇩</button><button id="export-open" class="export-button">書き出す ↗</button></div>
+  </header>
+  <main>
+    <section class="viewer-shell" aria-label="映像プレビュー">
+      <div class="viewer-head"><div><span class="tiny-signal"></span><span id="project-label">UNTITLED / EDIT 01</span></div><div id="viewer-status">READY</div></div>
+      <div id="preview-stage" class="preview-stage"><canvas id="preview" width="720" height="1280" aria-label="映像プレビューキャンバス"></canvas>
+        <div id="empty-overlay" class="empty-overlay"><div class="empty-emblem">◈</div><strong>白紙から、異常な映像を。</strong><span>動画・写真・音声を取り込んで編集</span><button id="import-empty" class="primary-button">＋ 素材を追加</button><small>この端末内で編集／ログイン不要</small></div>
+        <div class="preview-corner top-left"></div><div class="preview-corner top-right"></div><div class="preview-corner bottom-left"></div><div class="preview-corner bottom-right"></div>
+      </div>
+      <div class="viewer-bottom"><button id="ratio-button" class="chip" title="画面比率を変更">9:16 ▾</button><div class="timecode" id="timecode">00:00 <span>/ 00:00</span></div><button id="preview-fit" class="chip" title="画像の表示方式">FILL</button></div>
+    </section>
+
+    <section class="transport" aria-label="再生操作"><button class="transport-side" id="back-start" title="最初に戻る" aria-label="最初に戻る">|◀</button><button class="play-button" id="play" aria-label="再生・停止">▶</button><button class="transport-side" id="skip-forward" title="1秒先へ" aria-label="1秒先へ">+1s</button></section>
+    <section class="timeline-shell" aria-label="タイムライン">
+      <div class="section-label"><span>01 / TIMELINE</span><button id="add-media-small" class="plain-btn">＋ 素材</button></div>
+      <input id="scrubber" type="range" min="0" max="0" step="0.01" value="0" aria-label="再生位置">
+      <div class="ruler"><span>00:00</span><span id="ruler-right">00:00</span></div>
+      <div class="track-label"><span class="track-dot"></span> V1 <span class="dim">VIDEO / IMAGE</span></div>
+      <div id="clip-track" class="clip-track"><div class="track-placeholder">＋ クリップを読み込むとここに表示</div></div>
+      <div class="track-label music-track-label"><span class="track-dot audio-dot"></span> A1 <span class="dim">AUDIO / MUSIC</span></div>
+      <div id="music-track" class="music-track"><span>音声トラックなし</span><button id="add-music-small" class="plus-small">＋</button></div>
+      <div class="track-label"><span class="track-dot text-dot"></span> T1 <span class="dim">TEXT / OVERLAYS</span></div>
+      <div id="text-track" class="text-track"><span>字幕・テキストなし</span><button id="add-text-small" class="plus-small">＋</button></div>
+    </section>
+    <section class="tools-shell" aria-label="編集ツール">
+      <div class="section-label"><span>02 / WORKSPACE</span><span id="tool-hint">クリップを選択してください</span></div>
+      <div id="panel-clips" class="tool-panel" data-panel="clips"><div id="clip-unselected" class="hint-panel">クリップを選ぶと、トリミング・速度・分割などが使えます。</div>
+      <div id="clip-editor" hidden>
+        <div class="selected-header"><strong id="selected-title">CLIP</strong><span id="selected-duration">00:00</span></div>
+        <div class="control-grid"><label>IN <span id="in-label"></span><input id="trim-in" type="range" min="0" max="1" step="0.01"></label><label>OUT <span id="out-label"></span><input id="trim-out" type="range" min="0" max="1" step="0.01"></label></div>
+        <div class="speed-row"><span>再生速度</span><div class="segmented" id="speed-segments"><button data-speed="0.5">0.5×</button><button data-speed="1">1×</button><button data-speed="1.5">1.5×</button><button data-speed="2">2×</button></div></div>
+        <div class="button-row"><button id="split-clip">✂ 分割</button><button id="dup-clip">▧ 複製</button><button id="move-left">← 左へ</button><button id="move-right">右へ →</button><button class="danger" id="delete-clip">削除</button></div>
+      </div></div>
+      <div id="panel-look" class="tool-panel" data-panel="look" hidden><div class="control-title">LOOK LAB <span>非破壊・クリップ単位</span></div><div id="filters" class="filter-grid"></div><div class="button-row"><button id="filter-clear">フィルターを解除</button></div></div>
+      <div id="panel-text" class="tool-panel" data-panel="text" hidden><div class="control-title">TEXT LAYERS <span>プレビューへ合成</span></div><div class="button-row"><button class="primary-button" id="text-add">＋ テキストを追加</button></div><div id="text-editor" hidden><label class="field-label">文字列<input id="text-content" maxlength="160" placeholder="映像に出す言葉"></label><div class="control-grid"><label>文字サイズ <span id="text-size-label"></span><input id="text-size" type="range" min="28" max="120" step="2"></label><label>表示時間（秒） <span id="text-length-label"></span><input id="text-length" type="range" min="0.5" max="15" step="0.5"></label><label>左右位置 <span id="text-x-label"></span><input id="text-x" type="range" min="0.1" max="0.9" step="0.01"></label><label>上下位置 <span id="text-y-label"></span><input id="text-y" type="range" min="0.1" max="0.9" step="0.01"></label></div><label class="field-label">色<input id="text-color" type="color" value="#ffffff"></label><div class="button-row"><button id="delete-text" class="danger">テキスト削除</button></div></div><div id="text-list" class="text-list"></div></div>
+      <div id="panel-audio" class="tool-panel" data-panel="audio" hidden><div class="control-title">SOUND DESK <span>音楽は1トラック</span></div><button class="primary-button" id="music-add">＋ BGM / 音声を取り込む</button><div id="music-controls" hidden><div id="music-name" class="file-chip"></div><label>音量 <span id="music-volume-label">60%</span><input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.6"></label><div class="button-row"><button id="music-remove" class="danger">音声削除</button></div></div></div>
+      <div id="panel-export" class="tool-panel" data-panel="export" hidden><div class="control-title">OUTPUT <span>端末内で動画をレンダリング</span></div><p class="muted">ブラウザがサポートする形式（MP4またはWebM）で保存。音声も合成します。書き出し中は画面を閉じないでください。</p><div class="button-row"><button id="export-secondary" class="primary-button">映像を書き出す ↗</button><button id="backup-project">編集情報を保存</button></div><div id="export-progress" class="progress-area" hidden><div id="progress-text">レンダリング準備中</div><div class="progress-meter"><i id="progress-bar"></i></div></div></div>
+    </section>
+    <p class="privacy-note">◈ LOCAL FIRST　素材を外部サーバーへ送信せず、ブラウザ内で編集します。個人用の試作エディタです。</p>
+  </main>
+  <nav class="bottomnav" aria-label="ツール選択"><button class="nav-tab active" data-tab="clips"><span>▣</span>編集</button><button class="nav-tab" data-tab="look"><span>◉</span>LOOK</button><button class="nav-tab" data-tab="text"><span>Ｔ</span>文字</button><button class="nav-tab" data-tab="audio"><span>♫</span>音</button><button class="nav-tab" data-tab="export"><span>↗</span>出力</button></nav>
+  <div id="snackbar" role="status" aria-live="polite"></div>
+  <input id="file-picker" type="file" accept="video/*,image/*" multiple hidden>
+  <input id="music-picker" type="file" accept="audio/*" hidden>
+  <video id="media-player" playsinline preload="auto" hidden></video><audio id="bgm-player" preload="auto" hidden></audio>
+</div>
+<script type="module" src="./app.mjs"></script>
+</body></html>
