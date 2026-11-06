@@ -27,3 +27,10 @@
 - 動画制作は `CHATGPT_WORKFLOW.md` と `docs/production-rules.md` に従う。
 
 今回の変更と手動反映手順：`docs/creator-site-2026-10.md`。
+
+## 🎬 映像制作スキル統合
+
+- [Video Production Skill Hub](video-studio/README.md)：脚本・素材・Whisper・切り抜き・字幕・VRM・CG・音響・レンダー・QC・納品を15個のAgent Skillsとして統合。
+- [Agent Skills](.github/skills/video-production-director/SKILL.md)：映像制作の総合ディレクター。専門スキルは `.github/skills/` に格納。
+- [制作ツール](video-studio/cli.mjs)：索引検査・非公開job雛形作成・ffprobe構造QC。実レンダーや公開の完了を意味しない。
+
