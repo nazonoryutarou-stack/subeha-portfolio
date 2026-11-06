@@ -1,0 +1,16 @@
+{
+  "name":"SUBEHA CUT — モバイル映像工作室",
+  "short_name":"SUBEHA CUT",
+  "description":"独立系・ローカル動画編集アプリ。クリップ、字幕、フィルター、音声、書き出し",
+  "start_url":"./index.html",
+  "scope":"./",
+  "display":"standalone",
+  "orientation":"any",
+  "background_color":"#111318",
+  "theme_color":"#111318",
+  "lang":"ja",
+  "icons":[
+    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
