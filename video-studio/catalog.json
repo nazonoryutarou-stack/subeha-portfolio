@@ -1,0 +1,445 @@
+{
+  "schema": "subeha-video-skills-v1",
+  "generated_at": "2026-11-07",
+  "public_repository": "nazonoryutarou-stack/subeha-portfolio",
+  "private_transcripts": "nazonoryutarou-stack/subeha-transcripts",
+  "production_pr": 22,
+  "skills": [
+    {
+      "name": "video-production-director",
+      "phase": "orchestration",
+      "status": "procedure",
+      "description": "配信音声・実写・アニメーションの映像制作を企画から書き出しとQCまで統括する。制作依頼、完成判定、各動画スキルの選択に使用。",
+      "path": ".github/skills/video-production-director/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "CHATGPT_WORKFLOW.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "docs/production-rules.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "docs/vtuber-engine-golden-baseline.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "pr22",
+          "path": "docs/assistant-video-pipeline.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-storyboard-writing",
+      "phase": "preproduction",
+      "status": "procedure",
+      "description": "映像企画、ショート動画のフック、構成台本、ショットリスト、絵コンテ、制作仕様書を作る際に使う。",
+      "path": ".github/skills/video-storyboard-writing/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "docs/production-rules.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-source-ingest",
+      "phase": "ingest",
+      "status": "procedure",
+      "description": "実配信の音声、撮影素材、動画、静止画を取り込み、来歴・権利・プライバシーを確認する。",
+      "path": ".github/skills/video-source-ingest/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "docs/production-rules.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "private",
+          "path": "tools/whisper-timed/archive_io.py",
+          "repo": "nazonoryutarou-stack/subeha-transcripts",
+          "branch": "main",
+          "confidential": true
+        },
+        {
+          "location": "pr22",
+          "path": "remotion/vrm-lipsync/scripts/prepare-clip.mjs",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-asr-timing",
+      "phase": "transcription",
+      "status": "available",
+      "description": "Whisper.cppによる日本語文字起こしとトークン時刻、破損タイムスタンプの検出、clean転記との分離に使用。",
+      "path": ".github/skills/video-asr-timing/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "tools/vtuber-backup/run-whisper-token-termux.sh",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "tools/vtuber-backup/whisper-json-to-parts.py",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "docs/vtuber-engine-repro-164-166-169.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "private",
+          "path": "tools/whisper-timed/transcribe_archive.py",
+          "repo": "nazonoryutarou-stack/subeha-transcripts",
+          "branch": "main",
+          "confidential": true
+        }
+      ]
+    },
+    {
+      "name": "video-highlight-editing",
+      "phase": "editing",
+      "status": "branch-only",
+      "description": "長尺配信から切り抜き候補を選び、話者判定、原音切り出し、編集プランを作成する。",
+      "path": ".github/skills/video-highlight-editing/SKILL.md",
+      "sources": [
+        {
+          "location": "private",
+          "path": "tools/whisper-timed/video_clip_manifest.py",
+          "repo": "nazonoryutarou-stack/subeha-transcripts",
+          "branch": "main",
+          "confidential": true
+        },
+        {
+          "location": "pr22",
+          "path": "remotion/vrm-lipsync/assistant-plan.schema.json",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        },
+        {
+          "location": "pr22",
+          "path": "remotion/vrm-lipsync/scripts/import-assistant-plan.mjs",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-caption-timing",
+      "phase": "editing",
+      "status": "available",
+      "description": "日本語字幕、タイムコード、SRT/JSONL、画面safe area、字幕の内容校正と同期検証に使用。",
+      "path": ".github/skills/video-caption-timing/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "tools/vtuber-backup/prepare-termux.sh",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "remotion/vrm-lipsync/scripts/build-backup-timeline.mjs",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "docs/vtuber-engine-golden-baseline.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-vrm-performance",
+      "phase": "production",
+      "status": "available",
+      "description": "Subeha.vrmの自然姿勢、瞬き、音声波形に同期した口パク、話者ゲート、VRM演技を作る際に使用。",
+      "path": ".github/skills/video-vrm-performance/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "remotion/vrm-lipsync/src/backup/VrmLipSyncBackup.tsx",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "tools/vtuber-backup/make_mouth_curve.py",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "docs/vtuber-engine-golden-baseline.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "pr22",
+          "path": "remotion/vrm-lipsync/src/VrmLipSyncV3.tsx",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-visual-research",
+      "phase": "production",
+      "status": "procedure",
+      "description": "映像に合う写真、図版、古文書、観察パネル、Bロール、出典と権利を調査・設計する。",
+      "path": ".github/skills/video-visual-research/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "docs/vtuber-engine-golden-baseline.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "pr22",
+          "path": "remotion/vrm-lipsync/scripts/materialize-visuals.mjs",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-motion-vfx",
+      "phase": "production",
+      "status": "available",
+      "description": "Remotionを用いたモーショングラフィックス、テロップ演出、キネティック文字、トランジション、CG動画に使用。",
+      "path": ".github/skills/video-motion-vfx/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "remotion/teruteru-bot/src/Root.tsx",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "remotion/vrm-lipsync/src/Root.tsx",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "pr22",
+          "path": "remotion/vrm-lipsync/src/VrmLipSyncStudio.tsx",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-deepdream-art",
+      "phase": "production",
+      "status": "available",
+      "description": "DeepDream Labで夢幻的な静止画・テクスチャを制作し、映像の背景・場面転換・美術へ応用する。",
+      "path": ".github/skills/video-deepdream-art/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "deepdream/index.html",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "deepdream/dream-engine.js",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "deepdream/test-v21.mjs",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-audio-finishing",
+      "phase": "postproduction",
+      "status": "procedure",
+      "description": "配信原音の修復、ノイズ除去、レベル整合、BGM・SEのミックス、音声尺と映像尺の確認に使用。",
+      "path": ".github/skills/video-audio-finishing/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "docs/production-rules.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "pr22",
+          "path": "remotion/vrm-lipsync/scripts/generate-envelope.mjs",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-render-delivery",
+      "phase": "delivery",
+      "status": "branch-only",
+      "description": "Remotion/FFmpegによるH.264/AAC書き出し、16:9/9:16制作プロファイル、実ファイルの検証と納品に使用。",
+      "path": ".github/skills/video-render-delivery/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "remotion/vrm-lipsync/package.json",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "docs/vtuber-engine-golden-baseline.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "pr22",
+          "path": "remotion/vrm-lipsync/scripts/render-assistant.mjs",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-quality-assurance",
+      "phase": "quality",
+      "status": "available",
+      "description": "動画の実音声同期、字幕、VRM自然姿勢、コード検証、ffprobe構造検査、プライバシー審査に使用。",
+      "path": ".github/skills/video-quality-assurance/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "docs/production-rules.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "docs/vtuber-engine-golden-baseline.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "pr22",
+          "path": "tools/video-pipeline/validate_render.py",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-publishing-packaging",
+      "phase": "delivery",
+      "status": "procedure",
+      "description": "YouTube・TikTok・サイト等へ納品する前のタイトル、サムネ、説明文、権利、書き出し形式、公開判定に使用。",
+      "path": ".github/skills/video-publishing-packaging/SKILL.md",
+      "sources": [
+        {
+          "location": "main",
+          "path": "docs/production-rules.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        },
+        {
+          "location": "main",
+          "path": "README.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "main",
+          "confidential": false
+        }
+      ]
+    },
+    {
+      "name": "video-automation-rd",
+      "phase": "research",
+      "status": "experimental",
+      "description": "配信音声から自動企画・編集・絵選び・映像生成を統合する未完成機能の調査と実装優先順位づけに使用。",
+      "path": ".github/skills/video-automation-rd/SKILL.md",
+      "sources": [
+        {
+          "location": "pr-autodirector",
+          "path": "remotion/vrm-lipsync/scripts/auto-director.mjs",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vtuber-auto-director",
+          "confidential": false
+        },
+        {
+          "location": "pr-autodirector",
+          "path": "remotion/vrm-lipsync/scripts/vtuber-auto.mjs",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vtuber-auto-director",
+          "confidential": false
+        },
+        {
+          "location": "pr22",
+          "path": "docs/video-app-architecture.md",
+          "repo": "nazonoryutarou-stack/subeha-portfolio",
+          "branch": "feature/vrm-studio-webapp",
+          "confidential": false
+        }
+      ]
+    }
+  ]
+}
