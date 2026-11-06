@@ -1,6 +1,6 @@
 # すべての歯が見える — Video Production Skill Hub
 
-撮影・脚本・配信アーカイブ・字幕・切り抜き・VRM・DeepDream・Remotion・音響・納品を、実装状態の分かる **15個のAgent Skills** に統合した入口。GitHub Copilotが読み取れる形式の `.github/skills/<name>/SKILL.md` を使う（`video-studio/catalog.json` は機械可読索引）。
+撮影・脚本・配信アーカイブ・字幕・切り抜き・VRM・DeepDream・Remotion・音響・納品を、実装状態の分かる **111個のAgent Skills（安定系15 + 実験廃品96）** に統合した入口。GitHub Copilotが読み取れる形式の `.github/skills/<name>/SKILL.md` を使う（`video-studio/catalog.json` は機械可読索引）。
 
 ## 入口と役割
 - `AGENTS.md`: 動画担当エージェントへの共通指示。
@@ -44,7 +44,12 @@
 4. `video-caption-timing`, `video-vrm-performance`, `video-visual-research`, `video-motion-vfx`, `video-audio-finishing` を合成。
 5. `video-render-delivery` → `video-quality-assurance` → `video-publishing-packaging`。
 
-## スキル一覧
+## 実験廃品置き場
+
+- [VIDEO SCRAPYARD](junkyard/README.md)：用途未定の96種のスキルと41種のFFmpeg実演レシピを、失敗も含め収集。
+- [検索できる廃品目録](junkyard/index.html)：HTTPサーバー経由で閲覧。
+
+## 基本スキル一覧
 - [video-production-director](../.github/skills/video-production-director/SKILL.md) — orchestration / procedure
 - [video-storyboard-writing](../.github/skills/video-storyboard-writing/SKILL.md) — preproduction / procedure
 - [video-source-ingest](../.github/skills/video-source-ingest/SKILL.md) — ingest / procedure

@@ -5,3 +5,8 @@ outputs/
 *.wav
 *.mp4
 *.jsonl
+
+# Experiments and previews remain local
+junkyard/experiments/
+junkyard/renders/
+junkyard/tmp/

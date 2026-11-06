@@ -11,3 +11,7 @@ Check catalog: `node video-studio/cli.mjs check`.
 Create private job: `node video-studio/cli.mjs new <slug> [landscape|short]`.
 Structural QC: `node video-studio/cli.mjs qc <mp4> [landscape|short]`.
 目視QCを省略しない。
+
+## 広義の映像廃品（探索系）
+
+企画に妙な素材が必要なら `video-studio/junkyard/ideas.json` と `video-studio/junkyard/README.md` を読む。96個の `video-scrap-*` Agent Skills は**未検証の仮説**であり、使えないものも保管対象。`video-studio/junkyard/recipes.json` はFFmpeg実演の候補。実装確認の前に使えると断定しない。権利不明素材と private transcript は持ち込まない。

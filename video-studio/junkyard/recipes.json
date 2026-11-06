@@ -1,0 +1,421 @@
+{
+  "schema": "subeha-video-junkyard-ffmpeg-v1",
+  "date": "2026-11-07",
+  "requirements": [
+    "node >=18",
+    "ffmpeg built with libx264",
+    "ffprobe"
+  ],
+  "recipes": [
+    {
+      "id": "mandelbrot",
+      "kind": "source",
+      "title": "フラクタル航行",
+      "graph": "mandelbrot=size={W}x{H}:rate={FPS}:maxiter=150",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "life",
+      "kind": "source",
+      "title": "生命ゲームの都市灯",
+      "graph": "life=size={W}x{H}:rate={FPS}:seed=42",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "rule110",
+      "kind": "source",
+      "title": "セルオートマトン110",
+      "graph": "cellauto=size={W}x{H}:rate={FPS}:rule=110:random_fill_ratio=0.5",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "sierpinski",
+      "kind": "source",
+      "title": "三角形の無限階段",
+      "graph": "sierpinski=size={W}x{H}:rate={FPS}",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "gradients",
+      "kind": "source",
+      "title": "変化するグラデーション",
+      "graph": "gradients=size={W}x{H}:rate={FPS}",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "life-alt",
+      "kind": "source",
+      "title": "別seedの生命模様",
+      "graph": "life=size={W}x{H}:rate={FPS}:seed=23",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "black",
+      "kind": "source",
+      "title": "完全な黒の時間",
+      "graph": "color=c=black:s={W}x{H}:r={FPS}",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "pixel-math",
+      "kind": "source",
+      "title": "数式だけで描く像",
+      "graph": "nullsrc=size={W}x{H}:rate={FPS},geq=lum=mod(X+Y+N*3\\,256)",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "perlin",
+      "kind": "source",
+      "title": "パーリンノイズ",
+      "graph": "perlin=size={W}x{H}:rate={FPS}",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "hald-lut",
+      "kind": "source",
+      "title": "色校正の三次元表",
+      "graph": "haldclutsrc=level=5:rate={FPS}",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "tv-bars",
+      "kind": "source",
+      "title": "放送テストバー",
+      "graph": "smptebars=size={W}x{H}:rate={FPS}",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "outline",
+      "kind": "effect",
+      "title": "輪郭だけの世界",
+      "graph": "edgedetect=low=0.08:high=0.3",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "feedback-soft",
+      "kind": "effect",
+      "title": "前フレームの気配",
+      "graph": "tblend=all_mode=average",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "afterimage",
+      "kind": "effect",
+      "title": "残像する闇",
+      "graph": "lagfun=decay=0.9",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "chroma-tear",
+      "kind": "effect",
+      "title": "色差だけをずらす",
+      "graph": "chromashift=cbh=8:crh=-8",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "pixel-block",
+      "kind": "effect",
+      "title": "巨大画素化",
+      "graph": "pixelize=w=12:h=12:mode=avg",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "snow-noise",
+      "kind": "effect",
+      "title": "映像の吹雪",
+      "graph": "noise=alls=20:allf=t",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "hue-cycle",
+      "kind": "effect",
+      "title": "色相の迷走",
+      "graph": "hue=h=2*PI*t:s=1",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "hard-mono",
+      "kind": "effect",
+      "title": "高コントラスト白黒",
+      "graph": "eq=contrast=1.35:saturation=0",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "heat-map",
+      "kind": "effect",
+      "title": "擬似熱分布",
+      "graph": "pseudocolor=preset=turbo",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "lens-warp",
+      "kind": "effect",
+      "title": "レンズの曲面歪み",
+      "graph": "lenscorrection=cx=0.5:cy=0.5:k1=-0.35:k2=0.1",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "vignette",
+      "kind": "effect",
+      "title": "周辺光量の消失",
+      "graph": "vignette=PI/4",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "soft-blur",
+      "kind": "effect",
+      "title": "夢のぼけ",
+      "graph": "boxblur=2:1",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "cross-process",
+      "kind": "effect",
+      "title": "クロスプロセス色調",
+      "graph": "curves=preset=cross_process",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "over-sharp",
+      "kind": "effect",
+      "title": "痛々しいシャープ化",
+      "graph": "unsharp=5:5:1.0",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "channel-order",
+      "kind": "effect",
+      "title": "色面の入れ替え",
+      "graph": "shuffleplanes=0:2:1",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "camera-sway",
+      "kind": "effect",
+      "title": "揺れるカメラの偽物",
+      "graph": "rotate=0.15*sin(2*PI*t):fillcolor=black",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "sinusoid-tear",
+      "kind": "effect",
+      "title": "波による画素転送",
+      "graph": "geq=lum=p(X+10*sin(Y/16+N/5)\\,Y)",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "sobel",
+      "kind": "effect",
+      "title": "Sobelの輪郭彫刻",
+      "graph": "sobel",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "red-survivor",
+      "kind": "effect",
+      "title": "赤だけが残る",
+      "graph": "colorhold=color=red:similarity=0.12:blend=0.2",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "rgb-shift",
+      "kind": "effect",
+      "title": "RGB位相ずれ",
+      "graph": "rgbashift=rh=8:bh=-8",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "horizontal-scroll",
+      "kind": "effect",
+      "title": "横へ流れ続ける世界",
+      "graph": "scroll=horizontal=0.1",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "time-mix",
+      "kind": "effect",
+      "title": "時間の5枚重ね",
+      "graph": "tmix=frames=5:weights=1 1 1 1 1",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "histogram-eq",
+      "kind": "effect",
+      "title": "異常な階調補正",
+      "graph": "histeq=strength=0.35",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "negative",
+      "kind": "effect",
+      "title": "映像ネガ化",
+      "graph": "negate",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "mirrored",
+      "kind": "effect",
+      "title": "上下左右反転",
+      "graph": "hflip,vflip",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "data-scope",
+      "kind": "effect",
+      "title": "画素値そのものを撮る",
+      "graph": "datascope=size=320x180",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "vector-scope",
+      "kind": "effect",
+      "title": "色信号の航跡",
+      "graph": "vectorscope",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "luma-waveform",
+      "kind": "effect",
+      "title": "輝度波形そのもの",
+      "graph": "waveform",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "color-histogram",
+      "kind": "effect",
+      "title": "ヒストグラムを主役に",
+      "graph": "histogram",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    },
+    {
+      "id": "vr-panorama",
+      "kind": "effect",
+      "title": "全景を歪んだ視野へ",
+      "graph": "v360=input=equirect:output=flat:h_fov=90:v_fov=60",
+      "verified_filtergraph_in_reference_environment": true,
+      "execution_on_user_devices": "unverified",
+      "risk": "experimental",
+      "note": "Produces a short synthetic visual test or transforms a self-owned input; visual QC required."
+    }
+  ]
+}

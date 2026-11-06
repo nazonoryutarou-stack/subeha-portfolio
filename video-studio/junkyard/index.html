@@ -1,0 +1,37 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>VIDEO SCRAPYARD</title><style>
+:root{color-scheme:dark;background:#11100f;color:#e9e1d4;font-family:system-ui,-apple-system,sans-serif}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 4% -10%,#3e3025 0,transparent 38%),#11100f}
+main{max-width:1100px;margin:0 auto;padding:36px 16px 100px}h1{letter-spacing:.1em;font-size:clamp(2rem,6vw,5rem);line-height:1;margin:0;color:#f0d6a1}
+header p{max-width:720px;color:#c0b19d;font-size:1rem;line-height:1.8}a{color:#eac68a}label{display:block;font-size:.8rem;letter-spacing:.1em;margin:18px 0 8px;color:#af9c81}
+.toolbar{display:grid;grid-template-columns:1fr 210px;gap:12px;margin:32px 0 18px}input,select{width:100%;background:#1d1916;border:1px solid #645443;border-radius:5px;color:#eee;padding:14px;font-size:1rem}
+.stats{color:#bcae97;border-top:1px solid #554632;padding:16px 0}#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+article{border:1px solid #504332;background:linear-gradient(145deg,#251f19,#171512);padding:20px;min-height:206px;border-radius:4px}
+.badge{font:700 .7rem/1.4 monospace;color:#d9b379;letter-spacing:.09em}h2{font-size:1.15rem;margin:12px 0;color:#fae1b7}
+p{line-height:1.65}.small{color:#b5aa9b;font-size:.88rem}.meta{display:block;margin-top:10px;font:700 .7rem monospace;color:#a49b90;word-break:break-word}
+footer{margin:60px 0 0;color:#a49c90}button{font:inherit;background:transparent;color:#dcb980;border:1px solid #776246;padding:8px 12px;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #f8da9c}
+@media(max-width:580px){.toolbar{grid-template-columns:1fr}}
+</style></head><body><main><header><div class="badge">SUBEHA / EXPERIMENTAL MATERIALS</div><h1>VIDEO<br>SCRAPYARD.</h1><p>役に立つか分からない機械、理屈、失敗、妙な発想の回収所。動作済みの素材と未検証の構想を、混同せず並べておく。使い道はあとで発明すればいい。</p>
+<p><a href="../README.md">制作総合案内</a> · <a href="README.md">実験手順</a> · <a href="ideas.json">原本JSON</a></p></header>
+<div class="toolbar"><div><label for="query">検索</label><input id="query" type="search" placeholder="例: 音声 / 亡霊 / pixel / CRT / 数学"></div><div><label for="filter">分類</label><select id="filter"><option value="">すべての廃品</option></select></div></div><div id="stats" class="stats" aria-live="polite">データ読込中</div><section id="grid"></section><footer>IDEAS are not production features. Errors stay in the archive. Unauthorized footage never enters a public repository.</footer></main>
+<script>
+(async()=>{
+const [a,b]=await Promise.all([fetch('./ideas.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json()}),fetch('./recipes.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json()})]);
+const items=[...a.ideas.map(x=>({...x,kind:'idea'})),...b.recipes.map(x=>({...x,kind:'recipe',category:'ffmpeg-'+x.kind,mechanism:x.graph,trial:'CLIで短い見本を生成してから目視する'}))];
+const select=document.querySelector('#filter'),input=document.querySelector('#query'),grid=document.querySelector('#grid'),stats=document.querySelector('#stats');
+for(const c of [...new Set(items.map(x=>x.category))].sort()){const o=document.createElement('option');o.value=c;o.textContent=c;select.append(o)}
+const render=()=>{
+ const q=input.value.toLocaleLowerCase(),cat=select.value;
+ const show=items.filter(x=>(!cat||cat===x.category)&&(!q||[x.title,x.id,x.mechanism,x.trial].join(' ').toLocaleLowerCase().includes(q)));
+ grid.replaceChildren();
+ for(const x of show){
+ const card=document.createElement('article'),tag=document.createElement('div'),h=document.createElement('h2'),p=document.createElement('p'),t=document.createElement('p'),meta=document.createElement('div');
+ tag.className='badge';tag.textContent=x.kind==='idea'?'未検証 / '+x.category:'FFMPEG RECIPE / '+x.category;
+ h.textContent=x.title;p.textContent=x.mechanism;p.className='small';t.textContent=x.trial||'実験・観察を行う';t.className='small';
+ meta.textContent=x.id;meta.className='meta';card.append(tag,h,p,t,meta);grid.append(card);
+ }
+ stats.textContent=show.length+'件表示 / '+a.ideas.length+'件の未検証Skill / '+b.recipes.length+'件のFFmpegレシピ';
+};
+input.addEventListener('input',render);select.addEventListener('change',render);render();
+})().catch(e=>{document.querySelector('#stats').textContent='読込失敗: '+e.message+'。ローカルでは python3 -m http.server 等を使用。'});
+</script></body></html>
