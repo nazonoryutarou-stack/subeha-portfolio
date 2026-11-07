@@ -7,6 +7,8 @@ const picker=$('file-picker'),musicPicker=$('music-picker');
 const filters={none:{label:'ORIGINAL',style:'none'},mono:{label:'MONO',style:'grayscale(1) contrast(1.12)'},cinema:{label:'CINEMA',style:'contrast(1.15) saturate(.88) sepia(.15)'},vintage:{label:'VINTAGE',style:'sepia(.68) saturate(.7) contrast(1.06)'},dream:{label:'DREAM',style:'blur(1.2px) saturate(1.65) contrast(1.10)'},cold:{label:'COLD',style:'hue-rotate(160deg) saturate(.7) contrast(1.12)'},punch:{label:'PUNCH',style:'contrast(1.32) saturate(1.5)'},glitch:{label:'GLITCH',style:'contrast(1.2) saturate(1.6)'}};
 const state={project:{name:'UNTITLED 01',ratio:'9:16',fit:'cover',clips:[],texts:[],music:null},assets:new Map(),selectedClip:null,selectedText:null,activeClip:null,current:0,playing:false,recording:false,panel:'clips',lastFrame:0,switching:false,pendingSave:null,recorder:null,wakeLock:null};
 let db=null, audioCtx=null, mixer=null, videoNode=null, musicNode=null, toastTimer=null, drawPending=false, renderToken=0, raf=0;
+const renderHooks=[];
+const history={undo:[],redo:[],current:null};
 
 function toast(message){const box=$('snackbar');box.textContent=message;box.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>box.classList.remove('visible'),3200);}
 function fail(error){console.error(error);toast(error?.message||String(error));}
@@ -14,7 +16,7 @@ function openDB(){return new Promise((resolve,reject)=>{if(!('indexedDB'in windo
 function idbPut(store,key,value){if(!db)return Promise.resolve();return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(value,key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
 function idbGet(store,key){if(!db)return Promise.resolve(null);return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).get(key);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});}
 function idbDelete(store,key){if(!db)return Promise.resolve();return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
-function save(){clearTimeout(state.pendingSave);state.pendingSave=setTimeout(async()=>{try{await idbPut('projects','current',state.project);}catch(e){toast('保存容量不足。大きい素材を減らしてください。');console.warn(e);}},300);}
+function save(){const snap=JSON.stringify(state.project);if(history.current!==null && snap!==history.current){history.undo.push(history.current);if(history.undo.length>60)history.undo.shift();history.redo=[];}history.current=snap;window.dispatchEvent(new Event('subeha-cut-change'));clearTimeout(state.pendingSave);state.pendingSave=setTimeout(async()=>{try{await idbPut('projects','current',state.project);}catch(e){toast('保存容量不足。大きい素材を減らしてください。');console.warn(e);}},300);}
 const fileObjects=[];
 function videoProbe(url){return new Promise((resolve,reject)=>{const v=document.createElement('video');v.preload='metadata';v.muted=true;v.onloadedmetadata=()=>{resolve({duration:Number.isFinite(v.duration)&&v.duration>0?v.duration:0,width:v.videoWidth,height:v.videoHeight});v.removeAttribute('src');v.load();};v.onerror=()=>reject(new Error('動画を開けませんでした。形式をご確認ください'));v.src=url;});}
 function audioProbe(url){return new Promise((resolve,reject)=>{const a=new Audio();a.preload='metadata';a.onloadedmetadata=()=>{resolve({duration:Number.isFinite(a.duration)?a.duration:0});a.removeAttribute('src');a.load();};a.onerror=()=>reject(new Error('音声を読み込めませんでした'));a.src=url;});}
@@ -73,16 +75,16 @@ async function restore(){
  try{
    db=await openDB(); const project=await idbGet('projects','current');
    if(project?.clips && Array.isArray(project.clips)){
-     state.project={name:project.name||'UNTITLED 01',ratio:RATIOS[project.ratio]?project.ratio:'9:16',fit:project.fit==='contain'?'contain':'cover',clips:[],texts:Array.isArray(project.texts)?project.texts:[],music:project.music||null};
-     const ids=new Set([...project.clips.map(c=>c.assetId),...(project.music?[project.music.assetId]:[])]);
+     state.project={name:project.name||'UNTITLED 01',ratio:RATIOS[project.ratio]?project.ratio:'9:16',fit:project.fit==='contain'?'contain':'cover',clips:[],texts:Array.isArray(project.texts)?project.texts:[],overlays:Array.isArray(project.overlays)?project.overlays:[],music:project.music||null};
+     const ids=new Set([...project.clips.map(c=>c.assetId),...(project.music?[project.music.assetId]:[]),...(project.overlays||[]).map(o=>o.assetId)]);
      for(const id of ids){try{const item=await idbGet('files',id);if(item?.blob)await buildAsset(id,item.blob,item.type,item.name);}catch(e){console.warn('restore file',id,e);}}
-     state.project.clips=project.clips.filter(c=>state.assets.has(c.assetId));
+     state.project.clips=project.clips.filter(c=>state.assets.has(c.assetId));state.project.overlays=state.project.overlays.filter(o=>state.assets.has(o.assetId));
      if(project.music&&!state.assets.has(project.music.assetId))state.project.music=null;
      if(state.project.music){bgm.src=state.assets.get(state.project.music.assetId).url;bgm.load();}
      state.selectedClip=state.project.clips[0]?.id||null;
    }
  }catch(e){console.warn('Project storage unavailable',e);toast('この環境では自動保存できません');}
- refreshAll();await positionMedia();
+ history.undo=[];history.redo=[];history.current=JSON.stringify(state.project);refreshAll();await positionMedia();
 }
 function selectedClip(){return state.project.clips.find(c=>c.id===state.selectedClip)||null;}
 function selectedText(){return state.project.texts.find(t=>t.id===state.selectedText)||null;}
@@ -111,7 +113,7 @@ function refreshPanels(){
  $('text-list').replaceChildren();for(const text of state.project.texts){const b=document.createElement('button');b.textContent=text.text||'(空のテキスト)';b.classList.toggle('active',text.id===state.selectedText);b.addEventListener('click',()=>{state.selectedText=text.id;refreshPanels();seek(text.start);});$('text-list').append(b);}
 }
 function refreshAll(){
- const d=duration(state.project.clips);$('project-label').textContent=state.project.name+' / EDIT 01';$('empty-overlay').hidden=state.project.clips.length>0;
+ const d=duration(state.project.clips);window.dispatchEvent(new Event('subeha-cut-change'));$('project-label').textContent=state.project.name+' / EDIT 01';$('empty-overlay').hidden=state.project.clips.length>0;
  $('scrubber').max=String(d);$('scrubber').value=String(Math.min(state.current,d));$('ruler-right').textContent=formatClock(d);
  $('ratio-button').textContent=state.project.ratio+' ▾';$('preview-fit').textContent=state.project.fit==='cover'?'FILL':'FIT';
  refreshTimeline();refreshPanels();updateTimecode();draw();
@@ -157,14 +159,15 @@ function draw(){
    const ready=(a.type==='image'&&a.image)||(a.type==='video'&&state.activeClip===c.id&&media.readyState>=2);
    if(ready){
      ctx.save();const fade=state.playing?Math.min(1,at.local/.16,(at.length-at.local)/.16):1;ctx.globalAlpha=Math.max(0,fade);
-     ctx.filter=filters[c.filter]?.style||'none';
+     const adj=c.adjust||{};ctx.filter=[filters[c.filter]?.style||'none','brightness('+((adj.brightness??100)/100)+')','contrast('+((adj.contrast??100)/100)+')','saturate('+((adj.saturation??100)/100)+')','hue-rotate('+(adj.hue??0)+'deg)','blur('+(adj.blur??0)+'px)'].join(' ');ctx.globalAlpha*=c.opacity??1;if(c.rotation||c.flipX||c.flipY||c.zoom){ctx.translate(W/2,H/2);ctx.rotate((c.rotation||0)*Math.PI/180);ctx.scale((c.flipX?-1:1)*(c.zoom||1),(c.flipY?-1:1)*(c.zoom||1));ctx.translate(-W/2,-H/2);}
      try{drawFrameWithAspect(view,a.type==='image'?a.width:media.videoWidth,a.type==='image'?a.height:media.videoHeight);}catch(e){console.warn('draw',e);}
      ctx.restore();
      if(c.filter==='glitch'&&at.length>0){ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=.18;ctx.filter='hue-rotate(150deg)';ctx.translate(Math.sin(state.current*18)*10,0);try{drawFrameWithAspect(view,a.type==='image'?a.width:media.videoWidth,a.type==='image'?a.height:media.videoHeight);}catch{}ctx.restore();}
    }
  }
+ for(const hook of renderHooks){try{hook({canvas,ctx,state});}catch(e){console.warn('render hook',e);}}
  for(const t of state.project.texts){if(state.current<t.start||state.current>t.start+t.duration||!t.text)continue;
-   ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';const unit=W/720;const size=t.size*unit;ctx.font=`800 ${size}px system-ui,sans-serif`;ctx.fillStyle=t.color;ctx.strokeStyle='#000';ctx.lineWidth=Math.max(2,size*.12);ctx.lineJoin='round';ctx.shadowColor='#000b';ctx.shadowBlur=14*unit;
+   ctx.save();const age=Math.max(0,state.current-t.start),left=Math.max(0,t.duration-age);let textAlpha=1,textScale=1;if(t.motion==='fade'){textAlpha=Math.min(1,age/.28,left/.28);}else if(t.motion==='pop'){textScale=1+Math.max(0,.28-age)*.75;}else if(t.motion==='slide'){ctx.translate(0,Math.max(0,.4-age)*H*.18);}ctx.globalAlpha=Math.max(0,Math.min(1,textAlpha));ctx.translate(W*t.x,H*t.y);ctx.scale(textScale,textScale);ctx.translate(-W*t.x,-H*t.y);ctx.textAlign='center';ctx.textBaseline='middle';const unit=W/720;const size=t.size*unit;ctx.font=`800 ${size}px system-ui,sans-serif`;ctx.fillStyle=t.color;ctx.strokeStyle='#000';ctx.lineWidth=Math.max(2,size*.12);ctx.lineJoin='round';ctx.shadowColor='#000b';ctx.shadowBlur=14*unit;
    const lines=wrapText(t.text,W*.88,size),lineHeight=size*1.23;
    for(let i=0;i<lines.length;i++){const y=H*t.y+(i-(lines.length-1)/2)*lineHeight;ctx.strokeText(lines[i],W*t.x,y);ctx.fillText(lines[i],W*t.x,y);}
    ctx.restore();}
@@ -271,9 +274,14 @@ function bind(){
  $('music-remove').addEventListener('click',()=>{bgm.pause();bgm.removeAttribute('src');bgm.load();state.project.music=null;save();refreshAll();});
  $('export-open').addEventListener('click',()=>{setPanel('export');document.querySelector('.tools-shell').scrollIntoView({behavior:'smooth'});});
  $('export-secondary').addEventListener('click',exportMovie);$('backup-project').addEventListener('click',exportProject);$('project-save').addEventListener('click',exportProject);
- $('new-project').addEventListener('click',async()=>{if(!confirm('新規プロジェクトを開始しますか？ 現在の編集内容は上書きされます。'))return;state.playing=false;media.pause();bgm.pause();state.project={name:'UNTITLED '+String(Math.floor(Math.random()*90+10)),ratio:'9:16',fit:'cover',clips:[],texts:[],music:null};state.selectedClip=null;state.selectedText=null;state.activeClip=null;state.current=0;setRatio('9:16');save();refreshAll();});
+ $('new-project').addEventListener('click',async()=>{if(!confirm('新規プロジェクトを開始しますか？ 現在の編集内容は上書きされます。'))return;state.playing=false;media.pause();bgm.pause();state.project={name:'UNTITLED '+String(Math.floor(Math.random()*90+10)),ratio:'9:16',fit:'cover',clips:[],texts:[],overlays:[],music:null};state.selectedClip=null;state.selectedText=null;state.activeClip=null;state.current=0;setRatio('9:16');save();refreshAll();});
  window.addEventListener('pagehide',()=>{if(state.recording)console.warn('Export interrupted by pagehide');});
 }
 
-async function init(){bind();setRatio('9:16');setPanel('clips');try{if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))await navigator.serviceWorker.register('./sw.js');}catch(e){console.warn('Service worker',e);}await restore();requestAnimationFrame(animationLoop);}
+function applyHistory(snapshot){state.playing=false;media.pause();bgm.pause();state.project=JSON.parse(snapshot);state.selectedClip=state.project.clips[0]?.id||null;state.selectedText=null;state.activeClip=null;state.current=0;state.project.overlays ||= [];if(state.project.music&&state.assets.has(state.project.music.assetId)){bgm.src=state.assets.get(state.project.music.assetId).url;bgm.load();}else {bgm.removeAttribute('src');bgm.load();}refreshAll();positionMedia().catch(fail);save();}
+function undo(){if(!history.undo.length)return toast('戻す操作がありません');history.redo.push(history.current);history.current=history.undo.pop();applyHistory(history.current);}
+function redo(){if(!history.redo.length)return toast('やり直す操作がありません');history.undo.push(history.current);history.current=history.redo.pop();applyHistory(history.current);}
+window.__subehaSaveAsset=async(id,file,type,name)=>idbPut('files',id,{blob:file,type,name});
+window.__subehaCut={state,canvas,ctx,buildAsset,seek,save,refreshAll,refreshTimeline,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,assetOf,undo,redo};
+async function init(){bind();setRatio('9:16');setPanel('clips');try{if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))await navigator.serviceWorker.register('./sw.js');}catch(e){console.warn('Service worker',e);}await restore();window.dispatchEvent(new Event('subeha-cut-ready'));requestAnimationFrame(animationLoop);}
 init().catch(fail);
