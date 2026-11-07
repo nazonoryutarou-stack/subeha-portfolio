@@ -1,5 +1,5 @@
-const CACHE = 'subeha-cut-app-v1';
-const RESOURCES = ['./','./index.html','./app.mjs','./timeline.mjs','./style.css','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
+const CACHE = 'subeha-cut-app-v2';
+const RESOURCES = ['./','./index.html','./app.mjs','./timeline.mjs','./style.css','./pro.css','./pro.mjs','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(RESOURCES)).then(()=>self.skipWaiting()));
 });

@@ -1,38 +1,39 @@
-# SUBEHA CUT — Android-ready independent video editor (PWA)
+# SUBEHA CUT Pro v0.2
 
-An original local-first mobile video editor inspired by common non-proprietary editing workflows; not affiliated with Videoleap or Lightricks. UI, branding and code are original. The application uses only browser APIs, no CDN, no API keys, no account.
+独立開発のAndroid向けローカル動画編集PWA。Videoleapの一般的なモバイル編集ワークフローを参考に、オリジナルUIで実装したもの。LightricksおよびVideoleapとは無関係。
 
-## Capabilities in v0.1
+## 操作
+1. `/cut/` をAndroid Chromeで開く → アプリをインストール。
+2. 「素材を追加」で動画・画像を読み込む。端末のブラウザ内で編集し、IndexedDBへ自動保存（空き容量依存）。
+3. タイムラインからクリップを選ぶ。「編集」でトリム、分割、複製、速度と順序変更。「調整」で輝度/コントラスト/彩度/色相/ぼかし。「変形」で回転・反転・拡大・透明度。
+4. 「オーバーレイ」で画像/動画を追加し、位置・拡大率・透明度・回転を操作。円形マスク、ブレンド、◆ キーフレームに対応。レイヤーは別トラック表示。
+5. 「テキスト」で色・位置・時間・登場アニメーションを編集。「音声」でBGM追加と音量設定。戻る/やり直しは矢印から。
+6. 「出力」で映像を書き出し。ブラウザの`MediaRecorder`依存のMP4またはWebM、通常は等速レンダー。画面を閉じないこと。
 
-- Import multiple local videos/images and one BGM/audio track.
-- Timeline, trim IN/OUT, split at playhead, duplicate, reorder, delete, playback speed 0.5–2×.
-- Preview aspect ratios 9:16, 16:9, square; fill/fit.
-- Per-clip look presets and glitch overlay; text layers with position, duration, font size and color.
-- Audio routed through Web Audio for mixed export, browser-dependent.
-- Real-time recording of the edited canvas with `captureStream` + `MediaRecorder`; MP4 only where browser supports it, else WebM.
-- Autosaves project/assets to IndexedDB locally, subject to device storage limits. User may export project metadata as JSON (not media).
-- Offline PWA shell/service worker; Chrome Android can install when hosted on HTTPS.
-- Local-first; no data transmitted to servers.
+## v0.2追加
+- 暗色モバイル編集UI、9個の横スクロール可能なツールエントリ、時間目盛り/ドラッグシーク、ズーム操作
+- 複数レイヤーの画像・動画合成、円形マスク、7種の合成方法、キーフレーム（位置/拡大/回転/透明度）
+- 色調整、回転、左右/上下反転、透明度、拡大率の動画合成反映
+- テキストのフェード/ポップ/スライド動作
+- Undo/Redo（作業セッション内、履歴最大60回）
+- サービスワーカーのキャッシュバージョン更新
 
-## Limitations (explicit)
+## 既知の限界
+- Videoleapとのピクセル単位の同一UI、完全機能互換ではない。商標・素材・固有意匠の複製もしていない。
+- AI背景除去、オブジェクト追跡、マルチカム、独立複数音声トラック、GPU専用エフェクト、マスクの高精度フェザー、ネイティブAPKは未実装。
+- Android Web環境は端末・Chrome版によってコーデックが異なり、MP4出力を保証しない。長尺/多数レイヤーは性能とメモリに制約がある。
+- 一部の動画フォーマットはブラウザでデコードできない。
+- 実機テストは未実施。デスクトップChromiumのモバイル画面を使い、ローカル画像の取り込み/フィルター操作/レイヤー追加/キーフレーム保存までのスモークテストを実施した。
+- 「SUBEHA CUT」をVideoleap公式アプリと誤認させる表記は禁止。
 
-Not a 1:1 Videoleap clone. No native APK, AI background remover, AI generative video, true mask/keyframes, multi-layer video compositing, automatic speech subtitles, GPU accelerated effects or export faster than realtime. Export requires staying in foreground. On low-memory devices, long clips or big images may cause storage or export issues. `MediaRecorder` format varies by browser. Chrome typically uses WebM; export to MP4 requires a compatible recorder or transcoder. Effects such as glitch are deliberate approximations.
-
-## Local preview
-
-```sh
+## 検証
+```bash
 cd public/cut
-python3 -m http.server 8765
-# open http://localhost:8765 on the same machine
-```
-
-Android Chrome install at `https://<your-pages-host>/subeha-portfolio/cut/` → (⋮) menu → Install app / Add to home screen.
-
-## Validation
-
-```sh
-node --test test/timeline.test.mjs
 node --check app.mjs
+node --check pro.mjs
+node --test test/timeline.test.mjs
 ```
+`index.html` は `pro.mjs`、`pro.css` を読み込み、Service Worker はv2のキャッシュを使用。
 
-Service Worker only works over HTTPS/localhost. Local media files must be deliberately re-imported if the browser evicts its IndexedDB storage. The app never asks for all-media filesystem access.
+## セキュリティ
+ローカル動画をパブリックGitHubへアップロードしない。ブラウザにのみ保管し、ブラウザによるIndexedDB破棄の可能性に備えて素材の原本を手元に残す。
