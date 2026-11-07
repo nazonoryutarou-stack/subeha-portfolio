@@ -1,39 +1,40 @@
-# SUBEHA CUT Pro v0.2
+# SUBEHA CUT Pro v0.3 — local-first mobile video editor
 
-独立開発のAndroid向けローカル動画編集PWA。Videoleapの一般的なモバイル編集ワークフローを参考に、オリジナルUIで実装したもの。LightricksおよびVideoleapとは無関係。
+Videoleap-style workflow (independent implementation, no affiliation or copied assets). Chrome on Android supports installing it as an offline-capable PWA. Local user media never goes to GitHub.
 
-## 操作
-1. `/cut/` をAndroid Chromeで開く → アプリをインストール。
-2. 「素材を追加」で動画・画像を読み込む。端末のブラウザ内で編集し、IndexedDBへ自動保存（空き容量依存）。
-3. タイムラインからクリップを選ぶ。「編集」でトリム、分割、複製、速度と順序変更。「調整」で輝度/コントラスト/彩度/色相/ぼかし。「変形」で回転・反転・拡大・透明度。
-4. 「オーバーレイ」で画像/動画を追加し、位置・拡大率・透明度・回転を操作。円形マスク、ブレンド、◆ キーフレームに対応。レイヤーは別トラック表示。
-5. 「テキスト」で色・位置・時間・登場アニメーションを編集。「音声」でBGM追加と音量設定。戻る/やり直しは矢印から。
-6. 「出力」で映像を書き出し。ブラウザの`MediaRecorder`依存のMP4またはWebM、通常は等速レンダー。画面を閉じないこと。
+## Main features
 
-## v0.2追加
-- 暗色モバイル編集UI、9個の横スクロール可能なツールエントリ、時間目盛り/ドラッグシーク、ズーム操作
-- 複数レイヤーの画像・動画合成、円形マスク、7種の合成方法、キーフレーム（位置/拡大/回転/透明度）
-- 色調整、回転、左右/上下反転、透明度、拡大率の動画合成反映
-- テキストのフェード/ポップ/スライド動作
-- Undo/Redo（作業セッション内、履歴最大60回）
-- サービスワーカーのキャッシュバージョン更新
+- Multi-clip timeline: trim, split, reorder, speed, duplication, filters, color and transforms.
+- Multiple video/image overlay layers, blend modes, circle masks and **tap-to-draw polygon masks** with feather.
+- **Chroma key**: green/blue/custom key color, similarity, softness and edge spill control, applied to overlay image/video pixels with Canvas2D.
+- **Lightweight manual point tracking**: select an overlay, tap a textured point on the base video and play to record position samples; the overlay follows the sampled trajectory. Plain grayscale block matching, not human/object recognition. It can lose points on occlusion, high-speed moves or rotation.
+- Keyframe transform animation for overlays; text overlays with timing and animations.
+- **Multiple extra audio tracks**: audio clips start at individual project timeline positions, with source offset, volume, mute, fade in and fade out. WebAudio GainNodes feed both playback and the shared audio stream captured for export. Original one-BGM legacy track remains available in previously saved projects.
+- Local IndexedDB autosave and Undo/Redo. Project metadata JSON backup does NOT include media. Browser-based real-time recording/export.
 
-## 既知の限界
-- Videoleapとのピクセル単位の同一UI、完全機能互換ではない。商標・素材・固有意匠の複製もしていない。
-- AI背景除去、オブジェクト追跡、マルチカム、独立複数音声トラック、GPU専用エフェクト、マスクの高精度フェザー、ネイティブAPKは未実装。
-- Android Web環境は端末・Chrome版によってコーデックが異なり、MP4出力を保証しない。長尺/多数レイヤーは性能とメモリに制約がある。
-- 一部の動画フォーマットはブラウザでデコードできない。
-- 実機テストは未実施。デスクトップChromiumのモバイル画面を使い、ローカル画像の取り込み/フィルター操作/レイヤー追加/キーフレーム保存までのスモークテストを実施した。
-- 「SUBEHA CUT」をVideoleap公式アプリと誤認させる表記は禁止。
+## Usage
 
-## 検証
-```bash
-cd public/cut
-node --check app.mjs
-node --check pro.mjs
-node --test test/timeline.test.mjs
+1. Install `https://nazonoryutarou-stack.github.io/subeha-portfolio/cut/` using Chrome > Install app / Add to home screen.
+2. Import a base image/video. Use Overlay to import the top media layer.
+3. Select the overlay then use **キー合成** to key a uniform backdrop, **オーバーレイ** to choose **多角形** then **輪郭を描く** to tap polygon points on the preview. Use `境界ぼかし` to soften its edge.
+4. Use **追跡** to select a point with texture on the *base video*, then play the base video. Stop to commit a recorded trajectory.
+5. Use **音声** to add multiple local audio files and adjust each start time and fade.
+6. Use **出力** to export while keeping the app in the foreground.
+
+## Test
+
+```sh
+node --check app.mjs && node --check pro.mjs && node --check compositor.mjs && node --check multi-audio.mjs && node --check point-tracker.mjs
+node --test test/*.test.mjs
+python3 -m http.server 8765
 ```
-`index.html` は `pro.mjs`、`pro.css` を読み込み、Service Worker はv2のキャッシュを使用。
 
-## セキュリティ
-ローカル動画をパブリックGitHubへアップロードしない。ブラウザにのみ保管し、ブラウザによるIndexedDB破棄の可能性に備えて素材の原本を手元に残す。
+## Known limitations
+
+- **Not Videoleap feature-parity, visual identity, or native APK.** No proprietary templates/assets copied.
+- Chroma key runs on downsampled 640px edge-length CPU buffer; translucent/fine hair edges may be imperfect, large multilayer projects may drop frames.
+- Polygon mask vertices must be tapped manually; they are local to one layer transform. Mask feather relies on Canvas2D blur implementation. No semantic segmentation.
+- Tracker is a 2D local patch matcher and does **not** track identity, rotation, scaling or a person reliably. Only records positions during normal playback (not offline analysis or fast scrubbing). Track is sampled at ~5 Hz; recordings are capped to protect storage.
+- WebAudio routing for multiple tracks depends on user media gesture/browser support; phones vary. Extra track export is mixed through MediaStreamDestination, output format remains browser-dependent and export is real-time. No WAV multitrack/stems export.
+- Mobile Chrome real-device validation and heavy project render tests are pending. Performance and format compatibility vary by device.
+- Source files remain on device, subject to browser IndexedDB storage eviction. No server-side generation, AI removal, or automated object recognition.

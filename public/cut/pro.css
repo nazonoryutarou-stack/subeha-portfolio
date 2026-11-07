@@ -72,3 +72,13 @@ body{background:#0b0c10!important;font-size:13px}
 .privacy-note{font-size:10px;padding:9px 10px;color:#777782}
 @media(min-width:680px){.viewer-shell{padding:0 16px}.preview-stage{height:48dvh}.timeline-shell{padding-inline:26px}.clip-card{height:56px}.bottomnav{justify-content:center}}
 @media(max-width:370px){.brand{font-size:12px}.nav-tab{flex-basis:64px;min-width:64px}.preview-stage{height:39dvh}.pro-controls{grid-template-columns:1fr 1fr}}
+/* v0.3 multi-track and compositor controls */
+.pro-audio-tracks{display:flex;flex-direction:column;gap:3px;background:#152b29;border-left:2px solid #48ab90;min-height:0;max-height:132px;overflow-x:auto;overflow-y:auto;margin:5px 0}
+.pro-audio-row{position:relative;height:27px;min-height:27px}
+.pro-audio-pill{position:absolute;top:1px;min-width:42px;height:24px;background:#247868;color:#f4fff9;border:1px solid #54bfaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;padding:2px 5px;border-radius:4px;font:10px system-ui}
+.pro-audio-pill.selected{outline:2px solid #e5fff5}
+.pro-audio-list{display:flex;flex-wrap:wrap;gap:5px;margin:14px 0 0}
+.pro-audio-list button{flex:1 1 110px;min-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pro-content input[type=color]{height:33px;width:60px;margin-left:7px;vertical-align:middle}
+#pro-content input[type=checkbox]{accent-color:#fd617a;width:16px;height:16px;vertical-align:middle}
+#preview{touch-action:manipulation}
