@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {createProjectArchive,readProjectArchive,crc32,projectAssetIds} from '../project-archive.mjs';
+assert.equal(crc32(new TextEncoder().encode('123456789')),0xcbf43926);
+const p={name:'編集の復元',clips:[{id:'a',assetId:'123-ab'}],overlays:[],audioTracks:[{assetId:'music01'}],music:null,texts:[],captions:[{start:1,end:2,text:'文字'}]};
+assert.deepEqual(projectAssetIds(p),['123-ab','music01']);
+const media=new Map([['123-ab',{blob:new Blob(['video content'],{type:'video/mp4'}),name:'映像.mp4',type:'video'}],['music01',{blob:new Blob(['audio content'],{type:'audio/wav'}),name:'声.wav',type:'audio'}]]);
+const zip=await createProjectArchive(p,media);assert.equal(zip.type,'application/zip');
+const restored=await readProjectArchive(zip);assert.deepEqual(restored.project,p);assert.equal(restored.assets.length,2);
+assert.equal(await restored.assets[0].blob.text(),'video content');assert.equal(restored.assets[1].blob.type,'audio/wav');
+const broken=new Uint8Array(await zip.arrayBuffer());broken[120]^=0xFF;
+await assert.rejects(readProjectArchive(new Blob([broken])),/破損/);
+await assert.rejects(createProjectArchive(p,new Map()),/欠けている/);
+console.log('project archive tests PASS');

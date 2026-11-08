@@ -1,4 +1,5 @@
 import {RATIOS,clipLength,duration,locate,splitAt,clampTime,formatClock,safeName,newID} from './timeline.mjs';
+import {advanceTimeline} from './export-timing.mjs';
 
 const $ = (id) => document.getElementById(id);
 const canvas=$('preview'),ctx=canvas.getContext('2d',{alpha:false});
@@ -75,7 +76,7 @@ async function restore(){
  try{
    db=await openDB(); const project=await idbGet('projects','current');
    if(project?.clips && Array.isArray(project.clips)){
-     state.project={name:project.name||'UNTITLED 01',ratio:RATIOS[project.ratio]?project.ratio:'9:16',fit:project.fit==='contain'?'contain':'cover',clips:[],texts:Array.isArray(project.texts)?project.texts:[],overlays:Array.isArray(project.overlays)?project.overlays:[],music:project.music||null,audioTracks:Array.isArray(project.audioTracks)?project.audioTracks:[]};
+     state.project={name:project.name||'UNTITLED 01',ratio:RATIOS[project.ratio]?project.ratio:'9:16',fit:project.fit==='contain'?'contain':'cover',clips:[],texts:Array.isArray(project.texts)?project.texts:[],overlays:Array.isArray(project.overlays)?project.overlays:[],music:project.music||null,audioTracks:Array.isArray(project.audioTracks)?project.audioTracks:[],captions:Array.isArray(project.captions)?project.captions:[],captionStyle:project.captionStyle||null,captionEnabled:project.captionEnabled!==false};
      const ids=new Set([...project.clips.map(c=>c.assetId),...(project.music?[project.music.assetId]:[]),...(project.overlays||[]).map(o=>o.assetId),...(project.audioTracks||[]).map(o=>o.assetId)]);
      for(const id of ids){try{const item=await idbGet('files',id);if(item?.blob)await buildAsset(id,item.blob,item.type,item.name);}catch(e){console.warn('restore file',id,e);}}
      state.project.clips=project.clips.filter(c=>state.assets.has(c.assetId));state.project.overlays=state.project.overlays.filter(o=>state.assets.has(o.assetId));state.project.audioTracks=state.project.audioTracks.filter(o=>state.assets.has(o.assetId));
@@ -199,9 +200,9 @@ async function play(){
  state.playing=true;state.lastFrame=performance.now();await positionMedia();syncMusic();updateTimecode();
 }
 function animationLoop(timestamp){
- const delta=Math.min(.12,(timestamp-(state.lastFrame||timestamp))/1000);state.lastFrame=timestamp;
+ const lastFrame=state.lastFrame||timestamp;state.lastFrame=timestamp;
  if(state.playing){
-   state.current+=delta;
+   state.current=advanceTimeline({current:state.current,lastTimestamp:lastFrame,timestamp,anchor:state.exportClockStart,recording:state.recording,duration:duration(state.project.clips)});
    if(state.current>=duration(state.project.clips)){
      state.current=duration(state.project.clips);state.playing=false;media.pause();bgm.pause();
      if(state.recording&&state.recorder?.state!=='inactive')setTimeout(()=>state.recorder?.state==='recording'&&state.recorder.stop(),100);
@@ -237,12 +238,12 @@ async function exportMovie(){
        const actualType=recorder.mimeType||type,ext=actualType.startsWith('video/mp4')?'mp4':'webm';
        const blob=new Blob(chunks,{type:actualType});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=safeName(state.project.name)+'-'+new Date().toISOString().slice(0,10)+'.'+ext;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
        toast(`${ext.toUpperCase()}を書き出しました（${(blob.size/1024/1024).toFixed(1)}MB）`);
-     }catch(e){fail(e);}finally{state.recording=false;state.recorder=null;$('export-open').disabled=false;$('export-secondary').disabled=false;$('export-progress').hidden=true;for(const track of stream.getTracks())track.stop();state.wakeLock?.release().catch(()=>{});}
+     }catch(e){fail(e);}finally{state.recording=false;state.exportClockStart=null;state.recorder=null;$('export-open').disabled=false;$('export-secondary').disabled=false;$('export-progress').hidden=true;for(const track of stream.getTracks())track.stop();state.wakeLock?.release().catch(()=>{});}
    };
-   recorder.start(500);state.current=0;state.playing=true;state.lastFrame=performance.now();await positionMedia();syncMusic();
+   recorder.start(500);state.current=0;state.playing=true;state.exportClockStart=performance.now();state.lastFrame=state.exportClockStart;await positionMedia();syncMusic();
    if(navigator.wakeLock?.request)state.wakeLock=await navigator.wakeLock.request('screen').catch(()=>null);
    toast('録画方式で書き出し中。画面を閉じないでください');setPanel('export');
- }catch(e){state.recording=false;state.recorder=null;$('export-open').disabled=false;$('export-secondary').disabled=false;$('export-progress').hidden=true;fail(e);}
+ }catch(e){state.recording=false;state.exportClockStart=null;state.recorder=null;$('export-open').disabled=false;$('export-secondary').disabled=false;$('export-progress').hidden=true;fail(e);}
 }
 function exportProject(){const blob=new Blob([JSON.stringify({...state.project,note:'編集メタデータのみ。動画・画像・音声ファイルは含まれません。'},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=safeName(state.project.name)+'-project.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);toast('編集情報JSONを書き出しました（素材は含みません）');}
 function updateClip(fn){const c=selectedClip();if(!c||state.recording)return;fn(c);state.current=clampTime(state.current,state.project.clips);save();refreshAll();positionMedia().catch(fail);}
@@ -275,14 +276,26 @@ function bind(){
  $('music-remove').addEventListener('click',()=>{bgm.pause();bgm.removeAttribute('src');bgm.load();state.project.music=null;save();refreshAll();});
  $('export-open').addEventListener('click',()=>{setPanel('export');document.querySelector('.tools-shell').scrollIntoView({behavior:'smooth'});});
  $('export-secondary').addEventListener('click',exportMovie);$('backup-project').addEventListener('click',exportProject);$('project-save').addEventListener('click',exportProject);
- $('new-project').addEventListener('click',async()=>{if(!confirm('新規プロジェクトを開始しますか？ 現在の編集内容は上書きされます。'))return;state.playing=false;media.pause();bgm.pause();state.project={name:'UNTITLED '+String(Math.floor(Math.random()*90+10)),ratio:'9:16',fit:'cover',clips:[],texts:[],overlays:[],music:null,audioTracks:[]};state.selectedClip=null;state.selectedText=null;state.activeClip=null;state.current=0;setRatio('9:16');save();refreshAll();});
+ $('new-project').addEventListener('click',async()=>{if(!confirm('新規プロジェクトを開始しますか？ 現在の編集内容は上書きされます。'))return;state.playing=false;media.pause();bgm.pause();state.project={name:'UNTITLED '+String(Math.floor(Math.random()*90+10)),ratio:'9:16',fit:'cover',clips:[],texts:[],overlays:[],music:null,audioTracks:[],captions:[],captionStyle:null,captionEnabled:true};state.selectedClip=null;state.selectedText=null;state.activeClip=null;state.current=0;setRatio('9:16');save();refreshAll();});
  window.addEventListener('pagehide',()=>{if(state.recording)console.warn('Export interrupted by pagehide');});
 }
 
+function loadProjectSnapshot(snapshot){
+ if(state.recording)throw Error('書き出し中は復元できません');
+ const p=JSON.parse(JSON.stringify(snapshot));
+ if(!Array.isArray(p.clips)||p.clips.some(c=>!state.assets.has(c.assetId)))throw Error('読み込む動画素材が不足しています');
+ for(const name of ['overlays','audioTracks','texts','captions'])p[name]=Array.isArray(p[name])?p[name]:[];
+ for(const row of [...p.overlays,...p.audioTracks])if(!state.assets.has(row.assetId))throw Error('レイヤー素材が不足しています');
+ if(p.music&&!state.assets.has(p.music.assetId))throw Error('BGM素材が不足しています');
+ state.playing=false;media.pause();bgm.pause();
+ state.project=p;state.selectedClip=p.clips[0]?.id||null;state.selectedText=null;state.activeClip=null;state.current=0;
+ if(p.music){bgm.src=state.assets.get(p.music.assetId).url;bgm.load();}else{bgm.removeAttribute('src');bgm.load();}
+ setRatio(RATIOS[p.ratio]?p.ratio:'9:16');save();refreshAll();seek(0);
+}
 function applyHistory(snapshot){state.playing=false;media.pause();bgm.pause();state.project=JSON.parse(snapshot);state.selectedClip=state.project.clips[0]?.id||null;state.selectedText=null;state.activeClip=null;state.current=0;state.project.overlays ||= [];state.project.audioTracks ||= [];if(state.project.music&&state.assets.has(state.project.music.assetId)){bgm.src=state.assets.get(state.project.music.assetId).url;bgm.load();}else {bgm.removeAttribute('src');bgm.load();}refreshAll();positionMedia().catch(fail);save();}
 function undo(){if(!history.undo.length)return toast('戻す操作がありません');history.redo.push(history.current);history.current=history.undo.pop();applyHistory(history.current);}
 function redo(){if(!history.redo.length)return toast('やり直す操作がありません');history.undo.push(history.current);history.current=history.redo.pop();applyHistory(history.current);}
 window.__subehaSaveAsset=async(id,file,type,name)=>idbPut('files',id,{blob:file,type,name});
-window.__subehaCut={state,canvas,ctx,buildAsset,seek,save,refreshAll,refreshTimeline,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,assetOf,undo,redo,getAudioGraph:()=>{audioReady();return {audioCtx,mixer};}};
+window.__subehaCut={state,canvas,ctx,buildAsset,seek,save,refreshAll,refreshTimeline,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,assetOf,undo,redo,getAudioGraph:()=>{audioReady();return {audioCtx,mixer};},loadProjectSnapshot};
 async function init(){bind();setRatio('9:16');setPanel('clips');try{if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))await navigator.serviceWorker.register('./sw.js');}catch(e){console.warn('Service worker',e);}await restore();window.dispatchEvent(new Event('subeha-cut-ready'));requestAnimationFrame(animationLoop);}
 init().catch(fail);

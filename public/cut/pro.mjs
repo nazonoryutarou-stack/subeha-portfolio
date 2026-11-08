@@ -3,14 +3,18 @@ import {chromaPixels,trackingPosition,bound} from './compositor.mjs';
 import {createMultiAudioEngine} from './multi-audio.mjs';
 import {startPointTrack,trackPoint} from './point-tracker.mjs';
 import {locate} from './timeline.mjs';
+import {parseSubtitleFile,exportSRT,drawCaptions,defaultCaptionStyle} from './subtitles.mjs';
+import {createProjectArchive,readProjectArchive} from './project-archive.mjs';
+import {decodeWaveform,drawPeaks} from './waveform.mjs';
 const $ = id => document.getElementById(id);
 const api = window.__subehaCut;
 const {state,canvas,ctx,buildAsset,seek,save,refreshAll,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,undo,redo} = api;
 const root = $('app');
 const shell = document.querySelector('.timeline-shell');
 let selectedOverlay = null;
-let selectedAudio=null, editMode=null, trackingSession=null, lastTrackingAt=-1;
+let selectedAudio=null, selectedCue=null, captionOffset=0, editMode=null, trackingSession=null, lastTrackingAt=-1;
 const layerBuffers=new Map();
+const waveformCache=new Map(),waveformPending=new Set();
 const audioEngine=createMultiAudioEngine({state,getGraph:api.getAudioGraph});
 const trackCanvas=document.createElement('canvas');trackCanvas.width=180;trackCanvas.height=320;
 const trackCtx=trackCanvas.getContext('2d',{willReadFrequently:true});
@@ -45,6 +49,7 @@ function installChrome(){
   nav.innerHTML='<button class="nav-tab" data-tab="clips"><span>▥</span>編集</button>'+
   '<button class="nav-tab pro-nav" data-pro="overlay"><span>▧</span>オーバーレイ</button>'+
   '<button class="nav-tab" data-tab="text"><span>Ｔ</span>テキスト</button>'+
+  '<button class="nav-tab pro-nav" data-pro="captions"><span>▤</span>字幕</button>'+
   '<button class="nav-tab" data-tab="audio"><span>♫</span>音声</button>'+
   '<button class="nav-tab pro-nav" data-pro="chroma"><span>◩</span>キー合成</button>'+
   '<button class="nav-tab pro-nav" data-pro="tracking"><span>⊙</span>追跡</button>'+ 
@@ -52,12 +57,13 @@ function installChrome(){
   '<button class="nav-tab pro-nav" data-pro="adjust"><span>☷</span>調整</button>'+
   '<button class="nav-tab pro-nav" data-pro="transform"><span>◇</span>変形</button>'+
   '<button class="nav-tab pro-nav" data-pro="effects"><span>✦</span>効果</button>'+
+  '<button class="nav-tab pro-nav" data-pro="project"><span>▦</span>保存/復元</button>'+
   '<button class="nav-tab" data-tab="export"><span>↗</span>出力</button>';
   nav.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{closeDrawer();setPanel(b.dataset.tab);document.querySelector('.tools-shell').classList.add('pro-visible');nav.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));});
   nav.querySelectorAll('[data-pro]').forEach(b=>b.onclick=()=>{document.querySelector('.tools-shell').classList.remove('pro-visible');nav.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));showPanel(b.dataset.pro);});
   document.querySelector('.tools-shell').insertAdjacentHTML('afterbegin','<button id="pro-close-native" class="pro-close-native" aria-label="編集パネルを閉じる">×</button>');
   $('pro-close-native').onclick=()=>document.querySelector('.tools-shell').classList.remove('pro-visible');
-  root.insertAdjacentHTML('beforeend','<div id="pro-drawer" role="region" aria-label="追加編集機能"><header><strong id="pro-title">編集</strong><button id="pro-close">×</button></header><div id="pro-content"></div></div><input id="pro-overlay-picker" type="file" accept="image/*,video/*" hidden><input id="pro-audio-picker" type="file" accept="audio/*" multiple hidden>');
+  root.insertAdjacentHTML('beforeend','<div id="pro-drawer" role="region" aria-label="追加編集機能"><header><strong id="pro-title">編集</strong><button id="pro-close">×</button></header><div id="pro-content"></div></div><input id="pro-overlay-picker" type="file" accept="image/*,video/*" hidden><input id="pro-audio-picker" type="file" accept="audio/*" multiple hidden><input id="pro-caption-picker" type="file" accept=".srt,.vtt,.json,text/plain,application/json" hidden><input id="pro-project-picker" type="file" accept=".subecut,.zip,application/zip" hidden>');
   $('pro-close').onclick=closeDrawer;
   document.querySelector('.viewer-bottom').insertAdjacentHTML('beforeend','<button id="pro-fullscreen" class="chip">⛶</button>');
   $('pro-fullscreen').onclick=()=>{if(!document.fullscreenElement)stage.requestFullscreen?.().catch(()=>toast('全画面表示は非対応です'));else document.exitFullscreen?.();};
@@ -72,6 +78,8 @@ function installChrome(){
   $('clip-track').after(extra);
   $('pro-overlay-picker').addEventListener('change',async e=>{await importOverlay([...e.target.files]);e.target.value='';});
   $('pro-audio-picker').addEventListener('change',async e=>{await importAudioTracks([...e.target.files]);e.target.value='';});
+  $('pro-caption-picker').addEventListener('change',async e=>{if(e.target.files[0])await importCaptions(e.target.files[0]);e.target.value='';});
+  $('pro-project-picker').addEventListener('change',async e=>{if(e.target.files[0])await restoreArchive(e.target.files[0]);e.target.value='';});
   document.querySelector('.bottomnav [data-tab=audio]').onclick=()=>{document.querySelector('.tools-shell').classList.remove('pro-visible');document.querySelectorAll('.bottomnav button').forEach(x=>x.classList.toggle('active',x.dataset.tab==='audio'));showPanel('multiaudio');};
   document.querySelector('.privacy-note').textContent='ローカル編集 · 原本は端末内に保持 · 書き出し形式はブラウザ依存';
 }
@@ -95,7 +103,7 @@ function renderTimeline(){
       for(const layer of over){const b=document.createElement('button');b.className='pro-layer-pill';b.style.left=(layer.start*zoom)+'px';b.style.width=(Math.max(30,layer.duration*zoom))+'px';b.textContent='▧ '+(state.assets.get(layer.assetId)?.name||'レイヤー').slice(0,12);b.classList.toggle('selected',selectedOverlay===layer.id);b.onclick=()=>{selectedOverlay=layer.id;showPanel('overlay');renderTimeline();seek(layer.start);};row.append(b);}
       track.append(row);
     }
-    $('pro-zoom-label').textContent=Math.round(zoom)+'px/s';renderPlayhead();renderAudioTimeline(d);
+    $('pro-zoom-label').textContent=Math.round(zoom)+'px/s';renderPlayhead();renderAudioTimeline(d);renderCaptionTimeline(d);
   }finally{syncing=false;}
 }
 function selectedLayer(){return (state.project.overlays||[]).find(x=>x.id===selectedOverlay)||null;}
@@ -189,7 +197,10 @@ function renderAudioTimeline(d){
     b.textContent='♫ '+(state.assets.get(track.assetId)?.name||'audio').slice(0,16);
     b.classList.toggle('selected',track.id===selectedAudio);
     b.onclick=()=>{selectedAudio=track.id;showPanel('multiaudio');seek(track.start);};
-    row.style.width=Math.max(100,d*zoom)+'px';row.append(b);host.append(row);
+    row.style.width=Math.max(100,d*zoom)+'px';
+    const wave=document.createElement('canvas');wave.className='pro-waveform';wave.width=Math.max(40,Math.round(Math.min(650,track.duration*zoom)));wave.height=30;
+    const peaks=waveformCache.get(track.assetId);if(peaks)drawPeaks(wave.getContext('2d'),peaks,wave.width,wave.height);
+    b.append(wave);row.append(b);host.append(row);ensureWaveform(track.assetId);
   }
 }
 async function importAudioTracks(files){
@@ -205,6 +216,64 @@ async function importAudioTracks(files){
     }catch(e){console.error(e);toast('音声ファイルを読み込めませんでした');}
   }
   save();renderTimeline();showPanel('multiaudio');
+}
+function ensureWaveform(id){
+  if(waveformCache.has(id)||waveformPending.has(id))return;
+  const asset=state.assets.get(id);if(!asset?.blob||asset.type!=='audio')return;
+  waveformPending.add(id);
+  decodeWaveform(asset.blob).then(peaks=>{waveformCache.set(id,peaks);requestAnimationFrame(renderTimeline);})
+    .catch(err=>{console.warn('Waveform unavailable',err.message);waveformCache.set(id,[]);})
+    .finally(()=>waveformPending.delete(id));
+}
+function renderCaptionTimeline(d){
+  let host=$('pro-caption-timeline');
+  if(!host){host=document.createElement('div');host.id='pro-caption-timeline';host.className='pro-caption-timeline';$('text-track').after(host);}
+  host.replaceChildren();const captions=state.project.captions||[];
+  if(!captions.length){host.hidden=true;return;}host.hidden=false;
+  const label=document.createElement('div');label.className='pro-caption-label';label.textContent='字幕 / '+captions.length+' cues';host.append(label);
+  const row=document.createElement('div');row.className='pro-caption-row';row.style.width=Math.max(100,d*zoom)+'px';
+  let visibleCount=0;for(const cue of captions){if(cue.start>d||cue.end<0)continue;if(++visibleCount>400)break;
+    const b=document.createElement('button');b.className='pro-caption-pill';b.textContent=cue.text.replace(/\n/g,' / ').slice(0,25);b.title=cue.text;
+    b.style.left=Math.max(0,cue.start*zoom)+'px';b.style.width=Math.max(28,(cue.end-cue.start)*zoom)+'px';
+    b.classList.toggle('selected',selectedCue===cue.id);
+    b.onclick=()=>{selectedCue=cue.id;seek(cue.start);showPanel('captions');renderCaptionTimeline(d);};row.append(b);
+  }host.append(row);
+}
+async function importCaptions(file){
+  if(state.recording)return toast('書き出し中は字幕を変更できません');
+  if(file.size>4*1024*1024)return toast('字幕ファイルは4MBまでです');
+  try{const text=await file.text(),cues=parseSubtitleFile(text,file.name,{offset:captionOffset});
+    if(!cues.length)return toast('有効なタイムコードの字幕がありません');
+    state.project.captions=[...(state.project.captions||[]),...cues].sort((a,b)=>a.start-b.start);
+    state.project.captionEnabled=true;selectedCue=cues[0].id;save();renderTimeline();draw();showPanel('captions');
+    toast(`${cues.length}件の字幕を読み込みました（時刻を保持）`);
+  }catch(err){console.error(err);toast('字幕の読込失敗: '+err.message);}
+}
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
+async function saveArchive(){
+  if(state.recording)return toast('書き出し中は保存できません');
+  const btn=$('pro-package-save');if(btn)btn.disabled=true;
+  try{const archive=await createProjectArchive(state.project,state.assets);
+    downloadBlob(archive,(state.project.name||'untitled').replace(/[\\/:*?"<>|]/g,'_')+'.subecut');
+    toast('素材を含めた編集プロジェクトを保存しました');
+  }catch(err){console.error(err);toast('保存失敗: '+err.message);}finally{if(btn)btn.disabled=false;}
+}
+async function restoreArchive(file){
+  if(state.recording)return toast('書き出し中は復元できません');
+  if(!confirm('読み込んだプロジェクトに切り替えますか？現在の編集内容は上書きされます。'))return;
+  try{const {project,assets}=await readProjectArchive(file);
+    // Validate the ZIP and its CRC before modifying the running project.
+    const idMap=new Map(assets.map(a=>[a.id,newID()]));
+    const loaded=JSON.parse(JSON.stringify(project));
+    for(const clip of loaded.clips)clip.assetId=idMap.get(clip.assetId);
+    for(const layer of loaded.overlays||[])layer.assetId=idMap.get(layer.assetId);
+    for(const track of loaded.audioTracks||[])track.assetId=idMap.get(track.assetId);
+    if(loaded.music)loaded.music.assetId=idMap.get(loaded.music.assetId);
+    for(const a of assets){const id=idMap.get(a.id);await buildAsset(id,a.blob,a.type,a.name);await window.__subehaSaveAsset(id,a.blob,a.type,a.name);}
+    api.loadProjectSnapshot(loaded);selectedOverlay=null;selectedAudio=null;selectedCue=null;
+    for(const a of assets)if(a.type==='video')makeOverlayVideo(state.assets.get(idMap.get(a.id)));
+    renderTimeline();audioEngine.sync();showPanel('project');toast('素材と編集情報を復元しました');
+  }catch(err){console.error(err);toast('復元失敗: '+err.message);}
 }
 function renderTrackFrame(){
   const v=$('media-player');if(v.readyState<2||!v.videoWidth||!v.videoHeight)return null;
@@ -270,8 +339,36 @@ function onCanvasPoint(event){
 function bindSliders(kind,params,onChange){
   for(const [key,min,max,step] of params){const el=$('pro-'+key);if(!el)continue;el.oninput=e=>{const n=Number(e.target.value);$('pro-'+key+'-value').textContent=(step===1?Math.round(n):n);onChange(key,n);};}
 }
+function captionList(cues){return '<div class="pro-cue-list">'+cues.slice(0,250).map(c=>'<button data-cue="'+safe(c.id)+'">'+c.start.toFixed(2)+'–'+c.end.toFixed(2)+'s　'+safe(c.text).slice(0,80)+'</button>').join('')+'</div>'+(cues.length>250?'<p class="pro-tip">一覧は先頭250件を表示。タイムラインでは全件利用できます。</p>':'');}
 function showPanel(which){
-  if(which==='overlay'){
+  if(which==='captions'){
+    const captions=state.project.captions||[],cue=captions.find(x=>x.id===selectedCue);
+    if(!cue){
+      panel('字幕 / Whisper・SRT・VTT','<p>文字起こし済みの字幕データを読み込み、時刻を維持してプレビューと書き出し映像へ合成します。端末内だけで処理します。</p><label class="pro-select">読み込み時の時刻オフセット（秒）<input type="number" id="pro-caption-offset" step="0.1" value="'+captionOffset+'"></label><div class="pro-inline"><button id="pro-caption-import" class="pro-primary">＋ 字幕ファイル</button><button id="pro-caption-export">SRTを書き出す</button><button id="pro-caption-clear" class="pro-danger">字幕を全削除</button></div><p class="pro-tip">合計 '+captions.length+'件。音声から自動認識する機能ではありません。WhisperのJSON、SRT、VTTを利用できます。</p>'+captionList(captions));
+    }else{
+      const style={...defaultCaptionStyle,...state.project.captionStyle};
+      panel('字幕の編集','<div class="pro-inline"><button id="pro-caption-import">＋ 追加</button><button id="pro-caption-export">SRTを書き出す</button><button id="pro-caption-all">一覧</button></div><label class="pro-select">字幕テキスト<textarea id="pro-cue-text" maxlength="500" rows="3"></textarea></label><div class="pro-controls"><label>開始（秒）<input id="pro-cue-start" type="number" min="0" step=".01"></label><label>終了（秒）<input id="pro-cue-end" type="number" min="0" step=".01"></label>'+createControl('文字サイズ','pro-caption-size',16,90,1,style.size)+createControl('縦位置','pro-caption-y',.3,.95,.01,style.y)+'</div><label class="pro-select">文字色 <input type="color" id="pro-caption-color" value="'+style.color+'"></label><label class="pro-select"><input type="checkbox" id="pro-caption-background" '+(style.background?'checked':'')+'> 背景ボックス</label><label class="pro-select"><input type="checkbox" id="pro-caption-enabled" '+(state.project.captionEnabled!==false?'checked':'')+'> 字幕を映像に焼き込む</label><div class="pro-inline"><button id="pro-cue-delete" class="pro-danger">この字幕を削除</button><button id="pro-caption-clear" class="pro-danger">字幕を全削除</button></div>'+captionList(captions));
+      $('pro-cue-text').value=cue.text;$('pro-cue-start').value=cue.start;$('pro-cue-end').value=cue.end;
+      for(const [id,key,format] of [['pro-cue-text','text',v=>v],['pro-cue-start','start',Number],['pro-cue-end','end',Number]]){
+        $(id).addEventListener('change',e=>{const val=format(e.target.value);if(key==='text')cue.text=val.slice(0,500);else if(Number.isFinite(val))cue[key]=Math.max(0,val);if(cue.end<=cue.start)cue.end=cue.start+.05;state.project.captions.sort((a,b)=>a.start-b.start);save();renderTimeline();draw();});
+      }
+      for(const [id,key] of [['pro-caption-size','size'],['pro-caption-y','y']])$(id).oninput=e=>{state.project.captionStyle={...style,...state.project.captionStyle,[key]:Number(e.target.value)};$(id+'-value').textContent=e.target.value;save();draw();};
+      $('pro-caption-color').oninput=e=>{state.project.captionStyle={...state.project.captionStyle,color:e.target.value};save();draw();};
+      $('pro-caption-background').onchange=e=>{state.project.captionStyle={...state.project.captionStyle,background:e.target.checked};save();draw();};
+      $('pro-caption-enabled').onchange=e=>{state.project.captionEnabled=e.target.checked;save();draw();};
+      $('pro-cue-delete').onclick=()=>{state.project.captions=captions.filter(c=>c.id!==cue.id);selectedCue=null;save();renderTimeline();draw();showPanel('captions');};
+      $('pro-caption-all').onclick=()=>{selectedCue=null;showPanel('captions');};
+    }
+    const offsetField=$('pro-caption-offset');if(offsetField)offsetField.onchange=e=>{captionOffset=Number(e.target.value)||0;};
+    $('pro-caption-import').onclick=()=>$('pro-caption-picker').click();
+    $('pro-caption-export').onclick=()=>{if(!state.project.captions?.length)return toast('字幕がありません');downloadBlob(new Blob([exportSRT(state.project.captions)],{type:'text/plain;charset=utf-8'}),'subeha-captions.srt');};
+    $('pro-caption-clear').onclick=()=>{if(!confirm('すべての字幕を削除しますか？'))return;state.project.captions=[];selectedCue=null;save();renderTimeline();draw();showPanel('captions');};
+    $('pro-content').querySelectorAll('[data-cue]').forEach(b=>b.onclick=()=>{selectedCue=b.dataset.cue;const c=state.project.captions.find(x=>x.id===selectedCue);if(c)seek(c.start);showPanel('captions');});
+  }else if(which==='project'){
+    panel('素材ごと保存 / 復元','<p>動画・画像・音声と字幕・レイヤー・エフェクトをまとめた独立した編集プロジェクトを保存できます。</p><div class="pro-inline"><button class="pro-primary" id="pro-package-save">⇩ 素材を含めて保存（.subecut）</button><button id="pro-package-load">⇧ 保存したプロジェクトを開く</button></div><p class="pro-tip">保存形式は非圧縮ZIP。現在の端末の容量とメモリを守るため、合計200MB以内。インポート時はデータ破損を検査します。素材はサーバーに送信しません。従来の「編集情報JSON」とは異なり、別端末でも再編集できます。</p>');
+    $('pro-package-save').onclick=saveArchive;$('pro-package-load').onclick=()=>$('pro-project-picker').click();
+  }else if(which==='overlay'){
+
     const layer=selectedLayer();
     if(!layer){panel('オーバーレイ','<p>画像・動画を重ね、キーフレームや合成方法を設定できます。</p><button id="pro-import-layer" class="pro-primary">＋ 画像・動画レイヤー</button>');}
     else{
@@ -333,11 +430,12 @@ function showPanel(which){
 }
 function changeLayer(fn){const layer=selectedLayer();if(!layer||state.recording)return;fn(layer);layerBuffers.delete(layer.id);save();renderTimeline();draw();}
 function mount(){
-  state.project.overlays ||= [];state.project.audioTracks ||= [];
+  state.project.overlays ||= [];state.project.audioTracks ||= [];state.project.captions ||= [];
   installChrome();
   canvas.addEventListener('pointerdown',onCanvasPoint);
   for(const layer of state.project.overlays){const a=state.assets.get(layer.assetId);if(a?.type==='video')makeOverlayVideo(a);}
   renderHooks.push(renderLayers);
+  renderHooks.push(({ctx,canvas,state})=>drawCaptions(ctx,canvas,state.project,state.current));
   window.addEventListener('subeha-cut-change',()=>{requestAnimationFrame(renderTimeline);});
   const track=$('clip-track');
   const observer=new MutationObserver(()=>{requestAnimationFrame(renderTimeline);});
