@@ -82,3 +82,17 @@ body{background:#0b0c10!important;font-size:13px}
 #pro-content input[type=color]{height:33px;width:60px;margin-left:7px;vertical-align:middle}
 #pro-content input[type=checkbox]{accent-color:#fd617a;width:16px;height:16px;vertical-align:middle}
 #preview{touch-action:manipulation}
+
+/* v0.4: Whisper captions, independent timestamp track, and per-clip audio peaks. */
+.pro-caption-timeline{background:#28252c;border:1px solid #675673;border-radius:4px;margin:5px 0;padding:3px 0 4px;overflow:hidden;min-height:39px}
+.pro-caption-timeline[hidden]{display:none}
+.pro-caption-label{font-size:9px;color:#d0b2dc;padding-left:7px;height:13px}
+.pro-caption-row{height:20px;position:relative}
+.pro-caption-pill{position:absolute;top:0;height:19px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border:1px solid #bf9bd2;background:#583861;color:#faf0fc;border-radius:2px;font-size:9px;text-align:left;padding:1px 3px}
+.pro-caption-pill.selected{background:#ab6bc1;border-color:#fff}
+.pro-cue-list{display:flex;flex-direction:column;gap:3px;max-height:155px;overflow:auto;margin:9px 0}
+.pro-cue-list button{display:block;min-height:28px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+#pro-content textarea,#pro-content input[type=number]{display:block;width:100%;padding:8px;background:#15161b;border:1px solid #494953;border-radius:6px;color:#fff;font:12px system-ui,sans-serif}
+#pro-content textarea{resize:vertical;min-height:55px}
+.pro-audio-pill{position:relative;overflow:hidden!important}
+.pro-waveform{position:absolute;bottom:1px;left:0;width:100%;height:24px;opacity:.55;pointer-events:none}
