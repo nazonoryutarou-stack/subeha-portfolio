@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="すべての歯が見える。祭祀と、目に見えないものについての断章。">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#eae4d7">
+<title>すべての歯が見える — 断章</title>
+<link rel="stylesheet" href="./collage.css?v=20261109-ink">
+</head>
+<body>
+<a class="skip-link" href="#story">本文へ</a>
+<div class="page-grain" aria-hidden="true"></div>
+<header class="site-head">
+  <a class="head-seal" href="./" aria-label="入口に戻る"><img src="./hitotsu-ore-choji.png" alt=""></a>
+  <div class="head-wordmark"><span>RITUAL NOTES / SUBEHA</span><a href="./">すべての歯が見える</a></div>
+  <div class="head-controls">
+    <button type="button" class="chrome-button quiet-toggle" id="quietToggle" aria-pressed="false">装飾を減らす</button>
+    <button type="button" class="chrome-button index-toggle" id="mapButton" aria-expanded="false" aria-controls="utilityPanel"><span class="index-icon" aria-hidden="true">☰</span> 目次</button>
+  </div>
+</header>
+<main id="thought" class="thought-shell">
+  <div class="edition-line"><span>目に見えないものについて</span><span>SUBETE NO HA GA MIERU</span><span>2026 / 記録</span></div>
+  <div class="reading-grid">
+    <aside class="chapter-rail" aria-label="断章の目次">
+      <div class="chapter-heading"><small>CONTENTS</small><span>断章</span></div>
+      <nav class="rail-list" id="railList"></nav>
+      <p class="rail-mark">すべての歯が見える</p>
+    </aside>
+    <div class="reading-column">
+      <article id="story" class="story" aria-live="polite"><p class="loading-note">本文を読み込んでいます。</p></article>
+      <nav class="branch-nav" id="branchNav" aria-label="次の断章"></nav>
+    </div>
+  </div>
+  <footer class="endmatter"><span>すべての歯が見える</span><a href="./">入場画面に戻る</a><span>RITUAL / ARCHIVE</span></footer>
+</main>
+<aside class="utility-panel" id="utilityPanel" hidden aria-label="全体目次">
+  <div class="utility-inner">
+    <div class="utility-head"><span>INDEX <small> / すべての歯が見える</small></span><button id="closePanel" type="button" aria-label="目次を閉じる">閉じる ×</button></div>
+    <nav id="nodeIndex" class="node-index" aria-label="断章一覧"></nav>
+    <p class="utility-note">矢印キー・横方向のスワイプでも断章を移動できます。</p>
+  </div>
+</aside>
+<script src="./collage.js?v=20261109-ink" defer></script>
+</body>
+</html>

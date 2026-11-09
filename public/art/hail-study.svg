@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" fill="none">
+<defs><filter id="ice"><feTurbulence type="fractalNoise" baseFrequency=".025" numOctaves="3" seed="12" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="9"/></filter><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#38332e" stroke-opacity=".18" stroke-width="1"/></pattern></defs>
+<rect width="640" height="440" fill="#e4dfd5"/><rect width="640" height="440" fill="url(#grid)"/>
+<g filter="url(#ice)" stroke="#252322" stroke-width="4" fill="#f5f3ec">
+<circle cx="113" cy="142" r="53"/><circle cx="246" cy="130" r="38"/><circle cx="379" cy="160" r="62"/><circle cx="530" cy="145" r="43"/>
+<circle cx="172" cy="255" r="61"/><circle cx="330" cy="294" r="44"/><circle cx="485" cy="278" r="68"/>
+</g>
+<g stroke="#181716" stroke-opacity=".42" stroke-width="1.5"><path d="M20 45h110M500 45h120M20 400h600M20 12v412M620 12v412"/><path d="M113 70v142M42 142h143M379 76v170M290 160h178M485 180v200M375 278h220" stroke-dasharray="5 6"/></g>
+<circle cx="379" cy="160" r="87" stroke="#b23436" stroke-width="4" fill="none"/><path d="M436 209l100 95-28-3M536 304l-7-27" stroke="#b23436" stroke-width="5" fill="none"/>
+<text x="29" y="39" font-family="monospace" font-size="16" fill="#1b1a18">2019.11.11 / OSAKA</text>
+<text x="30" y="421" font-family="monospace" font-size="14" fill="#b23436">HAIL / UNVERIFIED SPECIMEN</text>
+</svg>
