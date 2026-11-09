@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {normalizeExportSettings,supportedRecorderType,estimateBytes,exportWarnings} from '../export-settings.mjs';
+assert.equal(normalizeExportSettings().fps,30);
+assert.equal(normalizeExportSettings({preset:'smooth'}).fps,60);
+assert.equal(normalizeExportSettings({preset:'unknown'}).preset,'standard');
+assert.equal(supportedRecorderType({isTypeSupported:t=>t==='video/webm'}),'video/webm');
+assert.equal(supportedRecorderType(null),null);
+assert.ok(estimateBytes(10,{preset:'high'})>estimateBytes(10,{preset:'compact'}));
+assert.ok(exportWarnings({seconds:200,clips:[{reverse:true},{transitionIn:{type:'dissolve'}}],fps:60}).length>=4);
+console.log('export settings tests PASS');

@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {TEXT_PRESETS,styleForText,applyTextPreset} from '../text-styles.mjs';
+assert.ok(Object.keys(TEXT_PRESETS).length>=5);
+const t={id:'id-1',text:'hello',x:.2,y:.4,start:1,duration:2,size:60};
+const after=applyTextPreset(t,'neon');
+assert.equal(after.id,t.id);assert.equal(after.text,t.text);assert.equal(after.fontFamily,'sans');
+assert.equal(styleForText({fontFamily:'evil\";','color':'red',outlineWidth:99}).outlineWidth,.35);
+assert.equal(styleForText({fontFamily:'evil'}).font,'system-ui, sans-serif');
+assert.equal(applyTextPreset(t,'unknown'),t);
+console.log('text style tests PASS');

@@ -13,6 +13,9 @@ export const RATIOS = Object.freeze({
   '9:16': [720,1280],
   '16:9': [1280,720],
   '1:1': [960,960],
+  '4:5': [960,1200],
+  '3:4': [960,1280],
+  '21:9': [1260,540],
 });
 export function clipLength(clip) { return clipSeconds(clip); }
 export function duration(clips) { return totalDuration(clips); }
@@ -21,12 +24,15 @@ export function splitAt(clips,seconds) {
   const at=locate(clips,seconds);
   // A transition is a two-source region; avoid ambiguous destructive splits.
   if (!at || at.transition || at.local<0.07 || at.length-at.local<0.07) return null;
-  const first={...at.clip,id:newID(),end:at.mediaTime};
-  const second={...at.clip,id:newID(),start:at.mediaTime,transitionIn:{type:'none',duration:0}};
+  // Reverse playback walks from source end toward source start. The leading
+  // segment therefore owns [cut,end], not [start,cut].
+  const reverse=!!at.clip.reverse;
+  const first={...structuredClone(at.clip),id:newID(),...(reverse?{start:at.mediaTime}:{end:at.mediaTime})};
+  const second={...structuredClone(at.clip),id:newID(),...(reverse?{end:at.mediaTime}:{start:at.mediaTime}),transitionIn:{type:'none',duration:0}};
   if((at.clip.keyframes||[]).length){
     const boundary={...clipTransform(at.clip,at.local),time:at.local};
-    first.keyframes=[...at.clip.keyframes.filter(k=>k.time<at.local),boundary];
-    second.keyframes=[{...boundary,time:0},...at.clip.keyframes.filter(k=>k.time>at.local).map(k=>({...k,time:k.time-at.local}))];
+    first.keyframes=[...at.clip.keyframes.filter(k=>k.time<at.local).map(k=>structuredClone(k)),boundary];
+    second.keyframes=[{...boundary,time:0},...at.clip.keyframes.filter(k=>k.time>at.local).map(k=>({...structuredClone(k),time:k.time-at.local}))];
   }
   const result=[...clips]; result.splice(at.index,1,first,second);
   return {clips:result,first,second};
