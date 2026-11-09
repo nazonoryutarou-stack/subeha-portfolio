@@ -46,7 +46,7 @@ function feature(node){
   "<figure class='persimmon-figure deco'><img src='"+img.persimmon+"' loading='lazy' alt='柿の古い植物画'><figcaption>柿（盗んでない）</figcaption></figure></section>",
   "<section class='entry entry-funeral'><div class='funeral-sun deco' aria-hidden='true'></div><div class='funeral-copy'><span class='label'>FINAL OBJECTIVE</span>",para(p[7],7,"closing"),"</div>",
   "<figure class='danjiri-photo deco'><img src='"+img.danjiri+"' loading='lazy' alt='大阪のだんじり祭'><figcaption>だんじり / OSAKA</figcaption></figure></section>",
-  "<aside class='footnote-panel'><div class='note-mark'>※</div><p>"+lines(node.footnote||"")+"</p>",
+  "<aside class='footnote-panel'><div class='note-mark' aria-hidden='true'>注</div><p>"+lines(node.footnote||"")+"</p>",
   "<img class='kappa-img deco' src='"+img.kappa+"' loading='lazy' alt='鳥山石燕によるひょうすべ（河童の仲間）の画'></aside>",
   "<details class='asset-credits'><summary>図版出典とライセンス</summary>",
   "<p>仏頭：<a href='https://commons.wikimedia.org/wiki/File:Head_of_Buddha_statue.jpg' target='_blank' rel='noopener noreferrer'>Adbh266 / CC0</a>。",
@@ -62,7 +62,7 @@ function ordinary(node){
  "<div class='hero-titles'><div class='hero-kicker'><b>"+clean(node.id)+"</b><span>THOUGHT FRAGMENT</span></div>"+
  "<h1>"+clean(node.title)+"</h1></div></header>"+
  "<div class='article-content regular-content'>"+node.body.map((v,i)=>"<section class='entry regular-entry'>"+para(v,i)+"</section>").join("")+
- (node.footnote?"<aside class='footnote-panel'><div class='note-mark'>※</div><p>"+lines(node.footnote)+"</p></aside>":"")+"</div>";
+ (node.footnote?"<aside class='footnote-panel'><div class='note-mark' aria-hidden='true'>注</div><p>"+lines(node.footnote)+"</p></aside>":"")+"</div>";
 }
 function navigation(){
  el.rail.innerHTML=nodes.map((node,i)=>"<a href='#node-"+clean(node.id)+"' data-go='"+clean(node.id)+"' class='rail-item "+(i===active?"selected":"")+"' "+(i===active?"aria-current='page'":"")+"><i></i><small>"+clean(node.id)+"</small><span>"+clean(node.title)+"</span></a>").join("");
