@@ -3,31 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="すべての歯が見える。祭祀についての記録、断章、自己紹介。">
+<meta name="description" content="すべての歯が見える。祭祀と、目に見えないものについての断章。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#f4f0e6">
-<title>すべての歯が見える｜断章</title>
-<link rel="stylesheet" href="./thought.css">
+<link rel="canonical" href="https://subetenohagamieru.neocities.org/thought.html">
+<meta name="theme-color" content="#eae4d7">
+<title>すべての歯が見える — 断章</title>
+<link rel="stylesheet" href="./collage.css?v=20261110-collage2">
 </head>
 <body>
-<a class="skip-link" href="#pageContent">本文へ</a>
-<header class="mag-header">
-  <button type="button" class="menu-trigger" id="mapButton" aria-expanded="false" aria-controls="utilityPanel" aria-label="記事一覧を開く"><span></span><span></span><span></span></button>
-  <a class="mag-brand" href="./" aria-label="すべての歯が見える、入口へ戻る"><img src="./hitotsu-ore-choji.png" alt=""><span>すべての歯が見える</span></a>
-  <span class="edition">THE RITUAL NOTES<br>EDITION / 001</span>
+<a class="skip-link" href="#story">本文へ</a>
+<div class="page-grain" aria-hidden="true"></div>
+<div class="reading-progress" id="readingProgress" aria-hidden="true"><span></span></div>
+<header class="site-head">
+  <a class="head-seal" href="./" aria-label="入口に戻る"><img src="./hitotsu-ore-choji.png" alt=""></a>
+  <div class="head-wordmark"><span>RITUAL NOTES / SUBEHA</span><a href="./">すべての歯が見える</a></div>
+  <div class="head-controls">
+    <button type="button" class="chrome-button quiet-toggle" id="quietToggle" aria-pressed="false">装飾を減らす</button>
+    <button type="button" class="chrome-button index-toggle" id="mapButton" aria-expanded="false" aria-controls="utilityPanel"><span class="index-icon" aria-hidden="true">☰</span> 目次</button>
+  </div>
 </header>
-<div class="chapter-strip" aria-hidden="true"><span>祭</span><i></i><span>祀</span><i></i><span>記</span></div>
-<div class="page-frame">
-  <nav class="chapter-rail" id="chapterRail" aria-label="断章一覧"><p class="rail-label">DOCUMENT / INDEX</p></nav>
-  <main id="pageContent" class="page-content" tabindex="-1"><span id="node-1-1" hidden></span><div class="loading-mark">記録を開いています。</div></main>
-  <aside class="marginalia" aria-hidden="true"><span>RITUAL / DOCUMENT</span><span>001 — 004</span></aside>
-</div>
-<footer class="reader-footer"><a href="./">入口へ戻る</a><a href="./collage.html#node-1-1" aria-label="墨絵コラージュ版で読む">墨絵版で読む ↗</a><span>すべての歯が見える / RITUAL NOTES</span><button type="button" id="topButton">↑ TOP</button></footer>
-<div id="utilityPanel" class="index-overlay" hidden>
-  <div class="index-head"><p>INDEX <small>思考の目次</small></p><button type="button" id="closePanel" aria-label="記事一覧を閉じる">×</button></div>
-  <nav class="index-list" id="nodeIndex" aria-label="記事一覧"></nav>
-</div>
-<noscript>このページではJavaScriptを使用します。<a href="./">入口へ戻る</a></noscript>
-<script src="./thought.js" defer></script>
+<span id="node-1-1" hidden></span>
+<main id="thought" class="thought-shell">
+  <div class="edition-line"><span>目に見えないものについて</span><span>SUBETE NO HA GA MIERU</span><span>2026 / 記録</span></div>
+  <div class="reading-grid">
+    <aside class="chapter-rail" aria-label="断章の目次">
+      <div class="chapter-heading"><small>CONTENTS</small><span>断章</span></div>
+      <nav class="rail-list" id="railList"></nav>
+      <p class="rail-mark">すべての歯が見える</p>
+    </aside>
+    <div class="reading-column">
+      <article id="story" class="story" aria-live="polite"><p class="loading-note">本文を読み込んでいます。</p></article>
+      <nav class="branch-nav" id="branchNav" aria-label="次の断章"></nav>
+    </div>
+  </div>
+  <footer class="endmatter"><span>すべての歯が見える</span><a href="./">入場画面に戻る</a><span>RITUAL / ARCHIVE</span></footer>
+</main>
+<aside class="utility-panel" id="utilityPanel" hidden aria-label="全体目次">
+  <div class="utility-inner">
+    <div class="utility-head"><span>INDEX <small> / すべての歯が見える</small></span><button id="closePanel" type="button" aria-label="目次を閉じる">閉じる ×</button></div>
+    <nav id="nodeIndex" class="node-index" aria-label="断章一覧"></nav>
+    <p class="utility-note">矢印キー・横方向のスワイプでも断章を移動できます。</p>
+  </div>
+</aside>
+<noscript><p style="padding:24px">本文の表示にはJavaScriptが必要です。<a href="./data/thought-nodes.json">原文データはこちら</a>。</p></noscript>
+<script src="./collage.js?v=20261110-collage2" defer></script>
 </body>
 </html>

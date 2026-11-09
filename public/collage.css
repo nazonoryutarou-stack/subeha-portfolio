@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700;900&family=Shippori+Mincho:wght@400;600;800&display=swap");
 /* Ritual collage / responsive editorial reader, edition 2026.11 */
 :root{
  --paper:#eee9df;--cream:#f8f4ea;--ink:#1b1916;--soft:#555047;--red:#ac3634;
@@ -235,4 +236,69 @@ figcaption{font:9px var(--sans);letter-spacing:.12em;line-height:1.55;color:#675
 @media (prefers-reduced-motion:reduce){
  html{scroll-behavior:auto}
  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+
+
+/* Second impression / 2026.11.10 — original typography, collage details and reading aids */
+.reading-progress{position:fixed;inset:0 0 auto;z-index:90;height:3px;background:transparent;pointer-events:none}
+.reading-progress span{display:block;width:100%;height:100%;background:#af3936;transform-origin:left center;transform:scaleX(0);will-change:transform}
+.site-head{isolation:isolate}
+.site-head::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;background-image:repeating-linear-gradient(106deg,transparent 0 12px,rgba(37,23,21,.027) 13px 14px,transparent 15px 27px),linear-gradient(130deg,rgba(172,54,52,.025),transparent 40%)}
+.head-wordmark a{font-family:"Shippori Mincho",var(--serif)}
+.hero-main{background-color:#e4ddd0;background-image:radial-gradient(circle at 26% 65%,#f5efe4 2%,transparent 72%),linear-gradient(90deg,#eee8dc,rgba(230,221,208,.65))}
+.hero-main::after{content:"";position:absolute;pointer-events:none;z-index:3;inset:0;background:linear-gradient(0deg,rgba(29,27,24,.07),transparent 18%,transparent 82%,rgba(29,27,24,.09)),repeating-linear-gradient(90deg,transparent 0 3px,rgba(25,23,21,.008) 4px 6px);mix-blend-mode:multiply}
+.hero-archive-mark{position:absolute;z-index:5;right:43%;top:10%;display:flex;align-items:center;gap:14px;transform:rotate(-8deg)}
+.hero-archive-mark b{font-size:clamp(24px,3vw,41px);line-height:1;border:3px double #9a302e;color:#9a302e;padding:7px 8px 10px;font-weight:800}
+.hero-archive-mark span{font:700 10px var(--sans);letter-spacing:.14em;color:#5f5550;writing-mode:vertical-rl}
+.hero-buddha::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-11deg,transparent 0 7px,rgba(20,16,16,.07) 8px,transparent 9px 14px);mix-blend-mode:multiply;pointer-events:none}
+.hero-titles{filter:drop-shadow(0 1px 0 rgba(248,244,234,.22))}
+.hero-kicker b{font-weight:800}
+.hero h1{font-family:"Shippori Mincho",var(--serif);letter-spacing:-.065em}
+.article-content{background-image:radial-gradient(circle at 1% 26%,rgba(125,85,63,.055) 0 2px,transparent 2.5px),radial-gradient(circle at 95% 58%,rgba(125,85,63,.045) 0 1px,transparent 1.5px);background-size:89px 119px,121px 163px}
+.entry::before{content:"";position:absolute;left:0;top:-1px;width:34px;border-top:2px solid var(--red);opacity:.75}
+.entry-first::before{display:none}
+.copy{font-feature-settings:"palt" 1;hanging-punctuation:allow-end}
+.entry-hail .hail-figure{outline:1px solid rgba(0,0,0,.25);outline-offset:7px}
+.entry-hail .hail-figure::after{content:"FIG / 01";font:9px var(--sans);letter-spacing:.22em;position:absolute;top:12px;right:12px;background:var(--cream);padding:5px 7px;color:var(--red)}
+.diagram::before{content:"結合・分離";font:10px var(--sans);color:var(--red);letter-spacing:.14em;position:absolute;top:0;right:0;transform:rotate(4deg)}
+.entry-name .copy{background:linear-gradient(90deg,rgba(248,244,234,.92) 0%,rgba(248,244,234,.68) 72%,transparent)}
+.entry-drink .drink-poster{transform:rotate(-1.3deg);box-shadow:12px 10px 0 rgba(44,29,25,.08)}
+.entry-persimmon .persimmon-figure{filter:contrast(1.07)}
+.entry-funeral .copy{font-family:"Shippori Mincho",var(--serif)}
+.entry-funeral .danjiri-photo{box-shadow:-12px 13px 0 rgba(255,255,255,.06)}
+.footnote-panel::after{content:"";position:absolute;left:0;top:0;width:180px;height:3px;background:var(--red)}
+.asset-credits summary:focus-visible,.chrome-button:focus-visible,.rail-item:focus-visible,.index-row:focus-visible,.branch-next:focus-visible,.branch-prev:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+
+@media (max-width:900px){
+ .hero-archive-mark{top:11%;right:35%}
+ .head-wordmark a{font-size:clamp(17px,3.2vw,25px)}
+}
+@media (max-width:640px){
+ .hero-archive-mark{right:6%;top:6%;transform:rotate(8deg)}
+ .hero-archive-mark b{font-size:28px;border-width:2px;padding:5px 5px 8px}
+ .hero-archive-mark span{font-size:8px}
+ .hero h1{font-size:clamp(42px,10.2vw,62px)}
+ .hero-main::after{opacity:.5}
+ .entry-name .copy{background:rgba(248,244,234,.65)}
+ .copy{font-feature-settings:normal}
+}
+@media (max-width:370px){
+ .head-wordmark a{font-size:15px}
+ .hero-titles{padding-left:38px}
+ .hero h1{font-size:41px}
+ .hero-archive-mark{top:5%}
+ .hero-vertical{font-size:12px}
+}
+@media print{
+ html,body{background:white!important;color:#111!important}
+ .page-grain,.site-head,.chapter-rail,.branch-nav,.endmatter,.utility-panel,.reading-progress{display:none!important}
+ .reading-grid{display:block!important}
+ .reading-column,.story,.article-content{width:100%!important;box-shadow:none!important;background:white!important}
+ .hero{min-height:200px!important;background:#faf8f3!important}
+ .hero-titles{padding:50px 0!important;max-width:100%!important}
+ .hero h1{font-size:45px!important}
+ .entry{break-inside:avoid-page}
+ .entry-funeral{background:#f7f3ea!important;color:#111!important}
+ .entry-funeral .copy{color:#111!important}
+ .copy{color:#111!important}
 }

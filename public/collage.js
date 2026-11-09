@@ -23,9 +23,9 @@ function feature(node){
  const first=p[2].indexOf("。"),sentence=first<0?p[2]:p[2].slice(0,first+1),rest=first<0?"":p[2].slice(first+1);
  return [
   "<header class='hero hero-main'>",
-  "<canvas class='ink-canvas' aria-hidden='true'></canvas><div class='hero-brush deco' aria-hidden='true'></div>",
+  "<canvas class='ink-canvas' aria-hidden='true'></canvas><div class='hero-brush deco' aria-hidden='true'></div><div class='hero-archive-mark deco' aria-hidden='true'><b>霊</b><span>11 XI 2019</span></div>",
   "<div class='hero-sun deco' aria-hidden='true'></div>",
-  "<figure class='hero-buddha deco'><img src='"+img.buddha+"' alt='' fetchpriority='high'></figure>",
+  "<figure class='hero-buddha deco'><img src='"+img.buddha+"' alt='' fetchpriority='high' decoding='async' data-fallback='./art/buddha-study.svg'></figure>",
   "<div class='hero-vertical deco' aria-hidden='true'>すべての歯が見える</div>",
   "<div class='hero-titles'><div class='hero-kicker'><b>1—1</b><span>CHAPTER ONE / INTRODUCTION</span></div>",
   "<h1>"+clean(node.title)+"</h1><div class='underline-ink deco' aria-hidden='true'></div><p class='hero-folio'>すべての歯が見える　 /　記録 001</p></div></header>",
@@ -43,14 +43,14 @@ function feature(node){
   "<section class='entry entry-drink'><div class='drink-poster deco' aria-hidden='true'><span>SAKE / REPEATEDLY</span><strong>酒</strong><i>酒　酒　酒　酒</i></div>",
   "<div><span class='label'>DAILY LIFE / EXORCISM</span>",para(p[5],5),"</div></section>",
   "<section class='entry entry-persimmon'><div>",para(p[6],6),"</div>",
-  "<figure class='persimmon-figure deco'><img src='"+img.persimmon+"' loading='lazy' alt='柿の古い植物画'><figcaption>柿（盗んでない）</figcaption></figure></section>",
+  "<figure class='persimmon-figure deco'><img src='"+img.persimmon+"' loading='lazy' decoding='async' data-fallback='./assets/persimmon-engraving.svg' alt='柿の古い植物画'><figcaption>柿（盗んでない）</figcaption></figure></section>",
   "<section class='entry entry-funeral'><div class='funeral-sun deco' aria-hidden='true'></div><div class='funeral-copy'><span class='label'>FINAL OBJECTIVE</span>",para(p[7],7,"closing"),"</div>",
-  "<figure class='danjiri-photo deco'><img src='"+img.danjiri+"' loading='lazy' alt='大阪のだんじり祭'><figcaption>だんじり / OSAKA</figcaption></figure></section>",
+  "<figure class='danjiri-photo deco'><img src='"+img.danjiri+"' loading='lazy' decoding='async' data-fallback='./art/danjiri-etching.svg' alt='大阪のだんじり祭'><figcaption>だんじり / OSAKA</figcaption></figure></section>",
   "<aside class='footnote-panel'><div class='note-mark' aria-hidden='true'>注</div><p>"+lines(node.footnote||"")+"</p>",
-  "<img class='kappa-img deco' src='"+img.kappa+"' loading='lazy' alt='鳥山石燕によるひょうすべ（河童の仲間）の画'></aside>",
+  "<img class='kappa-img deco' src='"+img.kappa+"' loading='lazy' decoding='async' data-fallback='./art/kappa-etching.svg' alt='鳥山石燕によるひょうすべ（河童の仲間）の画'></aside>",
   "<details class='asset-credits'><summary>図版出典とライセンス</summary>",
   "<p>仏頭：<a href='https://commons.wikimedia.org/wiki/File:Head_of_Buddha_statue.jpg' target='_blank' rel='noopener noreferrer'>Adbh266 / CC0</a>。",
-  "柿：<a href='https://commons.wikimedia.org/wiki/File:PersimmonWatercolor.jpg' target='_blank' rel='noopener noreferrer'>Amanda A. Newton, 1887 / Public Domain</a>。",
+  "柿：<a href='https://commons.wikimedia.org/wiki/File:PersimmonWatercolor.jpg' target='_blank' rel='noopener noreferrer'>Amanda A. Newton / Public Domain</a>。",
   "ひょうすべ：<a href='https://commons.wikimedia.org/wiki/File:SekienHyousube.jpg' target='_blank' rel='noopener noreferrer'>鳥山石燕, 1781 / Public Domain</a>。",
   "だんじり：<a href='https://commons.wikimedia.org/wiki/File:2019_Danjiri_festival_at_Otori_Shrine008.jpg' target='_blank' rel='noopener noreferrer'>Naokijp / CC BY-SA 4.0</a>（モノクロ化・トリミング表示）。",
   "<a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>ライセンス</a>。墨や模式図は本サイト用に制作。</p></details></div>"
@@ -93,10 +93,22 @@ function openMenu(){el.panel.hidden=false;document.body.classList.add("index-ope
 function show(id,changeHistory){
  const index=nodes.findIndex(node=>node.id===id);if(index===-1)return;
  active=index;const node=nodes[index];el.story.innerHTML=node.id==="1-1"?feature(node):ordinary(node);
+ el.story.querySelectorAll('img[data-fallback]').forEach(img=>{
+   img.addEventListener('error',()=>{
+     const fallback=img.getAttribute('data-fallback');
+     if(fallback){img.removeAttribute('data-fallback');img.src=fallback;}
+   },{once:true});
+ });
  el.story.dataset.node=node.id;document.title=node.id+" "+node.title+" — すべての歯が見える";
  navigation();if(changeHistory)history.pushState(null,"","#node-"+node.id);
- closeMenu(false);window.scrollTo(0,0);requestAnimationFrame(drawInk);
+ closeMenu(false);window.scrollTo(0,0);requestAnimationFrame(drawInk);requestAnimationFrame(updateReadingProgress);
 }
+function updateReadingProgress(){
+ const progress=document.querySelector('#readingProgress span');if(!progress)return;
+ const total=Math.max(1,document.documentElement.scrollHeight-window.innerHeight);
+ progress.style.transform='scaleX('+Math.min(1,Math.max(0,window.scrollY/total))+')';
+}
+window.addEventListener('scroll',updateReadingProgress,{passive:true});
 function syncHash(){const id=decodeURIComponent(location.hash.replace(/^#node-/,""));show(nodes.some(n=>n.id===id)?id:nodes[0].id,false);}
 document.addEventListener("click",e=>{const a=e.target.closest("[data-go]");if(a){e.preventDefault();show(a.dataset.go,true);}});
 el.menu.addEventListener("click",openMenu);
