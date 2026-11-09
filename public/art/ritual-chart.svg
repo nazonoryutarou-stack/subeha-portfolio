@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" fill="none" aria-hidden="true">
+<defs><pattern id="dots" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".65" fill="#171513" opacity=".32"/></pattern></defs>
+<circle cx="240" cy="240" r="204" stroke="#28201e" stroke-width="1.5"/><circle cx="240" cy="240" r="176" stroke="#28201e" stroke-width="1" stroke-dasharray="3 9"/><circle cx="240" cy="240" r="128" stroke="#28201e" stroke-width="1"/><circle cx="240" cy="240" r="82" stroke="#ad3435" stroke-width="2"/><circle cx="240" cy="240" r="25" fill="#b93f3d"/><path d="M240 16v448M16 240h448M80 80l320 320M80 400 400 80" stroke="#292523" stroke-width="1" opacity=".55"/>
+<path d="M36 240a204 204 0 0 1 204-204M240 444a204 204 0 0 0 204-204" stroke="#b93f3d" stroke-width="7"/>
+<circle cx="240" cy="36" r="14" fill="#171513"/><circle cx="444" cy="240" r="11" fill="#171513"/><circle cx="240" cy="444" r="11" fill="#171513"/><circle cx="36" cy="240" r="11" fill="#171513"/>
+<circle cx="240" cy="240" r="206" stroke="#28201e" stroke-width=".5" stroke-dasharray="1 5"/>
+<g stroke="#28201e" stroke-width="1.5"><path d="M236 10h8v38h-8zM236 432h8v38h-8zM10 236h38v8H10zM432 236h38v8h-38z"/></g>
+<path d="M190 240h100m-50-50v100" stroke="#f1e9da" stroke-width="1.5"/>
+<text x="240" y="174" font-size="14" font-family="serif" fill="#25211d" text-anchor="middle" letter-spacing="7">霊 ・ 運 ・ 縁</text>
+<text x="240" y="334" font-size="15" font-family="serif" fill="#25211d" text-anchor="middle" letter-spacing="7">作用と干渉</text>
+<text x="240" y="246" font-size="16" font-family="serif" font-weight="bold" fill="#f2ece2" text-anchor="middle">祭</text>
+<text x="82" y="20" font-size="10" font-family="monospace" fill="#a63736">RITUAL / 001</text>
+<text x="329" y="465" font-size="10" font-family="monospace" fill="#a63736">FIG. 01</text>
+</svg>
