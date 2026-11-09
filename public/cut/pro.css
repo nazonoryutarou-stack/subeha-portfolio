@@ -113,3 +113,12 @@ body{background:#0b0c10!important;font-size:13px}
 .pro-text-presets{display:flex;gap:6px;overflow-x:auto;max-width:100%;padding:5px 0 10px}
 .pro-text-presets button{border:1px solid #555762;border-radius:8px;background:#30303a;padding:10px 12px;color:#f5f4f9;font:600 11px monospace;white-space:nowrap}
 #pro-text-studio .pro-slider{margin-top:12px}
+
+/* v0.7 still-image retouch and editable starter templates */
+#retouch-preview-holder{display:flex;justify-content:center;min-height:100px;background:#0e1016;border:1px solid #3f4149;border-radius:8px;margin:12px 0;padding:8px;overflow:hidden}
+#retouch-preview{display:block;max-width:100%;max-height:250px;width:auto;height:auto;touch-action:none;cursor:crosshair;object-fit:contain}
+.retouch-slider{display:block;padding:8px 4px;font-size:11px;color:#ddd}.retouch-slider output{float:right;color:#f58ea0}.retouch-slider input{display:block;width:100%;accent-color:#f4516b}
+.retouch-template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0}
+#pro-content .retouch-template-grid button{min-height:73px;background:linear-gradient(125deg,#252833,#37303f);text-align:left;border:1px solid #66616a;border-radius:9px;padding:10px}
+.retouch-template-grid strong{font-size:12px;display:block;color:#fff}.retouch-template-grid small{color:#b7b6c3;display:block;font-size:10px;margin-top:6px}
+#cut-template-text{background:#17171d;border:1px solid #51515e;border-radius:8px;color:#fff;padding:9px;width:100%;max-width:100%}

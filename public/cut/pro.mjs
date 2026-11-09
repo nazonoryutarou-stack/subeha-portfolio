@@ -12,6 +12,7 @@ import {decodeWaveform,drawPeaks} from './waveform.mjs';
 import {normalizeEQ} from './audio-eq.mjs';
 import {EXPORT_PRESETS,normalizeExportSettings,supportedRecorderType,estimateBytes,exportWarnings} from './export-settings.mjs';
 import {TEXT_PRESETS,TEXT_FONTS,applyTextPreset} from './text-styles.mjs';
+import {mountRetouchStudio} from './retouch-studio.mjs';
 const $ = id => document.getElementById(id);
 const api = window.__subehaCut;
 const {state,canvas,ctx,buildAsset,seek,save,refreshAll,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,undo,redo} = api;
@@ -583,6 +584,7 @@ function setupExportStudio(){
 function mount(){
   state.project.overlays ||= [];state.project.audioTracks ||= [];state.project.captions ||= [];
   installChrome();
+  mountRetouchStudio(api,{panel,closeDrawer});
   setupTextStudio();setupExportStudio();
   canvas.addEventListener('pointerdown',onCanvasPoint);
   for(const layer of state.project.overlays){const a=state.assets.get(layer.assetId);if(a?.type==='video')makeOverlayVideo(a);}
