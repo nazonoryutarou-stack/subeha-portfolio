@@ -51,3 +51,28 @@ button{color:inherit}
 @media (prefers-reduced-motion:no-preference){
   .rail-wrap{scroll-behavior:smooth}
 }
+
+
+/* 1-1: quiet editorial layout. The text remains the entire subject. */
+.rail-wrap{align-items:stretch;max-height:calc(100svh - 110px);overflow-y:hidden}
+.node{min-height:100%;max-height:100%;overflow-y:auto;overscroll-behavior-y:contain;align-items:flex-start;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.node .card{margin:auto 0}
+.node[data-id="1-1"]{padding-top:clamp(42px,7vw,100px);padding-bottom:clamp(56px,8vw,110px)}
+.node[data-id="1-1"] .card{width:min(800px,100%);margin:0 auto;gap:0}
+.editorial-card .node-id{font-size:11px;letter-spacing:.24em;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:clamp(26px,5vw,60px)}
+.editorial-card h1{font-size:clamp(42px,8vw,84px);letter-spacing:-.055em;line-height:1.13;max-width:12em;margin:0 0 clamp(32px,6vw,72px)}
+.editorial-figure{display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 0 clamp(48px,7vw,90px);padding:clamp(24px,5vw,50px) 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.editorial-figure img{width:clamp(110px,24vw,210px);height:clamp(110px,24vw,210px);object-fit:contain;filter:grayscale(1);mix-blend-mode:multiply}
+.editorial-figure figcaption{font-size:10px;letter-spacing:.18em;color:var(--muted);margin-top:14px}
+.editorial-card .body{display:block;max-width:100%}
+.editorial-card .body p{font-size:clamp(17px,2.05vw,22px);line-height:2.15;letter-spacing:.015em;margin:0 0 2.1em;overflow-wrap:anywhere}
+.editorial-card .body p.lead{font-size:clamp(20px,2.4vw,27px);line-height:2.05}
+.editorial-card .body p.closing{font-size:clamp(22px,2.8vw,32px);line-height:1.85;margin:3em 0}
+.editorial-footnote{border-top:1px solid var(--line);padding-top:20px;margin-top:clamp(30px,6vw,70px);font-family:"Yu Mincho","Hiragino Mincho ProN",serif;font-size:clamp(13px,1.5vw,16px);line-height:2;color:#59564e}
+@media(max-width:700px){
+  .rail-wrap{max-height:calc(100svh - 130px);padding-top:78px;padding-bottom:8px}
+  .node{padding-left:clamp(20px,6vw,36px);padding-right:clamp(20px,6vw,36px)}
+  .node[data-id="1-1"]{padding-top:26px}
+  .editorial-card .body p{margin-bottom:1.8em}
+  .editorial-figure{margin-bottom:40px}
+}

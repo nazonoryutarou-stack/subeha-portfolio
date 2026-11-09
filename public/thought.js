@@ -28,15 +28,25 @@ function linkifyText(value=""){
   return html;
 }
 
+function renderBody(node){
+  if(node.id !== "1-1") return node.body.map(p => `<p>${linkifyText(p)}</p>`).join("");
+  return node.body.map((p,i) => {
+    const html=linkifyText(p).replace(/\n/g,"<br>");
+    const tag="p";
+    const klass=i===0?"lead":i===7?"closing":"";
+    return `<${tag} class="${klass}">${html}</${tag}>`;
+  }).join("");
+}
+
 function render(){
   rail.innerHTML = nodes.map((node, i) => `
     <article class="node" data-id="${escapeHTML(node.id)}" id="node-${escapeHTML(node.id)}">
-      <div class="card">
+      <div class="card ${node.id === "1-1" ? "editorial-card" : ""}">
         <p class="node-id">${escapeHTML(node.id)}</p>
         <h1>${escapeHTML(node.title)}</h1>
-        <div class="body">
-          ${node.body.map(p => `<p>${linkifyText(p)}</p>`).join("")}
-        </div>
+        ${node.id === "1-1" ? '<figure class="editorial-figure"><img src="./hitotsu-ore-choji.png" alt="一つ折れ丁子"><figcaption>一つ折れ丁子</figcaption></figure>' : ""}
+        <div class="body">${renderBody(node)}</div>
+        ${node.footnote ? `<aside class="editorial-footnote">${linkifyText(node.footnote)}</aside>` : ""}
       </div>
     </article>
   `).join("");
