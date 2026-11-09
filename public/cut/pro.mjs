@@ -2,7 +2,10 @@
 import {chromaPixels,trackingPosition,bound} from './compositor.mjs';
 import {createMultiAudioEngine} from './multi-audio.mjs';
 import {startPointTrack,trackPoint} from './point-tracker.mjs';
-import {locate} from './timeline.mjs';
+import {locate,splitAt} from './timeline.mjs';
+import {TRANSITIONS,transitionAt,spans,totalDuration} from './transitions.mjs';
+import {EFFECT_NAMES} from './effects.mjs';
+import {clipTransform} from './keyframes.mjs';
 import {parseSubtitleFile,exportSRT,drawCaptions,defaultCaptionStyle} from './subtitles.mjs';
 import {createProjectArchive,readProjectArchive} from './project-archive.mjs';
 import {decodeWaveform,drawPeaks} from './waveform.mjs';
@@ -23,7 +26,7 @@ let syncing = false;
 const playbackVideos = new Map();
 const mix = {normal:'source-over',screen:'screen',multiply:'multiply',lighten:'lighten',darken:'darken',overlay:'overlay',difference:'difference'};
 const clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,n));
-const totalTime=()=>state.project.clips.reduce((s,c)=>s+Math.max(0,(c.end-c.start)/(c.speed||1)),0);
+const totalTime=()=>totalDuration(state.project.clips);
 const time=(n)=>{let x=Math.max(0,Math.floor(n||0));return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');};
 const safe=(v)=>String(v||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
@@ -57,6 +60,10 @@ function installChrome(){
   '<button class="nav-tab pro-nav" data-pro="adjust"><span>☷</span>調整</button>'+
   '<button class="nav-tab pro-nav" data-pro="transform"><span>◇</span>変形</button>'+
   '<button class="nav-tab pro-nav" data-pro="effects"><span>✦</span>効果</button>'+
+  '<button class="nav-tab pro-nav" data-pro="transitions"><span>⋈</span>転換</button>'+
+  '<button class="nav-tab pro-nav" data-pro="canvas"><span>▣</span>背景</button>'+
+  '<button class="nav-tab pro-nav" data-pro="crop"><span>⊞</span>切抜</button>'+ 
+  '<button class="nav-tab pro-nav" data-pro="freeze"><span>❚❚</span>静止</button>'+ 
   '<button class="nav-tab pro-nav" data-pro="project"><span>▦</span>保存/復元</button>'+
   '<button class="nav-tab" data-tab="export"><span>↗</span>出力</button>';
   nav.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{closeDrawer();setPanel(b.dataset.tab);document.querySelector('.tools-shell').classList.add('pro-visible');nav.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));});
@@ -81,6 +88,7 @@ function installChrome(){
   $('pro-caption-picker').addEventListener('change',async e=>{if(e.target.files[0])await importCaptions(e.target.files[0]);e.target.value='';});
   $('pro-project-picker').addEventListener('change',async e=>{if(e.target.files[0])await restoreArchive(e.target.files[0]);e.target.value='';});
   document.querySelector('.bottomnav [data-tab=audio]').onclick=()=>{document.querySelector('.tools-shell').classList.remove('pro-visible');document.querySelectorAll('.bottomnav button').forEach(x=>x.classList.toggle('active',x.dataset.tab==='audio'));showPanel('multiaudio');};
+  $('clip-track').addEventListener('click',e=>{const joint=e.target.closest('[data-transition-target]');if(joint){state.selectedClip=joint.dataset.transitionTarget;showPanel('transitions');}});
   document.querySelector('.privacy-note').textContent='ローカル編集 · 原本は端末内に保持 · 書き出し形式はブラウザ依存';
 }
 function scrubAt(e){const rect=$('pro-scrub-ruler').getBoundingClientRect();seek(clamp((e.clientX-rect.left)/rect.width*totalTime(),0,totalTime()));renderPlayhead();}
@@ -104,6 +112,7 @@ function renderTimeline(){
       track.append(row);
     }
     $('pro-zoom-label').textContent=Math.round(zoom)+'px/s';renderPlayhead();renderAudioTimeline(d);renderCaptionTimeline(d);
+    for(const joint of document.querySelectorAll('.cut-transition-joint')){const c=clips.find(c=>c.id===joint.dataset.transitionTarget);joint.classList.toggle('applied',!!c?.transitionIn&&c.transitionIn.type!=='none');}
   }finally{syncing=false;}
 }
 function selectedLayer(){return (state.project.overlays||[]).find(x=>x.id===selectedOverlay)||null;}
@@ -216,6 +225,30 @@ async function importAudioTracks(files){
     }catch(e){console.error(e);toast('音声ファイルを読み込めませんでした');}
   }
   save();renderTimeline();showPanel('multiaudio');
+}
+let voiceRecorder=null,voiceStream=null,voiceChunks=[];
+async function toggleVoiceover(){
+ if(voiceRecorder&&voiceRecorder.state==='recording'){voiceRecorder.stop();return;}
+ if(state.recording)return toast('書き出し中は録音できません');
+ if(!state.project.clips.length)return toast('先に映像を追加してください');
+ if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==='undefined')return toast('ブラウザがマイク録音に対応していません');
+ try{
+   voiceStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+   const types=['audio/webm;codecs=opus','audio/mp4','audio/webm'];
+   const type=types.find(t=>MediaRecorder.isTypeSupported(t));
+   if(!type)throw Error('録音コーデックが利用できません');
+   voiceChunks=[];const start=state.current;
+   voiceRecorder=new MediaRecorder(voiceStream,{mimeType:type});
+   voiceRecorder.ondataavailable=e=>{if(e.data.size)voiceChunks.push(e.data);};
+   voiceRecorder.onstop=async()=>{
+     try{const blob=new Blob(voiceChunks,{type});if(blob.size<800)throw Error('録音が短すぎます');
+       const file=new File([blob],'voice-'+Date.now()+(type.includes('mp4')?'.m4a':'.webm'),{type});
+       const old=state.current;seek(start);await importAudioTracks([file]);seek(old);toast('ナレーションをタイムラインに追加しました');
+     }catch(err){console.warn(err);toast('録音の保存に失敗しました: '+err.message);}
+     finally{voiceStream?.getTracks().forEach(t=>t.stop());voiceStream=null;voiceRecorder=null;voiceChunks=[];showPanel('multiaudio');}
+   };
+   voiceRecorder.start(250);toast('マイク録音中。「録音終了」で保存');showPanel('multiaudio');
+ }catch(err){voiceStream?.getTracks().forEach(t=>t.stop());voiceStream=null;voiceRecorder=null;toast('マイク録音を開始できません: '+err.message);}
 }
 function ensureWaveform(id){
   if(waveformCache.has(id)||waveformPending.has(id))return;
@@ -340,8 +373,45 @@ function bindSliders(kind,params,onChange){
   for(const [key,min,max,step] of params){const el=$('pro-'+key);if(!el)continue;el.oninput=e=>{const n=Number(e.target.value);$('pro-'+key+'-value').textContent=(step===1?Math.round(n):n);onChange(key,n);};}
 }
 function captionList(cues){return '<div class="pro-cue-list">'+cues.slice(0,250).map(c=>'<button data-cue="'+safe(c.id)+'">'+c.start.toFixed(2)+'–'+c.end.toFixed(2)+'s　'+safe(c.text).slice(0,80)+'</button>').join('')+'</div>'+(cues.length>250?'<p class="pro-tip">一覧は先頭250件を表示。タイムラインでは全件利用できます。</p>':'');}
+async function freezeCurrentFrame(){
+ if(state.recording||state.playing)return toast('一時停止してからフリーズしてください');
+ const at=locate(state.project.clips,state.current);
+ if(!at||at.transition)return toast('クリップの内側でフリーズしてください（転換中は不可）');
+ const frozen=document.createElement('canvas');frozen.width=canvas.width;frozen.height=canvas.height;
+ const fctx=frozen.getContext('2d');fctx.drawImage(canvas,0,0);
+ const blob=await new Promise(res=>frozen.toBlob(res,'image/png'));
+ if(!blob)return toast('フレームを画像にできませんでした');
+ try{
+   const file=new File([blob],'freeze-'+Date.now()+'.png',{type:'image/png'}),id=newID();
+   await buildAsset(id,file,'image',file.name);
+   await window.__subehaSaveAsset(id,file,'image',file.name);
+   const frame={id:newID(),assetId:id,name:'フリーズフレーム',type:'image',start:0,end:2,speed:1,filter:'none'};
+   const split=splitAt(state.project.clips,state.current);
+   if(split){state.project.clips=split.clips;state.project.clips.splice(at.index+1,0,frame);}
+   else state.project.clips.splice(at.index+(at.local>at.length-.07?1:0),0,frame);
+   state.selectedClip=frame.id;save();refreshAll();seek(spans(state.project.clips).find(s=>s.clip.id===frame.id)?.start||0);
+   toast('2秒のフリーズフレームを挿入しました');showPanel('freeze');
+ }catch(err){console.error(err);toast('フリーズフレームの保存に失敗しました');}
+}
 function showPanel(which){
-  if(which==='captions'){
+  if(which==='transitions'){
+    const clips=state.project.clips,c=selectedClip(),i=clips.indexOf(c);
+    if(!c||i<=0){panel('場面転換','<p>タイムラインの2番目以降のクリップを選択してください。境界の＋から直接設定できます。</p>');return;}
+    const current=transitionAt(clips,i),max=Math.min(3,(c.end-c.start)/(c.speed||1)*.45,(clips[i-1].end-clips[i-1].start)/(clips[i-1].speed||1)*.45);
+    panel('場面転換 / '+safe(c.name),'<p>前後の素材を同時に再生するオーバーラップ式。尺は転換時間だけ短くなります。</p><div class="pro-transition-grid">'+
+      TRANSITIONS.map(v=>'<button class="'+(current.type===v?'selected':'')+'" data-transition="'+v+'">'+({'none':'なし','dissolve':'ディゾルブ','fade':'黒フェード','wipe-left':'左ワイプ','wipe-right':'右ワイプ','slide-left':'スライド','zoom':'ズーム'}[v])+'</button>').join('')+'</div>'+createControl('転換時間（秒）','pro-transition-duration',0,Math.max(.1,max),.1,current.duration||Math.min(.6,max))+
+      '<p class="pro-tip">隣接クリップの45%を超える転換は自動で制限します。端末性能によって動画同士の再生にフレーム落ちが生じることがあります。</p>');
+    const apply=(k,val)=>{c.transitionIn={type:current.type,duration:current.duration||Math.min(.6,max),...(c.transitionIn||{}),[k]:val};save();refreshAll();};
+    $('pro-content').querySelectorAll('[data-transition]').forEach(btn=>btn.onclick=()=>{apply('type',btn.dataset.transition);showPanel('transitions');});
+    $('pro-transition-duration').oninput=e=>{const val=Number(e.target.value);$('pro-transition-duration-value').textContent=val;apply('duration',val);};
+  }else if(which==='canvas'){
+    panel('背景 / キャンバス','<p>縦型・横型・正方形の映像背景を指定。FIT表示で余白が生じるときに有効です。</p><label class="pro-select">背景色 <input type="color" id="pro-canvas-color" value="'+(state.project.backgroundColor||'#07080b')+'"></label><label class="pro-select"><input id="pro-canvas-blur" type="checkbox" '+(state.project.blurBackground?'checked':'')+'> 余白を映像のぼかしで埋める</label><p class="pro-tip">プレビューのFITボタンでアスペクト比を保持できます。</p>');
+    $('pro-canvas-color').oninput=e=>{state.project.backgroundColor=e.target.value;save();draw();};
+    $('pro-canvas-blur').onchange=e=>{state.project.blurBackground=e.target.checked;save();draw();};
+  }else if(which==='freeze'){
+    panel('フリーズフレーム','<p>現在のプレビューを静止画にして2秒のクリップを挿入します。動画を一時停止し、止めたい位置で実行してください。</p><button id="pro-freeze-frame" class="pro-primary">❚❚ このフレームで静止</button><p class="pro-tip">静止画には現在表示されているテロップやレイヤーも含まれます。生成されたPNGはプロジェクト素材として保存されます。</p>');
+    $('pro-freeze-frame').onclick=freezeCurrentFrame;
+  }else if(which==='captions'){
     const captions=state.project.captions||[],cue=captions.find(x=>x.id===selectedCue);
     if(!cue){
       panel('字幕 / Whisper・SRT・VTT','<p>文字起こし済みの字幕データを読み込み、時刻を維持してプレビューと書き出し映像へ合成します。端末内だけで処理します。</p><label class="pro-select">読み込み時の時刻オフセット（秒）<input type="number" id="pro-caption-offset" step="0.1" value="'+captionOffset+'"></label><div class="pro-inline"><button id="pro-caption-import" class="pro-primary">＋ 字幕ファイル</button><button id="pro-caption-export">SRTを書き出す</button><button id="pro-caption-clear" class="pro-danger">字幕を全削除</button></div><p class="pro-tip">合計 '+captions.length+'件。音声から自動認識する機能ではありません。WhisperのJSON、SRT、VTTを利用できます。</p>'+captionList(captions));
@@ -398,11 +468,11 @@ function showPanel(which){
     $('pro-clear-track').onclick=()=>{finishTracking();changeLayer(x=>delete x.tracking);showPanel('tracking');};
   }else if(which==='multiaudio'){
     const tracks=state.project.audioTracks||[],selected=tracks.find(t=>t.id===selectedAudio);
-    if(!selected){panel('マルチトラック音声','<p>音声・効果音をいくつでも追加し、位置・音量・フェードを個別に設定します。</p><button class="pro-primary" id="pro-add-audio">＋ 音声を追加</button><div class="pro-audio-list">'+tracks.map(t=>'<button data-audio="'+t.id+'">♫ '+safe(state.assets.get(t.assetId)?.name||'音声')+'</button>').join('')+'</div>');}
+    if(!selected){panel('マルチトラック音声','<p>音声・効果音をいくつでも追加し、位置・音量・フェードを個別に設定します。</p><button class="pro-primary" id="pro-add-audio">＋ 音声を追加</button> <button id="pro-voice-record">🎙 マイク録音</button><div class="pro-audio-list">'+tracks.map(t=>'<button data-audio="'+t.id+'">♫ '+safe(state.assets.get(t.assetId)?.name||'音声')+'</button>').join('')+'</div>');}
     else{
       const asset=state.assets.get(selected.assetId),length=asset?.duration||selected.duration;
       const fields=[['start',0,Math.max(1,totalTime()),.1],['offset',0,Math.max(0,length-.1),.1],['duration',.1,Math.max(.1,length),.1],['volume',0,1,.01],['fadeIn',0,10,.1],['fadeOut',0,10,.1]];
-      panel('音声 · '+safe(asset?.name||'AUDIO'),'<button class="pro-primary" id="pro-add-audio">＋ トラック追加</button><div class="pro-controls">'+fields.map(([k,a,b,step])=>createControl(k,'pro-audio-'+k,a,b,step,selected[k]||0)).join('')+'</div><label class="pro-select"><input id="pro-audio-muted" type="checkbox" '+(selected.muted?'checked':'')+'> ミュート</label><div class="pro-inline"><button id="pro-audio-remove" class="pro-danger">この音声を削除</button><button id="pro-audio-unselect">トラック一覧</button></div><div class="pro-audio-list">'+tracks.map(t=>'<button data-audio="'+t.id+'">♫ '+safe(state.assets.get(t.assetId)?.name||'音声')+'</button>').join('')+'</div>');
+      panel('音声 · '+safe(asset?.name||'AUDIO'),'<button class="pro-primary" id="pro-add-audio">＋ トラック追加</button> <button id="pro-voice-record">🎙 マイク録音</button><div class="pro-controls">'+fields.map(([k,a,b,step])=>createControl(k,'pro-audio-'+k,a,b,step,selected[k]||0)).join('')+'</div><label class="pro-select"><input id="pro-audio-muted" type="checkbox" '+(selected.muted?'checked':'')+'> ミュート</label><div class="pro-inline"><button id="pro-audio-remove" class="pro-danger">この音声を削除</button><button id="pro-audio-unselect">トラック一覧</button></div><div class="pro-audio-list">'+tracks.map(t=>'<button data-audio="'+t.id+'">♫ '+safe(state.assets.get(t.assetId)?.name||'音声')+'</button>').join('')+'</div>');
       for(const [k] of fields){$('pro-audio-'+k).oninput=e=>{const n=Number(e.target.value);selected[k]=n;
         selected.offset=Math.min(selected.offset,Math.max(0,length-.1));selected.duration=Math.min(selected.duration,Math.max(.1,length-selected.offset));
         $('pro-audio-'+k+'-value').textContent=n;save();renderTimeline();audioEngine.sync();};}
@@ -411,6 +481,8 @@ function showPanel(which){
       $('pro-audio-unselect').onclick=()=>{selectedAudio=null;showPanel('multiaudio');};
     }
     $('pro-add-audio').onclick=()=>$('pro-audio-picker').click();
+    $('pro-voice-record').textContent=voiceRecorder?.state==='recording'?'■ 録音終了':'🎙 マイク録音';
+    $('pro-voice-record').onclick=toggleVoiceover;
     document.querySelectorAll('[data-audio]').forEach(b=>b.onclick=()=>{selectedAudio=b.dataset.audio;showPanel('multiaudio');});
   }else if(which==='adjust'){
     const c=selectedClip();if(!c){panel('色調整','<p>先にタイムラインから編集対象クリップを選んでください。</p>');return;}
@@ -420,12 +492,34 @@ function showPanel(which){
     $('pro-reset-adjust').onclick=()=>{updateClip(c=>c.adjust={});showPanel('adjust');};
   }else if(which==='transform'){
     const c=selectedClip();if(!c){panel('変形','<p>先にクリップを選択してください。</p>');return;}
-    panel('変形 · '+c.name,'<div class="pro-inline"><button id="pro-flip-h">⇆ 左右反転</button><button id="pro-flip-v">⇅ 上下反転</button><button id="pro-rotate90">⟳ 90°回転</button></div><div class="pro-controls">'+createControl('拡大率','pro-zoomscale',.5,3,.01,c.zoom||1)+createControl('透明度','pro-clipopacity',0,1,.01,c.opacity??1)+'</div>');
-    $('pro-flip-h').onclick=()=>updateClip(c=>c.flipX=!c.flipX);$('pro-flip-v').onclick=()=>updateClip(c=>c.flipY=!c.flipY);$('pro-rotate90').onclick=()=>updateClip(c=>c.rotation=((c.rotation||0)+90)%360);
-    bindSliders('transform',[['zoomscale',.5,3,.01],['clipopacity',0,1,.01]],(k,n)=>updateClip(c=>c[k==='zoomscale'?'zoom':'opacity']=n));
+    const span=spans(state.project.clips).find(row=>row.clip.id===c.id),relative=Math.max(0,Math.min(span?.length||0,state.current-(span?.start||0))),props=clipTransform(c,relative);
+    const fields=[['zoomscale',.4,4,.01,props.zoom],['clipopacity',0,1,.01,props.opacity],['rotation',-180,180,1,props.rotation],['x',-.5,1.5,.01,props.x],['y',-.5,1.5,.01,props.y],['clipvolume',0,1,.01,c.volume??1]];
+    panel('変形・キーフレーム · '+safe(c.name),'<div class="pro-inline"><button id="pro-flip-h">⇆ 左右反転</button><button id="pro-flip-v">⇅ 上下反転</button><button id="pro-rotate90">⟳ 90°回転</button><button id="pro-reverse">'+(c.reverse?'▶ 通常再生':'◀ 逆再生（試験）')+'</button></div><div class="pro-controls">'+fields.map(([k,a,b,step,val])=>createControl(k,'pro-'+k,a,b,step,val)).join('')+'</div><label class="pro-select"><input id="pro-clip-mute" type="checkbox" '+(c.muted?'checked':'')+'> クリップ音声をミュート</label><div class="pro-inline"><button id="pro-base-keyframe" class="pro-primary">◆ 現在位置をキーフレーム登録</button><button id="pro-base-clear" class="pro-danger">キーフレーム全削除</button></div><label class="pro-select">補間 <select id="pro-base-easing"><option value="linear">等速</option><option value="ease-in-out">緩急あり</option></select></label><p class="pro-tip">キーフレーム：'+(c.keyframes?.length||0)+'点。ズーム、位置、回転、透明度を補間。逆再生はフレームシーク方式で、Androidの動画によっては滑らかに再生できません。</p>');
+    $('pro-base-easing').value=c.easing||'linear';$('pro-base-easing').onchange=e=>updateClip(x=>x.easing=e.target.value);
+    $('pro-flip-h').onclick=()=>updateClip(x=>x.flipX=!x.flipX);$('pro-flip-v').onclick=()=>updateClip(x=>x.flipY=!x.flipY);$('pro-rotate90').onclick=()=>{updateClip(x=>x.rotation=((x.rotation||0)+90)%360);showPanel('transform');};
+    $('pro-reverse').onclick=()=>{updateClip(x=>x.reverse=!x.reverse);showPanel('transform');};
+    $('pro-clip-mute').onchange=e=>updateClip(x=>x.muted=e.target.checked);
+    for(const [k] of fields){$('pro-'+k).oninput=e=>{const n=Number(e.target.value);$('pro-'+k+'-value').textContent=n;updateClip(x=>x[({zoomscale:'zoom',clipopacity:'opacity',clipvolume:'volume'})[k]||k]=n);};}
+    $('pro-base-keyframe').onclick=()=>{
+      updateClip(x=>{const t=Math.max(0,Math.min(span?.length||0,state.current-(span?.start||0)));x.keyframes ||= [];x.keyframes=x.keyframes.filter(k=>Math.abs(k.time-t)>.04);x.keyframes.push({time:t,x:x.x??.5,y:x.y??.5,zoom:x.zoom??1,rotation:x.rotation??0,opacity:x.opacity??1});});
+      toast('◆ キーフレームを追加しました');showPanel('transform');
+    };
+    $('pro-base-clear').onclick=()=>{updateClip(x=>x.keyframes=[]);showPanel('transform');};
+  }else if(which==='crop'){
+    const c=selectedClip();if(!c){panel('切り抜き','<p>先にクリップを選んでください。</p>');return;}
+    const cfg={x:0,y:0,w:1,h:1,...(c.crop||{})};
+    panel('切り抜き / '+safe(c.name),'<p>元の画角から切り出す範囲を指定します。</p><div class="pro-controls">'+[['x',0,.95,.01],['y',0,.95,.01],['w',.05,1,.01],['h',.05,1,.01]].map(([k,a,b,step])=>createControl(k,'pro-crop-'+k,a,b,step,cfg[k])).join('')+'</div><button id="pro-crop-reset">範囲をリセット</button>');
+    for(const k of ['x','y','w','h'])$('pro-crop-'+k).oninput=e=>{const n=Number(e.target.value);$('pro-crop-'+k+'-value').textContent=n;updateClip(x=>{x.crop={...cfg,...x.crop,[k]:n};if(x.crop.x+x.crop.w>1)x.crop.w=1-x.crop.x;if(x.crop.y+x.crop.h>1)x.crop.h=1-x.crop.y;});};
+    $('pro-crop-reset').onclick=()=>{updateClip(x=>x.crop=null);showPanel('crop');};
   }else if(which==='effects'){
-    panel('映像効果','<p>Videoleap系の編集操作を参考にした独立実装。フィルター・色調整・反転・合成を組み合わせられます。</p><div class="pro-effect-list"><button data-fx="glitch">GLITCH</button><button data-fx="dream">DREAM</button><button data-fx="mono">MONO</button><button data-fx="cinema">CINEMA</button><button data-fx="vintage">VINTAGE</button><button data-fx="none">ORIGINAL</button></div><p class="pro-tip">背景色除去・簡易ポイント追跡は下部の専用ツールへ。生成AI・人物セグメンテーションは未搭載。</p>');
-    $('pro-content').querySelectorAll('[data-fx]').forEach(b=>b.onclick=()=>{if(!selectedClip())return toast('クリップを選択してください');updateClip(c=>c.filter=b.dataset.fx);});
+    const c=selectedClip();if(!c){panel('映像効果','<p>タイムラインでクリップを選んでください。</p>');return;}
+    panel('映像効果 / '+safe(c.name),'<div class="pro-effect-list">'+
+      EFFECT_NAMES.map(n=>'<button data-video-effect="'+n+'" class="'+((c.effect||'none')===n?'selected':'')+'">'+({'none':'なし','vignette':'周辺減光','pixelate':'ピクセル','prism':'色収差','scanlines':'走査線','grain':'フィルム粒子','lightleak':'光漏れ'}[n])+'</button>').join('')+
+      '</div>'+createControl('効果の強さ','pro-effect-amount',0,1,.05,c.effectAmount??.5)+
+      '<p class="pro-tip">いずれもオフラインCanvas効果。AI生成ではありません。高解像度でのピクセル効果は処理負荷が上がる場合があります。</p>');
+    $('pro-content').querySelectorAll('[data-video-effect]').forEach(btn=>btn.onclick=()=>{updateClip(x=>x.effect=btn.dataset.videoEffect);showPanel('effects');});
+    $('pro-effect-amount').oninput=e=>{const n=Number(e.target.value);$('pro-effect-amount-value').textContent=n;updateClip(x=>x.effectAmount=n);};
+
   }
 }
 function changeLayer(fn){const layer=selectedLayer();if(!layer||state.recording)return;fn(layer);layerBuffers.delete(layer.id);save();renderTimeline();draw();}
@@ -445,6 +539,7 @@ function mount(){
   const motionBox=document.createElement('label');motionBox.className='pro-select';motionBox.innerHTML='文字の登場効果 <select id="pro-text-motion"><option value="none">なし</option><option value="fade">フェード</option><option value="pop">ポップ</option><option value="slide">スライド</option></select>';
   $('text-editor').append(motionBox);
   $('pro-text-motion').onchange=e=>{const t=state.project.texts.find(x=>x.id===state.selectedText);if(t){t.motion=e.target.value;save();draw();}};
+  for(const speed of [0.25,0.75,1.25,3,4]){const segments=$('speed-segments');if(segments&&!segments.querySelector('[data-speed="'+speed+'"]')){const b=document.createElement('button');b.dataset.speed=speed;b.textContent=speed+'×';b.onclick=()=>updateClip(c=>c.speed=speed);segments.append(b);}}
   const nativeTabs=document.querySelectorAll('.nav-tab[data-tab]');nativeTabs[0]?.classList.add('active');
   renderTimeline();
   function frame(){renderPlayhead();audioEngine.sync();updateTracking();requestAnimationFrame(frame);}requestAnimationFrame(frame);
