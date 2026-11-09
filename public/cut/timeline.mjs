@@ -1,3 +1,5 @@
+import {clipSeconds,totalDuration,locateSpan} from './transitions.mjs';
+import {clipTransform} from './keyframes.mjs';
 export function newID() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
   const bytes = new Uint8Array(16);
@@ -12,33 +14,20 @@ export const RATIOS = Object.freeze({
   '16:9': [1280,720],
   '1:1': [960,960],
 });
-export function clipLength(clip) {
-  const speed = Number(clip.speed) || 1;
-  return Math.max(0, (Number(clip.end) - Number(clip.start)) / speed);
-}
-export function duration(clips) {
-  return clips.reduce((sum,c)=>sum+clipLength(c),0);
-}
-export function locate(clips, seconds) {
-  const total=duration(clips);
-  if (!clips.length || !Number.isFinite(seconds) || seconds<0) return null;
-  const t=Math.min(seconds,Math.max(0,total-0.000001));
-  let accumulated=0;
-  for(let index=0;index<clips.length;index++) {
-    const clip=clips[index],len=clipLength(clip);
-    if(t<accumulated+len || index===clips.length-1) {
-      const local=Math.max(0,Math.min(len,t-accumulated));
-      return {clip,index,offset:accumulated,local,mediaTime:Number(clip.start)+local*(Number(clip.speed)||1),length:len};
-    }
-    accumulated+=len;
-  }
-  return null;
-}
+export function clipLength(clip) { return clipSeconds(clip); }
+export function duration(clips) { return totalDuration(clips); }
+export function locate(clips, seconds) { return locateSpan(clips, seconds); }
 export function splitAt(clips,seconds) {
   const at=locate(clips,seconds);
-  if (!at || at.local<0.07 || at.length-at.local<0.07) return null;
+  // A transition is a two-source region; avoid ambiguous destructive splits.
+  if (!at || at.transition || at.local<0.07 || at.length-at.local<0.07) return null;
   const first={...at.clip,id:newID(),end:at.mediaTime};
-  const second={...at.clip,id:newID(),start:at.mediaTime};
+  const second={...at.clip,id:newID(),start:at.mediaTime,transitionIn:{type:'none',duration:0}};
+  if((at.clip.keyframes||[]).length){
+    const boundary={...clipTransform(at.clip,at.local),time:at.local};
+    first.keyframes=[...at.clip.keyframes.filter(k=>k.time<at.local),boundary];
+    second.keyframes=[{...boundary,time:0},...at.clip.keyframes.filter(k=>k.time>at.local).map(k=>({...k,time:k.time-at.local}))];
+  }
   const result=[...clips]; result.splice(at.index,1,first,second);
   return {clips:result,first,second};
 }

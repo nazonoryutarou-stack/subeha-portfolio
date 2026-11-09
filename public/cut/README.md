@@ -1,46 +1,44 @@
-# SUBEHA CUT Pro v0.4 — mobile editor + offline caption & portable project tools
+# SUBEHA CUT Pro v0.5 — Android mobile editing studio
 
-Original local-first video editor for Android Chrome (installable PWA). Inspired by standard multi-track mobile editing workflows. **Not affiliated with Videoleap or Lightricks.** No third-party proprietary templates, icons, or assets copied.
+Offline-first original PWA inspired by common mobile video-editing workflows. No affiliation with Videoleap/Lightricks; no protected branding, assets or UI source code copied. Android Chrome: https://nazonoryutarou-stack.github.io/subeha-portfolio/cut/
 
-## New in v0.4
+## v0.5 additions
 
-1. **Timestamp-faithful subtitles**: import SRT, VTT, Whisper JSON (segments and transcription), edit caption text and start/end time, adjust style (size, color, background, vertical position), show each cue in its own timeline lane, export corrected SRT. Imported captions are rendered on the same Canvas used for preview **and video export**. No online ASR or invented timings; the timestamps come from supplied files. Whisper.cpp `t0/t1` centisecond timestamps are supported.
-2. **Portable project backup**: Save `.subecut` containing media assets, music, overlays, captions, and all timeline metadata. This is a standards-compliant **uncompressed ZIP**, CRC-32 validated on restore. It does not upload assets to a server. Open it in a new browser/device to continue editing. Maximum archive source media: **200 MiB**, intended for shorter mobile projects. File sizes are checked before creating the ZIP. Import requires confirmation and CRC checks before modifying the active project.
-3. **Audio waveform**: multi-audio timeline tracks render sample peaks extracted locally via WebAudio. 32 MB per-file analysis cap; audio processing/storage is browser-limited. Peak data is ephemeral UI data, not recorded to the project.
-4. **Wall-clock export timing**: when recording the canvas in real time, advance the project playhead from the monotonic timer instead of the capped preview animation delta, limiting duration drift when rendering frames are delayed. *This does not produce frame-accurate offline rendering or guarantee A/V sync under heavy load.*
+- **True overlap transitions** between adjacent base clips: dissolve, dip-to-black/fade, left/right wipes, slide, zoom. Incoming clip owns `transitionIn`; its timeline begins during the outgoing clip, and the total project length is shortened by the transition overlap. Pure timing functions and overlap math are tested in `transitions.mjs`.
+- Two independently scheduled HTMLVideoElements preview the outgoing and incoming clips. In WebAudio-capable browsers, the outgoing and incoming base clip sound is crossfaded in the same audio stream used by export. Browser decoder load may cause dropped frames at cuts, especially on phones. Project clips, overlays, captions and audio use the shortened shared timeline.
+- **Effects**: editable intensity for vignette, pixelate, pseudo-prism/color displacement, scanlines, grain and animated light leak (`effects.mjs`). Runs in Canvas2D, not on GPU or AI.
+- **Voiceover**: record from the phone's microphone with an explicit user grant using `MediaRecorder`; recordings are imported as movable audio clips. Chrome/media codec support varies.
+- **Crop**: normalized X/Y/width/height source crop on base image/video clips. Existing fit/fill and rotation/flip remain available.
+- **Base clip keyframes**: zoom, position, rotation, opacity interpolated across clip-local time, linear or smoothstep easing. Splitting a keyframed clip preserves continuity at the cut.
+- **Freeze frame**: create a PNG of the displayed preview, store it as a project asset, insert a two-second image clip into the timeline.
+- **Canvas backgrounds**: choose background color or blurred image fill for aspect-fit compositions.
+- **Experimental reverse playback**: mapped source time in `transitions.mjs`; uses frequent seeks into the original video while moving the project timeline forward. May be choppy with compressed long-GOP source video and should **not** be considered reliable frame-accurate reverse export. Reversed clip audio is muted intentionally.
+- **Clip audio**: per-clip volume and mute; additional speeds 0.25×, 0.75×, 1.25×, 3×, 4×.
+- New UI entries for transitions, crop, canvas, freeze, effects, transforms.
 
-## Existing features from v0.3
+## Existing capabilities (v0.1–v0.4)
 
-- Local import of clips, multiple overlays, trim/split/reorder/duplicate, speed changes, color adjustments, filters, text animation, Undo/Redo, aspect ratios.
-- Layer keyframes, blend modes, circular / user-drawn polygon masks with feather; custom chroma key, basic point tracker.
-- Multiple independently positioned audio tracks, fades and volume, WebAudio mixing into export; legacy BGM supported.
-- Browser `MediaRecorder` exports supported formats (MP4 where available, otherwise WebM). Browser may require real-time rendering and the foreground tab.
-- On-device IndexedDB autosave; `.subecut` export is the recommended **portable** backup because JSON-only metadata lacks media.
+Clip selection/splitting/trimming, music, per-clip looks, video/image overlays, Canvas2D chroma key, polygon masking, manual feature-point tracking, draggable audio clips with fades, SRT/VTT/Whisper JSON subtitle import, timed subtitle burn-in, waveform preview, offline IndexedDB autosave, Undo/Redo, `.subecut` ZIP archives with source files (200MB limit) and browser-based real-time MediaRecorder export (MP4 or WebM depending on browser support).
 
-## How to use on Android
+## User operations
 
-1. Open `https://nazonoryutarou-stack.github.io/subeha-portfolio/cut/` in Chrome, choose **Install app** or **Add to Home screen**.
-2. Import a source video or still image. Other video and audio may be added as layers or independent audio tracks.
-3. Select **字幕 → + 字幕ファイル** to import SRT, VTT or Whisper JSON. Use the timeline to select a cue and edit it, or export corrected SRT. You can choose a global import offset before selecting a file.
-4. Use **保存/復元 → 素材を含めて保存** to download an `.subecut` archive. On another installation use **保存したプロジェクトを開く**. ZIP data stays on your device.
-5. Use **出力** to render video with captions, layers, and audio. Keep the app visible while exporting.
+1. Import at least two videos/images. Tap their shared **＋** joint in the timeline or select the second clip and open **転換**. Choose style and overlap length.
+2. Select a clip and open **効果**, **変形**, **切抜**, **背景**, or **静止**.
+3. For base keyframes, select a clip, position the playhead, change transform values, then tap **◆ 現在位置をキーフレーム登録**; repeat at other times. Keys interpolate. Splitting a keyframed clip retains key positions.
+4. Open **音声** → **🎙 マイク録音** → allow microphone → **■ 録音終了**, then adjust the new audio track.
+5. Export from **出力** while the app remains in foreground, or save all materials via **保存/復元**.
 
-## Validation
+## Verification
 
 ```sh
 cd public/cut
-node --check app.mjs && node --check pro.mjs
-node --check subtitles.mjs && node --check project-archive.mjs
-node --check waveform.mjs && node --check export-timing.mjs
+for f in *.mjs; do node --check "$f"; done
 node --test test/*.test.mjs
+python3 -m http.server 8765
 ```
 
-ZIP interoperability additionally checked using `unzip -t`. These are module/unit and format-validation tests, **not a substitute for Android real-device playback and export verification**. In the v0.4 development environment, headless Chromium navigation was blocked by the browser administrator policy; therefore the end-to-end UI, audio output and MP4 render tests for v0.4 remain unverified. v0.3 had a separate prior browser smoke test.
+## Important limitations
 
-## Limitations and privacy
+**This is not yet full feature parity with Videoleap.** There is no AI object removal, AI generative video, semantic subject/person matting, cloud templates, 4K/HEVC guarantee, offline GPU rendering, high-end optical-flow tracking, reliable reverse audio/video, or a native Android APK. Fonts/text motion, compositing and template library remain more limited. Web Canvas2D and WebAudio on mobile will have performance/memory limits. Export is foreground/realtime and file codec varies by browser. `.subecut` is our own archive, not a Videoleap project file.
 
-- No semantic/person AI background removal, GPU effects stack, automatic speech recognition, true frame-accurate encoding, native APK, or pixel-identical Videoleap UI. The manually directed tracker is not human detection.
-- `MediaRecorder` may record MP4 or WebM depending on the phone's Chrome version, hardware and codecs. Mobile browsers can throttle background tabs, decoding is limited, and high resolution or heavy layers can drop frames. No guarantee of exact sync.
-- Waveforms need audio decoding support; 32MB analysis cap, may be unavailable for some formats. Project archive media limit is 200MiB and ZIP is uncompressed.
-- Subtitles are parsed from local timing sources; **no automatic translation or speech-to-text**, no validation of the accuracy of user-provided timings.
-- Videos, photos, transcripts, audio and projects remain in the browser/phone unless the user deliberately saves/shares them. Avoid committing recordings or private transcripts into public GitHub.
+All user media stays local: never commit/import private personal recordings into a public repo. v0.5 automatic unit tests passed on Node 22; **Android device and full browser UI/video export verification remain outstanding** because available Chromium was restricted by container administrator navigation policies.

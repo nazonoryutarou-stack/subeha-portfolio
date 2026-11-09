@@ -96,3 +96,9 @@ body{background:#0b0c10!important;font-size:13px}
 #pro-content textarea{resize:vertical;min-height:55px}
 .pro-audio-pill{position:relative;overflow:hidden!important}
 .pro-waveform{position:absolute;bottom:1px;left:0;width:100%;height:24px;opacity:.55;pointer-events:none}
+/* v0.5: inline transitions and effect palette */
+.cut-transition-joint{flex:0 0 24px;height:56px;background:#29303a;color:#cfcfd9;border:1px dashed #656675;border-radius:4px;font-size:17px;padding:0;align-self:flex-start;z-index:2}
+.cut-transition-joint.applied{border-style:solid;background:#683e75;color:white}
+.pro-transition-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+#pro-content .pro-transition-grid button.selected,#pro-content .pro-effect-list button.selected{border-color:#fd6078;background:#653a4e;color:#fff}
+#pro-content input[type=color]{vertical-align:middle}
