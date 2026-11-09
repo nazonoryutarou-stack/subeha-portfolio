@@ -28,6 +28,16 @@ function linkifyText(value=""){
   return html;
 }
 
+function renderBody(node){
+  if(node.id !== "1-1") return node.body.map(p => `<p>${linkifyText(p)}</p>`).join("");
+  return node.body.map((p,i) => {
+    const html=linkifyText(p).replace(/\n/g,"<br>");
+    const tag=i===0?"p":"p";
+    const klass=i===0?"lead":i===7?"closing":"";
+    return `<${tag} class="${klass}">${html}</${tag}>`;
+  }).join("");
+}
+
 function render(){
   rail.innerHTML = nodes.map((node, i) => `
     <article class="node" data-id="${escapeHTML(node.id)}" id="node-${escapeHTML(node.id)}">
