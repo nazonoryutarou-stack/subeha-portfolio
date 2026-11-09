@@ -3,23 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="すべての歯が見える。">
+<meta name="description" content="すべての歯が見える。祭祀の記録。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#f3f0e7">
+<meta name="theme-color" content="#f4f0e6">
 <title>すべての歯が見える</title>
 <link rel="stylesheet" href="./home.css">
 </head>
 <body>
 <main class="entrance">
+  <header class="poster-meta"><span>SUBETE NO HA GA MIERU</span><span>RITUAL ARCHIVE<br>EDITION 001</span></header>
+  <div class="poster-brush" aria-hidden="true"></div>
+  <div class="poster-seal" aria-hidden="true">歯</div>
   <h1 class="site-title">すべての歯が見える</h1>
-
-  <div class="crest-stage">
-    <img class="crest-image" src="./hitotsu-ore-choji.png" alt="一つ折れ丁子">
-  </div>
-
+  <button class="crest-stage" id="crestStage" type="button" aria-label="一つ折れ丁子。押すと意匠が変わります">
+    <canvas id="inkCanvas" class="ink-canvas" width="460" height="460" aria-hidden="true"></canvas>
+    <span class="crest-orbit" aria-hidden="true"></span>
+    <img class="crest-image" src="./hitotsu-ore-choji.png" alt="" width="290" height="290">
+    <span class="crest-stage-note" id="crestNote" aria-live="polite">一つ折れ丁子　/　01</span>
+  </button>
   <div class="enter-wrap">
-    <a class="enter-link" href="./thought.html">入場</a>
+    <a class="enter-link" href="./thought.html#node-1-1">入場 <span aria-hidden="true">↗</span></a>
+    <p>ここから先は、祭祀の話である。</p>
   </div>
+  <footer class="poster-footer"><span>2019.11.11 — ∞</span><span>読むことは、儀式になる。</span></footer>
 </main>
+<script src="./home.js" defer></script>
 </body>
 </html>

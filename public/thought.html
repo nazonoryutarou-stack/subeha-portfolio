@@ -3,41 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="『すべての歯が見える』が世界をどう捉えているかを、断章と分岐として読むサイト。">
+<meta name="description" content="すべての歯が見える。祭祀についての記録、断章、自己紹介。">
 <meta name="robots" content="index,follow">
-<meta name="theme-color" content="#f4f1e8">
-<title>すべての歯が見える</title>
+<meta name="theme-color" content="#f4f0e6">
+<title>すべての歯が見える｜断章</title>
 <link rel="stylesheet" href="./thought.css">
 </head>
 <body>
-<a class="skip-link" href="#thought">本文へ</a>
-
-<header class="topbar">
-  <a class="crest-home" href="./" aria-label="入口に戻る"><img src="./hitotsu-ore-choji.png" alt=""></a>
-  <button class="map-button" id="mapButton" type="button" aria-expanded="false" aria-controls="utilityPanel">全体を見る</button>
+<a class="skip-link" href="#pageContent">本文へ</a>
+<header class="mag-header">
+  <button type="button" class="menu-trigger" id="mapButton" aria-expanded="false" aria-controls="utilityPanel" aria-label="記事一覧を開く"><span></span><span></span><span></span></button>
+  <a class="mag-brand" href="./" aria-label="すべての歯が見える、入口へ戻る"><img src="./hitotsu-ore-choji.png" alt=""><span>すべての歯が見える</span></a>
+  <span class="edition">THE RITUAL NOTES<br>EDITION / 001</span>
 </header>
-
-<main id="thought" class="thought-shell" aria-live="polite">
-  <section class="rail-wrap" aria-label="思考の流れ">
-    <div class="rail" id="rail"></div>
-  </section>
-
-  <nav class="branch-nav" id="branchNav" aria-label="次の分岐"></nav>
-
-  <p class="gesture-note">横へ送る / 矢印キーでも移動できます</p>
-</main>
-
-<aside class="utility-panel" id="utilityPanel" hidden>
-  <div class="utility-inner">
-    <div class="utility-head">
-      <p>INDEX</p>
-      <button id="closePanel" type="button">閉じる</button>
-    </div>
-    <div id="nodeIndex" class="node-index"></div>
-  </div>
-</aside>
-
-<noscript>この閲覧画面にはJavaScriptが必要です。</noscript>
+<div class="chapter-strip" aria-hidden="true"><span>祭</span><i></i><span>祀</span><i></i><span>記</span></div>
+<div class="page-frame">
+  <nav class="chapter-rail" id="chapterRail" aria-label="断章一覧"><p class="rail-label">DOCUMENT / INDEX</p></nav>
+  <main id="pageContent" class="page-content" tabindex="-1"><div class="loading-mark">記録を開いています。</div></main>
+  <aside class="marginalia" aria-hidden="true"><span>RITUAL / DOCUMENT</span><span>001 — 004</span></aside>
+</div>
+<footer class="reader-footer"><a href="./">入口へ戻る</a><span>すべての歯が見える / RITUAL NOTES</span><button type="button" id="topButton">↑ TOP</button></footer>
+<div id="utilityPanel" class="index-overlay" hidden>
+  <div class="index-head"><p>INDEX <small>思考の目次</small></p><button type="button" id="closePanel" aria-label="記事一覧を閉じる">×</button></div>
+  <nav class="index-list" id="nodeIndex" aria-label="記事一覧"></nav>
+</div>
+<noscript>このページではJavaScriptを使用します。<a href="./">入口へ戻る</a></noscript>
 <script src="./thought.js" defer></script>
 </body>
 </html>
