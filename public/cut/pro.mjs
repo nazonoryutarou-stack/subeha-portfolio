@@ -9,6 +9,9 @@ import {clipTransform} from './keyframes.mjs';
 import {parseSubtitleFile,exportSRT,drawCaptions,defaultCaptionStyle} from './subtitles.mjs';
 import {createProjectArchive,readProjectArchive} from './project-archive.mjs';
 import {decodeWaveform,drawPeaks} from './waveform.mjs';
+import {normalizeEQ} from './audio-eq.mjs';
+import {EXPORT_PRESETS,normalizeExportSettings,supportedRecorderType,estimateBytes,exportWarnings} from './export-settings.mjs';
+import {TEXT_PRESETS,TEXT_FONTS,applyTextPreset} from './text-styles.mjs';
 const $ = id => document.getElementById(id);
 const api = window.__subehaCut;
 const {state,canvas,ctx,buildAsset,seek,save,refreshAll,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,undo,redo} = api;
@@ -472,11 +475,12 @@ function showPanel(which){
     else{
       const asset=state.assets.get(selected.assetId),length=asset?.duration||selected.duration;
       const fields=[['start',0,Math.max(1,totalTime()),.1],['offset',0,Math.max(0,length-.1),.1],['duration',.1,Math.max(.1,length),.1],['volume',0,1,.01],['fadeIn',0,10,.1],['fadeOut',0,10,.1]];
-      panel('音声 · '+safe(asset?.name||'AUDIO'),'<button class="pro-primary" id="pro-add-audio">＋ トラック追加</button> <button id="pro-voice-record">🎙 マイク録音</button><div class="pro-controls">'+fields.map(([k,a,b,step])=>createControl(k,'pro-audio-'+k,a,b,step,selected[k]||0)).join('')+'</div><label class="pro-select"><input id="pro-audio-muted" type="checkbox" '+(selected.muted?'checked':'')+'> ミュート</label><div class="pro-inline"><button id="pro-audio-remove" class="pro-danger">この音声を削除</button><button id="pro-audio-unselect">トラック一覧</button></div><div class="pro-audio-list">'+tracks.map(t=>'<button data-audio="'+t.id+'">♫ '+safe(state.assets.get(t.assetId)?.name||'音声')+'</button>').join('')+'</div>');
+      panel('音声 · '+safe(asset?.name||'AUDIO'),'<button class="pro-primary" id="pro-add-audio">＋ トラック追加</button> <button id="pro-voice-record">🎙 マイク録音</button><div class="pro-controls">'+fields.map(([k,a,b,step])=>createControl(k,'pro-audio-'+k,a,b,step,selected[k]||0)).join('')+'</div><label class="pro-select"><input id="pro-audio-muted" type="checkbox" '+(selected.muted?'checked':'')+'> ミュート</label><p class="pro-tip">3バンドEQ / ±12dB（再生・書き出し双方に適用）</p><div class="pro-controls">'+[['bass','低音'],['mid','中音'],['treble','高音']].map(([key,label])=>createControl(label+' (dB)','pro-eq-'+key,-12,12,1,normalizeEQ(selected.eq)[key])).join('')+'</div><div class="pro-inline"><button id="pro-audio-remove" class="pro-danger">この音声を削除</button><button id="pro-audio-unselect">トラック一覧</button></div><div class="pro-audio-list">'+tracks.map(t=>'<button data-audio="'+t.id+'">♫ '+safe(state.assets.get(t.assetId)?.name||'音声')+'</button>').join('')+'</div>');
       for(const [k] of fields){$('pro-audio-'+k).oninput=e=>{const n=Number(e.target.value);selected[k]=n;
         selected.offset=Math.min(selected.offset,Math.max(0,length-.1));selected.duration=Math.min(selected.duration,Math.max(.1,length-selected.offset));
         $('pro-audio-'+k+'-value').textContent=n;save();renderTimeline();audioEngine.sync();};}
       $('pro-audio-muted').onchange=e=>{selected.muted=e.target.checked;save();audioEngine.sync();};
+      for(const band of ['bass','mid','treble']){const input=$('pro-eq-'+band);input.oninput=e=>{selected.eq={...normalizeEQ(selected.eq),[band]:Number(e.target.value)};$(input.id+'-value').textContent=e.target.value;save();audioEngine.sync();};}
       $('pro-audio-remove').onclick=()=>{state.project.audioTracks=tracks.filter(t=>t.id!==selected.id);selectedAudio=null;save();renderTimeline();showPanel('multiaudio');audioEngine.sync();};
       $('pro-audio-unselect').onclick=()=>{selectedAudio=null;showPanel('multiaudio');};
     }
@@ -523,9 +527,63 @@ function showPanel(which){
   }
 }
 function changeLayer(fn){const layer=selectedLayer();if(!layer||state.recording)return;fn(layer);layerBuffers.delete(layer.id);save();renderTimeline();draw();}
+function setupTextStudio(){
+ const editor=$('text-editor');
+ const div=document.createElement('div');div.id='pro-text-studio';
+ div.innerHTML='<p class="pro-tip">文字スタイル（編集可能）</p><div class="pro-text-presets">'+Object.entries(TEXT_PRESETS).map(([key,s])=>'<button type="button" data-text-preset="'+key+'">'+s.name+'</button>').join('')+'</div>'+ 
+  '<label class="pro-select">フォント <select id="pro-text-font">'+Object.keys(TEXT_FONTS).map(key=>'<option value="'+key+'">'+key+'</option>').join('')+'</select></label>'+ 
+  '<label class="pro-select">輪郭色 <input id="pro-text-outline-color" type="color" value="#000000"></label>'+ 
+  '<label class="pro-slider">輪郭の太さ <output id="pro-text-outline-label">0.12</output><input id="pro-text-outline" type="range" min="0" max="0.35" step="0.01" value="0.12"></label>'+ 
+  '<label class="pro-select"><input id="pro-text-box" type="checkbox"> 文字の背景ボックス</label>';
+ editor.append(div);
+ const current=()=>state.project.texts.find(t=>t.id===state.selectedText);
+ const change=fn=>{const t=current();if(!t||state.recording)return;fn(t);save();draw();};
+ div.querySelectorAll('[data-text-preset]').forEach(b=>b.onclick=()=>{change(t=>Object.assign(t,applyTextPreset(t,b.dataset.textPreset)));sync();});
+ $('pro-text-font').onchange=e=>change(t=>t.fontFamily=e.target.value);
+ $('pro-text-outline-color').oninput=e=>change(t=>t.outlineColor=e.target.value);
+ $('pro-text-outline').oninput=e=>{change(t=>t.outlineWidth=Number(e.target.value));$('pro-text-outline-label').textContent=e.target.value;};
+ $('pro-text-box').onchange=e=>change(t=>t.box=e.target.checked);
+ const sync=()=>{const t=current();if(!t)return;$('pro-text-font').value=t.fontFamily||'sans';$('pro-text-outline-color').value=t.outlineColor||'#000000';$('pro-text-outline').value=String(t.outlineWidth??.12);$('pro-text-outline-label').textContent=String(t.outlineWidth??.12);$('pro-text-box').checked=!!t.box;};
+ $('text-list').addEventListener('click',()=>setTimeout(sync,0));
+ document.querySelector('.nav-tab[data-tab=text]')?.addEventListener('click',()=>setTimeout(sync,0));
+ $('text-add').addEventListener('click',()=>setTimeout(sync,0));
+ $('add-text-small').addEventListener('click',()=>setTimeout(sync,0));
+ sync();
+}
+function setupExportStudio(){
+ const panel=$('panel-export');
+ const wrap=document.createElement('div');wrap.id='pro-export-studio';
+ wrap.innerHTML='<label class="pro-select">画質・フレームレート <select id="pro-export-preset">'+Object.entries(EXPORT_PRESETS).map(([key,c])=>'<option value="'+key+'">'+c.label+' / '+c.fps+'fps</option>').join('')+'</select></label>'+ 
+ '<label class="pro-select">形式の優先順位 <select id="pro-export-format"><option value="auto">自動</option><option value="mp4">MP4優先</option><option value="webm">WebM優先</option></select></label>'+ 
+ '<p class="pro-tip" id="pro-export-estimate"></p><div id="pro-export-warnings" class="pro-export-warnings" role="status"></div>'+ 
+ '<button id="pro-export-still" class="pro-secondary">▧ 現在のフレームをPNG画像で保存</button>';
+ panel.querySelector('.muted').after(wrap);
+ const update=()=>{
+   const opts=normalizeExportSettings(state.project.exportSettings);
+   $('pro-export-preset').value=opts.preset;$('pro-export-format').value=opts.format;
+   const d=totalTime(),size=(estimateBytes(d,opts)/1024/1024).toFixed(1),type=supportedRecorderType(window.MediaRecorder,opts.format);
+   $('pro-export-estimate').textContent=canvas.width+'×'+canvas.height+' / '+opts.fps+'fps希望 / 概算'+size+'MB / '+(type?.startsWith('video/mp4')?'MP4':type?'WebM':'録画非対応')+'。形式・画質は端末のエンコーダー依存。';
+   const warnings=exportWarnings({seconds:d,clips:state.project.clips,assets:[...state.assets.values()],fps:opts.fps});
+   $('pro-export-warnings').replaceChildren(...warnings.map(w=>{const n=document.createElement('p');n.textContent='⚠ '+w;return n;}));
+ };
+ for(const [id,key] of [['pro-export-preset','preset'],['pro-export-format','format']])$(id).onchange=e=>{state.project.exportSettings={...state.project.exportSettings,[key]:e.target.value};save();update();};
+ $('pro-export-still').onclick=()=>{
+   if(state.recording)return toast('動画の書き出し中は画像を保存できません');
+   if(!state.project.clips.length)return toast('先に素材を取り込んでください');
+   draw();canvas.toBlob(blob=>{
+     if(!blob)return toast('画像の保存に失敗しました');
+     downloadBlob(blob,(state.project.name||'untitled').replace(/[\/:*?"<>|]/g,'_')+'-frame-'+Math.floor(state.current*1000)+'.png');
+     toast('現在のフレームをPNGで保存しました');
+   },'image/png');
+ };
+ window.addEventListener('subeha-cut-change',()=>requestAnimationFrame(update));
+ document.querySelector('.nav-tab[data-tab=export]')?.addEventListener('click',update);
+ update();
+}
 function mount(){
   state.project.overlays ||= [];state.project.audioTracks ||= [];state.project.captions ||= [];
   installChrome();
+  setupTextStudio();setupExportStudio();
   canvas.addEventListener('pointerdown',onCanvasPoint);
   for(const layer of state.project.overlays){const a=state.assets.get(layer.assetId);if(a?.type==='video')makeOverlayVideo(a);}
   renderHooks.push(renderLayers);

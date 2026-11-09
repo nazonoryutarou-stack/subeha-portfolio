@@ -102,3 +102,14 @@ body{background:#0b0c10!important;font-size:13px}
 .pro-transition-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
 #pro-content .pro-transition-grid button.selected,#pro-content .pro-effect-list button.selected{border-color:#fd6078;background:#653a4e;color:#fff}
 #pro-content input[type=color]{vertical-align:middle}
+
+/* v0.6 - export, EQ and title studio */
+#pro-export-studio{padding:10px;border:1px solid #ffffff20;border-radius:10px;background:#292a32;margin:12px 0}
+#pro-export-studio select{max-width:100%;min-width:126px}
+#pro-export-studio .pro-tip{margin:10px 0;line-height:1.65}
+.pro-export-warnings p{font-size:11px;color:#f5b4a2;line-height:1.45;margin:4px 0}
+#pro-export-still{border:1px solid #595762;background:#383941;color:#fafafa;padding:9px 11px;border-radius:7px;font-size:11px}
+#pro-text-studio{border-top:1px solid #474852;padding-top:10px;margin-top:12px}
+.pro-text-presets{display:flex;gap:6px;overflow-x:auto;max-width:100%;padding:5px 0 10px}
+.pro-text-presets button{border:1px solid #555762;border-radius:8px;background:#30303a;padding:10px 12px;color:#f5f4f9;font:600 11px monospace;white-space:nowrap}
+#pro-text-studio .pro-slider{margin-top:12px}

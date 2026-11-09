@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {normalizeEQ,installTrackEQ} from '../audio-eq.mjs';
+assert.deepEqual(normalizeEQ(),{bass:0,mid:0,treble:0});
+assert.deepEqual(normalizeEQ({bass:99,mid:-99,treble:4.5}),{bass:12,mid:-12,treble:4.5});
+assert.deepEqual(normalizeEQ({bass:'oops',mid:null,treble:NaN}),{bass:0,mid:0,treble:0});
+const nodes=[];const node=()=>({connections:[],gain:{value:0},frequency:{value:0},Q:{value:0},connect(x){this.connections.push(x);}});
+const ctx={createBiquadFilter(){const n=node();nodes.push(n);return n;}};
+const source=node(),gain=node(),speakers=node(),recorder=node();
+const chain=installTrackEQ(ctx,source,gain,speakers,recorder);
+assert.equal(nodes.length,3);assert.equal(source.connections[0],nodes[0]);assert.equal(nodes[2].connections[0],gain);
+assert.deepEqual(gain.connections,[speakers,recorder]);
+chain.update({bass:7,mid:-3,treble:11});assert.deepEqual(nodes.map(n=>n.gain.value),[7,-3,11]);
+console.log('audio EQ tests PASS');
