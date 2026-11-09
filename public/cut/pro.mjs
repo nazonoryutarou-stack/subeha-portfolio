@@ -13,6 +13,8 @@ import {normalizeEQ} from './audio-eq.mjs';
 import {EXPORT_PRESETS,normalizeExportSettings,supportedRecorderType,estimateBytes,exportWarnings} from './export-settings.mjs';
 import {TEXT_PRESETS,TEXT_FONTS,applyTextPreset} from './text-styles.mjs';
 import {mountRetouchStudio} from './retouch-studio.mjs';
+import {mountVideoRetouchStudio} from './video-retouch-studio.mjs';
+import {retouchFrame,normalizedRetouch} from './video-retouch.mjs';
 const $ = id => document.getElementById(id);
 const api = window.__subehaCut;
 const {state,canvas,ctx,buildAsset,seek,save,refreshAll,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,undo,redo} = api;
@@ -141,15 +143,24 @@ function keyframeValue(layer,t){
 }
 function overlayImage(layer,view,asset){
   const sw=asset.width||view.videoWidth||1,sh=asset.height||view.videoHeight||1;
-  const scale=Math.min(1,640/Math.max(sw,sh));
+  const cfg=normalizedRetouch(layer.videoRetouch);
+  const scale=Math.min(1,(cfg?.enabled?cfg.quality:640)/Math.max(sw,sh));
   const w=Math.max(2,Math.round(sw*scale)),h=Math.max(2,Math.round(sh*scale));
-  const signature=JSON.stringify([asset.id,layer.key,layer.mask,layer.points,layer.feather,layer.chroma]);
+  const signature=JSON.stringify([asset.id,layer.key,layer.mask,layer.points,layer.feather,layer.chroma,layer.videoRetouch]);
   const cache=layerBuffers.get(layer.id);
-  if(asset.type==='image'&&cache?.signature===signature)return cache.canvas;
+  if(asset.type==='image'&&!layer.videoRetouch&&cache?.signature===signature)return cache.canvas;
   let buffer=cache?.canvas;
   if(!buffer||buffer.width!==w||buffer.height!==h){buffer=document.createElement('canvas');buffer.width=w;buffer.height=h;}
   const b=buffer.getContext('2d',{willReadFrequently:true});b.clearRect(0,0,w,h);
   try{b.drawImage(view,0,0,w,h);}catch{return null;}
+  if(layer.videoRetouch){
+    try{const config=normalizedRetouch(layer.videoRetouch),local=state.current-layer.start;
+      if(config?.enabled&&local>=config.start&&local<=config.end){
+       const original=b.getImageData(0,0,w,h),edited=retouchFrame(original,config,local);
+       if(edited.changed)b.putImageData(new ImageData(edited.image.data,w,h),0,0);
+      }
+    }catch(e){console.warn('Overlay video retouch',e);}
+  }
   if(layer.chroma?.enabled){
     try{const pixels=b.getImageData(0,0,w,h);chromaPixels(pixels,layer.chroma);b.putImageData(pixels,0,0);}catch(e){console.warn('Chroma',e);}
   }
@@ -585,6 +596,7 @@ function mount(){
   state.project.overlays ||= [];state.project.audioTracks ||= [];state.project.captions ||= [];
   installChrome();
   mountRetouchStudio(api,{panel,closeDrawer});
+  mountVideoRetouchStudio(api,{panel,closeDrawer});
   setupTextStudio();setupExportStudio();
   canvas.addEventListener('pointerdown',onCanvasPoint);
   for(const layer of state.project.overlays){const a=state.assets.get(layer.assetId);if(a?.type==='video')makeOverlayVideo(a);}

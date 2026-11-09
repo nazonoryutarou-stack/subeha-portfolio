@@ -16,6 +16,7 @@ const filters={none:{label:'ORIGINAL',style:'none'},mono:{label:'MONO',style:'gr
 const state={project:{name:'UNTITLED 01',ratio:'9:16',fit:'cover',backgroundColor:'#07080b',blurBackground:false,clips:[],texts:[],music:null,audioTracks:[],exportSettings:{preset:'standard'}},assets:new Map(),selectedClip:null,selectedText:null,activeClip:null,current:0,playing:false,recording:false,panel:'clips',lastFrame:0,switching:false,pendingSave:null,recorder:null,wakeLock:null};
 let db=null, audioCtx=null, mixer=null, videoNode=null, musicNode=null, toastTimer=null, drawPending=false, renderToken=0, raf=0;
 const renderHooks=[];
+const sourceFrameHooks=[];
 const history={undo:[],redo:[],current:null};
 
 function toast(message){const box=$('snackbar');box.textContent=message;box.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>box.classList.remove('visible'),3200);}
@@ -186,7 +187,9 @@ function renderBaseClip(clip,view,asset,alpha=1,local=0){
  ctx.filter=[filters[clip.filter]?.style||'none','brightness('+((adj.brightness??100)/100)+')','contrast('+((adj.contrast??100)/100)+')','saturate('+((adj.saturation??100)/100)+')','hue-rotate('+(adj.hue??0)+'deg)','blur('+(adj.blur??0)+'px)'].join(' ');
  ctx.globalAlpha*=props.opacity;
  if(props.rotation||clip.flipX||clip.flipY||props.zoom||props.x!==.5||props.y!==.5){ctx.translate(W*props.x,H*props.y);ctx.rotate(props.rotation*Math.PI/180);ctx.scale((clip.flipX?-1:1)*props.zoom,(clip.flipY?-1:1)*props.zoom);ctx.translate(-W/2,-H/2);}
- try{drawFrameWithAspect(view,asset.width||view.videoWidth,asset.height||view.videoHeight,clip.crop);}catch(e){console.warn('draw',e);}
+ let source=view,sourceW=asset.width||view.videoWidth,sourceH=asset.height||view.videoHeight;
+ for(const hook of sourceFrameHooks){try{const ret=hook({clip,view:source,asset,local});if(ret?.source){source=ret.source;sourceW=ret.width;sourceH=ret.height;}}catch(e){console.warn('source frame hook',e);}}
+ try{drawFrameWithAspect(source,sourceW,sourceH,clip.crop);}catch(e){console.warn('draw',e);}
  ctx.restore();
 }
 function draw(){
@@ -354,6 +357,6 @@ function applyHistory(snapshot){state.playing=false;media.pause();bgm.pause();tr
 function undo(){if(!history.undo.length)return toast('戻す操作がありません');history.redo.push(history.current);history.current=history.undo.pop();applyHistory(history.current);}
 function redo(){if(!history.redo.length)return toast('やり直す操作がありません');history.undo.push(history.current);history.current=history.redo.pop();applyHistory(history.current);}
 window.__subehaSaveAsset=async(id,file,type,name)=>idbPut('files',id,{blob:file,type,name});
-window.__subehaCut={state,canvas,ctx,buildAsset,seek,save,refreshAll,refreshTimeline,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,assetOf,undo,redo,duration,locate,spans,renderBaseClip,getAudioGraph:()=>{audioReady();return {audioCtx,mixer};},loadProjectSnapshot};
+window.__subehaCut={state,canvas,ctx,buildAsset,seek,save,refreshAll,refreshTimeline,draw,selectedClip,updateClip,setPanel,renderHooks,sourceFrameHooks,toast,newID,assetOf,undo,redo,duration,locate,spans,renderBaseClip,getAudioGraph:()=>{audioReady();return {audioCtx,mixer};},loadProjectSnapshot};
 async function init(){bind();setRatio('9:16');setPanel('clips');try{if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))await navigator.serviceWorker.register('./sw.js');}catch(e){console.warn('Service worker',e);}await restore();window.dispatchEvent(new Event('subeha-cut-ready'));requestAnimationFrame(animationLoop);}
 init().catch(fail);
