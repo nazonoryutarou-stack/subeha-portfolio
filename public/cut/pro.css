@@ -122,3 +122,9 @@ body{background:#0b0c10!important;font-size:13px}
 #pro-content .retouch-template-grid button{min-height:73px;background:linear-gradient(125deg,#252833,#37303f);text-align:left;border:1px solid #66616a;border-radius:9px;padding:10px}
 .retouch-template-grid strong{font-size:12px;display:block;color:#fff}.retouch-template-grid small{color:#b7b6c3;display:block;font-size:10px;margin-top:6px}
 #cut-template-text{background:#17171d;border:1px solid #51515e;border-radius:8px;color:#fff;padding:9px;width:100%;max-width:100%}
+
+/* v0.8: interactive per-frame video retouch workspace */
+#vr-preview-box{width:100%;display:flex;align-items:center;justify-content:center;background:#12141a;border-radius:10px;border:1px solid #4b4d5a;max-height:320px;overflow:hidden;margin:7px 0 12px;min-height:145px}
+#vr-preview{display:block;max-width:100%;max-height:300px;width:auto;height:auto;touch-action:none;cursor:crosshair;object-fit:contain}
+#vr-status{color:#c1e5d6;min-height:24px}
+#pro-content #vr-quality{background:#18191f;color:#fafafa;border:1px solid #4f535e;border-radius:6px;min-height:35px}
