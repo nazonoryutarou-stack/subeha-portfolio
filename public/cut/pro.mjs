@@ -15,6 +15,7 @@ import {TEXT_PRESETS,TEXT_FONTS,applyTextPreset} from './text-styles.mjs';
 import {mountRetouchStudio} from './retouch-studio.mjs';
 import {mountVideoRetouchStudio} from './video-retouch-studio.mjs';
 import {retouchFrame,normalizedRetouch} from './video-retouch.mjs';
+import {mountTouchWorkspace} from './touch-workspace.mjs';
 const $ = id => document.getElementById(id);
 const api = window.__subehaCut;
 const {state,canvas,ctx,buildAsset,seek,save,refreshAll,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,undo,redo} = api;
@@ -29,6 +30,7 @@ const trackCanvas=document.createElement('canvas');trackCanvas.width=180;trackCa
 const trackCtx=trackCanvas.getContext('2d',{willReadFrequently:true});
 let zoom = 15;
 let syncing = false;
+let touchWorkspace=null;
 const playbackVideos = new Map();
 const mix = {normal:'source-over',screen:'screen',multiply:'multiply',lighten:'lighten',darken:'darken',overlay:'overlay',difference:'difference'};
 const clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,n));
@@ -81,8 +83,8 @@ function installChrome(){
   document.querySelector('.viewer-bottom').insertAdjacentHTML('beforeend','<button id="pro-fullscreen" class="chip">⛶</button>');
   $('pro-fullscreen').onclick=()=>{if(!document.fullscreenElement)stage.requestFullscreen?.().catch(()=>toast('全画面表示は非対応です'));else document.exitFullscreen?.();};
   document.querySelector('.timeline-shell .section-label').innerHTML='<span id="pro-timeline-caption">タイムライン</span><div class="pro-zoom"><button id="pro-zoom-out">−</button><span id="pro-zoom-label">15px/s</span><button id="pro-zoom-in">＋</button></div>';
-  $('pro-zoom-out').onclick=()=>{zoom=clamp(zoom/1.45,7,60);renderTimeline();};
-  $('pro-zoom-in').onclick=()=>{zoom=clamp(zoom*1.45,7,60);renderTimeline();};
+  $('pro-zoom-out').onclick=()=>{touchWorkspace?.zoom(zoom/1.45);};
+  $('pro-zoom-in').onclick=()=>{touchWorkspace?.zoom(zoom*1.45);};
   const ruler=document.createElement('div');ruler.id='pro-scrub-ruler';ruler.innerHTML='<div id="pro-ruler-ticks"></div><div id="pro-playhead"></div>';
   $('clip-track').before(ruler);
   ruler.addEventListener('pointerdown',e=>{ruler.setPointerCapture(e.pointerId);scrubAt(e);});
@@ -119,6 +121,7 @@ function renderTimeline(){
     }
     $('pro-zoom-label').textContent=Math.round(zoom)+'px/s';renderPlayhead();renderAudioTimeline(d);renderCaptionTimeline(d);
     for(const joint of document.querySelectorAll('.cut-transition-joint')){const c=clips.find(c=>c.id===joint.dataset.transitionTarget);joint.classList.toggle('applied',!!c?.transitionIn&&c.transitionIn.type!=='none');}
+    touchWorkspace?.render();
   }finally{syncing=false;}
 }
 function selectedLayer(){return (state.project.overlays||[]).find(x=>x.id===selectedOverlay)||null;}
@@ -613,7 +616,18 @@ function mount(){
   $('pro-text-motion').onchange=e=>{const t=state.project.texts.find(x=>x.id===state.selectedText);if(t){t.motion=e.target.value;save();draw();}};
   for(const speed of [0.25,0.75,1.25,3,4]){const segments=$('speed-segments');if(segments&&!segments.querySelector('[data-speed="'+speed+'"]')){const b=document.createElement('button');b.dataset.speed=speed;b.textContent=speed+'×';b.onclick=()=>updateClip(c=>c.speed=speed);segments.append(b);}}
   const nativeTabs=document.querySelectorAll('.nav-tab[data-tab]');nativeTabs[0]?.classList.add('active');
+  touchWorkspace=mountTouchWorkspace({api,
+    getZoom:()=>zoom,
+    setZoom:value=>{zoom=clamp(value,12,160);renderTimeline();},
+    getLayer:selectedLayer,
+    getLayerProps:(layer,local)=>effectivePosition(layer,keyframeValue(layer,local)),
+    getEditMode:()=>editMode,
+    onSelectLayer:id=>{selectedOverlay=id;showPanel('overlay');renderTimeline();},
+    onSelectAudio:id=>{selectedAudio=id;showPanel('multiaudio');},
+    onSelectCaption:id=>{selectedCue=id;showPanel('captions');},
+    onOpenOverlay:()=>{selectedOverlay=null;showPanel('overlay');$('pro-overlay-picker')?.click();}
+  });
   renderTimeline();
-  function frame(){renderPlayhead();audioEngine.sync();updateTracking();requestAnimationFrame(frame);}requestAnimationFrame(frame);
+  function frame(){renderPlayhead();touchWorkspace?.tick();audioEngine.sync();updateTracking();requestAnimationFrame(frame);}requestAnimationFrame(frame);
 }
 if(window.__subehaCut && state.project) { if(document.readyState==='loading')window.addEventListener('subeha-cut-ready',mount,{once:true});else if(state.assets.size||document.readyState==='complete')mount();else window.addEventListener('subeha-cut-ready',mount,{once:true});}
