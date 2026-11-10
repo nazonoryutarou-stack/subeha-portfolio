@@ -1,4 +1,5 @@
-import {PIP_PRESETS,applyPipPreset,normalizePipStyle,drawPipFrame} from './pip-style.mjs';
+import {drawPipFrame} from './pip-style.mjs'; // read-only compatibility for pre-v1.2 projects
+import {OVERLAY_MOTIONS,overlayMotion} from './overlay-motion.mjs';
 /* SUBEHA CUT Pro 0.3 - original offline compositing and tracking studio. */
 import {chromaPixels,trackingPosition,bound} from './compositor.mjs';
 import {createMultiAudioEngine} from './multi-audio.mjs';
@@ -60,7 +61,6 @@ function installChrome(){
   const nav=document.querySelector('.bottomnav');
   nav.innerHTML='<button class="nav-tab" data-tab="clips"><span>▥</span>編集</button>'+
   '<button class="nav-tab pro-nav" data-pro="overlay"><span>▧</span>オーバーレイ</button>'+
-  '<button class="nav-tab pro-nav" data-pro="pip"><span>◩</span>小窓</button>'+
   '<button class="nav-tab" data-tab="text"><span>Ｔ</span>テキスト</button>'+
   '<button class="nav-tab pro-nav" data-pro="captions"><span>▤</span>字幕</button>'+
   '<button class="nav-tab" data-tab="audio"><span>♫</span>音声</button>'+
@@ -458,30 +458,16 @@ function showPanel(which){
   }else if(which==='project'){
     panel('素材ごと保存 / 復元','<p>動画・画像・音声と字幕・レイヤー・エフェクトをまとめた独立した編集プロジェクトを保存できます。</p><div class="pro-inline"><button class="pro-primary" id="pro-package-save">⇩ 素材を含めて保存（.subecut）</button><button id="pro-package-load">⇧ 保存したプロジェクトを開く</button></div><p class="pro-tip">保存形式は非圧縮ZIP。現在の端末の容量とメモリを守るため、合計200MB以内。インポート時はデータ破損を検査します。素材はサーバーに送信しません。従来の「編集情報JSON」とは異なり、別端末でも再編集できます。</p>');
     $('pro-package-save').onclick=saveArchive;$('pro-package-load').onclick=()=>$('pro-project-picker').click();
-  }else if(which==='pip'){
-    if(!selectedLayer() && state.project.overlays?.length)selectedOverlay=state.project.overlays.at(-1).id;
-    const layer=selectedLayer();
-    if(!layer){panel('ピクチャ・イン・ピクチャ','<p>背景映像の上に、動画・画像を小窓として重ねられます。</p><button class="pro-primary" id="pro-pip-import">＋ 小窓用の素材を追加</button>');$('pro-pip-import').onclick=()=>$('pro-overlay-picker').click();return;}
-    const st=normalizePipStyle(layer.pipStyle);
-    panel('小窓 / フレーム装飾',
-      '<div class="pro-pip-grid">'+Object.entries(PIP_PRESETS).map(([key,v])=>'<button data-pip="'+key+'">'+v.label+'</button>').join('')+'</div>'+ 
-      '<div class="pro-controls">'+createControl('角丸','pro-pip-radius',0,.3,.005,st.radius)+createControl('縁取り','pro-pip-border',0,.03,.001,st.border)+createControl('影','pro-pip-shadow',0,.08,.002,st.shadow)+'</div>'+ 
-      '<label class="pro-select">縁の色 <input type="color" id="pro-pip-color" value="'+st.borderColor+'"></label>'+ 
-      '<div class="pro-inline"><button id="pro-pip-new">＋ 別の小窓を追加</button><button id="pro-pip-none">フレームなし</button></div><p class="pro-tip">配置後はプレビューをドラッグして移動、2本指で拡大・回転できます。映像の書き出しにも適用されます。</p>');
-    $('pro-content').querySelectorAll('[data-pip]').forEach(b=>b.onclick=()=>{changeLayer(l=>Object.assign(l,applyPipPreset(l,b.dataset.pip)));showPanel('pip');});
-    for(const k of ['radius','border','shadow'])$('pro-pip-'+k).oninput=e=>{const n=Number(e.target.value);$('pro-pip-'+k+'-value').textContent=n;changeLayer(l=>{l.pipStyle={...normalizePipStyle(l.pipStyle),[k]:n};});};
-    $('pro-pip-color').oninput=e=>changeLayer(l=>{l.pipStyle={...normalizePipStyle(l.pipStyle),borderColor:e.target.value};});
-    $('pro-pip-new').onclick=()=>$('pro-overlay-picker').click();
-    $('pro-pip-none').onclick=()=>{changeLayer(l=>delete l.pipStyle);showPanel('pip');};
   }else if(which==='overlay'){
 
     const layer=selectedLayer();
     if(!layer){panel('オーバーレイ','<p>画像・動画を重ね、キーフレームや合成方法を設定できます。</p><button id="pro-import-layer" class="pro-primary">＋ 画像・動画レイヤー</button>');}
     else{
       const fields=[['x',0,1,.01],['y',0,1,.01],['scale',.1,1.9,.01],['opacity',0,1,.01],['rotation',-180,180,1],['duration',.2,180,.1],['start',0,180,.1]];
-      panel('レイヤーを編集','<button id="pro-import-layer" class="pro-primary">＋ レイヤーを追加</button><div class="pro-controls">'+fields.map(([k,a,b,c])=>createControl(k,'pro-'+k,a,b,c,layer[k])).join('')+'</div><label class="pro-select">合成 <select id="pro-blend">'+Object.keys(mix).map(k=>'<option value="'+k+'" '+(layer.blend===k?'selected':'')+'>'+k+'</option>').join('')+'</select></label><label class="pro-select">マスク <select id="pro-mask"><option value="rect">通常</option><option value="circle">円形</option><option value="soft">柔らかい円</option><option value="polygon">多角形</option></select></label><div class="pro-controls">'+createControl('境界ぼかし','pro-feather',0,.25,.005,layer.feather??0)+'</div><div class="pro-inline"><button id="pro-polygon">✎ 輪郭を描く</button><button id="pro-finish-polygon">輪郭確定</button><button id="pro-keyframe">◆ この位置をキーフレーム登録</button><button id="pro-remove-layer" class="pro-danger">レイヤー削除</button></div><p class="pro-tip">キーフレーム数: '+(layer.keyframes?.length||0)+' / レイヤーを選ぶと時間軸に表示</p>');
+      panel('レイヤーを編集','<button id="pro-import-layer" class="pro-primary">＋ レイヤーを追加</button><div class="pro-controls">'+fields.map(([k,a,b,c])=>createControl(k,'pro-'+k,a,b,c,layer[k])).join('')+'</div><label class="pro-select">合成 <select id="pro-blend">'+Object.keys(mix).map(k=>'<option value="'+k+'" '+(layer.blend===k?'selected':'')+'>'+k+'</option>').join('')+'</select></label><label class="pro-select">マスク <select id="pro-mask"><option value="rect">通常</option><option value="circle">円形</option><option value="soft">柔らかい円</option><option value="polygon">多角形</option></select></label><div class="pro-controls">'+createControl('境界ぼかし','pro-feather',0,.25,.005,layer.feather??0)+'</div><div class="pro-inline"><button id="pro-polygon">✎ 輪郭を描く</button><button id="pro-finish-polygon">輪郭確定</button><button id="pro-keyframe">◆ この位置をキーフレーム登録</button><button id="pro-remove-layer" class="pro-danger">レイヤー削除</button></div><div class="pro-motion-presets"><strong>登場アニメーション</strong><div class="pro-motion-options">'+Object.entries(OVERLAY_MOTIONS).map(([key,label])=>'<button data-overlay-motion="'+key+'">'+label+'</button>').join('')+'</div></div><p class="pro-tip">キーフレーム数: '+(layer.keyframes?.length||0)+' / レイヤーを選ぶと時間軸に表示</p>');
       $('pro-mask').value=layer.mask||'rect';$('pro-feather').oninput=e=>{const n=Number(e.target.value);$('pro-feather-value').textContent=n;changeLayer(l=>l.feather=n);};$('pro-polygon').onclick=beginPolygon;$('pro-finish-polygon').onclick=()=>{editMode=null;toast('多角形を確定しました');showPanel('overlay');};$('pro-blend').onchange=e=>changeLayer(l=>l.blend=e.target.value);$('pro-mask').onchange=e=>changeLayer(l=>l.mask=e.target.value);
       bindSliders('overlay',fields,(k,n)=>changeLayer(l=>l[k]=n));
+      $('pro-content').querySelectorAll('[data-overlay-motion]').forEach(button=>button.onclick=()=>{const next=overlayMotion(layer,button.dataset.overlayMotion);changeLayer(l=>{l.keyframes=next.keyframes;});showPanel('overlay');toast('アニメーションを設定しました');});
       $('pro-keyframe').onclick=()=>changeLayer(l=>{let t=clamp(state.current-l.start,0,l.duration);l.keyframes ||= [];l.keyframes=l.keyframes.filter(f=>Math.abs(f.time-t)>.04);l.keyframes.push({time:t,x:l.x,y:l.y,scale:l.scale,opacity:l.opacity,rotation:l.rotation});toast('◆ キーフレームを登録しました');});
       $('pro-remove-layer').onclick=()=>{state.project.overlays=state.project.overlays.filter(l=>l.id!==layer.id);selectedOverlay=null;save();renderTimeline();showPanel('overlay');draw();};
     }

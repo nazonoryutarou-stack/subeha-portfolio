@@ -48,8 +48,6 @@
 .leap-layout .leap-tool.has-badge:after{content:'New';font:700 9px/1.4 system-ui;position:absolute;top:3px;right:10px;background:#fff;color:#161619;padding:1px 4px;border-radius:5px}
 .leap-layout #snackbar{bottom:calc(76px + env(safe-area-inset-bottom))}
 .leap-layout #pro-drawer,.leap-layout .tools-shell,.leap-extras,.leap-mini-sheet{bottom:calc(69px + env(safe-area-inset-bottom))}
-.pro-pip-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:10px 0}
-#pro-content .pro-pip-grid button{min-height:47px;padding:5px 2px;font-size:11px}
 .leap-layout .leap-magic-row{display:flex;flex-direction:column;gap:9px}
 .leap-layout .leap-magic-row button{border-radius:9px;text-align:left;background:#35353d;color:#f5f5f6;padding:13px 11px;border:1px solid #55545d;font-size:13px;display:flex;flex-direction:column;gap:5px}
 .leap-layout .leap-magic-row small{font-size:10px;color:#bbbbc0}
@@ -62,3 +60,9 @@
 .leap-layout #cut-touch-workspace{height:175px;flex:0 0 175px}
 .leap-layout .leap-editing-bar{height:35px;flex:0 0 35px;position:relative;z-index:3}
 @media(max-height:760px){.leap-layout .timeline-shell.cut-touch-enabled{height:180px;flex-basis:180px}.leap-layout #cut-touch-workspace{height:145px}}
+
+/* v1.2: overlay motion entry, replacing the mistaken screenshot-based PiP option. */
+.pro-motion-presets{margin:14px 0 8px;border-top:1px solid #45454d;padding-top:11px}
+.pro-motion-presets strong{display:block;margin-bottom:8px;font-size:11px;color:#eee}
+.pro-motion-options{display:flex;gap:6px;overflow-x:auto;padding-bottom:7px;scrollbar-width:thin}
+#pro-content .pro-motion-options button{flex:0 0 auto;min-width:82px;padding:9px 8px;background:#383942}
