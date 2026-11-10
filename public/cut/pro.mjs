@@ -1,3 +1,4 @@
+import {PIP_PRESETS,applyPipPreset,normalizePipStyle,drawPipFrame} from './pip-style.mjs';
 /* SUBEHA CUT Pro 0.3 - original offline compositing and tracking studio. */
 import {chromaPixels,trackingPosition,bound} from './compositor.mjs';
 import {createMultiAudioEngine} from './multi-audio.mjs';
@@ -28,7 +29,7 @@ const waveformCache=new Map(),waveformPending=new Set();
 const audioEngine=createMultiAudioEngine({state,getGraph:api.getAudioGraph});
 const trackCanvas=document.createElement('canvas');trackCanvas.width=180;trackCanvas.height=320;
 const trackCtx=trackCanvas.getContext('2d',{willReadFrequently:true});
-let zoom = 42;
+let zoom = 126;
 let syncing = false;
 let touchWorkspace=null;
 const playbackVideos = new Map();
@@ -59,6 +60,7 @@ function installChrome(){
   const nav=document.querySelector('.bottomnav');
   nav.innerHTML='<button class="nav-tab" data-tab="clips"><span>▥</span>編集</button>'+
   '<button class="nav-tab pro-nav" data-pro="overlay"><span>▧</span>オーバーレイ</button>'+
+  '<button class="nav-tab pro-nav" data-pro="pip"><span>◩</span>小窓</button>'+
   '<button class="nav-tab" data-tab="text"><span>Ｔ</span>テキスト</button>'+
   '<button class="nav-tab pro-nav" data-pro="captions"><span>▤</span>字幕</button>'+
   '<button class="nav-tab" data-tab="audio"><span>♫</span>音声</button>'+
@@ -210,7 +212,7 @@ function renderLayers(){
     if(!(w>0&&h>0))continue;
     ctx.save();ctx.globalAlpha=clamp(props.opacity,0,1);ctx.globalCompositeOperation=mix[layer.blend]||'source-over';
     ctx.translate(props.x*W,props.y*H);ctx.rotate(props.rotation*Math.PI/180);
-    ctx.drawImage(rendered,-w/2,-h/2,w,h);ctx.restore();
+    if(layer.pipStyle)drawPipFrame(ctx,rendered,w,h,layer.pipStyle,W);else ctx.drawImage(rendered,-w/2,-h/2,w,h);ctx.restore();
   }
 }
 function renderAudioTimeline(d){
@@ -238,7 +240,7 @@ async function importAudioTracks(files){
       const asset=await buildAsset(id,file,'audio',file.name);
       if(window.__subehaSaveAsset)await window.__subehaSaveAsset(id,file,'audio',file.name);
       const start=state.current,duration=Math.min(asset.duration,Math.max(.1,totalTime()-start));
-      const clip={id:newID(),assetId:id,start,duration,offset:0,volume:.75,muted:false,fadeIn:0,fadeOut:0};
+      const clip={id:newID(),assetId:id,start,duration,offset:0,volume:.75,muted:false,fadeIn:0,fadeOut:0,role:'music'};
       state.project.audioTracks ||= [];state.project.audioTracks.push(clip);selectedAudio=clip.id;
     }catch(e){console.error(e);toast('音声ファイルを読み込めませんでした');}
   }
@@ -261,7 +263,7 @@ async function toggleVoiceover(){
    voiceRecorder.onstop=async()=>{
      try{const blob=new Blob(voiceChunks,{type});if(blob.size<800)throw Error('録音が短すぎます');
        const file=new File([blob],'voice-'+Date.now()+(type.includes('mp4')?'.m4a':'.webm'),{type});
-       const old=state.current;seek(start);await importAudioTracks([file]);seek(old);toast('ナレーションをタイムラインに追加しました');
+       const old=state.current;seek(start);await importAudioTracks([file]);const voice=state.project.audioTracks.find(t=>t.id===selectedAudio);if(voice){voice.role='voice';state.project.audioDucking={enabled:true,level:.28,attack:.18,release:.45};save();}seek(old);toast('ナレーションを追加しました。BGMは自動的に音量を下げます');
      }catch(err){console.warn(err);toast('録音の保存に失敗しました: '+err.message);}
      finally{voiceStream?.getTracks().forEach(t=>t.stop());voiceStream=null;voiceRecorder=null;voiceChunks=[];showPanel('multiaudio');}
    };
@@ -423,7 +425,8 @@ function showPanel(which){
     $('pro-content').querySelectorAll('[data-transition]').forEach(btn=>btn.onclick=()=>{apply('type',btn.dataset.transition);showPanel('transitions');});
     $('pro-transition-duration').oninput=e=>{const val=Number(e.target.value);$('pro-transition-duration-value').textContent=val;apply('duration',val);};
   }else if(which==='canvas'){
-    panel('背景 / キャンバス','<p>縦型・横型・正方形の映像背景を指定。FIT表示で余白が生じるときに有効です。</p><label class="pro-select">背景色 <input type="color" id="pro-canvas-color" value="'+(state.project.backgroundColor||'#07080b')+'"></label><label class="pro-select"><input id="pro-canvas-blur" type="checkbox" '+(state.project.blurBackground?'checked':'')+'> 余白を映像のぼかしで埋める</label><p class="pro-tip">プレビューのFITボタンでアスペクト比を保持できます。</p>');
+    panel('背景 / キャンバス','<p>映像の縦横比と背景を調整できます。</p><button id="pro-source-ratio">元画像に近い画角（7:10 / 5:7対応）</button><label class="pro-select">背景色 <input type="color" id="pro-canvas-color" value="'+(state.project.backgroundColor||'#07080b')+'"></label><label class="pro-select"><input id="pro-canvas-blur" type="checkbox" '+(state.project.blurBackground?'checked':'')+'> 余白を映像のぼかしで埋める</label><p class="pro-tip">プレビューのFITボタンでアスペクト比を保持できます。</p>');
+    const matchSource=$('pro-source-ratio');if(matchSource)matchSource.onclick=()=>{const c=selectedClip()||state.project.clips[0],a=c&&state.assets.get(c.assetId);if(!a?.width||!a?.height)return toast('画像・動画素材を選んでください');const ratios={'9:16':9/16,'7:10':7/10,'5:7':5/7,'3:4':3/4,'4:5':4/5,'1:1':1,'16:9':16/9,'21:9':21/9},source=a.width/a.height;const chosen=Object.keys(ratios).reduce((best,k)=>Math.abs(Math.log(source/ratios[k]))<Math.abs(Math.log(source/ratios[best]))?k:best,'9:16');api.setRatio(chosen);toast('キャンバスを'+chosen+'に変更しました');};
     $('pro-canvas-color').oninput=e=>{state.project.backgroundColor=e.target.value;save();draw();};
     $('pro-canvas-blur').onchange=e=>{state.project.blurBackground=e.target.checked;save();draw();};
   }else if(which==='freeze'){
@@ -455,6 +458,21 @@ function showPanel(which){
   }else if(which==='project'){
     panel('素材ごと保存 / 復元','<p>動画・画像・音声と字幕・レイヤー・エフェクトをまとめた独立した編集プロジェクトを保存できます。</p><div class="pro-inline"><button class="pro-primary" id="pro-package-save">⇩ 素材を含めて保存（.subecut）</button><button id="pro-package-load">⇧ 保存したプロジェクトを開く</button></div><p class="pro-tip">保存形式は非圧縮ZIP。現在の端末の容量とメモリを守るため、合計200MB以内。インポート時はデータ破損を検査します。素材はサーバーに送信しません。従来の「編集情報JSON」とは異なり、別端末でも再編集できます。</p>');
     $('pro-package-save').onclick=saveArchive;$('pro-package-load').onclick=()=>$('pro-project-picker').click();
+  }else if(which==='pip'){
+    if(!selectedLayer() && state.project.overlays?.length)selectedOverlay=state.project.overlays.at(-1).id;
+    const layer=selectedLayer();
+    if(!layer){panel('ピクチャ・イン・ピクチャ','<p>背景映像の上に、動画・画像を小窓として重ねられます。</p><button class="pro-primary" id="pro-pip-import">＋ 小窓用の素材を追加</button>');$('pro-pip-import').onclick=()=>$('pro-overlay-picker').click();return;}
+    const st=normalizePipStyle(layer.pipStyle);
+    panel('小窓 / フレーム装飾',
+      '<div class="pro-pip-grid">'+Object.entries(PIP_PRESETS).map(([key,v])=>'<button data-pip="'+key+'">'+v.label+'</button>').join('')+'</div>'+ 
+      '<div class="pro-controls">'+createControl('角丸','pro-pip-radius',0,.3,.005,st.radius)+createControl('縁取り','pro-pip-border',0,.03,.001,st.border)+createControl('影','pro-pip-shadow',0,.08,.002,st.shadow)+'</div>'+ 
+      '<label class="pro-select">縁の色 <input type="color" id="pro-pip-color" value="'+st.borderColor+'"></label>'+ 
+      '<div class="pro-inline"><button id="pro-pip-new">＋ 別の小窓を追加</button><button id="pro-pip-none">フレームなし</button></div><p class="pro-tip">配置後はプレビューをドラッグして移動、2本指で拡大・回転できます。映像の書き出しにも適用されます。</p>');
+    $('pro-content').querySelectorAll('[data-pip]').forEach(b=>b.onclick=()=>{changeLayer(l=>Object.assign(l,applyPipPreset(l,b.dataset.pip)));showPanel('pip');});
+    for(const k of ['radius','border','shadow'])$('pro-pip-'+k).oninput=e=>{const n=Number(e.target.value);$('pro-pip-'+k+'-value').textContent=n;changeLayer(l=>{l.pipStyle={...normalizePipStyle(l.pipStyle),[k]:n};});};
+    $('pro-pip-color').oninput=e=>changeLayer(l=>{l.pipStyle={...normalizePipStyle(l.pipStyle),borderColor:e.target.value};});
+    $('pro-pip-new').onclick=()=>$('pro-overlay-picker').click();
+    $('pro-pip-none').onclick=()=>{changeLayer(l=>delete l.pipStyle);showPanel('pip');};
   }else if(which==='overlay'){
 
     const layer=selectedLayer();
@@ -486,7 +504,7 @@ function showPanel(which){
     $('pro-clear-track').onclick=()=>{finishTracking();changeLayer(x=>delete x.tracking);showPanel('tracking');};
   }else if(which==='multiaudio'){
     const tracks=state.project.audioTracks||[],selected=tracks.find(t=>t.id===selectedAudio);
-    if(!selected){panel('マルチトラック音声','<p>音声・効果音をいくつでも追加し、位置・音量・フェードを個別に設定します。</p><button class="pro-primary" id="pro-add-audio">＋ 音声を追加</button> <button id="pro-voice-record">🎙 マイク録音</button><div class="pro-audio-list">'+tracks.map(t=>'<button data-audio="'+t.id+'">♫ '+safe(state.assets.get(t.assetId)?.name||'音声')+'</button>').join('')+'</div>');}
+    if(!selected){panel('マルチトラック音声','<p>音声・効果音をいくつでも追加し、位置・音量・フェードを個別に設定します。ナレーション中はBGMを自動的に下げられます。</p><button class="pro-primary" id="pro-add-audio">＋ 音声を追加</button> <button id="pro-voice-record">🎙 マイク録音</button><div class="pro-audio-list">'+tracks.map(t=>'<button data-audio="'+t.id+'">♫ '+safe(state.assets.get(t.assetId)?.name||'音声')+'</button>').join('')+'</div>');}
     else{
       const asset=state.assets.get(selected.assetId),length=asset?.duration||selected.duration;
       const fields=[['start',0,Math.max(1,totalTime()),.1],['offset',0,Math.max(0,length-.1),.1],['duration',.1,Math.max(.1,length),.1],['volume',0,1,.01],['fadeIn',0,10,.1],['fadeOut',0,10,.1]];
@@ -494,11 +512,16 @@ function showPanel(which){
       for(const [k] of fields){$('pro-audio-'+k).oninput=e=>{const n=Number(e.target.value);selected[k]=n;
         selected.offset=Math.min(selected.offset,Math.max(0,length-.1));selected.duration=Math.min(selected.duration,Math.max(.1,length-selected.offset));
         $('pro-audio-'+k+'-value').textContent=n;save();renderTimeline();audioEngine.sync();};}
-      $('pro-audio-muted').onchange=e=>{selected.muted=e.target.checked;save();audioEngine.sync();};
+      $('pro-audio-muted').onchange=e=>{selected.muted=e.target.checked;save();audioEngine.sync();};$('pro-audio-role').value=selected.role||'music';$('pro-audio-role').onchange=e=>{selected.role=e.target.value;save();audioEngine.sync();};
       for(const band of ['bass','mid','treble']){const input=$('pro-eq-'+band);input.oninput=e=>{selected.eq={...normalizeEQ(selected.eq),[band]:Number(e.target.value)};$(input.id+'-value').textContent=e.target.value;save();audioEngine.sync();};}
       $('pro-audio-remove').onclick=()=>{state.project.audioTracks=tracks.filter(t=>t.id!==selected.id);selectedAudio=null;save();renderTimeline();showPanel('multiaudio');audioEngine.sync();};
       $('pro-audio-unselect').onclick=()=>{selectedAudio=null;showPanel('multiaudio');};
     }
+    const config=state.project.audioDucking||{enabled:false,level:.28};
+    const controls=document.createElement('div');controls.className='pro-ducking';controls.innerHTML='<label class="pro-select"><input type="checkbox" id="pro-duck-enable" '+(config.enabled?'checked':'')+'> ナレーション中にBGMを自動で下げる</label>'+createControl('BGM音量（ナレーション中）','pro-duck-level',.05,1,.05,config.level??.28)+'<p class="pro-tip">録音したナレーション、または「ナレーション」に指定した音声トラックで作動。プレビューと書き出しに適用。</p>';
+    $('pro-content').append(controls);
+    $('pro-duck-enable').onchange=e=>{state.project.audioDucking={...config,...state.project.audioDucking,enabled:e.target.checked};save();audioEngine.sync();};
+    $('pro-duck-level').oninput=e=>{const n=Number(e.target.value);$('pro-duck-level-value').textContent=n;state.project.audioDucking={...config,...state.project.audioDucking,level:n};save();audioEngine.sync();};
     $('pro-add-audio').onclick=()=>$('pro-audio-picker').click();
     $('pro-voice-record').textContent=voiceRecorder?.state==='recording'?'■ 録音終了':'🎙 マイク録音';
     $('pro-voice-record').onclick=toggleVoiceover;

@@ -1,0 +1,64 @@
+/* SUBEHA CUT 1.1 — mobile video-first editor, using user-provided screen geometry as reference.
+   Own brand and icons; no proprietary UI assets. */
+:root{--leap-red:#ff515f;--leap-panel:#202024}
+.leap-layout #app,.leap-layout main{background:#1f1f23}
+.leap-layout .topbar{flex:0 0 54px;height:54px;background:#202024;border:0;padding:0 12px}
+.leap-layout .topbar .brand{color:var(--leap-red);font:760 17px/1.15 system-ui,sans-serif;letter-spacing:-.035em}
+.leap-layout .topbar .brand strong{color:var(--leap-red)}
+.leap-layout #new-project{left:8px;top:9px;width:36px;height:36px;color:#d6d6da}
+.leap-layout .leap-head-help{top:9px;left:56px;width:36px;height:36px;color:#c3c3c8}
+.leap-layout .topbar svg{width:24px;height:24px}
+.leap-layout #export-open{height:35px;min-width:96px;border-radius:23px;padding:7px 12px;background:#414148;font-size:13px;gap:7px}
+.leap-layout #export-open svg{width:19px;height:19px}
+.leap-layout .viewer-shell{background:#161619}
+.leap-layout .preview-stage{background:#050506}
+.leap-layout .transport{height:38px;flex:0 0 38px;background:#151518;padding:0 12px}
+.leap-layout .transport .timecode{font-size:12px;color:#b7b7bb;letter-spacing:.01em}
+.leap-layout .transport .timecode span{display:none}
+.leap-layout .transport #play{height:38px;width:48px;font-size:23px;color:#bbbcc0}
+.leap-layout .transport #pro-fullscreen{min-height:35px;min-width:36px;color:#bfc0c4}
+.leap-layout .transport #pro-fullscreen svg{width:23px;height:23px}
+.leap-layout .timeline-shell.cut-touch-enabled{height:175px;flex:0 0 175px;background:#202024}
+.leap-layout #cut-touch-workspace{background:#202024;height:100%}
+.leap-layout .cut-timeline-frame{height:175px;min-height:175px;background:#202024;border-top:1px solid #2e2e33;overflow:hidden}
+.leap-layout .cut-timeline-scroll{height:175px;max-height:175px;background:#202024}
+.leap-layout .cut-timeline-content{min-height:175px!important;background:#202024;padding-bottom:0}
+.leap-layout .cut-time-ruler{height:27px;background:#202024}
+.leap-layout .cut-tick{top:7px;height:13px;color:#929198;font-size:11px;border-left:0;padding-left:4px}
+.leap-layout .cut-tick:before{content:'·';position:absolute;left:-8px;top:0;color:#8e8e94}
+.leap-layout #cut-video-lane{margin-top:45px;height:58px;background:#202024}
+.leap-layout .cut-video-card{background-color:#343138;height:56px}
+.leap-layout .cut-timeline-pill{height:56px;top:1px}
+.leap-layout .cut-video-card.selected{border-color:#fff}
+.leap-layout .cut-center-playhead{background:#fa4351;top:27px;bottom:1px;width:2px}
+.leap-layout .cut-center-playhead i{display:none}
+.leap-layout .leap-add-media{top:99px;right:7px;width:44px;height:44px;font-size:32px;font-weight:300;background:#fb515e;border:0;box-shadow:none}
+.leap-layout .leap-editing-bar{height:35px;flex:0 0 35px;background:#202024;border:0;padding:0 10px}
+.leap-layout .leap-editing-bar>div{gap:6px}
+.leap-layout .leap-editing-bar button{width:38px;height:32px;color:#bcbcc0}
+.leap-layout .leap-editing-bar button svg{width:25px;height:25px}
+.leap-layout .leap-midtools,.leap-layout #leap-zoom{display:none!important}
+.leap-layout .bottomnav{flex:0 0 calc(69px + env(safe-area-inset-bottom));height:calc(69px + env(safe-area-inset-bottom));background:#202024}
+.leap-layout .leap-toolstrip{height:69px;padding:2px 0 3px;gap:0}
+.leap-layout .leap-tool,.leap-layout .leap-tool:first-child{flex:0 0 74px;min-width:74px;min-height:63px;gap:8px;padding:5px 0 3px;font-size:11px;color:#d1d1d6}
+.leap-layout .leap-tool svg{width:26px;height:26px;color:#a2a2a7}
+.leap-layout .leap-tool:active{color:#ff6c78}
+.leap-layout .leap-tool:active svg{color:#ff6c78}
+.leap-layout .leap-tool.has-badge{position:relative}
+.leap-layout .leap-tool.has-badge:after{content:'New';font:700 9px/1.4 system-ui;position:absolute;top:3px;right:10px;background:#fff;color:#161619;padding:1px 4px;border-radius:5px}
+.leap-layout #snackbar{bottom:calc(76px + env(safe-area-inset-bottom))}
+.leap-layout #pro-drawer,.leap-layout .tools-shell,.leap-extras,.leap-mini-sheet{bottom:calc(69px + env(safe-area-inset-bottom))}
+.pro-pip-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:10px 0}
+#pro-content .pro-pip-grid button{min-height:47px;padding:5px 2px;font-size:11px}
+.leap-layout .leap-magic-row{display:flex;flex-direction:column;gap:9px}
+.leap-layout .leap-magic-row button{border-radius:9px;text-align:left;background:#35353d;color:#f5f5f6;padding:13px 11px;border:1px solid #55545d;font-size:13px;display:flex;flex-direction:column;gap:5px}
+.leap-layout .leap-magic-row small{font-size:10px;color:#bbbbc0}
+.leap-layout .leap-mini-sheet .leap-magic-info{line-height:1.7;font-size:11px;padding:0 1px 12px;color:#bbbcc1}
+@media(max-height:760px){.leap-layout .timeline-shell.cut-touch-enabled{height:145px;flex-basis:145px}.leap-layout .cut-timeline-frame,.leap-layout .cut-timeline-scroll{height:145px;max-height:145px;min-height:145px}.leap-layout .cut-timeline-content{min-height:145px!important}.leap-layout #cut-video-lane{margin-top:23px}.leap-layout .leap-add-media{top:78px}}
+@media(min-width:600px){.leap-layout .leap-toolstrip{justify-content:flex-start}}
+/* The undo/redo row is a sibling of the filmstrip inside timeline-shell.
+   Reserve space for BOTH children; otherwise flex overflow hides Undo on phones. */
+.leap-layout .timeline-shell.cut-touch-enabled{height:210px;flex-basis:210px;overflow:hidden}
+.leap-layout #cut-touch-workspace{height:175px;flex:0 0 175px}
+.leap-layout .leap-editing-bar{height:35px;flex:0 0 35px;position:relative;z-index:3}
+@media(max-height:760px){.leap-layout .timeline-shell.cut-touch-enabled{height:180px;flex-basis:180px}.leap-layout #cut-touch-workspace{height:145px}}

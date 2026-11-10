@@ -5,6 +5,7 @@ import {clamp,timelineScroll,timelineTime,rulerStep,clipTrim,moveClip,applyOverl
 const el=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x;};
 const clock=t=>`${String(Math.floor(Math.max(0,t)/60)).padStart(2,'0')}:${String(Math.floor(Math.max(0,t)%60)).padStart(2,'0')}`;
 const number=(n)=>Number.isFinite(Number(n))?Number(n):0;
+export const tickLabel=(t)=>Math.abs(t-Math.floor(t)-.5)<.001?'15f':clock(t);
 
 export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,onSelectLayer,onSelectAudio,onSelectCaption,onOpenOverlay,getEditMode}){
  const {state,seek,save,draw,refreshAll}=api;
@@ -77,7 +78,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      const d=projectDuration(),scale=pps();content.style.width=Math.max(width,Math.ceil(2*pad+d*scale))+'px';
      content.style.setProperty('--cut-pad',pad+'px');
      const ruler=$('cut-time-ruler');ruler.replaceChildren();
-     const step=rulerStep(scale);for(let t=0;t<=d+.001;t+=step){const tick=el('span','cut-tick',clock(t));tick.style.left=(pad+t*scale)+'px';ruler.append(tick);}
+     const step=rulerStep(scale);for(let t=0;t<=d+.001;t+=step){const tick=el('span','cut-tick',tickLabel(t));tick.style.left=(pad+t*scale)+'px';ruler.append(tick);}
      const v=$('cut-video-lane');v.replaceChildren();
      for(const row of spans(state.project.clips)){
        const c=row.clip,a=state.assets.get(c.assetId);

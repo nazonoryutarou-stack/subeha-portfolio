@@ -5,6 +5,7 @@ assert.equal(timelineTime(108,36,100),3);
 assert.equal(timelineTime(1000,36,9),9);
 assert.equal(rulerStep(20),5);
 assert.equal(rulerStep(70),1);
+assert.equal(rulerStep(126),.5);
 const a={id:'a',start:2,end:12,speed:2};
 assert.equal(clipTrim(a,'left',40,20,30).start,6);
 assert.equal(clipTrim(a,'right',20,20,30).end,14);
