@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {parseOBJ,defaultCGScene,evaluateCG,updateSceneKey,OBJ_MAX_TRIANGLES} from '../obj-core.mjs';
+import {modelMatrix,multiply,identity,perspective} from '../obj-renderer.mjs';
+const cube=`# simple test\nv -1 -1 0\nv 1 -1 0\nv 1 1 0\nv -1 1 0\nf 1 2 3 4`;
+let geo=parseOBJ(cube);assert.equal(geo.triangleCount,2);assert.equal(geo.positions.length,18);assert.equal(geo.normals.length,18);
+const backward=parseOBJ('v 0 0 0\nv 1 0 0\nv 0 1 0\nf -3 -2 -1');assert.equal(backward.triangleCount,1);
+const supplied=parseOBJ('v 0 0 0\nv 1 0 0\nv 0 1 0\nvn 0 0 -1\nf 1//1 2//1 3//1');assert.equal(supplied.normals[2],-1);
+assert.throws(()=>parseOBJ('v 0 0 0'),/f/);
+assert.throws(()=>parseOBJ('v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3',{maxTriangles:0}),/三角形/);
+const s=defaultCGScene('obj-one','model',0,10,'3d');assert.equal(s.modelAssetId,'obj-one');
+const first=evaluateCG(s,0),mid=evaluateCG(s,5),end=evaluateCG(s,10);assert.equal(first.yaw,0);assert.equal(mid.yaw,180);assert.equal(end.yaw,360);
+updateSceneKey(s,0,{yaw:0,pitch:0,x:0,y:0,scale:1,camera:4.5,light:45});
+updateSceneKey(s,10,{yaw:90,pitch:0,x:2,y:1,scale:2,camera:5,light:30});
+assert.equal(s.keys.length,2);assert.equal(evaluateCG(s,5).yaw,45);assert.equal(evaluateCG(s,5).x,1);
+const a=Array.from(multiply(identity(),modelMatrix({yaw:0,pitch:0,x:2,y:1,scale:1}))),b=Array.from(modelMatrix({yaw:0,pitch:0,x:2,y:1,scale:1}));assert.ok(a.every((v,i)=>Math.abs(v-b[i])<1e-6));
+const projection=perspective(Math.PI/4,9/16);assert.ok(projection[0]>projection[5]);
+console.log('obj core tests OK');

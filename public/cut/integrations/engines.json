@@ -1,0 +1,12 @@
+{
+  "schema":"subeha.cut.engine-hub.v1",
+  "description":"Third-party repositories are analyzed as integration candidates, not copied or bundled. Active in-app code is independent.",
+  "engines":[
+    {"id":"subeha-web","name":"SUBEHA CUT Web","repository":"nazonoryutarou-stack/subeha-portfolio","license":"independent","runtime":"Android Chrome/PWA","status":"active","capabilities":["timeline","compositing","captions","audio","obj-webgl","recording"]},
+    {"id":"clearcut","name":"ClearCut","repository":"SysAdminDoc/ClearCut","url":"https://github.com/SysAdminDoc/ClearCut","license":"MIT","runtime":"native Android Kotlin + Media3","status":"candidate-not-bundled","capabilities":["native-timeline","media3-export","native-effects"]},
+    {"id":"actioncut","name":"ActionCut","repository":"naveenneog/ActionCut","url":"https://github.com/naveenneog/ActionCut","license":"not-found-at-audit","runtime":"native Android Kotlin + Media3","status":"reference-only","capabilities":["native-timeline","touch-ui"]},
+    {"id":"open-video-editor","name":"Open Video Editor","repository":"devhyper/open-video-editor","url":"https://github.com/devhyper/open-video-editor","license":"GPL-3.0","runtime":"native Android Kotlin + Media3","status":"reference-only-copyleft","capabilities":["native-timeline","media3-export"]},
+    {"id":"ltx-desktop","name":"LTX Desktop","repository":"Lightricks/LTX-Desktop","url":"https://github.com/Lightricks/LTX-Desktop","license":"Apache-2.0; model weights separately licensed","runtime":"desktop GPU / separate network API when configured","status":"external-optional-not-connected","capabilities":["ai-text-to-video","ai-image-to-video","ai-video-edit"]},
+    {"id":"videoleap-flow","name":"Videoleap Flow Rebuild","repository":"eddieatadapty/videoleap-flow-rebuild","url":"https://github.com/eddieatadapty/videoleap-flow-rebuild","license":"not-found-at-audit","runtime":"web prototype","status":"research-only","capabilities":["onboarding-reference"]}
+  ]
+}

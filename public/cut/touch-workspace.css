@@ -65,3 +65,6 @@
 .cut-video-card .cut-video-label{position:relative}
 .cut-video-card .cut-trim-handle{position:absolute}
 .cut-video-card:has(.cut-filmstrip) .cut-video-label{background:#16161699;padding:2px 4px;border-radius:3px;width:fit-content;max-width:95%}
+
+/* v1.3 OBJ CG appears on the overlay lane without adding an empty track. */
+.cut-cg-pill{height:24px;top:3px;background:#3d5e81;border:1px solid #8db6e5;color:#e2eeff}

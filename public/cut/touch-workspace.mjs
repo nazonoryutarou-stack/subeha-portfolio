@@ -110,6 +110,10 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      for(const l of state.project.overlays||[]){const x=pad+number(l.start)*scale,w=number(l.duration)*scale;
        addPill(overlay,{left:x,width:w,cls:'cut-overlay-pill',text:'▧ '+(state.assets.get(l.assetId)?.name||'レイヤー').slice(0,18),title:'前面レイヤーを編集',onclick:()=>onSelectLayer(l.id)}).dataset.layerId=l.id;
      }
+     for(const scene of state.project.cgScenes||[]){
+       const x=pad+number(scene.start)*scale,w=number(scene.duration)*scale;
+       addPill(overlay,{left:x,width:w,cls:'cut-cg-pill',text:'◇ '+(scene.name||'3D CG').slice(0,16),title:'3D CGシーンを編集',onclick:()=>{seek(scene.start);window.__subehaCGSelect?.(scene.id);}}).dataset.cgId=scene.id;
+     }
      const audio=$('cut-audio-lane');audio.replaceChildren();
      for(const a of state.project.audioTracks||[]){const x=pad+number(a.start)*scale,w=number(a.duration)*scale;
        addPill(audio,{left:x,width:w,cls:'cut-audio-pill',text:'♫ '+(state.assets.get(a.assetId)?.name||'音声').slice(0,17),title:'音声トラックを編集・移動',onclick:()=>onSelectAudio(a.id)}).dataset.audioId=a.id;
