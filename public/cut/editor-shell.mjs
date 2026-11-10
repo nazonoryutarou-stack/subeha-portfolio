@@ -90,11 +90,61 @@ function installShell(){
   make('オーディオ','audio',()=>openTool('audio')),
   make('フィルタ','filters',()=>openTool('look')),
   make('調整','adjust',()=>openTool('adjust')),
-  make('エフェクト','effect',()=>openTool('effects')),
+  make('エフェクト','effect',()=>openEffectsMenu()),
   make('キャンバス','canvas',()=>openTool('canvas')),
   make('字幕','captions',()=>openTool('captions')),
   make('テンプレ','template',()=>openTool('templates')),
   make('すべて','more',()=>openExtras()),
+ ];
+
+ const effectChoices=[
+  {label:'なし',effect:'none',icon:'back'},
+  {label:'シェイク',effect:'shake',icon:'effect'},
+  {label:'プリズム',effect:'prism',icon:'filters'},
+  {label:'オフセット',effect:'offset',icon:'transitions'},
+  {label:'古い映画',effect:'oldfilm',icon:'template'},
+  {label:'モザイク',effect:'mosaic',icon:'canvas'},
+  {label:'焦点ぼけ',effect:'focusblur',icon:'track'},
+  {label:'RGB',effect:'rgb',icon:'effect'},
+  {label:'パターン',effect:'pattern',icon:'adjust'},
+  {label:'スキャン',effect:'scan',icon:'filters'},
+  {label:'カレイド',effect:'kaleido',icon:'transitions'},
+  {label:'周辺減光',effect:'vignette',icon:'filters'},
+  {label:'フィルム粒子',effect:'grain',icon:'effect'},
+  {label:'光漏れ',effect:'lightleak',icon:'effect'}
+ ];
+ function openEffectsMenu(){
+  mini.hidden=true;sheet.hidden=true;
+  document.body.classList.remove('pro-open');
+  document.querySelector('.tools-shell')?.classList.remove('pro-visible');
+  modeState.mode='effects';toolstrip.dataset.mode='';renderToolbar();
+  if(!state.selectedClip)window.__subehaCut.toast('効果を適用するクリップを選んでください');
+ }
+ function showEffectIntensity(effect){
+  const clip=state.project.clips.find(c=>c.id===state.selectedClip);
+  if(!clip)return;
+  const label=effectChoices.find(e=>e.effect===effect)?.label||'エフェクト';
+  mini.innerHTML=`<header><button id="leap-effect-close" aria-label="閉じる">‹</button><strong>${label}</strong><button id="leap-effect-done" aria-label="完了">✓</button></header><div id="leap-effect-options"></div>`;
+  mini.hidden=false;
+  mini.querySelector('#leap-effect-close').onclick=mini.querySelector('#leap-effect-done').onclick=()=>{mini.hidden=true;};
+  if(effect==='none')return;
+  const body=mini.querySelector('#leap-effect-options');
+  const control=document.createElement('label');control.className='leap-mini-volume';control.textContent='効果の強さ';
+  const output=document.createElement('output');output.textContent=Math.round((clip.effectAmount??.5)*100)+'%';control.append(output);
+  const input=document.createElement('input');input.type='range';input.min='0';input.max='100';input.step='1';input.value=Math.round((clip.effectAmount??.5)*100);
+  input.setAttribute('aria-label','効果の強さ');
+  input.oninput=()=>{output.textContent=input.value+'%';apiUpdate(c=>c.effectAmount=Number(input.value)/100);};
+  control.append(input);body.append(control);
+ }
+ function chooseEffect(effect){
+  if(!state.selectedClip){window.__subehaCut.toast('先にタイムラインでクリップを選んでください');return;}
+  apiUpdate(c=>{c.effect=effect;c.effectAmount=c.effectAmount??.5;});
+  toolstrip.dataset.mode='';renderToolbar();
+  showEffectIntensity(effect);
+ }
+ const effectTools=()=>[
+  make('‹','back',()=>{mini.hidden=true;modeState.mode=state.selectedClip?'clip':'main';toolstrip.dataset.mode='';renderToolbar();}),
+  ...effectChoices.map(e=>make(e.label,e.icon,()=>chooseEffect(e.effect),e.effect))
  ];
  function openMagicEdit(){
   sheet.hidden=true;document.querySelector('.tools-shell')?.classList.remove('pro-visible');document.body.classList.remove('pro-open');
@@ -154,6 +204,7 @@ function installShell(){
   make('速度','speed',()=>openClipControl('speed')),
   make('音量','volume',()=>openClipControl('volume')),
   make('フィルター','filters',()=>openTool('look')),
+  make('エフェクト','effect',()=>openEffectsMenu()),
   make('調整','adjust',()=>openTool('adjust')),
   make('切り抜き','crop',()=>openTool('crop')),
   make('変形','canvas',()=>openTool('transform')),
@@ -171,12 +222,12 @@ function installShell(){
   make('すべて','more',()=>openExtras()),
  ];
  function renderToolbar(){
-  const arr=modeState.mode==='clip'&&state.selectedClip?clipTools():modeState.mode==='layer'?layerTools():general;
+  const arr=modeState.mode==='effects'?effectTools():modeState.mode==='clip'&&state.selectedClip?clipTools():modeState.mode==='layer'?layerTools():general;
   const current=toolstrip.dataset.mode;
-  const key=modeState.mode==='clip'&&state.selectedClip?'clip':modeState.mode==='layer'?'layer':'main';
+  const key=modeState.mode==='effects'?'effects':modeState.mode==='clip'&&state.selectedClip?'clip':modeState.mode==='layer'?'layer':'main';
   if(current===key && toolstrip.childElementCount===arr.length)return;
   toolstrip.dataset.mode=key;toolstrip.replaceChildren();
-  for(const item of arr){const b=document.createElement('button');b.type='button';b.className='leap-tool';b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.setAttribute('aria-label',item.label);if(item.label==='オーディオ')b.classList.add('has-badge');b.onclick=item.onClick;toolstrip.append(b);}
+  for(const item of arr){const b=document.createElement('button');b.type='button';b.className='leap-tool';b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.setAttribute('aria-label',item.label);if(modeState.mode==='effects'&&item.id&&state.project.clips.find(c=>c.id===state.selectedClip)?.effect===item.id)b.classList.add('selected');if(item.label==='オーディオ')b.classList.add('has-badge');b.onclick=item.onClick;toolstrip.append(b);}
   toolstrip.scrollLeft=0;
  }
  function refreshMode(){
