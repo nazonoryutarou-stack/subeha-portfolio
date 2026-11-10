@@ -34,3 +34,8 @@ python test/smoke-export.py
 Webブラウザの`MediaRecorder`書き出しでは、MP4コンテナでもH.264/AACになる保証がありません。大規模プロジェクトのフレームストリップ生成は処理負荷がかかる場合があります。AI背景認識、ネイティブの高精度4K/HEVCレンダリング等は未実装。Nothing Phone実機での長尺編集・書き出しは未検証です。
 
 https://nazonoryutarou-stack.github.io/subeha-portfolio/cut/
+
+
+## v1.3 — device-observed effects toolbar
+
+The Videoleap 1.40.1 Android UI was inspected from a user-captured screen/XML audit (1260×2800). The captured `home` view was an import overlay, not the app home screen; no home layout is claimed. The editor screenshot confirms a top action bar, content-dominant preview, centered playhead, horizontal filmstrip and bottom effect toolbar. `effects.xml` was captured after the screenshot UI changed, so categories are treated as observed labels, not a verified complete ordering. A new local, independently implemented effects submenu exposes Shake, Prism, Offset, Old Film, Mosaic, Focus Blur, RGB, Pattern, Scan and Kaleido. Effects actually render in the existing Canvas export path and have an intensity slider. No assets or code were extracted from Videoleap. Browser-only app; iOS UI is not claimed to be faithfully reproduced. The original `effects.mjs` effects remain available. Service Worker cache upgraded to v13.
