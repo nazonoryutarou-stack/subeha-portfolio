@@ -227,7 +227,7 @@ function installShell(){
   const key=modeState.mode==='effects'?'effects':modeState.mode==='clip'&&state.selectedClip?'clip':modeState.mode==='layer'?'layer':'main';
   if(current===key && toolstrip.childElementCount===arr.length)return;
   toolstrip.dataset.mode=key;toolstrip.replaceChildren();
-  for(const item of arr){const b=document.createElement('button');b.type='button';b.className='leap-tool';b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.setAttribute('aria-label',item.label);if(modeState.mode==='effects'&&item.id&&state.project.clips.find(c=>c.id===state.selectedClip)?.effect===item.id)b.classList.add('selected');if(item.label==='オーディオ')b.classList.add('has-badge');b.onclick=item.onClick;toolstrip.append(b);}
+  for(const item of arr){const b=document.createElement('button');b.type='button';b.className='leap-tool';if(modeState.mode==='effects')b.classList.add('leap-effect-choice');b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.setAttribute('aria-label',item.label);if(modeState.mode==='effects'&&item.id&&state.project.clips.find(c=>c.id===state.selectedClip)?.effect===item.id)b.classList.add('selected');if(item.label==='オーディオ')b.classList.add('has-badge');b.onclick=item.onClick;toolstrip.append(b);}
   toolstrip.scrollLeft=0;
  }
  function refreshMode(){
