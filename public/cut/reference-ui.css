@@ -66,3 +66,15 @@
 .pro-motion-presets strong{display:block;margin-bottom:8px;font-size:11px;color:#eee}
 .pro-motion-options{display:flex;gap:6px;overflow-x:auto;padding-bottom:7px;scrollbar-width:thin}
 #pro-content .pro-motion-options button{flex:0 0 auto;min-width:82px;padding:9px 8px;background:#383942}
+
+
+/* Videoleap 1.40.1 device audit: measured horizontal effects strip.
+   Keep the original SUBEHA icons and local rendering pipeline. */
+.leap-layout .leap-toolstrip:has(.leap-effect-choice){scroll-snap-type:x proximity}
+.leap-layout .leap-tool.selected{color:#ff626d;background:#313137}
+.leap-layout .leap-tool.selected svg{color:#ff626d}
+.leap-layout .leap-tool.selected span{font-weight:700}
+@media(max-width:440px){
+ .leap-layout .leap-toolstrip{overscroll-behavior-x:contain}
+ .leap-layout .leap-tool{scroll-snap-align:start}
+}
