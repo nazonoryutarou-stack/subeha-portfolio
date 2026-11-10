@@ -44,8 +44,8 @@ export function applyEffect(ctx,canvas,fx,amount=0.5,time=0){
    const band=Math.round(h*.22);
    const shift=Math.round(w*(.06+.23*a)*Math.sin(time*7));
    const sx=((shift%w)+w)%w;
-   ctx.drawImage(snap,w-sx,top,sx,band,0,top,sx,band);
-   ctx.drawImage(snap,0,top,w-sx,band,sx,top,w-sx,band);
+   if(sx>0)ctx.drawImage(snap,w-sx,top,sx,band,0,top,sx,band);
+   if(sx<w)ctx.drawImage(snap,0,top,w-sx,band,sx,top,w-sx,band);
  }else if(fx==='oldfilm'){
    ctx.fillStyle=`rgba(174,124,70,${(a*.28).toFixed(3)})`;ctx.fillRect(0,0,w,h);
    const v=ctx.createRadialGradient(w/2,h/2,w*.16,w/2,h/2,h*.7);
