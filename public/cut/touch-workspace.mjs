@@ -1,5 +1,6 @@
 /* SUBEHA CUT v0.9: touch-first editing layer, independent of proprietary editor UI. */
 import {spans,totalDuration} from './transitions.mjs';
+import {createFilmstripCache} from './filmstrip-cache.mjs';
 import {clamp,timelineScroll,timelineTime,rulerStep,clipTrim,moveClip,applyOverlayTransform} from './touch-edit.mjs';
 
 const el=(tag,cls,text)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(text!==undefined)x.textContent=text;return x;};
@@ -9,6 +10,7 @@ export const tickLabel=(t)=>Math.abs(t-Math.floor(t)-.5)<.001?'15f':clock(t);
 
 export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,onSelectLayer,onSelectAudio,onSelectCaption,onOpenOverlay,getEditMode}){
  const {state,seek,save,draw,refreshAll}=api;
+ const filmstrips=createFilmstripCache();
  const $=id=>document.getElementById(id);
  const host=document.querySelector('.timeline-shell');
  const controls=el('section','cut-touch-workspace');controls.id='cut-touch-workspace';
@@ -86,6 +88,14 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
        const card=addPill(v,{left:x,width:w,cls:'cut-video-card'+(state.selectedClip===c.id?' selected':''),text:'',title:c.name,onclick:()=>selectClip(c.id)});
        card.dataset.clipId=c.id;
        if(a?.thumb){card.style.backgroundImage=`linear-gradient(0deg,#090a12ba,#0001 80%), url(${JSON.stringify(a.thumb)})`;card.style.backgroundSize='cover';card.style.backgroundPosition='center';}
+       if(a?.type==='video' && w>=35){
+         const strip=el('div','cut-filmstrip');card.prepend(strip);
+         filmstrips.request(a,c,w,frames=>{
+           if(!card.isConnected)return;
+           strip.replaceChildren();
+           for(const source of frames){const tile=el('span','cut-filmstrip-tile');tile.style.backgroundImage='url('+JSON.stringify(source)+')';strip.append(tile);}
+         });
+       }
        const label=el('span','cut-video-label',c.name);card.append(label);
        const length=el('span','cut-video-time',row.length.toFixed(1)+'s');card.append(length);
        if(state.selectedClip===c.id){

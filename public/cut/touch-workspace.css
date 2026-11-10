@@ -55,3 +55,13 @@
 
 .cut-audio-pill,.cut-overlay-pill{touch-action:none}
 @media(max-width:650px){.preview-stage{height:clamp(200px,35dvh,370px)}}
+
+/* v1.2 - real per-time video filmstrip thumbnails. */
+.cut-video-card{position:absolute;isolation:isolate}
+.cut-filmstrip{position:absolute;inset:0;display:flex;overflow:hidden;z-index:0;pointer-events:none}
+.cut-filmstrip-tile{display:block;flex:1 1 0;min-width:0;height:100%;background-position:center;background-size:cover;border-right:1px solid #24242a55}
+.cut-video-card .cut-video-label,.cut-video-card .cut-video-time,.cut-video-card .cut-trim-handle{z-index:2;position:relative}
+.cut-video-card .cut-video-time{position:absolute}
+.cut-video-card .cut-video-label{position:relative}
+.cut-video-card .cut-trim-handle{position:absolute}
+.cut-video-card:has(.cut-filmstrip) .cut-video-label{background:#16161699;padding:2px 4px;border-radius:3px;width:fit-content;max-width:95%}

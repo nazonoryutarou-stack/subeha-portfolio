@@ -4,7 +4,6 @@ const $=id=>document.getElementById(id);
 const ICONS={
  home:'<path d="M3 11 12 3l9 8v9h-6v-6H9v6H3z"/>',
  magic:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="m4 7-1-4 4-1 2 5M12 7l-1-5 4-1 1 6M5 11h14M16 14l1.2 2.8L20 18l-2.8 1.1L16 22l-1.2-2.9L12 18l2.8-1.2z"/>' ,
- pip:'<rect x="2.5" y="3" width="19" height="18" rx="2"/><rect x="11" y="10" width="8" height="7" rx="1"/>',
  help:'<circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 5"/><path d="M12 18h.01"/>',
  undo:'<path d="M9 7 4 12l5 5"/><path d="M5 12h9a6 6 0 0 1 6 6"/>',
  redo:'<path d="m15 7 5 5-5 5"/><path d="M19 12h-9a6 6 0 0 0-6 6"/>',
@@ -93,7 +92,6 @@ function installShell(){
   make('調整','adjust',()=>openTool('adjust')),
   make('エフェクト','effect',()=>openTool('effects')),
   make('キャンバス','canvas',()=>openTool('canvas')),
-  make('小窓','pip',()=>openTool('pip')),
   make('字幕','captions',()=>openTool('captions')),
   make('テンプレ','template',()=>openTool('templates')),
   make('すべて','more',()=>openExtras()),
@@ -115,8 +113,7 @@ function installShell(){
   mini.hidden=true;const options=[
    make('マジック編集','magic',()=>openMagicEdit()),
    make('キャンバス','canvas',()=>openTool('canvas')),
-   make('小窓','pip',()=>openTool('pip')),
-   make('クロマキー','filters',()=>openTool('chroma')),
+    make('クロマキー','filters',()=>openTool('chroma')),
    make('背景切抜','brush',()=>openTool('videoRetouch')),
    make('画像修復','brush',()=>openTool('retouch')),
    make('追跡','track',()=>openTool('tracking')),
