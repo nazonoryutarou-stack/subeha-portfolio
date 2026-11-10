@@ -2,7 +2,7 @@
 export const clamp = (value,low,high)=>Math.max(low,Math.min(high,Number(value)||0));
 export const timelineScroll = (seconds,pixelsPerSecond)=>Math.max(0,Number(seconds)||0)*pixelsPerSecond;
 export const timelineTime = (scrollLeft,pixelsPerSecond,total)=>clamp(scrollLeft/Math.max(1,pixelsPerSecond),0,total);
-export function rulerStep(pps){return [1,2,5,10,15,30,60,120,300].find(step=>step*pps>=54)||300;}
+export function rulerStep(pps){return pps>=100?.5:([1,2,5,10,15,30,60,120,300].find(step=>step*pps>=54)||300);}
 export function clipTrim(clip,edge,deltaPx,pps,assetSeconds=Infinity,{minimum=.12}={}){
   const rate=Math.max(.01,Number(clip.speed)||1);
   const delta=deltaPx/Math.max(1,pps)*rate;

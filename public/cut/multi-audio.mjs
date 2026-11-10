@@ -1,3 +1,4 @@
+import {trackDuckingFactor} from './audio-ducking.mjs';
 /* Multiple independently placed and mixed audio clips, using the app's shared capture mixer. */
 import {bound} from './compositor.mjs';
 import {installTrackEQ} from './audio-eq.mjs';
@@ -23,7 +24,7 @@ export function createMultiAudioEngine({state,getGraph}){
         const el=new Audio(asset.url);el.preload='auto';el.playsInline=true;
         player={el,gain:null,eq:null,connected:false};players.set(track.id,player);
       }
-      const gainValue=audioClipGain(track,state.current);
+      const gainValue=audioClipGain(track,state.current)*trackDuckingFactor(track,state.current,tracks,state.project.audioDucking);
       const active=state.playing&&gainValue>0;
       if(active&&!player.connected){
         try{

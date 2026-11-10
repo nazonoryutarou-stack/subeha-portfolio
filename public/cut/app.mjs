@@ -357,6 +357,6 @@ function applyHistory(snapshot){state.playing=false;media.pause();bgm.pause();tr
 function undo(){if(!history.undo.length)return toast('戻す操作がありません');history.redo.push(history.current);history.current=history.undo.pop();applyHistory(history.current);}
 function redo(){if(!history.redo.length)return toast('やり直す操作がありません');history.undo.push(history.current);history.current=history.redo.pop();applyHistory(history.current);}
 window.__subehaSaveAsset=async(id,file,type,name)=>idbPut('files',id,{blob:file,type,name});
-window.__subehaCut={state,canvas,ctx,buildAsset,seek,save,refreshAll,refreshTimeline,draw,selectedClip,updateClip,setPanel,renderHooks,sourceFrameHooks,toast,newID,assetOf,undo,redo,duration,locate,spans,renderBaseClip,getAudioGraph:()=>{audioReady();return {audioCtx,mixer};},loadProjectSnapshot};
+window.__subehaCut={state,canvas,ctx,buildAsset,seek,save,refreshAll,refreshTimeline,draw,selectedClip,updateClip,setPanel,renderHooks,sourceFrameHooks,toast,newID,assetOf,undo,redo,duration,locate,spans,renderBaseClip,getAudioGraph:()=>{audioReady();return {audioCtx,mixer};},loadProjectSnapshot,setRatio};
 async function init(){bind();setRatio('9:16');setPanel('clips');try{if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))await navigator.serviceWorker.register('./sw.js');}catch(e){console.warn('Service worker',e);}await restore();window.dispatchEvent(new Event('subeha-cut-ready'));requestAnimationFrame(animationLoop);}
 init().catch(fail);

@@ -1,7 +1,10 @@
+import {MAGIC_MODES,magicEdit} from './magic-edit.mjs';
 /* SUBEHA CUT 1.0 — compact, content-first editor shell. Uses existing editor actions, no copied assets. */
 const $=id=>document.getElementById(id);
 const ICONS={
  home:'<path d="M3 11 12 3l9 8v9h-6v-6H9v6H3z"/>',
+ magic:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="m4 7-1-4 4-1 2 5M12 7l-1-5 4-1 1 6M5 11h14M16 14l1.2 2.8L20 18l-2.8 1.1L16 22l-1.2-2.9L12 18l2.8-1.2z"/>' ,
+ pip:'<rect x="2.5" y="3" width="19" height="18" rx="2"/><rect x="11" y="10" width="8" height="7" rx="1"/>',
  help:'<circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 5"/><path d="M12 18h.01"/>',
  undo:'<path d="M9 7 4 12l5 5"/><path d="M5 12h9a6 6 0 0 1 6 6"/>',
  redo:'<path d="m15 7 5 5-5 5"/><path d="M19 12h-9a6 6 0 0 0-6 6"/>',
@@ -82,19 +85,37 @@ function installShell(){
  }}
  const make=(label,icon,onClick,id='')=>({label,icon,onClick,id});
  const general=[
-  make('キャンバス','canvas',()=>openTool('canvas')),
-  make('重ねる','overlay',()=>openTool('overlay')),
+  make('マジック編集','magic',()=>openMagicEdit()),
+  make('オーバーレイ','overlay',()=>openTool('overlay')),
   make('テキスト','text',()=>openTool('text')),
-  make('字幕','captions',()=>openTool('captions')),
-  make('音声','audio',()=>openTool('audio')),
-  make('フィルター','filters',()=>openTool('look')),
+  make('オーディオ','audio',()=>openTool('audio')),
+  make('フィルタ','filters',()=>openTool('look')),
+  make('調整','adjust',()=>openTool('adjust')),
   make('エフェクト','effect',()=>openTool('effects')),
+  make('キャンバス','canvas',()=>openTool('canvas')),
+  make('小窓','pip',()=>openTool('pip')),
+  make('字幕','captions',()=>openTool('captions')),
   make('テンプレ','template',()=>openTool('templates')),
   make('すべて','more',()=>openExtras()),
  ];
+ function openMagicEdit(){
+  sheet.hidden=true;document.querySelector('.tools-shell')?.classList.remove('pro-visible');document.body.classList.remove('pro-open');
+  mini.innerHTML='<header><button id="leap-magic-close" aria-label="閉じる">‹</button><strong>マジック編集</strong><span>✦</span></header><div class="leap-magic-info">映像にまとめて色彩・効果・場面転換を設定します。動画を生成するAIではありません。元の素材や音声は保持されます。</div><div id="leap-magic-row" class="leap-magic-row"></div>';
+  mini.hidden=false;mini.querySelector('#leap-magic-close').onclick=()=>mini.hidden=true;
+  const desc={film:'柔らかなディゾルブ、映画風の色調と周辺減光',rhythm:'短いワイプ、鮮やかな色と軽い色収差',memory:'ゆったりしたフェード、古いフィルムの質感'};
+  for(const [key,mode] of Object.entries(MAGIC_MODES)){
+    const b=document.createElement('button');b.innerHTML='<strong>'+mode.label+'</strong><small>'+desc[key]+'</small>';
+    b.onclick=()=>{if(!state.project.clips.length){window.__subehaCut.toast('先に素材を読み込んでください');return;}
+      const edited=magicEdit(state.project,key);state.project.clips=edited.clips;window.__subehaCut.save();window.__subehaCut.refreshAll();mini.hidden=true;window.__subehaCut.toast(mode.label+'の編集を適用しました。あとから個別変更・元に戻すことができます。');
+    };mini.querySelector('#leap-magic-row').append(b);
+  }
+ }
+
  function openExtras(){
   mini.hidden=true;const options=[
+   make('マジック編集','magic',()=>openMagicEdit()),
    make('キャンバス','canvas',()=>openTool('canvas')),
+   make('小窓','pip',()=>openTool('pip')),
    make('クロマキー','filters',()=>openTool('chroma')),
    make('背景切抜','brush',()=>openTool('videoRetouch')),
    make('画像修復','brush',()=>openTool('retouch')),
@@ -158,7 +179,7 @@ function installShell(){
   const key=modeState.mode==='clip'&&state.selectedClip?'clip':modeState.mode==='layer'?'layer':'main';
   if(current===key && toolstrip.childElementCount===arr.length)return;
   toolstrip.dataset.mode=key;toolstrip.replaceChildren();
-  for(const item of arr){const b=document.createElement('button');b.type='button';b.className='leap-tool';b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.setAttribute('aria-label',item.label);b.onclick=item.onClick;toolstrip.append(b);}
+  for(const item of arr){const b=document.createElement('button');b.type='button';b.className='leap-tool';b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.setAttribute('aria-label',item.label);if(item.label==='オーディオ')b.classList.add('has-badge');b.onclick=item.onClick;toolstrip.append(b);}
   toolstrip.scrollLeft=0;
  }
  function refreshMode(){
