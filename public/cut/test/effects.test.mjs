@@ -10,3 +10,7 @@ assert.ok(EFFECT_NAMES.includes('prism'));
 applyEffect(context,canvas,'none',.5);
 assert.equal(context.saved,0);
 console.log('effect gradient drawing: PASS');
+
+// Videoleap 1.40.1 reference screen effects (independent implementations).
+for(const name of ['shake','prism','offset','oldfilm','mosaic','focusblur','rgb','pattern','scan','kaleido']) assert.ok(EFFECT_NAMES.includes(name), name+' is available');
+console.log('device-audit effect categories: PASS');
