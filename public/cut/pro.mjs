@@ -28,7 +28,7 @@ const waveformCache=new Map(),waveformPending=new Set();
 const audioEngine=createMultiAudioEngine({state,getGraph:api.getAudioGraph});
 const trackCanvas=document.createElement('canvas');trackCanvas.width=180;trackCanvas.height=320;
 const trackCtx=trackCanvas.getContext('2d',{willReadFrequently:true});
-let zoom = 15;
+let zoom = 42;
 let syncing = false;
 let touchWorkspace=null;
 const playbackVideos = new Map();
