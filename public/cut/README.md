@@ -1,42 +1,42 @@
-# SUBEHA CUT Pro v0.9 — touch-first mobile video editor
+# SUBEHA CUT v1.0 — video-first mobile editing UI
 
-Android Chrome向け独立開発のローカル編集PWA。Videoleapの一般的な編集ワークフローを参考に、オリジナルUI/実装でタッチ操作を改善。Videoleap/Lightricksとは無関係で、商標、意匠、専用素材、ソースコードをコピーしません。
+An original offline-first Android Chrome PWA for personal video editing. Not affiliated with Videoleap / Lightricks. The workflow follows common touch video editors; it does not reuse proprietary branding, templates, design assets, or app source code.
 
-## v0.9のタッチ編集UI
+## New in v1.0
 
-- **中央固定の赤い再生ヘッド**：時間軸を左右にスワイプしてシーク。時間目盛りをタップして指定時間へ移動。
-- **1画面の複数トラック**：ベース映像、動画・画像オーバーレイ、音声、テキスト/字幕を共通の時間スケールで表示。
-- **ピンチズーム**：タイムラインを2本指で拡大・縮小。＋/−ボタンも利用可能。再生位置を維持。
-- **直接トリミング**：選択クリップ両端の白ハンドルをドラッグしてIN/OUTを変更。順再生、逆再生、再生速度、画像クリップの長時間化に対応。
-- **長押し並べ替え**：クリップを長押しし、別の位置へ移動。変更された隣接関係のトランジションは安全のため解除。
-- **音声・レイヤートラック移動**：各トラックの素材をドラッグしてタイムライン開始位置を変更。
-- **プレビュー直接操作**：レイヤー編集パネルが開いているとき、選択した画像・動画を指で移動。2本指で拡大/縮小/回転。中心スナップと選択枠を表示。
-- **文字の直接移動**：文字編集パネルでテキストをドラッグ、ピンチでサイズ変更。
-- **クイック編集**：選択クリップに応じて「分割」「複製」「前面レイヤー追加」「ミュート」「削除」を表示。既存の詳細編集ツールは下部メニューに維持。
-- **キーボード編集**：Space再生/停止、左右矢印1フレーム、Shift+左右矢印0.5秒、Ctrl+Z/Shift+Ctrl+Z、Delete。
-- **非破壊・既存プロジェクト互換**：プロジェクトモデルおよび素材管理の仕様は変更なし。`.subecut`アーカイブも継続利用可能。
+The v0.9 workspace made the preview small by exposing every empty track, large quick actions, permanent editing labels, and a 17-item toolbar. v1.0 consolidates these into a compact, content-first editing screen:
 
-## 操作
+- Simple header with project/home, help and export controls, centered SUBEHA CUT title.
+- Flexible preview, compact playback row and fullscreen control.
+- Centered red playhead above the real main-clip thumbnail strip, with more legible timeline zoom (42px/s), white trim handles and a floating add-media button.
+- Empty overlay, audio, and caption tracks are hidden; each appears once content is added.
+- Contextual bottom tools: canvas/overlay/text/captions/audio/filters/effects/templates in standard mode; split/speed/volume/filters/adjust/crop/transform/transition/duplicate/delete on clip selection.
+- Speed and volume sheets act directly on the selected clip. Advanced legacy tools remain available via the “すべて” menu.
+- Reuses existing project save, local media, compositing, subtitles, audio, and export pipelines. Service worker bumped to `subeha-cut-app-v10`.
 
-1. https://nazonoryutarou-stack.github.io/subeha-portfolio/cut/ をChromeで開き、必要なら「ホーム画面に追加」。
-2. ＋素材から動画・写真を追加。タイムラインを横に動かし、中央の赤い再生ヘッドを目的の位置に合わせる。
-3. クリップをタップして選択し、白い左右のハンドルでトリム。長押しして移動。クイックメニューで分割・複製・ミュート・削除。
-4. 「重ねる」でレイヤーを追加。レイヤー編集画面を開いたままプレビュー上でドラッグ・ピンチして位置・大きさ・角度を編集。
-5. 字幕、音声、色補正、効果、動画修復、プロジェクトバックアップは従来の下部ツールバーで使用。書き出しは「保存」/「出力」から行う。
+## Operations
 
-## 検証
+1. Open `https://nazonoryutarou-stack.github.io/subeha-portfolio/cut/` from Android Chrome and import images/videos using the center button or the circular `＋` on the timeline.
+2. Drag the timeline under the stationary red playhead to seek. Pinch to zoom, tap a clip to select it, drag its white trim handles, long-press to reorder it.
+3. Once selected, use the contextual toolbar to split or change speed/volume or open advanced filters and transforms. Use the first back control to switch to general editing tools.
+4. Tap `書き出す` to open the existing browser-dependent export panel; select an export preset and save. For portability, save `.subecut` from “すべて → 保存/復元”.
 
-- `for f in *.mjs; do node --check "$f" || exit 1; done`
-- `node --test test/*.test.mjs`：17系統のテストが成功。
-- Chromium幅390pxでJSをインライン化したブラウザテスト：静止画複数読込、ズーム、右端ドラッグで5秒→約3.47秒、複製、画像レイヤー追加、キャンバス移動、長押し並べ替え。JavaScriptエラー無し。
-- 通常のローカルHTTP遷移は開発ブラウザのポリシーでブロックされたため、インラインモジュール方式でUIテスト。これは実機テストと同等ではない。
+## Validation
 
-## 限界
+- JavaScript syntax checks: all `.mjs` passed.
+- Node.js test suite: **17/17 test files passed**.
+- Chromium 390×844 simulated mobile viewport: new layout initialized, one image imported, clip selection opened contextual tools, speed changed to 2× (5s → 2.5s), volume set to 70%, filter and template panels opened, no uncaught JavaScript errors.
+- Chromium in this environment blocks local URL navigation; the browser smoke test used inline CSS and data-URL ES modules to load **the actual source files**, not a mocked UI.
+- **Android hardware and lengthy-video export have not been verified for v1.0.** The old video engine's MediaRecorder codec and performance constraints remain.
 
-- Videoleapとの**完全な機能互換、ピクセル単位の画面一致はありません**。タッチ操作を近づけるための独立実装。
-- 実機Nothing Phoneの熱・メモリ・長尺・多レイヤーや、Android ChromeのMediaRecorderコーデックについては未検証。書き出しが必ずH.264/AACや4Kになる保証はありません。
-- タイムラインのクリップ長・再生速度が異なると、指操作の精度はズーム倍率や端末画面に依存。映像トラッキングとAI人物切り抜きはVideoleapの高度なAI処理と同等ではありません。
-- 人物認識による背景除去、生成AIによる不要物消去、プロ品質GPUエンコード・ネイティブAPKは未実装。静止画/動画の既存の色ベース修復は引き続き利用可能。
-- ローカルのIndexedDBに素材を保存。ブラウザの容量制限・キャッシュ削除でデータが失われる可能性があるため、`.subecut`保存推奨。素材をGitHubへアップロードしない。
+## Remaining limitations
 
-**公開URL**：https://nazonoryutarou-stack.github.io/subeha-portfolio/cut/
+This is a close *interaction pattern*, not a claim of pixel-perfect Videoleap equivalence or identical AI features. Some typography/icons/advanced tools differ. Android Chrome/PWA limitations remain: browser-driven encoding, potential 4K and memory constraints, and real-time capture/export. Nothing Phone touch, decoder, codec, and thermal tests still need device verification.
+
+## Development
+
+```sh
+cd public/cut
+for file in *.mjs; do node --check "$file" || exit 1; done
+node --test test/*.test.mjs
+```
