@@ -1,4 +1,4 @@
-const CACHE = 'subeha-cut-app-v12';
+const CACHE = 'subeha-cut-app-v13';
 const RESOURCES = ['./','./index.html','./app.mjs','./timeline.mjs','./style.css','./pro.css','./pro.mjs','./compositor.mjs','./point-tracker.mjs','./multi-audio.mjs','./subtitles.mjs','./project-archive.mjs','./waveform.mjs','./export-timing.mjs','./transitions.mjs','./keyframes.mjs','./effects.mjs','./audio-eq.mjs','./export-settings.mjs','./text-styles.mjs','./image-retouch.mjs','./edit-templates.mjs','./retouch-studio.mjs','./video-retouch.mjs','./video-retouch-studio.mjs','./touch-edit.mjs','./touch-workspace.mjs','./touch-workspace.css','./editor-shell.css','./editor-shell.mjs','./reference-ui.css','./magic-edit.mjs','./pip-style.mjs','./frame-strip.mjs','./filmstrip-cache.mjs','./overlay-motion.mjs','./audio-ducking.mjs','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(RESOURCES)).then(()=>self.skipWaiting()));
