@@ -13,7 +13,7 @@ const transMedia=document.createElement('video');transMedia.playsInline=true;tra
 let outgoingClip=null,mainVolume=null,outgoingVolume=null;
 const picker=$('file-picker'),musicPicker=$('music-picker');
 const filters={none:{label:'ORIGINAL',style:'none'},mono:{label:'MONO',style:'grayscale(1) contrast(1.12)'},cinema:{label:'CINEMA',style:'contrast(1.15) saturate(.88) sepia(.15)'},vintage:{label:'VINTAGE',style:'sepia(.68) saturate(.7) contrast(1.06)'},dream:{label:'DREAM',style:'blur(1.2px) saturate(1.65) contrast(1.10)'},cold:{label:'COLD',style:'hue-rotate(160deg) saturate(.7) contrast(1.12)'},punch:{label:'PUNCH',style:'contrast(1.32) saturate(1.5)'},glitch:{label:'GLITCH',style:'contrast(1.2) saturate(1.6)'}};
-const state={project:{name:'UNTITLED 01',ratio:'9:16',fit:'cover',backgroundColor:'#07080b',blurBackground:false,clips:[],texts:[],music:null,audioTracks:[],exportSettings:{preset:'standard'}},assets:new Map(),selectedClip:null,selectedText:null,activeClip:null,current:0,playing:false,recording:false,panel:'clips',lastFrame:0,switching:false,pendingSave:null,recorder:null,wakeLock:null};
+const state={project:{name:'UNTITLED 01',ratio:'9:16',fit:'cover',backgroundColor:'#07080b',blurBackground:false,clips:[],texts:[],music:null,audioTracks:[],cgScenes:[],exportSettings:{preset:'standard'}},assets:new Map(),selectedClip:null,selectedText:null,activeClip:null,current:0,playing:false,recording:false,panel:'clips',lastFrame:0,switching:false,pendingSave:null,recorder:null,wakeLock:null};
 let db=null, audioCtx=null, mixer=null, videoNode=null, musicNode=null, toastTimer=null, drawPending=false, renderToken=0, raf=0;
 const renderHooks=[];
 const sourceFrameHooks=[];
@@ -55,7 +55,7 @@ async function buildAsset(id,blob,type,name,quiet=false){
    const meta=await audioProbe(url);asset.duration=meta.duration;
  }
  state.assets.set(id,asset);
- if(type!=='audio')makeThumb(asset).then(v=>{asset.thumb=v;refreshTimeline();});
+ if(type==='video'||type==='image')makeThumb(asset).then(v=>{asset.thumb=v;refreshTimeline();});
  return asset;
 }
 async function importFiles(files,music=false){
@@ -84,10 +84,10 @@ async function restore(){
  try{
    db=await openDB(); const project=await idbGet('projects','current');
    if(project?.clips && Array.isArray(project.clips)){
-     state.project={name:project.name||'UNTITLED 01',ratio:RATIOS[project.ratio]?project.ratio:'9:16',fit:project.fit==='contain'?'contain':'cover',backgroundColor:project.backgroundColor||'#07080b',blurBackground:!!project.blurBackground,clips:[],texts:Array.isArray(project.texts)?project.texts:[],overlays:Array.isArray(project.overlays)?project.overlays:[],music:project.music||null,audioTracks:Array.isArray(project.audioTracks)?project.audioTracks:[],captions:Array.isArray(project.captions)?project.captions:[],captionStyle:project.captionStyle||null,captionEnabled:project.captionEnabled!==false,exportSettings:{preset:normalizeExportSettings(project.exportSettings).preset,format:normalizeExportSettings(project.exportSettings).format}};
-     const ids=new Set([...project.clips.map(c=>c.assetId),...(project.music?[project.music.assetId]:[]),...(project.overlays||[]).map(o=>o.assetId),...(project.audioTracks||[]).map(o=>o.assetId)]);
+     state.project={name:project.name||'UNTITLED 01',ratio:RATIOS[project.ratio]?project.ratio:'9:16',fit:project.fit==='contain'?'contain':'cover',backgroundColor:project.backgroundColor||'#07080b',blurBackground:!!project.blurBackground,clips:[],texts:Array.isArray(project.texts)?project.texts:[],overlays:Array.isArray(project.overlays)?project.overlays:[],music:project.music||null,audioTracks:Array.isArray(project.audioTracks)?project.audioTracks:[],cgScenes:Array.isArray(project.cgScenes)?project.cgScenes:[],captions:Array.isArray(project.captions)?project.captions:[],captionStyle:project.captionStyle||null,captionEnabled:project.captionEnabled!==false,exportSettings:{preset:normalizeExportSettings(project.exportSettings).preset,format:normalizeExportSettings(project.exportSettings).format}};
+     const ids=new Set([...project.clips.map(c=>c.assetId),...(project.music?[project.music.assetId]:[]),...(project.overlays||[]).map(o=>o.assetId),...(project.audioTracks||[]).map(o=>o.assetId),...(project.cgScenes||[]).map(o=>o.modelAssetId)]);
      for(const id of ids){try{const item=await idbGet('files',id);if(item?.blob)await buildAsset(id,item.blob,item.type,item.name);}catch(e){console.warn('restore file',id,e);}}
-     state.project.clips=project.clips.filter(c=>state.assets.has(c.assetId));state.project.overlays=state.project.overlays.filter(o=>state.assets.has(o.assetId));state.project.audioTracks=state.project.audioTracks.filter(o=>state.assets.has(o.assetId));
+     state.project.clips=project.clips.filter(c=>state.assets.has(c.assetId));state.project.overlays=state.project.overlays.filter(o=>state.assets.has(o.assetId));state.project.audioTracks=state.project.audioTracks.filter(o=>state.assets.has(o.assetId));state.project.cgScenes=state.project.cgScenes.filter(o=>state.assets.has(o.modelAssetId));
      if(project.music&&!state.assets.has(project.music.assetId))state.project.music=null;
      if(state.project.music){bgm.src=state.assets.get(state.project.music.assetId).url;bgm.load();}
      state.selectedClip=state.project.clips[0]?.id||null;
@@ -337,7 +337,7 @@ function bind(){
  $('music-remove').addEventListener('click',()=>{bgm.pause();bgm.removeAttribute('src');bgm.load();state.project.music=null;save();refreshAll();});
  $('export-open').addEventListener('click',()=>{setPanel('export');document.querySelector('.tools-shell').scrollIntoView({behavior:'smooth'});});
  $('export-secondary').addEventListener('click',exportMovie);$('backup-project').addEventListener('click',exportProject);$('project-save').addEventListener('click',exportProject);
- $('new-project').addEventListener('click',async()=>{if(!confirm('新規プロジェクトを開始しますか？ 現在の編集内容は上書きされます。'))return;state.playing=false;media.pause();bgm.pause();transMedia.pause();state.project={name:'UNTITLED '+String(Math.floor(Math.random()*90+10)),ratio:'9:16',fit:'cover',backgroundColor:'#07080b',blurBackground:false,clips:[],texts:[],overlays:[],music:null,audioTracks:[],captions:[],captionStyle:null,captionEnabled:true,exportSettings:{preset:'standard',format:'auto'}};state.selectedClip=null;state.selectedText=null;state.activeClip=null;state.current=0;setRatio('9:16');save();refreshAll();});
+ $('new-project').addEventListener('click',async()=>{if(!confirm('新規プロジェクトを開始しますか？ 現在の編集内容は上書きされます。'))return;state.playing=false;media.pause();bgm.pause();transMedia.pause();state.project={name:'UNTITLED '+String(Math.floor(Math.random()*90+10)),ratio:'9:16',fit:'cover',backgroundColor:'#07080b',blurBackground:false,clips:[],texts:[],overlays:[],music:null,audioTracks:[],cgScenes:[],captions:[],captionStyle:null,captionEnabled:true,exportSettings:{preset:'standard',format:'auto'}};state.selectedClip=null;state.selectedText=null;state.activeClip=null;state.current=0;setRatio('9:16');save();refreshAll();});
  window.addEventListener('pagehide',()=>{if(state.recording)console.warn('Export interrupted by pagehide');});
 }
 
@@ -345,15 +345,15 @@ function loadProjectSnapshot(snapshot){
  if(state.recording)throw Error('書き出し中は復元できません');
  const p=JSON.parse(JSON.stringify(snapshot));
  if(!Array.isArray(p.clips)||p.clips.some(c=>!state.assets.has(c.assetId)))throw Error('読み込む動画素材が不足しています');
- for(const name of ['overlays','audioTracks','texts','captions'])p[name]=Array.isArray(p[name])?p[name]:[];
+ for(const name of ['overlays','audioTracks','texts','captions','cgScenes'])p[name]=Array.isArray(p[name])?p[name]:[];
  for(const row of [...p.overlays,...p.audioTracks])if(!state.assets.has(row.assetId))throw Error('レイヤー素材が不足しています');
- if(p.music&&!state.assets.has(p.music.assetId))throw Error('BGM素材が不足しています');
+ if(p.music&&!state.assets.has(p.music.assetId))throw Error('BGM素材が不足しています');for(const scene of p.cgScenes)if(!state.assets.has(scene.modelAssetId))throw Error('3Dモデル素材が不足しています');
  state.playing=false;media.pause();bgm.pause();transMedia.pause();
  state.project=p;state.selectedClip=p.clips[0]?.id||null;state.selectedText=null;state.activeClip=null;state.current=0;
  if(p.music){bgm.src=state.assets.get(p.music.assetId).url;bgm.load();}else{bgm.removeAttribute('src');bgm.load();}
  setRatio(RATIOS[p.ratio]?p.ratio:'9:16');save();refreshAll();seek(0);
 }
-function applyHistory(snapshot){state.playing=false;media.pause();bgm.pause();transMedia.pause();state.project=JSON.parse(snapshot);state.selectedClip=state.project.clips[0]?.id||null;state.selectedText=null;state.activeClip=null;state.current=0;state.project.overlays ||= [];state.project.audioTracks ||= [];if(state.project.music&&state.assets.has(state.project.music.assetId)){bgm.src=state.assets.get(state.project.music.assetId).url;bgm.load();}else {bgm.removeAttribute('src');bgm.load();}refreshAll();positionMedia().catch(fail);save();}
+function applyHistory(snapshot){state.playing=false;media.pause();bgm.pause();transMedia.pause();state.project=JSON.parse(snapshot);state.selectedClip=state.project.clips[0]?.id||null;state.selectedText=null;state.activeClip=null;state.current=0;state.project.overlays ||= [];state.project.audioTracks ||= [];state.project.cgScenes ||= [];if(state.project.music&&state.assets.has(state.project.music.assetId)){bgm.src=state.assets.get(state.project.music.assetId).url;bgm.load();}else {bgm.removeAttribute('src');bgm.load();}refreshAll();positionMedia().catch(fail);save();}
 function undo(){if(!history.undo.length)return toast('戻す操作がありません');history.redo.push(history.current);history.current=history.undo.pop();applyHistory(history.current);}
 function redo(){if(!history.redo.length)return toast('やり直す操作がありません');history.undo.push(history.current);history.current=history.redo.pop();applyHistory(history.current);}
 window.__subehaSaveAsset=async(id,file,type,name)=>idbPut('files',id,{blob:file,type,name});

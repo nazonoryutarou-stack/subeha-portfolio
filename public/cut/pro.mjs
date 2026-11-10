@@ -1,3 +1,5 @@
+import {mountEngineHub} from './engine-hub-ui.mjs';
+import {mountCGStudio} from './cg-studio.mjs';
 import {drawPipFrame} from './pip-style.mjs'; // read-only compatibility for pre-v1.2 projects
 import {OVERLAY_MOTIONS,overlayMotion} from './overlay-motion.mjs';
 /* SUBEHA CUT Pro 0.3 - original offline compositing and tracking studio. */
@@ -322,6 +324,7 @@ async function restoreArchive(file){
     for(const layer of loaded.overlays||[])layer.assetId=idMap.get(layer.assetId);
     for(const track of loaded.audioTracks||[])track.assetId=idMap.get(track.assetId);
     if(loaded.music)loaded.music.assetId=idMap.get(loaded.music.assetId);
+    for(const scene of loaded.cgScenes||[])scene.modelAssetId=idMap.get(scene.modelAssetId);
     for(const a of assets){const id=idMap.get(a.id);await buildAsset(id,a.blob,a.type,a.name);await window.__subehaSaveAsset(id,a.blob,a.type,a.name);}
     api.loadProjectSnapshot(loaded);selectedOverlay=null;selectedAudio=null;selectedCue=null;
     for(const a of assets)if(a.type==='video')makeOverlayVideo(state.assets.get(idMap.get(a.id)));
@@ -607,6 +610,8 @@ function setupExportStudio(){
 function mount(){
   state.project.overlays ||= [];state.project.audioTracks ||= [];state.project.captions ||= [];
   installChrome();
+  mountCGStudio(api,{panel,closeDrawer});
+  mountEngineHub(api,{panel});
   mountRetouchStudio(api,{panel,closeDrawer});
   mountVideoRetouchStudio(api,{panel,closeDrawer});
   setupTextStudio();setupExportStudio();

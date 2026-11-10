@@ -14,6 +14,7 @@ export function projectAssetIds(project){
   for(const c of project.clips||[])ids.add(c.assetId);
   for(const o of project.overlays||[])ids.add(o.assetId);
   for(const o of project.audioTracks||[])ids.add(o.assetId);
+  for(const scene of project.cgScenes||[])ids.add(scene.modelAssetId);
   if(project.music)ids.add(project.music.assetId);
   return [...ids];
 }
@@ -28,9 +29,9 @@ export async function createProjectArchive(project,assetMap){
     if(!Number.isFinite(blob.size)||blob.size<0)throw Error('不正な素材サイズ');
     total+=blob.size;if(total>ARCHIVE_LIMIT)throw Error('素材の合計が200MBを超えています。容量を減らして再試行してください');
     const name=String(item.name||id).slice(0,160),type=item.type;
-    if(!['video','image','audio'].includes(type))throw Error('未知の素材種別');
+    if(!['video','image','audio','model'].includes(type))throw Error('未知の素材種別');
     const path=`media/${id}`;
-    assets.push({id,path,name,type,mime:blob.type||({video:'video/mp4',image:'image/png',audio:'audio/mpeg'}[type]),size:blob.size});
+    assets.push({id,path,name,type,mime:blob.type||({video:'video/mp4',image:'image/png',audio:'audio/mpeg',model:'text/plain'}[type]),size:blob.size});
     items.push({path,blob});
   }
   const manifest={format:'subeha.cut.project',version:1,savedAt:new Date().toISOString(),project:JSON.parse(JSON.stringify(project)),assets};
@@ -94,7 +95,7 @@ export async function readProjectArchive(blob){
   if(ids.length!==manifest.assets.length||ids.length>MAX_ENTRIES-1)throw Error('素材一覧に不整合があります');
   const assets=[];
   for(const meta of manifest.assets){
-    if(!safeId(meta.id)||meta.path!==`media/${meta.id}`||!ids.includes(meta.id)||!['image','video','audio'].includes(meta.type))throw Error('素材情報が不正です');
+    if(!safeId(meta.id)||meta.path!==`media/${meta.id}`||!ids.includes(meta.id)||!['image','video','audio','model'].includes(meta.type))throw Error('素材情報が不正です');
     const media=await extract(meta.path,meta.mime||'application/octet-stream');
     if(media.size!==meta.size)throw Error('素材サイズが一致しません');
     assets.push({id:meta.id,blob:media,name:String(meta.name||meta.id).slice(0,160),type:meta.type});
