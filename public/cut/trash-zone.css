@@ -1,0 +1,19 @@
+/* Always-on-top drag destination. Only appears during a real drag. */
+#cut-trash-bin{position:fixed;left:50%;bottom:calc(94px + env(safe-area-inset-bottom));transform:translate(-50%,35px) scale(.93);z-index:1100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:min(290px,82vw);height:102px;border:2px dashed #8e5b68;border-radius:22px;background:rgba(41,23,30,.96);color:#fff;opacity:0;visibility:hidden;pointer-events:none;box-shadow:0 12px 45px #0009;transition:transform .16s ease,opacity .16s ease,border-color .15s ease,background .15s ease}
+#cut-trash-bin.active{visibility:visible;opacity:1;transform:translate(-50%,0) scale(1)}
+#cut-trash-bin.over{border-color:white;background:#d53149;transform:translate(-50%,0) scale(1.09);box-shadow:0 0 0 5px #fd6b813b,0 14px 55px #000b}
+.cut-trash-icon{font-size:28px;line-height:1;transform:rotate(0deg)}
+#cut-trash-bin.over .cut-trash-icon{transform:rotate(-13deg)}
+#cut-trash-bin strong{font-size:14px;font-weight:700}
+#cut-trash-bin small{font-size:10px;color:#f4d8dd}
+#cut-trash-ghost{position:fixed;z-index:1099;display:none;max-width:200px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:9px 12px;border-radius:10px;background:#e8e8ed;color:#222;font-size:11px;font-weight:700;box-shadow:0 7px 20px #0009;pointer-events:none;transform:translateY(-50%)}
+#cut-trash-ghost.active{display:block}
+#cut-trash-undo{position:fixed;bottom:calc(92px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:1120;width:min(340px,90vw);padding:10px 12px;border:1px solid #666;border-radius:13px;background:#25262e;color:#fff;box-shadow:0 12px 40px #0009;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px}
+#cut-trash-undo[hidden]{display:none!important}
+#cut-trash-restore{background:#fb576f!important;border:none!important;color:#fff!important;border-radius:8px;padding:10px 13px;font-size:12px;font-weight:700}
+.cut-discarding #preview{cursor:grabbing}
+@media (prefers-reduced-motion:reduce){#cut-trash-bin{transition:none}}
+/* Android: keep hold gestures from showing the native selection/callout menu. */
+.cut-timeline-pill,#cut-direct-frame{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+/* The undo toast must not block the timeline or become the next drag target. */
+#cut-trash-undo{bottom:auto;top:calc(63px + env(safe-area-inset-top))}

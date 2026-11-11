@@ -20,14 +20,14 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
    <div id="cut-timeline-scroll" class="cut-timeline-scroll" tabindex="0" aria-label="横スクロールで再生位置を動かすタイムライン">
     <div class="cut-timeline-content" id="cut-timeline-content">
      <div class="cut-time-ruler" id="cut-time-ruler"></div>
-     <div class="cut-lane-title">V1 · VIDEO / IMAGE</div><div class="cut-lane cut-video-lane" id="cut-video-lane"></div>
-     <div class="cut-lane-title">V2 · OVERLAY</div><div class="cut-lane cut-overlay-lane" id="cut-overlay-lane"></div>
-     <div class="cut-lane-title">A1 · AUDIO</div><div class="cut-lane cut-audio-lane" id="cut-audio-lane"></div>
-     <div class="cut-lane-title">T1 · TEXT / SUBTITLE</div><div class="cut-lane cut-caption-lane" id="cut-caption-lane"></div>
+     <div class="cut-lane-title">動画・写真</div><div class="cut-lane cut-video-lane" id="cut-video-lane"></div>
+     <div class="cut-lane-title">重ねた素材</div><div class="cut-lane cut-overlay-lane" id="cut-overlay-lane"></div>
+     <div class="cut-lane-title">音声</div><div class="cut-lane cut-audio-lane" id="cut-audio-lane"></div>
+     <div class="cut-lane-title">文字・字幕</div><div class="cut-lane cut-caption-lane" id="cut-caption-lane"></div>
     </div>
    </div>
  </div>
- <div class="cut-workspace-foot"><span>◀ スワイプで移動 · 2本指で拡大 · 長押しで並替</span><div class="cut-scale-actions"><button type="button" id="cut-zoom-out" aria-label="タイムライン縮小">−</button><button type="button" id="cut-zoom-in" aria-label="タイムライン拡大">＋</button></div></div>`;
+ <div class="cut-workspace-foot"><span>左右に動かして再生位置を移動 · 2本指で拡大 · 長押ししてゴミ箱へ</span><div class="cut-scale-actions"><button type="button" id="cut-zoom-out" aria-label="タイムライン縮小">−</button><button type="button" id="cut-zoom-in" aria-label="タイムライン拡大">＋</button></div></div>`;
  host.querySelector('.section-label').after(controls);
  host.classList.add('cut-touch-enabled');
  const scroller=$('cut-timeline-scroll'),content=$('cut-timeline-content'),actions=$('cut-actions');
@@ -37,7 +37,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
  stage.append(box);
  const centerGuide=el('div','cut-center-guide');centerGuide.hidden=true;stage.append(centerGuide);
  let blockScroll=false,pinching=false,dragging=false,longTimer=null,rendering=false,renderFrame=0,dragData=null,gestureOrigin=null;
- let lastSelected='',lastSummary='',pendingHoldStart=null;
+ let lastSelected='',lastSummary='',pendingHoldStart=null,suppressTapUntil=0;
  const projectDuration=()=>totalDuration(state.project.clips);
  const pps=()=>getZoom();
  function setTimelineScale(value){
@@ -119,8 +119,8 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
        addPill(audio,{left:x,width:w,cls:'cut-audio-pill',text:'♫ '+(state.assets.get(a.assetId)?.name||'音声').slice(0,17),title:'音声トラックを編集・移動',onclick:()=>onSelectAudio(a.id)}).dataset.audioId=a.id;
      }
      const sub=$('cut-caption-lane');sub.replaceChildren();
-     for(const t of state.project.texts||[]){addPill(sub,{left:pad+number(t.start)*scale,width:number(t.duration)*scale,cls:'cut-text-pill',text:'Ｔ '+(t.text||'テキスト').slice(0,22),onclick:()=>{state.selectedText=t.id;api.setPanel('text');document.querySelector('.tools-shell')?.classList.add('pro-visible');}});}
-     for(const c of state.project.captions||[]){addPill(sub,{left:pad+number(c.start)*scale,width:Math.max(.08,number(c.end)-number(c.start))*scale,cls:'cut-caption-pill',text:'▤ '+(c.text||'字幕').slice(0,22),onclick:()=>onSelectCaption(c.id)});}
+     for(const t of state.project.texts||[]){addPill(sub,{left:pad+number(t.start)*scale,width:number(t.duration)*scale,cls:'cut-text-pill',text:'Ｔ '+(t.text||'文字').slice(0,22),onclick:()=>{state.selectedText=t.id;api.setPanel('text');document.querySelector('.tools-shell')?.classList.add('pro-visible');}}).dataset.textId=t.id;}
+     for(const c of state.project.captions||[]){addPill(sub,{left:pad+number(c.start)*scale,width:Math.max(.08,number(c.end)-number(c.start))*scale,cls:'cut-caption-pill',text:'▤ '+(c.text||'字幕').slice(0,22),onclick:()=>onSelectCaption(c.id)}).dataset.captionId=c.id;}
      renderQuick();
    }finally{rendering=false;}
  }
@@ -139,6 +139,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      if(Math.abs(t-state.current)>.018)seek(t);
    });
  }
+ scroller.addEventListener('contextmenu',e=>{if(e.target.closest('[data-clip-id],[data-text-id],[data-caption-id],[data-layer-id],[data-audio-id],[data-cg-id]'))e.preventDefault();});
  scroller.addEventListener('scroll',updateFromScroll,{passive:true});
  scroller.addEventListener('click',e=>{
    if(!e.target.closest('.cut-time-ruler')||dragging||pinching)return;
@@ -146,6 +147,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
    const t=clamp((e.clientX-rect.left-pad)/pps(),0,projectDuration());
    seek(t);blockScroll=true;scroller.scrollLeft=timelineScroll(t,pps());blockScroll=false;
  });
+ scroller.addEventListener('click',e=>{if(performance.now()<suppressTapUntil){e.preventDefault();e.stopImmediatePropagation();}},true);
  scroller.addEventListener('pointerdown',e=>{
    const card=e.target.closest('[data-clip-id]');
    const handle=e.target.closest('[data-trim-edge]');
@@ -161,10 +163,16 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      const id=card.dataset.clipId,startX=e.clientX,startY=e.clientY;pendingHoldStart={x:startX,y:startY};
      longTimer=setTimeout(()=>{longTimer=null;dragging=true;dragData={mode:'reorder',id,startX,startY,currentIndex:state.project.clips.findIndex(c=>c.id===id)};
        scroller.setPointerCapture(e.pointerId);card.classList.add('cut-dragging');
+       window.__subehaTrash?.begin('clip',id,{clientX:startX,clientY:startY});
        navigator.vibrate?.(16);
      },420);
    }else if(e.target.closest('[data-audio-id],[data-layer-id]')){
-     const pill=e.target.closest('[data-audio-id],[data-layer-id]');scroller.setPointerCapture(e.pointerId);dragData={mode:pill.dataset.audioId?'move-audio':'move-layer',id:pill.dataset.audioId||pill.dataset.layerId,startX:e.clientX,original:null,active:false};
+     const pill=e.target.closest('[data-audio-id],[data-layer-id]');scroller.setPointerCapture(e.pointerId);dragData={mode:pill.dataset.audioId?'move-audio':'move-layer',id:pill.dataset.audioId||pill.dataset.layerId,startX:e.clientX,startY:e.clientY,original:null,active:false};
+   }else {
+     const pill=e.target.closest('[data-text-id],[data-caption-id],[data-cg-id]');
+     if(pill){const kind=pill.dataset.textId?'text':pill.dataset.captionId?'caption':'cg';const id=pill.dataset.textId||pill.dataset.captionId||pill.dataset.cgId;const startX=e.clientX,startY=e.clientY;pendingHoldStart={x:startX,y:startY};
+       longTimer=setTimeout(()=>{longTimer=null;dragging=true;dragData={mode:'discard',kind,id};scroller.setPointerCapture(e.pointerId);window.__subehaTrash?.begin(kind,id,{clientX:startX,clientY:startY});navigator.vibrate?.(16);},420);
+     }
    }
  },true);
  scroller.addEventListener('pointermove',e=>{
@@ -173,7 +181,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      // On pointer moves the queued click will still work.
    }
    if(longTimer){
-     const p=e.target.closest('[data-clip-id]');
+     const p=e.target.closest('[data-clip-id],[data-text-id],[data-caption-id],[data-cg-id]');
      // A scroll move cancels reordering before the 420ms threshold.
      if(!p || !pendingHoldStart || Math.hypot(e.clientX-pendingHoldStart.x,e.clientY-pendingHoldStart.y)>10){clearTimeout(longTimer);longTimer=null;pendingHoldStart=null;}
    }
@@ -185,7 +193,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      const seconds=(next.end-next.start)/(next.speed||1);
      $('cut-selection').textContent=`${next.name.slice(0,20)} · ${seconds.toFixed(2)}秒`;
    }else if(dragData.mode==='reorder'){
-     e.preventDefault();
+     e.preventDefault();window.__subehaTrash?.move(e);
      const cards=[...$('cut-video-lane').querySelectorAll('[data-clip-id]')];
      const nearest=cards.reduce((best,item,index)=>{
        const rect=item.getBoundingClientRect(),distance=Math.abs(e.clientX-(rect.left+rect.width/2));
@@ -193,11 +201,14 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      },{distance:Infinity,index:dragData.currentIndex});
      dragData.currentIndex=nearest.index;
      for(const [i,item] of cards.entries())item.classList.toggle('cut-drop-target',i===nearest.index);
+   }else if(dragData.mode==='discard'){
+     e.preventDefault();window.__subehaTrash?.move(e);
    }else if(dragData.mode==='move-audio'||dragData.mode==='move-layer'){
      const arr=dragData.mode==='move-audio'?state.project.audioTracks:state.project.overlays;
      const row=(arr||[]).find(x=>x.id===dragData.id);if(!row)return;
-     if(!dragData.active){dragData.original=row.start;dragData.active=true;}
-     if(Math.abs(e.clientX-dragData.startX)<3)return;
+     if(Math.hypot(e.clientX-dragData.startX,e.clientY-dragData.startY)<6&&!dragData.active)return;
+     if(!dragData.active){dragData.original=row.start;dragData.active=true;window.__subehaTrash?.begin(dragData.mode==='move-audio'?'audio':'layer',dragData.id,e);}
+     window.__subehaTrash?.move(e);
      e.preventDefault();dragging=true;
      row.start=clamp(dragData.original+(e.clientX-dragData.startX)/pps(),0,projectDuration());
      $('cut-selection').textContent=`開始 ${row.start.toFixed(2)}s`;
@@ -208,6 +219,9 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
    if(!dragData)return;
    const data=dragData;dragData=null;
    const wasDragging=dragging;dragging=false;
+   const removed=e.type==='pointerup'&&data.mode!=='trim'?window.__subehaTrash?.finish(e):false;
+   window.__subehaTrash?.cancel();
+   if(removed){suppressTapUntil=performance.now()+420;lastSelected='';lastSummary='';render();return;}
    if(data.mode==='trim'){
      if(Math.abs(data.snapshot.start-data.clip.start)+Math.abs(data.snapshot.end-data.clip.end)>.001){save();refreshAll();const row=spans(state.project.clips).find(r=>r.clip.id===data.clip.id);seek((row?.start||0)+(data.edge==='right'?row?.length||0:0));}
    }else if(data.mode==='reorder'){
@@ -224,6 +238,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
    if(e.touches.length===2){pinching=true;previousTouchDistance=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);previousZoom=pps();}
  },{passive:true});
  scroller.addEventListener('touchmove',e=>{
+   if(dragging&&dragData?.mode!=='trim'){e.preventDefault();return;}
    if(!pinching||e.touches.length!==2)return;
    e.preventDefault();
    const gap=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);

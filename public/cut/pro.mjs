@@ -20,6 +20,7 @@ import {mountRetouchStudio} from './retouch-studio.mjs';
 import {mountVideoRetouchStudio} from './video-retouch-studio.mjs';
 import {retouchFrame,normalizedRetouch} from './video-retouch.mjs';
 import {mountTouchWorkspace} from './touch-workspace.mjs';
+import {installTrashZone} from './trash-zone.mjs';
 const $ = id => document.getElementById(id);
 const api = window.__subehaCut;
 const {state,canvas,ctx,buildAsset,seek,save,refreshAll,draw,selectedClip,updateClip,setPanel,renderHooks,toast,newID,undo,redo} = api;
@@ -36,13 +37,15 @@ let zoom = 126;
 let syncing = false;
 let touchWorkspace=null;
 const playbackVideos = new Map();
+const mixLabels={normal:'普通に重ねる',screen:'明るく重ねる',multiply:'暗く重ねる',lighten:'明るい部分を残す',darken:'暗い部分を残す',overlay:'明暗を強める',difference:'色の違いを出す'};
 const mix = {normal:'source-over',screen:'screen',multiply:'multiply',lighten:'lighten',darken:'darken',overlay:'overlay',difference:'difference'};
 const clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,n));
 const totalTime=()=>totalDuration(state.project.clips);
 const time=(n)=>{let x=Math.max(0,Math.floor(n||0));return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');};
 const safe=(v)=>String(v||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
-function createControl(label,id,min,max,step,value){return '<label class="pro-slider">'+label+' <output id="'+id+'-value">'+value+'</output><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+value+'"></label>';}
+const proFieldNames={x:'左右の位置',y:'上下の位置',scale:'大きさ',opacity:'透明度',rotation:'回転角度',duration:'表示する長さ（秒）',start:'開始する時刻（秒）',brightness:'明るさ',contrast:'くっきり度',saturation:'色の鮮やかさ',hue:'色合い',blur:'ぼかし',zoomscale:'拡大率',clipopacity:'透明度',feather:'境界をぼかす',clipvolume:'動画の音量'};
+function createControl(label,id,min,max,step,value){return '<label class="pro-slider">'+(proFieldNames[label]||label)+' <output id="'+id+'-value">'+value+'</output><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+value+'"></label>';}
 function panel(title,body){$('pro-title').textContent=title;$('pro-content').innerHTML=body;openDrawer();}
 function openDrawer(){document.body.classList.add('pro-open');document.querySelector('.tools-shell').classList.remove('pro-visible');}
 function closeDrawer(){document.body.classList.remove('pro-open');}
@@ -62,19 +65,19 @@ function installChrome(){
   $('play').textContent='▶';
   const nav=document.querySelector('.bottomnav');
   nav.innerHTML='<button class="nav-tab" data-tab="clips"><span>▥</span>編集</button>'+
-  '<button class="nav-tab pro-nav" data-pro="overlay"><span>▧</span>オーバーレイ</button>'+
+  '<button class="nav-tab pro-nav" data-pro="overlay"><span>▧</span>素材を重ねる</button>'+
   '<button class="nav-tab" data-tab="text"><span>Ｔ</span>テキスト</button>'+
   '<button class="nav-tab pro-nav" data-pro="captions"><span>▤</span>字幕</button>'+
   '<button class="nav-tab" data-tab="audio"><span>♫</span>音声</button>'+
-  '<button class="nav-tab pro-nav" data-pro="chroma"><span>◩</span>キー合成</button>'+
+  '<button class="nav-tab pro-nav" data-pro="chroma"><span>◩</span>背景色を消す</button>'+
   '<button class="nav-tab pro-nav" data-pro="tracking"><span>⊙</span>追跡</button>'+ 
   '<button class="nav-tab" data-tab="look"><span>◉</span>フィルター</button>'+
-  '<button class="nav-tab pro-nav" data-pro="adjust"><span>☷</span>調整</button>'+
+  '<button class="nav-tab pro-nav" data-pro="adjust"><span>☷</span>色を調整</button>'+
   '<button class="nav-tab pro-nav" data-pro="transform"><span>◇</span>変形</button>'+
   '<button class="nav-tab pro-nav" data-pro="effects"><span>✦</span>効果</button>'+
-  '<button class="nav-tab pro-nav" data-pro="transitions"><span>⋈</span>転換</button>'+
+  '<button class="nav-tab pro-nav" data-pro="transitions"><span>⋈</span>場面のつなぎ</button>'+
   '<button class="nav-tab pro-nav" data-pro="canvas"><span>▣</span>背景</button>'+
-  '<button class="nav-tab pro-nav" data-pro="crop"><span>⊞</span>切抜</button>'+ 
+  '<button class="nav-tab pro-nav" data-pro="crop"><span>⊞</span>切り抜き</button>'+ 
   '<button class="nav-tab pro-nav" data-pro="freeze"><span>❚❚</span>静止</button>'+ 
   '<button class="nav-tab pro-nav" data-pro="project"><span>▦</span>保存/復元</button>'+
   '<button class="nav-tab" data-tab="export"><span>↗</span>出力</button>';
@@ -140,7 +143,7 @@ async function importOverlay(files){
       if(window.__subehaSaveAsset) await window.__subehaSaveAsset(id,file,type,file.name);
     }catch(e){console.error(e);toast('レイヤー追加に失敗しました');}
   }
-  save();renderTimeline();showPanel('overlay');draw();
+  save();renderTimeline();closeDrawer();draw();toast('素材を重ねました。指で動かせます。');
 }
 function makeOverlayVideo(asset){let v=playbackVideos.get(asset.id);if(v)return v;v=document.createElement('video');v.src=asset.url;v.muted=true;v.playsInline=true;v.preload='auto';playbackVideos.set(asset.id,v);return v;}
 function keyframeValue(layer,t){
@@ -248,7 +251,7 @@ async function importAudioTracks(files){
       state.project.audioTracks ||= [];state.project.audioTracks.push(clip);selectedAudio=clip.id;
     }catch(e){console.error(e);toast('音声ファイルを読み込めませんでした');}
   }
-  save();renderTimeline();showPanel('multiaudio');
+  save();renderTimeline();closeDrawer();toast('音声を追加しました。時間軸で長さや位置を調整できます。');
 }
 let voiceRecorder=null,voiceStream=null,voiceChunks=[];
 async function toggleVoiceover(){
@@ -466,21 +469,21 @@ function showPanel(which){
   }else if(which==='overlay'){
 
     const layer=selectedLayer();
-    if(!layer){panel('オーバーレイ','<p>画像・動画を重ね、キーフレームや合成方法を設定できます。</p><button id="pro-import-layer" class="pro-primary">＋ 画像・動画レイヤー</button>');}
+    if(!layer){panel('素材を重ねる','<p>画像・動画を重ね、キーフレームや合成方法を設定できます。</p><button id="pro-import-layer" class="pro-primary">＋ 画像・動画レイヤー</button>');}
     else{
       const fields=[['x',0,1,.01],['y',0,1,.01],['scale',.1,1.9,.01],['opacity',0,1,.01],['rotation',-180,180,1],['duration',.2,180,.1],['start',0,180,.1]];
-      panel('レイヤーを編集','<button id="pro-import-layer" class="pro-primary">＋ レイヤーを追加</button><div class="pro-controls">'+fields.map(([k,a,b,c])=>createControl(k,'pro-'+k,a,b,c,layer[k])).join('')+'</div><label class="pro-select">合成 <select id="pro-blend">'+Object.keys(mix).map(k=>'<option value="'+k+'" '+(layer.blend===k?'selected':'')+'>'+k+'</option>').join('')+'</select></label><label class="pro-select">マスク <select id="pro-mask"><option value="rect">通常</option><option value="circle">円形</option><option value="soft">柔らかい円</option><option value="polygon">多角形</option></select></label><div class="pro-controls">'+createControl('境界ぼかし','pro-feather',0,.25,.005,layer.feather??0)+'</div><div class="pro-inline"><button id="pro-polygon">✎ 輪郭を描く</button><button id="pro-finish-polygon">輪郭確定</button><button id="pro-keyframe">◆ この位置をキーフレーム登録</button><button id="pro-remove-layer" class="pro-danger">レイヤー削除</button></div><div class="pro-motion-presets"><strong>登場アニメーション</strong><div class="pro-motion-options">'+Object.entries(OVERLAY_MOTIONS).map(([key,label])=>'<button data-overlay-motion="'+key+'">'+label+'</button>').join('')+'</div></div><p class="pro-tip">キーフレーム数: '+(layer.keyframes?.length||0)+' / レイヤーを選ぶと時間軸に表示</p>');
+      panel('重ねた素材を編集','<button id="pro-import-layer" class="pro-primary">＋ レイヤーを追加</button><div class="pro-controls">'+fields.map(([k,a,b,c])=>createControl(k,'pro-'+k,a,b,c,layer[k])).join('')+'</div><label class="pro-select">重なり方 <select id="pro-blend">'+Object.keys(mix).map(k=>'<option value="'+k+'" '+(layer.blend===k?'selected':'')+'>'+(mixLabels[k]||k)+'</option>').join('')+'</select></label><label class="pro-select">見せる形 <select id="pro-mask"><option value="rect">通常</option><option value="circle">円形</option><option value="soft">柔らかい円</option><option value="polygon">多角形</option></select></label><div class="pro-controls">'+createControl('境界ぼかし','pro-feather',0,.25,.005,layer.feather??0)+'</div><div class="pro-inline"><button id="pro-polygon">✎ 輪郭を描く</button><button id="pro-finish-polygon">輪郭確定</button><button id="pro-keyframe">◆ この位置を動きの記録点を追加</button><button id="pro-remove-layer" class="pro-danger">レイヤー削除</button></div><div class="pro-motion-presets"><strong>登場アニメーション</strong><div class="pro-motion-options">'+Object.entries(OVERLAY_MOTIONS).map(([key,label])=>'<button data-overlay-motion="'+key+'">'+label+'</button>').join('')+'</div></div><p class="pro-tip">動きの記録点: '+(layer.keyframes?.length||0)+' / レイヤーを選ぶと時間軸に表示</p>');
       $('pro-mask').value=layer.mask||'rect';$('pro-feather').oninput=e=>{const n=Number(e.target.value);$('pro-feather-value').textContent=n;changeLayer(l=>l.feather=n);};$('pro-polygon').onclick=beginPolygon;$('pro-finish-polygon').onclick=()=>{editMode=null;toast('多角形を確定しました');showPanel('overlay');};$('pro-blend').onchange=e=>changeLayer(l=>l.blend=e.target.value);$('pro-mask').onchange=e=>changeLayer(l=>l.mask=e.target.value);
       bindSliders('overlay',fields,(k,n)=>changeLayer(l=>l[k]=n));
       $('pro-content').querySelectorAll('[data-overlay-motion]').forEach(button=>button.onclick=()=>{const next=overlayMotion(layer,button.dataset.overlayMotion);changeLayer(l=>{l.keyframes=next.keyframes;});showPanel('overlay');toast('アニメーションを設定しました');});
-      $('pro-keyframe').onclick=()=>changeLayer(l=>{let t=clamp(state.current-l.start,0,l.duration);l.keyframes ||= [];l.keyframes=l.keyframes.filter(f=>Math.abs(f.time-t)>.04);l.keyframes.push({time:t,x:l.x,y:l.y,scale:l.scale,opacity:l.opacity,rotation:l.rotation});toast('◆ キーフレームを登録しました');});
+      $('pro-keyframe').onclick=()=>changeLayer(l=>{let t=clamp(state.current-l.start,0,l.duration);l.keyframes ||= [];l.keyframes=l.keyframes.filter(f=>Math.abs(f.time-t)>.04);l.keyframes.push({time:t,x:l.x,y:l.y,scale:l.scale,opacity:l.opacity,rotation:l.rotation});toast('◆ 動きの記録点を追加しました');});
       $('pro-remove-layer').onclick=()=>{state.project.overlays=state.project.overlays.filter(l=>l.id!==layer.id);selectedOverlay=null;save();renderTimeline();showPanel('overlay');draw();};
     }
     $('pro-import-layer').onclick=()=>$('pro-overlay-picker').click();
   }else if(which==='chroma'){
-    const l=selectedLayer();if(!l){panel('クロマキー','<p>先にオーバーレイから動画・画像レイヤーを選択してください。</p>');return;}
+    const l=selectedLayer();if(!l){panel('背景色を消す','<p>先にオーバーレイから動画・画像レイヤーを選択してください。</p>');return;}
     const cfg=l.chroma||{enabled:false,color:'#00ff00',similarity:.23,softness:.12,spill:.4};
-    panel('クロマキー / 背景色の除去','<label class="pro-select"><input type="checkbox" id="pro-key-enable" '+(cfg.enabled?'checked':'')+'> クロマキーを有効にする</label><label class="pro-select">消す色 <input id="pro-key-color" type="color" value="'+(cfg.color||'#00ff00')+'"></label><div class="pro-controls">'+[
+    panel('背景の色を透明にする','<label class="pro-select"><input type="checkbox" id="pro-key-enable" '+(cfg.enabled?'checked':'')+'> 背景色を消す処理を使う</label><label class="pro-select">消す色 <input id="pro-key-color" type="color" value="'+(cfg.color||'#00ff00')+'"></label><div class="pro-controls">'+[
       ['similarity',0,.8,.01],['softness',.005,.5,.005],['spill',0,1,.05]
     ].map(([k,a,b,step])=>createControl(k,'pro-key-'+k,a,b,step,cfg[k]??0)).join('')+'</div><p class="pro-tip">グリーンバック・ブルーバック等の単色背景向け。被写体と背景が似た色の場合、輪郭が欠けます。</p>');
     const update=(k,val)=>changeLayer(layer=>{layer.chroma={enabled:false,color:'#00ff00',similarity:.23,softness:.12,spill:.4,...layer.chroma,[k]:val};layerBuffers.delete(layer.id);});
@@ -527,7 +530,7 @@ function showPanel(which){
     const c=selectedClip();if(!c){panel('変形','<p>先にクリップを選択してください。</p>');return;}
     const span=spans(state.project.clips).find(row=>row.clip.id===c.id),relative=Math.max(0,Math.min(span?.length||0,state.current-(span?.start||0))),props=clipTransform(c,relative);
     const fields=[['zoomscale',.4,4,.01,props.zoom],['clipopacity',0,1,.01,props.opacity],['rotation',-180,180,1,props.rotation],['x',-.5,1.5,.01,props.x],['y',-.5,1.5,.01,props.y],['clipvolume',0,1,.01,c.volume??1]];
-    panel('変形・キーフレーム · '+safe(c.name),'<div class="pro-inline"><button id="pro-flip-h">⇆ 左右反転</button><button id="pro-flip-v">⇅ 上下反転</button><button id="pro-rotate90">⟳ 90°回転</button><button id="pro-reverse">'+(c.reverse?'▶ 通常再生':'◀ 逆再生（試験）')+'</button></div><div class="pro-controls">'+fields.map(([k,a,b,step,val])=>createControl(k,'pro-'+k,a,b,step,val)).join('')+'</div><label class="pro-select"><input id="pro-clip-mute" type="checkbox" '+(c.muted?'checked':'')+'> クリップ音声をミュート</label><div class="pro-inline"><button id="pro-base-keyframe" class="pro-primary">◆ 現在位置をキーフレーム登録</button><button id="pro-base-clear" class="pro-danger">キーフレーム全削除</button></div><label class="pro-select">補間 <select id="pro-base-easing"><option value="linear">等速</option><option value="ease-in-out">緩急あり</option></select></label><p class="pro-tip">キーフレーム：'+(c.keyframes?.length||0)+'点。ズーム、位置、回転、透明度を補間。逆再生はフレームシーク方式で、Androidの動画によっては滑らかに再生できません。</p>');
+    panel('位置や動き · '+safe(c.name),'<div class="pro-inline"><button id="pro-flip-h">⇆ 左右反転</button><button id="pro-flip-v">⇅ 上下反転</button><button id="pro-rotate90">⟳ 90°回転</button><button id="pro-reverse">'+(c.reverse?'▶ 通常再生':'◀ 逆再生（試験）')+'</button></div><div class="pro-controls">'+fields.map(([k,a,b,step,val])=>createControl(k,'pro-'+k,a,b,step,val)).join('')+'</div><label class="pro-select"><input id="pro-clip-mute" type="checkbox" '+(c.muted?'checked':'')+'> この動画の音を消す</label><div class="pro-inline"><button id="pro-base-keyframe" class="pro-primary">◆ 現在位置を動きの記録点を追加</button><button id="pro-base-clear" class="pro-danger">動きの記録をすべて消す</button></div><label class="pro-select">補間 <select id="pro-base-easing"><option value="linear">等速</option><option value="ease-in-out">緩急あり</option></select></label><p class="pro-tip">キーフレーム：'+(c.keyframes?.length||0)+'点。ズーム、位置、回転、透明度を補間。逆再生はフレームシーク方式で、Androidの動画によっては滑らかに再生できません。</p>');
     $('pro-base-easing').value=c.easing||'linear';$('pro-base-easing').onchange=e=>updateClip(x=>x.easing=e.target.value);
     $('pro-flip-h').onclick=()=>updateClip(x=>x.flipX=!x.flipX);$('pro-flip-v').onclick=()=>updateClip(x=>x.flipY=!x.flipY);$('pro-rotate90').onclick=()=>{updateClip(x=>x.rotation=((x.rotation||0)+90)%360);showPanel('transform');};
     $('pro-reverse').onclick=()=>{updateClip(x=>x.reverse=!x.reverse);showPanel('transform');};
@@ -632,6 +635,7 @@ function mount(){
   $('pro-text-motion').onchange=e=>{const t=state.project.texts.find(x=>x.id===state.selectedText);if(t){t.motion=e.target.value;save();draw();}};
   for(const speed of [0.25,0.75,1.25,3,4]){const segments=$('speed-segments');if(segments&&!segments.querySelector('[data-speed="'+speed+'"]')){const b=document.createElement('button');b.dataset.speed=speed;b.textContent=speed+'×';b.onclick=()=>updateClip(c=>c.speed=speed);segments.append(b);}}
   const nativeTabs=document.querySelectorAll('.nav-tab[data-tab]');nativeTabs[0]?.classList.add('active');
+  installTrashZone(api);
   touchWorkspace=mountTouchWorkspace({api,
     getZoom:()=>zoom,
     setZoom:value=>{zoom=clamp(value,12,160);renderTimeline();},

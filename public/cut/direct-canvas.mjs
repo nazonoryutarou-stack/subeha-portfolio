@@ -16,7 +16,7 @@ function mount(){
  bar.innerHTML='<button data-do="edit">✎ 編集</button><button data-do="color">● 色</button><button data-do="duplicate">▣ 複製</button><button data-do="delete">× 削除</button><button data-do="close">完了</button>';
  stage.append(bar);
  const panel=document.createElement('div');panel.id='cut-direct-sheet';panel.hidden=true;
- panel.innerHTML='<header><strong id="cut-direct-title">文字を編集</strong><button id="cut-direct-close">×</button></header><textarea id="cut-direct-input" rows="2" maxlength="500" aria-label="文字を編集"></textarea><div class="cut-direct-palette">'+colors.map(c=>`<button data-color="${c}" style="--swatch:${c}" title="${c}" aria-label="文字色 ${c}"></button>`).join('')+'<input type="color" id="cut-direct-color" title="任意の文字色"></div><div class="cut-direct-row"><button id="cut-direct-bg">▧ 背景</button><button id="cut-direct-motion">✦ アニメ</button><button id="cut-direct-small">A−</button><button id="cut-direct-large">A＋</button></div><p>文字を直接ドラッグ。2本指で大きさと角度を変更。右下の↘でもサイズ変更できます。</p>';
+ panel.innerHTML='<header><strong id="cut-direct-title">文字を編集</strong><button id="cut-direct-close">×</button></header><textarea id="cut-direct-input" rows="2" maxlength="500" aria-label="文字を編集"></textarea><div class="cut-direct-palette">'+colors.map(c=>`<button data-color="${c}" style="--swatch:${c}" title="${c}" aria-label="文字色 ${c}"></button>`).join('')+'<input type="color" id="cut-direct-color" title="任意の文字色"></div><div class="cut-direct-row"><button id="cut-direct-bg">▧ 背景</button><button id="cut-direct-motion">✦ 動きをつける</button><button id="cut-direct-small">A−</button><button id="cut-direct-large">A＋</button></div><p>文字を直接ドラッグ。2本指で大きさと角度を変更。右下の↘でもサイズ変更できます。</p>';
  $('app').append(panel);
  let selection=null,gest=null,lastTextId=null,dirty=false,lastRender=0;
  const fps=()=>state.current;
@@ -77,6 +77,10 @@ function mount(){
   if(contacts.size===2){const [a,b]=[...contacts.values()];const size=scaleBy(g.props.size,g.distance,pointerGap(a,b),selection.kind==='layer'?8:12,selection.kind==='layer'?350:240);
    const rotation=rotateBy(g.props.rotation,g.angle,pointerAngle(a,b));applyPatch({size,rotation});
   }else if(g.mode==='move'){
+   if(contacts.size===1&&Math.hypot(e.clientX-g.fromScreen.x,e.clientY-g.fromScreen.y)>12){
+     if(!window.__subehaTrash?.active())window.__subehaTrash?.begin(selection.kind,selection.id,e);
+     else window.__subehaTrash?.move(e);
+   }
    const patch=moveBy(g.props,{x:g.from.x/canvas.width,y:g.from.y/canvas.height},{x:point(e).x/canvas.width,y:point(e).y/canvas.height});
    for(const axis of ['x','y'])if(Math.abs(patch[axis]-.5)<.012)patch[axis]=.5;
    applyPatch(patch);
@@ -91,7 +95,11 @@ function mount(){
   }
   g.changed=true;
  }
- function end(e){contacts.delete(e.pointerId);if(contacts.size===1){const other=[...contacts.values()][0];gest={mode:'move',from:point(other),fromScreen:{x:other.clientX,y:other.clientY},props:currentProps(),changed:false};}
+ function end(e,canceled=false){
+  const discarded=!canceled&&contacts.size===1&&gest?.mode==='move'&&window.__subehaTrash?.finish(e);
+  window.__subehaTrash?.cancel();
+  if(discarded){contacts.clear();gest=null;dirty=false;clear();return;}
+  contacts.delete(e.pointerId);if(contacts.size===1){const other=[...contacts.values()][0];gest={mode:'move',from:point(other),fromScreen:{x:other.clientX,y:other.clientY},props:currentProps(),changed:false};}
   if(!contacts.size){gest=null;if(dirty){dirty=false;save();refreshAll();layout();}}}
  canvas.addEventListener('pointerdown',e=>{
   if(state.recording||window.__subehaDirectSuspend?.()===true)return;
@@ -100,15 +108,15 @@ function mount(){
   canvas.setPointerCapture(e.pointerId);begin(e);
  },true);
  canvas.addEventListener('pointermove',e=>{if(!contacts.has(e.pointerId))return;e.preventDefault();e.stopImmediatePropagation();motion(e);},true);
- for(const type of ['pointerup','pointercancel'])canvas.addEventListener(type,e=>{if(!contacts.has(e.pointerId))return;e.preventDefault();e.stopImmediatePropagation();end(e);},true);
+ for(const type of ['pointerup','pointercancel'])canvas.addEventListener(type,e=>{if(!contacts.has(e.pointerId))return;e.preventDefault();e.stopImmediatePropagation();end(e,type==='pointercancel');},true);
  for(const [cls,mode] of [['.cut-direct-resize','resize'],['.cut-direct-rotate','rotate']]){
   const h=box.querySelector(cls);h.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);begin(e,mode);});
   h.addEventListener('pointermove',e=>{if(!contacts.has(e.pointerId))return;e.preventDefault();motion(e);});
-  for(const type of ['pointerup','pointercancel'])h.addEventListener(type,e=>{if(contacts.has(e.pointerId))end(e);});
+  for(const type of ['pointerup','pointercancel'])h.addEventListener(type,e=>{if(contacts.has(e.pointerId))end(e,type==='pointercancel');});
  }
  function openPanel(){const cur=current();if(!cur)return;
   panel.hidden=false;const t=cur.item;
-  $('cut-direct-title').textContent=selection.kind==='caption'?'字幕の直接編集':selection.kind==='layer'?'オーバーレイの直接編集':'テキストの直接編集';
+  $('cut-direct-title').textContent=selection.kind==='caption'?'字幕の直接編集':selection.kind==='layer'?'重ねた素材を指で編集':'テキストの直接編集';
   $('cut-direct-input').hidden=selection.kind==='layer';$('cut-direct-input').value=t.text||'';
   const st=selection.kind==='caption'?captionAppearance(state.project,t):t;
   $('cut-direct-color').value=st.color||'#ffffff';
