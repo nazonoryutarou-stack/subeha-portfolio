@@ -96,6 +96,7 @@ function installShell(){
   make('キャンバス','canvas',()=>openTool('canvas')),
   make('字幕','captions',()=>{openTool('captions');window.__subehaDirectOpen?.('caption');}),
   make('テンプレ','template',()=>openTool('templates')),
+  make('保存','save',()=>window.__subehaArchiveSave?.()),
   make('すべて','more',()=>openExtras()),
  ];
  function openMagicEdit(){

@@ -620,6 +620,16 @@ function mount(){
   mountRetouchStudio(api,{panel,closeDrawer});
   mountVideoRetouchStudio(api,{panel,closeDrawer});
   setupTextStudio();setupExportStudio();
+  $('backup-project').textContent='設定だけ保存（素材なし）';
+  $('backup-project').title='動画や画像は保存されません。素材込みの保存には上部の「保存」を使います';
+  window.__subehaArchiveSave=saveArchive;
+  const projectSave=$('project-save');
+  projectSave.textContent='保存';
+  projectSave.style.fontSize='11px';
+  projectSave.style.minWidth='42px';
+  projectSave.title='素材を含めたプロジェクトを保存';
+  projectSave.setAttribute('aria-label','素材を含めたプロジェクトを保存');
+  projectSave.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();saveArchive();},{capture:true});
   canvas.addEventListener('pointerdown',onCanvasPoint);
   for(const layer of state.project.overlays){const a=state.assets.get(layer.assetId);if(a?.type==='video')makeOverlayVideo(a);}
   renderHooks.push(renderLayers);

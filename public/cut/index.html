@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
   <meta name="theme-color" content="#111318">
   <meta name="description" content="SUBEHA CUT — スマホ向けローカル映像編集・写真修復">
-  <title>SUBEHA CUT — 映像編集 v1.6</title>
+  <title>SUBEHA CUT — 映像編集 v1.7</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="./trash-zone.css">
   <link rel="stylesheet" href="./fx-lab.css">
   <link rel="stylesheet" href="./reference-ui.css">
-</head>
+<style>.export-cancel{margin-top:9px;border:1px solid #a55c64;background:#38262b;color:#ffd7dc;padding:10px 14px;border-radius:9px;min-height:42px}.export-last-report{margin:12px 0;padding:10px 12px;border-left:3px solid #e75b6d;background:#24252b;color:#eee;font-size:12px;line-height:1.6}.export-last-report[hidden]{display:none}.save-indicator{font-size:10px;color:#a4afb0;white-space:nowrap}.save-indicator[data-state=error]{color:#ff8e96}</style></head>
 <body>
 <div id="app">
   <header class="topbar">
     <div class="brand"><span class="brand-mark">◈</span><span>SUBEHA<span class="brand-light">CUT</span><small>PERSONAL VIDEO LAB</small></span></div>
-    <div class="top-actions"><button id="new-project" class="icon-button" title="新規プロジェクト" aria-label="新規プロジェクト">↺</button><button id="project-save" class="icon-button" title="プロジェクト情報を書き出す" aria-label="プロジェクト情報を書き出す">⇩</button><button id="export-open" class="export-button">書き出す ↗</button></div>
+    <div class="top-actions"><button id="new-project" class="icon-button" title="新規プロジェクト" aria-label="新規プロジェクト">↺</button><button id="project-save" class="icon-button" title="素材を含めて保存" aria-label="素材を含めて保存">⇩</button><span id="save-indicator" class="save-indicator" aria-live="polite">自動保存</span><button id="export-open" class="export-button">書き出す ↗</button></div>
   </header>
   <main>
     <section class="viewer-shell" aria-label="映像プレビュー">
@@ -58,7 +58,7 @@
       <div id="panel-look" class="tool-panel" data-panel="look" hidden><div class="control-title">色フィルター <span>非破壊・クリップ単位</span></div><div id="filters" class="filter-grid"></div><div class="button-row"><button id="filter-clear">フィルターを解除</button></div></div>
       <div id="panel-text" class="tool-panel" data-panel="text" hidden><div class="control-title">文字 <span>プレビューへ合成</span></div><div class="button-row"><button class="primary-button" id="text-add">＋ テキストを追加</button></div><div id="text-editor" hidden><label class="field-label">文字列<input id="text-content" maxlength="160" placeholder="映像に出す言葉"></label><div class="control-grid"><label>文字サイズ <span id="text-size-label"></span><input id="text-size" type="range" min="28" max="120" step="2"></label><label>表示時間（秒） <span id="text-length-label"></span><input id="text-length" type="range" min="0.5" max="15" step="0.5"></label><label>左右位置 <span id="text-x-label"></span><input id="text-x" type="range" min="0.1" max="0.9" step="0.01"></label><label>上下位置 <span id="text-y-label"></span><input id="text-y" type="range" min="0.1" max="0.9" step="0.01"></label></div><label class="field-label">色<input id="text-color" type="color" value="#ffffff"></label><div class="button-row"><button id="delete-text" class="danger">テキスト削除</button></div></div><div id="text-list" class="text-list"></div></div>
       <div id="panel-audio" class="tool-panel" data-panel="audio" hidden><div class="control-title">音声 <span>音楽は1トラック</span></div><button class="primary-button" id="music-add">＋ BGM / 音声を取り込む</button><div id="music-controls" hidden><div id="music-name" class="file-chip"></div><label>音量 <span id="music-volume-label">60%</span><input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.6"></label><div class="button-row"><button id="music-remove" class="danger">音声削除</button></div></div></div>
-      <div id="panel-export" class="tool-panel" data-panel="export" hidden><div class="control-title">動画の保存 <span>端末内で動画をレンダリング</span></div><p class="muted">ブラウザがサポートする形式（MP4またはWebM）で保存。音声も合成します。書き出し中は画面を閉じないでください。</p><div class="button-row"><button id="export-secondary" class="primary-button">映像を書き出す ↗</button><button id="backup-project">編集情報を保存</button></div><div id="export-progress" class="progress-area" hidden><div id="progress-text">レンダリング準備中</div><div class="progress-meter"><i id="progress-bar"></i></div></div></div>
+      <div id="panel-export" class="tool-panel" data-panel="export" hidden><div class="control-title">動画の保存 <span>端末内で動画をレンダリング</span></div><p class="muted">ブラウザがサポートする形式（MP4またはWebM）で保存。音声も合成します。書き出し中は画面を閉じないでください。</p><div class="button-row"><button id="export-secondary" class="primary-button">映像を書き出す ↗</button><button id="backup-project">編集情報を保存</button></div><div id="export-progress" class="progress-area" hidden><div id="progress-text">動画を準備しています</div><div class="progress-meter"><i id="progress-bar"></i></div><button id="export-cancel" type="button" class="export-cancel">書き出しを中止する</button></div><div id="export-last-report" role="status" class="export-last-report" hidden></div></div>
     </section>
     <p class="privacy-note">◈ 端末内で編集　素材を外部サーバーへ送信せず、ブラウザ内で編集します。個人用の試作エディタです。</p>
   </main>
