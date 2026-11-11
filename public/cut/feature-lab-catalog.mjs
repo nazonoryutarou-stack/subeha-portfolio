@@ -121,10 +121,10 @@ export const FEATURE_LAB_CATALOG=Object.freeze([
     "id": "branches",
     "title": "編集履歴の分岐",
     "category": "基盤",
-    "status": "backend",
+    "status": "active",
     "description": "A/B/C編集案を独立保存して切り替える。",
     "implementation": "immutable command log",
-    "action": ""
+    "action": "branches"
   },
   {
     "id": "rotoscope",
