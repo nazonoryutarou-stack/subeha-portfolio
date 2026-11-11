@@ -13,3 +13,24 @@
 .cut-fx-unit{background:#2e2e36;border:1px solid #4e4e59;border-radius:11px;padding:9px;margin-bottom:8px}.cut-fx-unit>header{display:flex;align-items:center;justify-content:space-between;font-size:12px}.cut-fx-unit header button{min-width:30px;min-height:28px;border:0;background:#45454f;color:white;border-radius:6px;margin-left:4px}
 .cut-fx-unit label{margin:10px 0 7px}.cut-fx-unit output{color:#ff829b}.cut-fx-keys{display:flex;flex-wrap:wrap;gap:5px}.cut-fx-keys button{background:#393944;border:1px solid #62626a;border-radius:7px;color:white;padding:7px;font-size:10px}
 .cut-fx-unit small{display:block;margin-top:8px;color:#aaa;font-size:10px}.cut-fx-empty{padding:13px;color:#aaa;font-size:12px}
+
+/* v1.6: touch-friendly filter layers */
+#cut-fx-compare{font-size:11px!important;min-width:66px!important;border:1px solid #72727b!important;background:#3a3a43!important;touch-action:none;user-select:none}
+#cut-fx-compare.pressed{background:#fa566e!important;border-color:#fff!important}
+.cut-fx-tabs{overflow-x:auto;scrollbar-width:none}.cut-fx-tabs button{flex:0 0 auto;min-width:76px}
+.cut-filter-picker{display:flex;gap:7px;overflow-x:auto;padding:7px 0 14px;scrollbar-width:none}
+.cut-filter-picker button{flex:0 0 84px;display:flex;flex-direction:column;align-items:center;gap:6px;white-space:nowrap;color:#fafafa;background:#383941;border:1px solid #656673;padding:11px;border-radius:11px;font-size:12px;min-height:42px}
+.cut-filter-row{background:#303039;border:1px solid #4f505a;padding:11px 9px 12px;margin:0 0 8px;border-radius:11px}
+.cut-filter-row.is-off{opacity:.55}.cut-filter-row.drop-target{outline:2px solid #ff697d}
+.cut-filter-row header{display:flex;align-items:center;gap:7px}.cut-filter-row header strong{font-size:12px;flex:1}.cut-filter-buttons{display:flex;gap:3px}
+.cut-filter-buttons button{min-width:30px;min-height:31px;border-radius:8px;background:#494a55;color:#f9f9fc;border:0;font-size:16px}
+.cut-filter-order{color:#d6c3d0;font-size:23px;display:grid;place-items:center;width:30px;min-height:38px;touch-action:none;user-select:none;cursor:grab}
+.cut-filter-order.dragging{color:#ff788b}
+.cut-filter-row label{display:grid;grid-template-columns:1fr auto;gap:7px;font-size:12px;margin-top:12px}.cut-filter-row input{grid-column:1/-1;width:100%;height:26px;accent-color:#fe5874;touch-action:pan-x}
+.cut-filter-row output{color:#ffc1cb}.cut-filter-bottom{display:flex;gap:8px;margin-top:12px}.cut-filter-bottom button{flex:1;min-height:44px;border-radius:10px;background:#3b3b47;border:1px solid #5a5b68;color:#fafafa;font-size:11px;padding:8px}
+.cut-filter-bottom .cut-fx-danger{margin-top:0;flex:0 0 40%}.cut-filter-legacy{background:#433e34;color:#f6e3ae;border-radius:9px;padding:10px;font-size:11px}.cut-filter-legacy button{padding:6px;color:white;background:#75623c;border:0;border-radius:6px}
+
+.cut-filter-thumbnail{display:block;width:60px;height:51px;background:linear-gradient(45deg,#a8335f,#7aaabf);background-size:cover;background-position:center;border-radius:6px}
+
+#cut-fx-lab>header{position:sticky;top:-8px;z-index:5;background:#24242b;border-bottom:1px solid #393941}
+#cut-fx-lab .cut-fx-tabs{position:sticky;top:32px;z-index:4;background:#24242b}
