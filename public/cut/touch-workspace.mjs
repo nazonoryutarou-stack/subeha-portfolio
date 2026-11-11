@@ -275,6 +275,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
  const pointDistance=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
  const pointAngle=(a,b)=>Math.atan2(b.clientY-a.clientY,b.clientX-a.clientX)*180/Math.PI;
  canvas.addEventListener('pointerdown',e=>{
+   if(window.__subehaCGTouchActive)return;
    const obj=activeTransform();if(!obj)return;
    const point=pointerPos(e),props=transformedProps(obj);
    const allowed=fingers.size>0 || (Math.abs(point.x-props.x)<Math.max(.09,(props.scale||.4)*.65)&&Math.abs(point.y-props.y)<Math.max(.07,(props.scale||.4)*.65));

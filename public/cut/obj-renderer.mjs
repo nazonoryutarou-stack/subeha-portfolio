@@ -1,6 +1,6 @@
 /** Minimal local WebGL OBJ renderer. Flat/vertex normals, diffuse + specular lighting. */
 import {evaluateCG} from './obj-core.mjs';
-const VS=`attribute vec3 aPos;attribute vec3 aNormal;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNormal;varying vec3 vWorld;void main(){vec4 w=uModel*vec4(aPos,1.);vWorld=w.xyz;vNormal=mat3(uModel)*aNormal;gl_Position=uMVP*vec4(aPos,1.);}`;
+const VS=`attribute vec3 aPos;attribute vec3 aNormal;attribute vec3 aMouth;uniform float uMouth;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNormal;varying vec3 vWorld;void main(){vec3 posed=aPos+aMouth*uMouth;vec4 w=uModel*vec4(posed,1.);vWorld=w.xyz;vNormal=mat3(uModel)*aNormal;gl_Position=uMVP*vec4(posed,1.);}`;
 const FS=`precision mediump float;varying vec3 vNormal;varying vec3 vWorld;uniform vec3 uColor;uniform vec3 uLight;uniform vec3 uEye;void main(){vec3 n=normalize(vNormal);vec3 l=normalize(uLight-vWorld);float diff=max(dot(n,l),0.);vec3 h=normalize(l+normalize(uEye-vWorld));float spec=pow(max(dot(n,h),0.),24.);vec3 color=uColor*(.23+.78*diff)+vec3(.78)*spec*.33;gl_FragColor=vec4(pow(clamp(color,0.,1.),vec3(.92)),1.);}`;
 const rad=n=>n*Math.PI/180;
 export function multiply(a,b){const o=new Float32Array(16);for(let col=0;col<4;col++)for(let row=0;row<4;row++)for(let k=0;k<4;k++)o[col*4+row]+=a[k*4+row]*b[col*4+k];return o;}
@@ -18,23 +18,28 @@ export function createOBJRenderer({width=405,height=720}={}){
  const program=gl.createProgram();gl.attachShader(program,compile(gl,gl.VERTEX_SHADER,VS));gl.attachShader(program,compile(gl,gl.FRAGMENT_SHADER,FS));gl.linkProgram(program);
  if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
  gl.useProgram(program);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
- const attrPos=gl.getAttribLocation(program,'aPos'),attrNor=gl.getAttribLocation(program,'aNormal');
- const un={mvp:gl.getUniformLocation(program,'uMVP'),model:gl.getUniformLocation(program,'uModel'),color:gl.getUniformLocation(program,'uColor'),light:gl.getUniformLocation(program,'uLight'),eye:gl.getUniformLocation(program,'uEye')};
+ const attrPos=gl.getAttribLocation(program,'aPos'),attrNor=gl.getAttribLocation(program,'aNormal'),attrMouth=gl.getAttribLocation(program,'aMouth');
+ const un={mvp:gl.getUniformLocation(program,'uMVP'),model:gl.getUniformLocation(program,'uModel'),color:gl.getUniformLocation(program,'uColor'),light:gl.getUniformLocation(program,'uLight'),eye:gl.getUniformLocation(program,'uEye'),mouth:gl.getUniformLocation(program,'uMouth')};
  const meshes=new Map();
  function register(id,geometry){if(meshes.has(id))return;
- const v=gl.createBuffer(),n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,v);gl.bufferData(gl.ARRAY_BUFFER,geometry.positions,gl.STATIC_DRAW);
- gl.bindBuffer(gl.ARRAY_BUFFER,n);gl.bufferData(gl.ARRAY_BUFFER,geometry.normals,gl.STATIC_DRAW);meshes.set(id,{v,n,count:geometry.positions.length/3});}
- function render(scene,id,at,w,h){const mesh=meshes.get(id);if(!mesh)return null;
+ const v=gl.createBuffer(),n=gl.createBuffer(),mouth=geometry.mouthDeltas?.length===geometry.positions.length?gl.createBuffer():null;
+ gl.bindBuffer(gl.ARRAY_BUFFER,v);gl.bufferData(gl.ARRAY_BUFFER,geometry.positions,gl.STATIC_DRAW);
+ gl.bindBuffer(gl.ARRAY_BUFFER,n);gl.bufferData(gl.ARRAY_BUFFER,geometry.normals,gl.STATIC_DRAW);
+ if(mouth){gl.bindBuffer(gl.ARRAY_BUFFER,mouth);gl.bufferData(gl.ARRAY_BUFFER,geometry.mouthDeltas,gl.STATIC_DRAW);}
+ meshes.set(id,{v,n,mouth,count:geometry.positions.length/3});}
+ function render(scene,id,at,w,h,{mouthOpen=0}={}){const mesh=meshes.get(id);if(!mesh)return null;
  const aspect=w/h,edge=Math.min(900,Math.max(w,h)),sizeW=Math.max(1,Math.round(w*edge/Math.max(w,h))),sizeH=Math.max(1,Math.round(h*edge/Math.max(w,h)));
  if(canvas.width!==sizeW||canvas.height!==sizeH){canvas.width=sizeW;canvas.height=sizeH;}
  gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
  const p=evaluateCG(scene,at),m=modelMatrix(p),pv=multiply(perspective(rad(44),aspect),viewMatrix(p.camera)),mvp=multiply(pv,m);
  gl.useProgram(program);gl.uniformMatrix4fv(un.mvp,false,mvp);gl.uniformMatrix4fv(un.model,false,m);
- gl.uniform3fv(un.color,new Float32Array(hex(scene.color)));gl.uniform3fv(un.light,new Float32Array([Math.cos(rad(p.light))*4,4,Math.sin(rad(p.light))*4+4]));gl.uniform3fv(un.eye,new Float32Array([0,0,p.camera]));
+ gl.uniform3fv(un.color,new Float32Array(hex(scene.color)));gl.uniform3fv(un.light,new Float32Array([Math.cos(rad(p.light))*4,4,Math.sin(rad(p.light))*4+4]));gl.uniform3fv(un.eye,new Float32Array([0,0,p.camera]));gl.uniform1f(un.mouth,mesh.mouth?Math.max(0,Math.min(1,mouthOpen)):0);
  gl.bindBuffer(gl.ARRAY_BUFFER,mesh.v);gl.vertexAttribPointer(attrPos,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(attrPos);
  gl.bindBuffer(gl.ARRAY_BUFFER,mesh.n);gl.vertexAttribPointer(attrNor,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(attrNor);
+ if(mesh.mouth){gl.bindBuffer(gl.ARRAY_BUFFER,mesh.mouth);gl.vertexAttribPointer(attrMouth,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(attrMouth);}
+ else{gl.disableVertexAttribArray(attrMouth);gl.vertexAttrib3f(attrMouth,0,0,0);}
  gl.drawArrays(gl.TRIANGLES,0,mesh.count);gl.flush();return canvas;}
- function dispose(){for(const m of meshes.values()){gl.deleteBuffer(m.v);gl.deleteBuffer(m.n);}meshes.clear();gl.deleteProgram(program);}
+ function dispose(){for(const m of meshes.values()){gl.deleteBuffer(m.v);gl.deleteBuffer(m.n);if(m.mouth)gl.deleteBuffer(m.mouth);}meshes.clear();gl.deleteProgram(program);}
  return {canvas,register,render,dispose};
 }
 
@@ -43,12 +48,12 @@ export function createSoftwareOBJRenderer(canvas=document.createElement('canvas'
  const meshes=new Map(),c=canvas.getContext('2d',{alpha:true});if(!c)throw Error('2D描画が利用できません');
  const MAX_FACES=2400;
  return {canvas,backend:'canvas2d-fallback',register(id,geo){meshes.set(id,geo);},
- render(scene,id,at,w,h){const geo=meshes.get(id);if(!geo)return null;
+ render(scene,id,at,w,h,{mouthOpen=0}={}){const geo=meshes.get(id);if(!geo)return null;
   const edge=Math.min(780,Math.max(w,h));canvas.width=Math.max(1,Math.round(w*edge/Math.max(w,h)));canvas.height=Math.max(1,Math.round(h*edge/Math.max(w,h)));
   const W=canvas.width,H=canvas.height,p=evaluateCG(scene,at),a=rad(p.yaw),b=rad(p.pitch),ca=Math.cos(a),sa=Math.sin(a),cb=Math.cos(b),sb=Math.sin(b),factor=H*.5/Math.tan(rad(22));
   c.clearRect(0,0,W,H);
   const tri=geo.positions,frames=[],stride=Math.max(1,Math.ceil(tri.length/9/MAX_FACES));const light=[Math.cos(rad(p.light))*.6,.7,Math.sin(rad(p.light))*.6+.7],color=hex(scene.color);
-  function transform(i){let x=tri[i]*p.scale,y=tri[i+1]*p.scale,z=tri[i+2]*p.scale;
+  function transform(i){const morph=geo.mouthDeltas,blend=Math.max(0,Math.min(1,mouthOpen));let x=(tri[i]+(morph?.[i]||0)*blend)*p.scale,y=(tri[i+1]+(morph?.[i+1]||0)*blend)*p.scale,z=(tri[i+2]+(morph?.[i+2]||0)*blend)*p.scale;
    const yy=y*cb-z*sb,zz=y*sb+z*cb,xx=x*ca+zz*sa,z2=-x*sa+zz*ca;
    return [xx+p.x,yy+p.y,z2];}
   for(let t=0;t<tri.length/9;t+=stride){const i=t*9,v=[transform(i),transform(i+3),transform(i+6)];const ds=v.map(x=>p.camera-x[2]);if(ds.some(d=>d<=.05))continue;

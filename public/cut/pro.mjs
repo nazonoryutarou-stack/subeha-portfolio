@@ -1,5 +1,6 @@
 import {mountEngineHub} from './engine-hub-ui.mjs';
 import {mountCGStudio} from './cg-studio.mjs';
+import {makeNarrationCues} from './narration-cues.mjs';
 import {drawPipFrame} from './pip-style.mjs'; // read-only compatibility for pre-v1.2 projects
 import {OVERLAY_MOTIONS,overlayMotion} from './overlay-motion.mjs';
 /* SUBEHA CUT Pro 0.3 - original offline compositing and tracking studio. */
@@ -132,7 +133,7 @@ function renderTimeline(){
   }finally{syncing=false;}
 }
 window.__subehaSelectLayer=(id)=>{selectedOverlay=id;renderTimeline();};
-window.__subehaDirectSuspend=()=>editMode!==null;
+window.__subehaDirectSuspend=()=>editMode!==null||window.__subehaCGTouchActive===true;
 function selectedLayer(){return (state.project.overlays||[]).find(x=>x.id===selectedOverlay)||null;}
 async function importOverlay(files){
   if(!state.project.clips.length){toast('先にベースの動画・画像を追加してください');return;}
@@ -329,7 +330,12 @@ async function restoreArchive(file){
     for(const layer of loaded.overlays||[])layer.assetId=idMap.get(layer.assetId);
     for(const track of loaded.audioTracks||[])track.assetId=idMap.get(track.assetId);
     if(loaded.music)loaded.music.assetId=idMap.get(loaded.music.assetId);
-    for(const scene of loaded.cgScenes||[])scene.modelAssetId=idMap.get(scene.modelAssetId);
+    for(const scene of loaded.cgScenes||[]){
+      scene.modelAssetId=idMap.get(scene.modelAssetId);
+      if(scene.lipSyncAssetId)scene.lipSyncAssetId=idMap.get(scene.lipSyncAssetId)||null;
+    }
+    for(const credit of loaded.voiceCredits||[])if(credit.assetId)credit.assetId=idMap.get(credit.assetId)||null;
+    for(const credit of loaded.stockCredits||[])if(credit.assetId)credit.assetId=idMap.get(credit.assetId)||null;
     for(const a of assets){const id=idMap.get(a.id);await buildAsset(id,a.blob,a.type,a.name);await window.__subehaSaveAsset(id,a.blob,a.type,a.name);}
     api.loadProjectSnapshot(loaded);selectedOverlay=null;selectedAudio=null;selectedCue=null;
     for(const a of assets)if(a.type==='video')makeOverlayVideo(state.assets.get(idMap.get(a.id)));
@@ -646,15 +652,24 @@ function mount(){
   for(const speed of [0.25,0.75,1.25,3,4]){const segments=$('speed-segments');if(segments&&!segments.querySelector('[data-speed="'+speed+'"]')){const b=document.createElement('button');b.dataset.speed=speed;b.textContent=speed+'×';b.onclick=()=>updateClip(c=>c.speed=speed);segments.append(b);}}
   const nativeTabs=document.querySelectorAll('.nav-tab[data-tab]');nativeTabs[0]?.classList.add('active');
   // Import synthetic narration as a first-class multi-track clip, not legacy one-BGM replacement.
-  window.__subehaImportVoiceFile=async(file,creditInfo)=>{
+  window.__subehaImportVoiceFile=async(file,creditInfo,options={})=>{
     if(!state.project.clips.length)throw Error('先に動画か写真を読み込んでください');
     const before=new Set(state.assets.keys());await importAudioTracks([file]);
     const imported=[...state.assets].find(([id,a])=>!before.has(id)&&a.name===file.name);
     if(!imported)throw Error('音声トラックに取り込めませんでした');
     const track=state.project.audioTracks?.find(x=>x.assetId===imported[0]);if(track)track.role='voice';
+    if(track&&options.autoCaptions!==false&&creditInfo?.text){
+      const cues=makeNarrationCues(creditInfo.text,{start:track.start,duration:track.duration,idFactory:newID});
+      state.project.captions ||= [];
+      state.project.captions.push(...cues);state.project.captions.sort((a,b)=>a.start-b.start);
+      state.project.captionEnabled=true;
+    }
+    let linked=false;
+    if(options.linkLipSync!==false)linked=window.__subehaLinkVoiceToCG?.(imported[0])===true;
+
     state.project.voiceCredits ||= [];
-    state.project.voiceCredits.push({assetId:imported[0],...creditInfo,createdAt:new Date().toISOString()});save();
-    return imported[0];
+    state.project.voiceCredits.push({assetId:imported[0],...creditInfo,createdAt:new Date().toISOString()});save();renderTimeline();draw();
+    return {assetId:imported[0],trackId:track?.id,captions:state.project.captions?.filter(c=>c.start>=track?.start&&c.end<=track.start+track.duration).length||0,linked};
   };
   installTrashZone(api);
   touchWorkspace=mountTouchWorkspace({api,
