@@ -38,7 +38,7 @@ export function detectBeats(windows,{sensitivity=1.25,minGap=.29}={}){
  const sorted=flux.slice().sort((a,b)=>a-b);
  const median=sorted[Math.floor(sorted.length*.5)]||0;
  const high=sorted[Math.floor(sorted.length*.85)]||0;
- const threshold=Math.max(.04,median+(high-median)*Math.max(.4,Math.min(2,sensitivity)));
+ const threshold=Math.max(.04,median+(high-median)*(.32+Math.max(.4,Math.min(2,sensitivity))*.30));
  const beats=[];let last=-Infinity;
  for(let i=2;i<flux.length-2;i++){
   if(flux[i]<threshold||flux[i]<flux[i-1]||flux[i]<flux[i+1])continue;
