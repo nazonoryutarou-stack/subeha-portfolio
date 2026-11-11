@@ -1,0 +1,11 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {parseStaticGLB,describeVRMRights,VRM_LIMIT_BYTES} from '../vrm-lite.mjs';
+function glb(model={}){
+ const j={asset:{version:'2.0'},buffers:[{byteLength:42}],bufferViews:[{buffer:0,byteOffset:0,byteLength:36},{buffer:0,byteOffset:36,byteLength:6}],accessors:[{bufferView:0,componentType:5126,type:'VEC3',count:3},{bufferView:1,componentType:5123,type:'SCALAR',count:3}],meshes:[{primitives:[{attributes:{POSITION:0},indices:1}]}],nodes:[{mesh:0}],scenes:[{nodes:[0]}],scene:0,...model};
+ const json=new TextEncoder().encode(JSON.stringify(j));const pad=(4-json.length%4)%4;const jpad=new Uint8Array(json.length+pad).fill(32);jpad.set(json);
+ const b=new Uint8Array(44),v=new DataView(b.buffer);for(const [i,pt] of [0,0,0, 1,0,0, 0,1,0].entries())v.setFloat32(i*4,pt,true);[0,1,2].forEach((i,k)=>v.setUint16(36+k*2,i,true));
+ const out=new ArrayBuffer(12+8+jpad.length+8+b.length),d=new DataView(out),u=new Uint8Array(out);d.setUint32(0,0x46546c67,true);d.setUint32(4,2,true);d.setUint32(8,out.byteLength,true);d.setUint32(12,jpad.length,true);d.setUint32(16,0x4e4f534a,true);u.set(jpad,20);const o=20+jpad.length;d.setUint32(o,b.length,true);d.setUint32(o+4,0x004e4942,true);u.set(b,o+8);return out;
+}
+test('load glTF/VRM static mesh into existing 3D renderer shape',()=>{const geo=parseStaticGLB(glb());assert.equal(geo.triangleCount,1);assert.equal(geo.positions.length,9);assert.equal(geo.normals.length,9);assert.equal(Math.max(...geo.positions),1);});
+test('VRM1 license default forbids religious use; explicit allow shown',()=>{const base={VRMC_vrm:{meta:{name:'demo',authors:['artist'],commercialUsage:'corporation'}}};const v=describeVRMRights({extensions:base});assert.equal(v.religious,'不可');assert.equal(v.commercial,'法人の商用利用も許可');assert.equal(v.name,'demo');const yes=describeVRMRights({extensions:{VRMC_vrm:{meta:{...base.VRMC_vrm.meta,allowPoliticalOrReligiousUsage:true}}}});assert.equal(yes.religious,'許可');});
+test('reject invalid GLB, excessive files, and unsupported compression',()=>{assert.throws(()=>parseStaticGLB(new ArrayBuffer(80)),/GLB|VRM|glTF/);assert.ok(VRM_LIMIT_BYTES>12e6);assert.throws(()=>parseStaticGLB(glb({meshes:[{primitives:[{attributes:{POSITION:0},indices:1,extensions:{KHR_draco_mesh_compression:{}}}]}]})),/圧縮/);});

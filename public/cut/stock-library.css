@@ -31,3 +31,7 @@
 @media(min-width:640px){.stock-results{grid-template-columns:repeat(3,minmax(0,1fr))}.stock-preview{height:142px}}
 
 .stock-credits-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.stock-credits-toolbar button{background:#393942;color:#e5e5e8;border:1px solid #676771;border-radius:7px;font-size:11px;padding:8px}
+
+#stock-catalog-links{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 12px}
+.stock-source-row{flex:1 1 160px;display:flex;flex-direction:column;gap:3px;background:#292b32;border:1px solid #41434e;border-radius:9px;padding:9px}
+.stock-source-row a{font-size:12px;color:#a7dbff;font-weight:700;text-decoration:none}.stock-source-row small{font-size:10px;color:#d0ccd2}

@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {normalizeLibraryKind,sourceSearchLinks,STOCK_EXTERNAL_CATALOG} from '../stock-sources.mjs';
+test('music and sound effects use CC0 audio search, model catalogs are explicit external links',()=>{assert.equal(normalizeLibraryKind('sfx'),'audio');assert.equal(normalizeLibraryKind('music'),'audio');assert.ok(STOCK_EXTERNAL_CATALOG.model.some(x=>x.key==='polyModels'));assert.ok(STOCK_EXTERNAL_CATALOG.vrm.some(x=>x.key==='vroid'));const links=sourceSearchLinks('space');assert.match(links.polyModels,/polyhaven/);assert.match(links.vroid,/vroid/);assert.match(links.nasa,/nasa/);assert.match(links.freesound,/freesound/);});
