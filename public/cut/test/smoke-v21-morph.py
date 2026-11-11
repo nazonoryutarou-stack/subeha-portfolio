@@ -1,4 +1,4 @@
-import asyncio,importlib.util,json,struct
+import asyncio,importlib.util,json,struct,io,wave,math
 from pathlib import Path
 from playwright.async_api import async_playwright
 root=Path(__file__).resolve().parents[1]
@@ -31,6 +31,19 @@ async def main():
   data=await page.evaluate('''() => {const a=window.__subehaCut,s=a.state.project.cgScenes[0],r=window.__subehaCGAPI.getRenderer();const one=r.render(s,s.modelAssetId,0,720,1280,{mouthOpen:0})?.toDataURL()||'';const two=r.render(s,s.modelAssetId,0,720,1280,{mouthOpen:1})?.toDataURL()||'';return {backend:r.backend||'WebGL',oneLength:one.length,twoLength:two.length,changed:one!==two,scene:s.id};}''')
   print('MORPH RENDER',data)
   assert data['oneLength']>1000 and data['twoLength']>1000 and data['changed'],data
+  # Audio-to-morph render path: silence first half, tone in the second half.
+  buf=io.BytesIO()
+  with wave.open(buf,'wb') as w:
+   w.setnchannels(1);w.setsampwidth(2);w.setframerate(16000)
+   samples=[0 if i<8000 else int(math.sin(i*2*math.pi*250/16000)*19000) for i in range(16000)]
+   w.writeframes(b''.join(struct.pack('<h',x) for x in samples))
+  await page.locator('#pro-audio-picker').set_input_files({'name':'lip.wav','mimeType':'audio/wav','buffer':buf.getvalue()})
+  await page.wait_for_function('window.__subehaCut.state.project.audioTracks.length===1',timeout=9000)
+  await page.evaluate('''() => {const a=window.__subehaCut,s=a.state.project.cgScenes[0];s.motion='static';s.lipEnabled=true;window.__subehaLinkVoiceToCG(a.state.project.audioTracks[0].assetId);}''')
+  await page.wait_for_timeout(450)
+  frames=await page.evaluate('''() => {const a=window.__subehaCut;a.state.current=.12;a.draw();const one=a.canvas.toDataURL();a.state.current=.72;a.draw();const two=a.canvas.toDataURL();return {different:one!==two,one:one.length,two:two.length};}''')
+  print('WAV-DRIVEN 3D PREVIEW',frames)
+  assert frames['one']>2000 and frames['different'],frames
   assert not errors,errors
   await b.close()
 if __name__=='__main__':asyncio.run(main())
