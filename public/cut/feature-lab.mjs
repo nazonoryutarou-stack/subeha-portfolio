@@ -26,7 +26,7 @@ function showCatalog(){
  const intro=node('p','lab-intro',FEATURE_LAB_CATALOG.length+'機能を登録：利用可能 '+sum.active+' ／ 一部利用可能 '+sum.partial+' ／ 接続・実装待ち '+sum.backend+' ／ 研究段階 '+sum.research);
  host.append(intro);
  const quick=node('div','lab-quick');host.append(quick);
- for(const [id,label] of [['beat','♫ ビート解析'],['silence','◌ 無音検出'],['scenes','▥ 場面検出'],['transcript','T 字幕編集'],['command','⌘ 編集コマンド']])addButton(quick,label,()=>showTool(id));
+ for(const [id,label] of [['beat','♫ ビート解析'],['silence','◌ 無音検出'],['scenes','▥ 場面検出'],['transcript','T 字幕編集'],['command','⌘ 編集コマンド'],['branches','◇ 編集分岐']])addButton(quick,label,()=>showTool(id));
  const search=node('input','lab-search');search.type='search';search.placeholder='機能を検索';search.value=query;search.setAttribute('aria-label','機能を検索');
  search.oninput=()=>{query=search.value;renderFeatures(list);};host.append(search);
  const tabs=node('div','lab-tabs');host.append(tabs);
@@ -65,7 +65,7 @@ function showDetail(f){
  else message(host,'この機能は未接続です。必要なモデル・ネイティブ処理・API・権利条件を満たすまでは実行できません。');
 }
 function execute(action){
- if(['beat','silence','scenes','transcript','command'].includes(action))return showTool(action);
+ if(['beat','silence','scenes','transcript','command','branches'].includes(action))return showTool(action);
  close();
  if(action==='fx'){if(window.__subehaFXOpen)window.__subehaFXOpen('effects');else api()?.toast('エフェクトを開けません');return;}
  if(action==='3d'){if(window.__subehaCGOpen)window.__subehaCGOpen();else api()?.toast('3D CGを開けません');return;}
@@ -76,12 +76,13 @@ function execute(action){
 function showTool(name){
  const host=container();
  addButton(host,'‹ 全機能へ',showCatalog,'lab-back');
- const titles={beat:'ビート同期・自動カット',silence:'無音区間の検出',scenes:'シーン切替の検出',transcript:'字幕から映像へジャンプ',command:'日本語の編集命令'};
+ const titles={beat:'ビート同期・自動カット',silence:'無音区間の検出',scenes:'シーン切替の検出',transcript:'字幕から映像へジャンプ',command:'日本語の編集命令',branches:'編集案をA/B/Cに分岐保存'};
  host.append(node('h3','lab-title',titles[name]));
  if(name==='beat'||name==='silence')return audioTool(name,host);
  if(name==='scenes')return sceneTool(host);
  if(name==='transcript')return transcriptTool(host);
  if(name==='command')return commandTool(host);
+ if(name==='branches')return branchTool(host);
 }
 function audioSources(){
  const p=api()?.state?.project,a=api()?.state?.assets;if(!p||!a)return [];
@@ -227,6 +228,38 @@ function transcriptTool(host){
    },'lab-primary');
   }catch(e){status.textContent='読み込み失敗: '+(e.message||e);}
  };
+}
+function branchTool(host){
+ message(host,'現在の編集状態をA/B/Cの3案として保存します。元の動画素材は共有し、編集メタデータだけを複製します。');
+ const a=api();if(!a)return message(host,'編集エンジンが起動していません。');
+ if(!a.state.project.clips.length)return message(host,'まず素材を取り込んでください。');
+ const list=node('div','lab-transcript');host.append(list);
+ const current=()=>Array.isArray(a.state.project.editBranches)?a.state.project.editBranches:[];
+ const refresh=()=>{
+  list.replaceChildren();
+  for(const key of ['A','B','C']){
+   const saved=current().find(x=>x.key===key);
+   const row=node('div','lab-branch');const title=node('strong','',key+'案 '+(saved?'（保存済）':'（未保存）'));row.append(title);
+   const controls=node('div','lab-controls');row.append(controls);
+   addButton(controls,saved?'現在の状態で上書き':'この案に現在を保存',()=>{
+    if(a.state.recording)return a.toast('書き出し中は変更できません');
+    if(saved&&!confirm(key+'案を上書きします。よろしいですか？'))return;
+    const snapshot=JSON.parse(JSON.stringify({...a.state.project,editBranches:[]}));
+    const branches=current().filter(x=>x.key!==key);
+    branches.push({key,createdAt:new Date().toISOString(),snapshot});
+    a.state.project.editBranches=branches;a.save();refresh();a.toast(key+'案を保存しました');
+   },'lab-btn');
+   if(saved)addButton(controls,key+'案に切り替える',()=>{
+    if(a.state.recording)return a.toast('書き出し中は切替できません');
+    if(!confirm(key+'案に切り替えます。現在の未保存変更を別の案に保存する場合は先に保存してください。'))return;
+    const branches=current().map(x=>structuredClone(x));
+    try{a.loadProjectSnapshot({...structuredClone(saved.snapshot),editBranches:branches});refresh();a.toast(key+'案へ切り替えました');}
+    catch(e){a.toast('切替失敗：'+e.message);}
+   },'lab-primary');
+   list.append(row);
+  }
+ };
+ refresh();
 }
 function commandTool(host){
  message(host,'対応例：「3秒に分割」「速度を2倍」「9:16に」「5秒に移動」「テキスト「こんにちは」を追加」「ミュート」。実行前に変更内容を表示します。');
