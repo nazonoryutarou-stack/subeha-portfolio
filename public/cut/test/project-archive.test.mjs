@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {createProjectArchive,readProjectArchive,crc32,projectAssetIds} from '../project-archive.mjs';
 assert.equal(crc32(new TextEncoder().encode('123456789')),0xcbf43926);
-const p={name:'編集の復元',clips:[{id:'a',assetId:'123-ab'}],overlays:[],audioTracks:[{assetId:'music01'}],music:null,texts:[],captions:[{start:1,end:2,text:'文字'}]};
+const p={name:'編集の復元',clips:[{id:'a',assetId:'123-ab',filterStack:[{id:'filter-1',type:'monochrome',amount:.8,enabled:true},{id:'filter-2',type:'sepia',amount:.2,enabled:false}]}],overlays:[],audioTracks:[{assetId:'music01'}],music:null,texts:[],captions:[{start:1,end:2,text:'文字'}]};
 assert.deepEqual(projectAssetIds(p),['123-ab','music01']);
 const media=new Map([['123-ab',{blob:new Blob(['video content'],{type:'video/mp4'}),name:'映像.mp4',type:'video'}],['music01',{blob:new Blob(['audio content'],{type:'audio/wav'}),name:'声.wav',type:'audio'}]]);
 const zip=await createProjectArchive(p,media);assert.equal(zip.type,'application/zip');
