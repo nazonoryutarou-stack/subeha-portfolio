@@ -1,0 +1,44 @@
+/* Mobile feature laboratory. Isolated styles: does not change the edit timeline. */
+.lab-overlay[hidden]{display:none!important}
+.lab-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;touch-action:pan-y}
+.lab-sheet{width:min(100%,860px);height:min(88dvh,880px);display:flex;flex-direction:column;overflow:hidden;background:#1d1d22;color:#f3f3f6;border:1px solid #45444e;border-radius:18px 18px 0 0;box-shadow:0 -20px 55px #000c;font:400 13px/1.5 system-ui,-apple-system,sans-serif;padding-bottom:env(safe-area-inset-bottom)}
+.lab-head{display:flex;align-items:center;justify-content:space-between;padding:17px 16px 12px;border-bottom:1px solid #35353b;background:#24242a}
+.lab-head h2{font-size:17px;font-weight:740;margin:0 0 2px}
+.lab-head small{font-size:11px;color:#aaaab4}
+.lab-head button{font-size:28px;min-width:44px;min-height:44px;background:transparent;color:#f7f7f7}
+#lab-content{overflow:auto;overscroll-behavior:contain;padding:15px 14px 32px;flex:1}
+.lab-intro{margin:0 0 14px;line-height:1.65;color:#bfbfc8}
+.lab-quick{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.lab-btn,.lab-primary,.lab-back,.lab-marker,.lab-transcript-row{background:#303038;border:1px solid #55545f;color:#f8f8f9;border-radius:9px;padding:11px 12px;min-height:42px;font-size:12px;text-align:center}
+.lab-btn:active,.lab-primary:active,.lab-feature:active{filter:brightness(1.2)}
+.lab-primary{background:#e64f66;border-color:#e64f66;font-weight:700;color:#fff}
+.lab-btn:disabled,.lab-primary:disabled{opacity:.45}
+.lab-back{display:block;background:transparent;border:0;padding:9px 1px;color:#d2d2d9;text-align:left;margin-bottom:4px}
+.lab-title{font-size:17px;font-weight:720;margin:8px 0 10px;color:#fff}
+.lab-search,.lab-select,.lab-file,.lab-command{width:100%;min-height:45px;background:#292930;border:1px solid #62616b;color:#fff;border-radius:9px;padding:11px 12px;font-size:14px;outline:none}
+.lab-command{resize:vertical;min-height:85px;line-height:1.6}
+.lab-search:focus,.lab-select:focus,.lab-command:focus{border-color:#f46677}
+.lab-tabs{display:flex;gap:6px;margin:12px 0;overflow-x:auto;scrollbar-width:none}
+.lab-tabs .lab-btn{flex:0 0 auto;min-height:34px;padding:7px 11px;color:#d2d1d6}
+.lab-tabs .lab-btn.active{background:#9e3e54;border-color:#f15d70;color:#fff}
+.lab-list{display:grid;grid-template-columns:1fr;gap:7px}
+.lab-feature{display:grid;grid-template-columns:1fr auto;grid-template-areas:"title status" "sub sub";gap:4px 8px;width:100%;text-align:left;padding:12px 11px;background:#28282f;border:1px solid #393942;border-radius:9px;color:#efeff2}
+.lab-feature-title{grid-area:title;font-weight:680;font-size:13px}
+.lab-status{grid-area:status;font-size:10px;white-space:nowrap;padding:2px 7px;background:#34343d;color:#c9c9d4;border-radius:6px}
+.lab-status.active,.lab-tag.active{color:#b4efce}
+.lab-status.partial,.lab-tag.partial{color:#f4d0a1}
+.lab-status.backend,.lab-tag.backend{color:#c1c1c9}
+.lab-status.research,.lab-tag.research{color:#c5b5f2}
+.lab-feature-sub{grid-area:sub;line-height:1.55;font-size:11px;color:#a9a9b5}
+.lab-tag{font-size:11px}
+.lab-note{color:#c3c1cb;line-height:1.7;margin:9px 0 14px;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.lab-foot{margin-top:15px;border-top:1px solid #3c3c45;padding-top:13px;display:grid;gap:8px}
+.lab-controls{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}
+.lab-field{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:#ddd;padding:8px 0}
+.lab-field input{flex:1 1 100%;accent-color:#ec5a6e;min-height:22px}
+.lab-field output{margin-left:auto;color:#ff8392}
+.lab-markers{padding-top:8px;margin-top:13px;border-top:1px solid #41414a}
+.lab-marker-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.lab-marker-list,.lab-transcript{display:grid;gap:6px;max-height:40dvh;overflow-y:auto}
+.lab-marker,.lab-transcript-row{text-align:left;min-height:39px;overflow-wrap:anywhere}
+@media(min-width:650px){.lab-list{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-sheet{height:min(90dvh,850px)}}
