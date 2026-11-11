@@ -44,17 +44,31 @@ function transform(v,m){return [m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12],m[1]*v[0]+m[
 function faceNormal(a,b,c){const ab=b.map((n,i)=>n-a[i]),ac=c.map((n,i)=>n-a[i]);const x=ab[1]*ac[2]-ab[2]*ac[1],y=ab[2]*ac[0]-ab[0]*ac[2],z=ab[0]*ac[1]-ab[1]*ac[0],l=Math.hypot(x,y,z)||1;return [x/l,y/l,z/l];}
 export function parseStaticGLB(buffer,{maxTriangles=OBJ_MAX_TRIANGLES}={}){
  const {json:doc,bin}=readGLB(buffer),meshes=doc.meshes||[];if(!meshes.length)throw Error('メッシュが含まれていません');
- const positions=[],normals=[];let triangles=0;let min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
- const emit=(a,b,c)=>{if(++triangles>maxTriangles)throw Error(`表示できる面の上限は${maxTriangles.toLocaleString()}です`);const n=faceNormal(a,b,c);for(const v of [a,b,c]){positions.push(...v);normals.push(...n);for(let k=0;k<3;k++){min[k]=Math.min(min[k],v[k]);max[k]=Math.max(max[k],v[k]);}}};
- function meshDraw(index,m){const mesh=meshes[index];if(!mesh)return;for(const p of mesh.primitives||[]){if(p.mode!==undefined&&p.mode!==4)continue;if(p.extensions?.KHR_draco_mesh_compression||p.extensions?.EXT_meshopt_compression)throw Error('圧縮メッシュは未対応です');
+ const positions=[],normals=[],mouthDeltas=[];let hasMouth=false;let triangles=0;let min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+ const emit=(a,b,c,deltas=null)=>{if(++triangles>maxTriangles)throw Error(`表示できる面の上限は${maxTriangles.toLocaleString()}です`);const n=faceNormal(a,b,c);for(const [j,v] of [a,b,c].entries()){positions.push(...v);normals.push(...n);mouthDeltas.push(...(deltas?.[j]||[0,0,0]));if(deltas)hasMouth=true;for(let k=0;k<3;k++){min[k]=Math.min(min[k],v[k]);max[k]=Math.max(max[k],v[k]);}}};
+ function meshDraw(index,m,nodeIndex){const mesh=meshes[index];if(!mesh)return;for(const p of mesh.primitives||[]){if(p.mode!==undefined&&p.mode!==4)continue;if(p.extensions?.KHR_draco_mesh_compression||p.extensions?.EXT_meshopt_compression)throw Error('圧縮メッシュは未対応です');
  const vertices=readAccessor(doc,bin,p.attributes?.POSITION);if(!vertices.length||vertices[0].length!==3)continue;
+ // VRM 1.0 uses node+target-index expression bindings; VRM 0.x uses mesh+target-index.
+ const vrm1=doc.extensions?.VRMC_vrm?.expressions?.preset?.aa?.morphTargetBinds||[];
+ const vrm0=doc.extensions?.VRM?.blendShapeMaster?.blendShapeGroups||[];
+ const group0=vrm0.find(g=>String(g.presetName||'').toLowerCase()==='a');
+ const binds=[...vrm1.filter(b=>b.node===nodeIndex),...(group0?.binds||[]).filter(b=>b.mesh===index).map(b=>({...b,weight:Number(b.weight??100)/100}))];
+ const mouth=vertices.map(()=>[0,0,0]);let hasPrimitiveMouth=false;
+ for(const binding of binds){const target=p.targets?.[binding.index];if(target?.POSITION===undefined)continue;
+   const shape=readAccessor(doc,bin,target.POSITION);if(shape.length!==vertices.length)continue;
+   const weight=Math.max(0,Math.min(1,Number(binding.weight??1)));
+   for(let i=0;i<vertices.length;i++)for(let k=0;k<3;k++)mouth[i][k]+=shape[i][k]*weight;
+   hasPrimitiveMouth=true;
+ }
  const indices=p.indices!==undefined?readAccessor(doc,bin,p.indices).map(x=>x[0]):vertices.map((_,i)=>i);
- for(let t=0;t+2<indices.length;t+=3){const ids=indices.slice(t,t+3);if(ids.some(i=>!Number.isInteger(i)||i<0||i>=vertices.length))throw Error('三角形の頂点が不正です');emit(...ids.map(i=>transform(vertices[i],m)));}
+ for(let t=0;t+2<indices.length;t+=3){const ids=indices.slice(t,t+3);if(ids.some(i=>!Number.isInteger(i)||i<0||i>=vertices.length))throw Error('三角形の頂点が不正です');emit(...ids.map(i=>transform(vertices[i],m)),hasPrimitiveMouth?ids.map(i=>{
+   const v=mouth[i];return [m[0]*v[0]+m[4]*v[1]+m[8]*v[2],m[1]*v[0]+m[5]*v[1]+m[9]*v[2],m[2]*v[0]+m[6]*v[1]+m[10]*v[2]];
+ }):null);}
  }}
  const nodes=doc.nodes||[],roots=doc.scenes?.[doc.scene||0]?.nodes||nodes.map((_,i)=>i),visited=new Set();
- function visit(index,parent,depth=0){if(depth>64||visited.has(index))return;const node=nodes[index];if(!node)return;visited.add(index);const m=mul(parent,nodeMatrix(node));if(node.mesh!==undefined)meshDraw(node.mesh,m);for(const k of node.children||[])visit(k,m,depth+1);}
- if(nodes.length)roots.forEach(i=>visit(i,identity()));else meshes.forEach((_,i)=>meshDraw(i,identity()));
+ function visit(index,parent,depth=0){if(depth>64||visited.has(index))return;const node=nodes[index];if(!node)return;visited.add(index);const m=mul(parent,nodeMatrix(node));if(node.mesh!==undefined)meshDraw(node.mesh,m,index);for(const k of node.children||[])visit(k,m,depth+1);}
+ if(nodes.length)roots.forEach(i=>visit(i,identity()));else meshes.forEach((_,i)=>meshDraw(i,identity(),null));
  if(!triangles)throw Error('表示できる三角形がありません');const center=min.map((v,k)=>(v+max[k])/2),diameter=Math.max(...max.map((v,k)=>v-min[k]))||1;
- for(let i=0;i<positions.length;i++)positions[i]=(positions[i]-center[i%3])*2/diameter;
- return {positions:new Float32Array(positions),normals:new Float32Array(normals),triangleCount:triangles,center,originalDiameter:diameter,rights:describeVRMRights(doc)};
+ for(let i=0;i<positions.length;i++){positions[i]=(positions[i]-center[i%3])*2/diameter;mouthDeltas[i]=mouthDeltas[i]*2/diameter;}
+ return {mouthDeltas:hasMouth?new Float32Array(mouthDeltas):null,positions:new Float32Array(positions),normals:new Float32Array(normals),triangleCount:triangles,center,originalDiameter:diameter,rights:describeVRMRights(doc)};
 }

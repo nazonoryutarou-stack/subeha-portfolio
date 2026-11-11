@@ -25,6 +25,8 @@ function init(){if($('voice-studio'))return;
  <label>声の高さ <input id="voice-pitch" type="range" min="-0.15" max="0.15" step="0.01" value="0"><output id="voice-pitch-val">0.00</output></label>
  <label>抑揚 <input id="voice-intonation" type="range" min="0.1" max="2" step="0.05" value="1"><output id="voice-intonation-val">1.00</output></label></div>
  <div id="voice-license" class="voice-license"></div><small id="voice-credit"></small>
+ <label class="voice-check"><input type="checkbox" id="voice-auto-captions" checked> 台本から字幕も自動作成する（時刻は目安・編集可能）</label>
+ <label class="voice-check"><input type="checkbox" id="voice-link-cg" checked> 3Dアバターの口パクにも使う（対応するVRMのみ）</label>
  <div class="voice-actions"><button id="voice-generate" type="button" class="voice-primary">🎙 声を生成する</button><button id="voice-append" type="button" disabled>＋ 音声を時間軸に追加</button><button id="voice-save-wav" type="button" disabled>WAVを保存</button><button id="voice-save-credits" type="button">声のクレジット一覧</button></div><audio id="voice-preview" controls hidden></audio>
  <p role="status" id="voice-status" aria-live="polite">音声エンジンへ接続してください。</p>
  <div class="voice-import"><h3>ゆっくり音声（AquesTalk）</h3><p>ゆっくり音声は公式ツール等で作成したWAVを読み込めます。団体利用・広告・収益化用途では所定の使用ライセンスが必要です。東方Project等のキャラクター画像を添える場合はその権利も別途確認してください。</p><a href="${AQUESTALK_LICENSE_URL}" target="_blank" rel="noopener noreferrer">AquesTalk公式の使い方とライセンス</a><button id="voice-add-local" type="button">＋ 作成済みの音声を取り込む</button></div>
@@ -60,8 +62,8 @@ function init(){if($('voice-studio'))return;
  $('voice-append').onclick=async()=>{if(!clip)return;if(!window.__subehaImportVoiceFile){status('映像編集画面を読み込み直してください');return;}
   const button=$('voice-append');button.disabled=true;
   try{const file=new File([clip.blob],clip.filename,{type:'audio/wav'});
-   await window.__subehaImportVoiceFile(file,{provider:'VOICEVOX',voice:clip.speakerName,style:clip.style,credit:clip.credit,licenseUrl:clip.licenseUrl,text:clip.text});
-   status('音声トラックへ追加しました。音量や開始位置を編集できます。');window.__subehaCut.toast('合成した音声を追加しました');
+   const result=await window.__subehaImportVoiceFile(file,{provider:'VOICEVOX',voice:clip.speakerName,style:clip.style,credit:clip.credit,licenseUrl:clip.licenseUrl,text:clip.text},{autoCaptions:$('voice-auto-captions').checked,linkLipSync:$('voice-link-cg').checked});
+   status('音声トラックへ追加しました。'+($('voice-auto-captions').checked?'字幕も自動作成（正確なタイミングは手で調整）しました。':'')+(result.linked?'3D口パクも接続しました。':''));window.__subehaCut.toast('合成した音声を追加しました');
   }catch(err){status('音声の追加に失敗：'+err.message);}finally{button.disabled=false;}
  };
  $('voice-save-wav').onclick=()=>{if(clip)downloadWav(clip.blob,clip.filename);};
