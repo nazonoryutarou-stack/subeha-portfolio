@@ -128,6 +128,8 @@ function renderTimeline(){
     touchWorkspace?.render();
   }finally{syncing=false;}
 }
+window.__subehaSelectLayer=(id)=>{selectedOverlay=id;renderTimeline();};
+window.__subehaDirectSuspend=()=>editMode!==null;
 function selectedLayer(){return (state.project.overlays||[]).find(x=>x.id===selectedOverlay)||null;}
 async function importOverlay(files){
   if(!state.project.clips.length){toast('先にベースの動画・画像を追加してください');return;}

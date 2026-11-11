@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {moveBy,containsRotated,scaleBy,rotateBy,textBounds} from '../direct-geometry.mjs';
+const moved=moveBy({x:.5,y:.7},{x:.1,y:.1},{x:.3,y:.2});assert.ok(Math.abs(moved.x-.7)<1e-9);assert.ok(Math.abs(moved.y-.8)<1e-9);
+assert.equal(scaleBy(40,100,150),60);
+assert.equal(Math.round(rotateBy(0,0,Math.PI/2)),90);
+assert.equal(containsRotated({x:200,y:200,w:120,h:50,rotation:90},{x:200,y:250}),true);
+assert.equal(containsRotated({x:200,y:200,w:120,h:50,rotation:90},{x:280,y:200}),false);
+const ctx={save(){},restore(){},measureText(t){return {width:t.length*30}},set font(v){}};
+const bounds=textBounds(ctx,{width:720,height:1280},{x:.25,y:.7,size:70,text:'字幕',rotation:15});
+assert.equal(bounds.x,180);assert.equal(bounds.y,896);assert.equal(bounds.rotation,15);
+console.log('direct geometry tests PASS');
