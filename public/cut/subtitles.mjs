@@ -1,3 +1,4 @@
+import {layoutTitle,drawTitle} from './title-render.mjs';
 /* SUBEHA CUT v0.4 — timestamp-faithful subtitle ingest and canvas burn-in. No ASR, no cloud. */
 export function parseTimestamp(input) {
   if (typeof input === 'number') return Number.isFinite(input) && input >= 0 ? input : NaN;
@@ -84,37 +85,11 @@ export function captionAppearance(project,cue){
  return {...base,...(cue?.style||{})};
 }
 export function captionLayout(ctx,canvas,project,cue){
- const st=captionAppearance(project,cue),W=canvas.width,H=canvas.height;
- const size=Math.max(12,Math.min(240,Number(st.size)||42))*W/720;
- ctx.save();ctx.font=`800 ${size}px system-ui,'Noto Sans JP',sans-serif`;
- const maxWidth=W*.88,lines=[];
- for(const para of String(cue.text||'').split('\n')){
-  let line='';for(const char of para){if(line&&ctx.measureText(line+char).width>maxWidth){lines.push(line);line=char;}else line+=char;}lines.push(line);
- }
- const visible=lines.slice(0,6),lineHeight=size*1.34;
- const textH=visible.length*lineHeight;
- const w=Math.min(W*.93,Math.max(size*1.5,...visible.map(x=>ctx.measureText(x).width))+size*.7);
- ctx.restore();
- return {x:W*Math.max(-.2,Math.min(1.2,Number(st.x??.5))),y:H*Math.max(-.2,Math.min(1.2,Number(st.y??.82))),w,h:textH+size*.5,size,lineHeight,lines:visible,rotation:Number(st.rotation)||0,style:st};
+ const item={...captionAppearance(project,cue),text:cue?.text||''};
+ return layoutTitle(ctx,canvas,item,true);
 }
 export function drawCaptions(ctx,canvas,project,time){
  if(project.captionEnabled===false)return;
  const cue=activeCue(project.captions,time);if(!cue)return;
- const box=captionLayout(ctx,canvas,project,cue),st=box.style;
- ctx.save();
- try{
-  ctx.translate(box.x,box.y);ctx.rotate(box.rotation*Math.PI/180);
-  ctx.font=`800 ${box.size}px system-ui,'Noto Sans JP',sans-serif`;
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  if(st.background!==false){
-   ctx.fillStyle='rgba(0,0,0,0.64)';ctx.beginPath();
-   if(ctx.roundRect)ctx.roundRect(-box.w/2,-box.h/2,box.w,box.h,box.size*.22);else ctx.rect(-box.w/2,-box.h/2,box.w,box.h);
-   ctx.fill();
-  }
-  ctx.fillStyle=/^#[0-9a-f]{6}$/i.test(st.color)?st.color:'#ffffff';
-  if(st.shadow!==false){ctx.strokeStyle='rgba(0,0,0,.93)';ctx.lineWidth=box.size*.12;ctx.lineJoin='round';}
-  for(let i=0;i<box.lines.length;i++){const y=(i-(box.lines.length-1)/2)*box.lineHeight;
-   if(st.shadow!==false)ctx.strokeText(box.lines[i],0,y);ctx.fillText(box.lines[i],0,y);
-  }
- }finally{ctx.restore();}
+ return drawTitle(ctx,canvas,{...captionAppearance(project,cue),text:cue.text},true);
 }
