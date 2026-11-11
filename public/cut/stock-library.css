@@ -35,3 +35,20 @@
 #stock-catalog-links{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 12px}
 .stock-source-row{flex:1 1 160px;display:flex;flex-direction:column;gap:3px;background:#292b32;border:1px solid #41434e;border-radius:9px;padding:9px}
 .stock-source-row a{font-size:12px;color:#a7dbff;font-weight:700;text-decoration:none}.stock-source-row small{font-size:10px;color:#d0ccd2}
+
+/* Pixabay API: visible, user-supplied key without bundling credentials. */
+.stock-pixabay-config[hidden]{display:none!important}
+.stock-pixabay-config{margin:2px 0 12px;border:1px solid #4a4c55;border-radius:9px;background:#2a2a33;padding:7px 10px;font-size:11px;color:#c7c7d0}
+.stock-pixabay-config summary{font-size:12px;cursor:pointer;color:#e5e8fa;font-weight:650;min-height:29px;display:list-item;align-content:center}
+.stock-pixabay-config p{margin:7px 0;font-size:11px;line-height:1.65;color:#c1c0cb}
+.stock-pixabay-key-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center}
+.stock-pixabay-key-row input{min-width:0;height:40px;border-radius:7px;border:1px solid #707080;background:#202027;color:#fff;padding:7px 9px;font-size:12px}
+.stock-pixabay-key-row button{height:40px;border-radius:7px;border:1px solid #6a6a72;padding:7px;font-size:11px;background:#3d3d48;color:#fff}
+.stock-pixabay-key-row #stock-pixabay-save{background:#e85770;border-color:#e85770;font-weight:650}
+.stock-pixabay-doc{display:flex;gap:12px;flex-wrap:wrap;margin:7px 0}
+.stock-pixabay-doc a{color:#a5dfff;font-size:11px}
+#stock-pixabay-key-state{display:block;color:#b2c3c6;margin-top:5px}
+#stock-provider option:disabled{color:#999}
+#stock-status{min-height:35px;line-height:1.55;word-break:break-word}
+.stock-preview img{width:100%;height:100%;object-fit:cover}
+@media(max-width:420px){.stock-pixabay-key-row{grid-template-columns:minmax(0,1fr) auto}.stock-pixabay-key-row #stock-pixabay-clear{grid-column:2}}
