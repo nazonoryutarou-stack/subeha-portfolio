@@ -87,6 +87,7 @@ function installShell(){
  const general=[
   make('マジック編集','magic',()=>openMagicEdit()),
   make('素材を重ねる','overlay',()=>openTool('overlay')),
+  make('無料素材','template',()=>window.__subehaStockOpen?.()),
   make('3D映像','cube',()=>window.__subehaCGOpen?.()),
   make('テキスト','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text');}),
   make('音声','audio',()=>openTool('audio')),
@@ -115,6 +116,7 @@ function installShell(){
  function openExtras(){
   mini.hidden=true;const options=[
    make('マジック編集','magic',()=>openMagicEdit()),
+   make('無料素材','template',()=>window.__subehaStockOpen?.()),
    make('キャンバス','canvas',()=>openTool('canvas')),
     make('背景色を消す','filters',()=>openTool('chroma')),
    make('背景切抜','brush',()=>openTool('videoRetouch')),
@@ -170,6 +172,7 @@ function installShell(){
  const layerTools=()=>[
   make('‹','back',()=>{modeState.mode='main';renderToolbar();}),
   make('素材を重ねる','overlay',()=>openTool('overlay')),
+  make('無料素材','template',()=>window.__subehaStockOpen?.()),
   make('背景色を消す','filters',()=>openTool('chroma')),
   make('追跡','track',()=>openTool('tracking')),
   make('切り抜き','brush',()=>openTool('videoRetouch')),

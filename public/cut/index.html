@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="./trash-zone.css">
   <link rel="stylesheet" href="./fx-lab.css">
   <link rel="stylesheet" href="./reference-ui.css">
+  <link rel="stylesheet" href="./stock-library.css">
 <style>.export-cancel{margin-top:9px;border:1px solid #a55c64;background:#38262b;color:#ffd7dc;padding:10px 14px;border-radius:9px;min-height:42px}.export-last-report{margin:12px 0;padding:10px 12px;border-left:3px solid #e75b6d;background:#24252b;color:#eee;font-size:12px;line-height:1.6}.export-last-report[hidden]{display:none}.save-indicator{font-size:10px;color:#a4afb0;white-space:nowrap}.save-indicator[data-state=error]{color:#ff8e96}</style></head>
 <body>
 <div id="app">
@@ -60,7 +61,7 @@
       <div id="panel-audio" class="tool-panel" data-panel="audio" hidden><div class="control-title">音声 <span>音楽は1トラック</span></div><button class="primary-button" id="music-add">＋ BGM / 音声を取り込む</button><div id="music-controls" hidden><div id="music-name" class="file-chip"></div><label>音量 <span id="music-volume-label">60%</span><input id="music-volume" type="range" min="0" max="1" step="0.05" value="0.6"></label><div class="button-row"><button id="music-remove" class="danger">音声削除</button></div></div></div>
       <div id="panel-export" class="tool-panel" data-panel="export" hidden><div class="control-title">動画の保存 <span>端末内で動画をレンダリング</span></div><p class="muted">ブラウザがサポートする形式（MP4またはWebM）で保存。音声も合成します。書き出し中は画面を閉じないでください。</p><div class="button-row"><button id="export-secondary" class="primary-button">映像を書き出す ↗</button><button id="backup-project">編集情報を保存</button></div><div id="export-progress" class="progress-area" hidden><div id="progress-text">動画を準備しています</div><div class="progress-meter"><i id="progress-bar"></i></div><button id="export-cancel" type="button" class="export-cancel">書き出しを中止する</button></div><div id="export-last-report" role="status" class="export-last-report" hidden></div></div>
     </section>
-    <p class="privacy-note">◈ 端末内で編集　素材を外部サーバーへ送信せず、ブラウザ内で編集します。個人用の試作エディタです。</p>
+    <p class="privacy-note">◈ 編集素材は端末内で管理します。素材検索時は検索語がOpenverse・Wikimedia等へ送信されます。</p>
   </main>
   <nav class="bottomnav" aria-label="ツール選択"><button class="nav-tab active" data-tab="clips"><span>▣</span>編集</button><button class="nav-tab" data-tab="look"><span>◉</span>LOOK</button><button class="nav-tab" data-tab="text"><span>Ｔ</span>文字</button><button class="nav-tab" data-tab="audio"><span>♫</span>音</button><button class="nav-tab" data-tab="export"><span>↗</span>出力</button></nav>
   <div id="snackbar" role="status" aria-live="polite"></div>
@@ -74,4 +75,5 @@
 <script type="module" src="./direct-canvas.mjs"></script>
 <script type="module" src="./fx-lab.mjs"></script>
 <script type="module" src="./japanese-ui.mjs"></script>
+<script type="module" src="./stock-library.mjs"></script>
 </body></html>
