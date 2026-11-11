@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {buildGradeFilter,fxAmountAt,addFx,applyLookToClip,FX_TYPES} from '../fx-lab-core.mjs';
+assert.equal(buildGradeFilter({}),'none');
+assert.match(buildGradeFilter({exposure:20,warmth:-35,fade:10,saturation:-60}),/brightness/);
+assert.match(buildGradeFilter({saturation:-100}),/saturate\(0.0000\)/);
+assert.ok(FX_TYPES.includes('bloom'));
+const fx={type:'grain',amount:.3,start:1,end:4,keys:[{time:1,amount:0},{time:3,amount:1}]};
+assert.equal(fxAmountAt(fx,0),0);assert.equal(fxAmountAt(fx,1),0);assert.equal(fxAmountAt(fx,2),.5);assert.equal(fxAmountAt(fx,5),0);
+const stack=addFx([],'bloom',.7,'fx-a');assert.equal(stack.length,1);assert.equal(stack[0].amount,.7);
+const original={id:'a',name:'hello',grade:{exposure:2},fxStack:[{id:'old'}]};
+const modified=applyLookToClip(original,'analog');assert.equal(original.fxStack[0].id,'old');assert.equal(modified.grade.exposure,0);assert.equal(modified.fxStack.length,3);
+assert.throws(()=>addFx([],'nonexistent'),/Unknown/);
+console.log('fx lab core tests PASS');

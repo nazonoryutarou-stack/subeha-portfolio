@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {drawCaptions,captionLayout,captionAppearance} from '../subtitles.mjs';
+const calls=[];
+const ctx={save(){},restore(){},translate(x,y){calls.push(['translate',x,y]);},rotate(x){calls.push(['rotate',x]);},measureText(s){return {width:s.length*22};},fillText(s){calls.push(['text',s]);},strokeText(){},beginPath(){},roundRect(){},rect(){},fill(){},set font(v){},set textAlign(v){},set textBaseline(v){},set fillStyle(v){},set strokeStyle(v){},set lineWidth(v){},set lineJoin(v){}};
+const cue={id:'one',start:0,end:2,text:'こんにちは',style:{x:.25,y:.65,size:64,rotation:-10,color:'#ff5566',background:false}};
+const project={captions:[cue],captionStyle:{x:.5,size:42,y:.8}};
+assert.equal(captionAppearance(project,cue).x,.25);
+const l=captionLayout(ctx,{width:720,height:1280},project,cue);assert.equal(l.x,180);assert.equal(l.y,832);assert.equal(l.rotation,-10);
+drawCaptions(ctx,{width:720,height:1280},project,1);
+assert.ok(calls.some(c=>c[0]==='translate'&&c[1]===180&&c[2]===832));assert.ok(calls.some(c=>c[0]==='text'&&c[1]==='こんにちは'));
+console.log('per-cue caption rendering PASS');

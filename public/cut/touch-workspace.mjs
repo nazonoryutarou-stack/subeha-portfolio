@@ -233,11 +233,11 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
  function selectedText(){return state.project.texts.find(t=>t.id===state.selectedText);}
  function activeTransform(){
    if(getEditMode?.())return null;
-   if(document.body.classList.contains('pro-open') && /^レイヤー/.test($('pro-title')?.textContent||'')){
+   if(!window.__subehaDirectTextActive && document.body.classList.contains('pro-open') && /^レイヤー/.test($('pro-title')?.textContent||'')){
      const l=getLayer();if(l)return {kind:'layer',target:l};
    }
    if(document.querySelector('.tools-shell')?.classList.contains('pro-visible')&&state.panel==='text'){
-     const t=selectedText();if(t)return {kind:'text',target:t};
+     const t=selectedText();if(t&&!window.__subehaDirectTextActive)return {kind:'text',target:t};
    }
    return null;
  }

@@ -79,30 +79,42 @@ export function timestampSRT(n){
 }
 export function exportSRT(cues){return (cues||[]).slice().sort((a,b)=>a.start-b.start).map((c,i)=>`${i+1}\n${timestampSRT(c.start)} --> ${timestampSRT(c.end)}\n${c.text}\n`).join('\n');}
 export const defaultCaptionStyle=Object.freeze({size:42,y:.82,color:'#ffffff',background:true,shadow:true});
+export function captionAppearance(project,cue){
+ const base={x:.5,rotation:0,...defaultCaptionStyle,...(project?.captionStyle||{})};
+ return {...base,...(cue?.style||{})};
+}
+export function captionLayout(ctx,canvas,project,cue){
+ const st=captionAppearance(project,cue),W=canvas.width,H=canvas.height;
+ const size=Math.max(12,Math.min(240,Number(st.size)||42))*W/720;
+ ctx.save();ctx.font=`800 ${size}px system-ui,'Noto Sans JP',sans-serif`;
+ const maxWidth=W*.88,lines=[];
+ for(const para of String(cue.text||'').split('\n')){
+  let line='';for(const char of para){if(line&&ctx.measureText(line+char).width>maxWidth){lines.push(line);line=char;}else line+=char;}lines.push(line);
+ }
+ const visible=lines.slice(0,6),lineHeight=size*1.34;
+ const textH=visible.length*lineHeight;
+ const w=Math.min(W*.93,Math.max(size*1.5,...visible.map(x=>ctx.measureText(x).width))+size*.7);
+ ctx.restore();
+ return {x:W*Math.max(-.2,Math.min(1.2,Number(st.x??.5))),y:H*Math.max(-.2,Math.min(1.2,Number(st.y??.82))),w,h:textH+size*.5,size,lineHeight,lines:visible,rotation:Number(st.rotation)||0,style:st};
+}
 export function drawCaptions(ctx,canvas,project,time){
-  if(project.captionEnabled===false)return;
-  const cue=activeCue(project.captions,time);if(!cue)return;
-  const style={...defaultCaptionStyle,...project.captionStyle};
-  const W=canvas.width,H=canvas.height,unit=W/720,size=Math.max(12,Math.min(100,Number(style.size)||42))*unit;
-  const centerY=H*Math.max(.1,Math.min(.97,Number(style.y)||.82));
-  ctx.save();
-  try{
-    ctx.font=`800 ${size}px system-ui,'Noto Sans JP',sans-serif`;
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    const maxWidth=W*.88,lines=[];
-    for(const para of cue.text.split('\n')){
-      let line='';for(const c of para){if(line&&ctx.measureText(line+c).width>maxWidth){lines.push(line);line=c;}else line+=c;}lines.push(line);
-    }
-    const visible=lines.slice(0,6),lineHeight=size*1.34;
-    const textH=visible.length*lineHeight,startY=centerY-textH/2+lineHeight/2;
-    if(style.background!==false){
-      const widest=Math.min(W*.92,Math.max(...visible.map(x=>ctx.measureText(x).width))+size*.7),padY=size*.25;
-      ctx.fillStyle='rgba(0,0,0,0.64)';ctx.beginPath();const x=(W-widest)/2,y=centerY-textH/2-padY,w=widest,h=textH+padY*2;
-      if(ctx.roundRect)ctx.roundRect(x,y,w,h,size*.22);else ctx.rect(x,y,w,h);
-      ctx.fill();
-    }
-    ctx.fillStyle=/^#[0-9a-f]{6}$/i.test(style.color)?style.color:'#ffffff';
-    if(style.shadow!==false){ctx.strokeStyle='rgba(0,0,0,.93)';ctx.lineWidth=size*.12;ctx.lineJoin='round';}
-    for(let i=0;i<visible.length;i++){const y=startY+i*lineHeight;if(style.shadow!==false)ctx.strokeText(visible[i],W/2,y);ctx.fillText(visible[i],W/2,y);}
-  }finally{ctx.restore();}
+ if(project.captionEnabled===false)return;
+ const cue=activeCue(project.captions,time);if(!cue)return;
+ const box=captionLayout(ctx,canvas,project,cue),st=box.style;
+ ctx.save();
+ try{
+  ctx.translate(box.x,box.y);ctx.rotate(box.rotation*Math.PI/180);
+  ctx.font=`800 ${box.size}px system-ui,'Noto Sans JP',sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  if(st.background!==false){
+   ctx.fillStyle='rgba(0,0,0,0.64)';ctx.beginPath();
+   if(ctx.roundRect)ctx.roundRect(-box.w/2,-box.h/2,box.w,box.h,box.size*.22);else ctx.rect(-box.w/2,-box.h/2,box.w,box.h);
+   ctx.fill();
+  }
+  ctx.fillStyle=/^#[0-9a-f]{6}$/i.test(st.color)?st.color:'#ffffff';
+  if(st.shadow!==false){ctx.strokeStyle='rgba(0,0,0,.93)';ctx.lineWidth=box.size*.12;ctx.lineJoin='round';}
+  for(let i=0;i<box.lines.length;i++){const y=(i-(box.lines.length-1)/2)*box.lineHeight;
+   if(st.shadow!==false)ctx.strokeText(box.lines[i],0,y);ctx.fillText(box.lines[i],0,y);
+  }
+ }finally{ctx.restore();}
 }

@@ -16,7 +16,7 @@ assert.equal(parseSRT(srt,{offset:2})[0].start,2.2);
 assert.equal(parseSRT(exportSRT(cues)).length,2);
 assert.throws(()=>parseWhisperJSON('{"wrong":true}'),/segments/);
 const calls=[];
-const ctx={save(){calls.push('save');},restore(){calls.push('restore');},measureText(x){return {width:x.length*20}},beginPath(){},roundRect(){},fill(){},fillText(t){calls.push(t);},strokeText(){},set font(v){},set textAlign(v){},set textBaseline(v){},set fillStyle(v){},set strokeStyle(v){},set lineWidth(v){},set lineJoin(v){}};
+const ctx={translate(){},rotate(){},save(){calls.push('save');},restore(){calls.push('restore');},measureText(x){return {width:x.length*20}},beginPath(){},roundRect(){},fill(){},fillText(t){calls.push(t);},strokeText(){},set font(v){},set textAlign(v){},set textBaseline(v){},set fillStyle(v){},set strokeStyle(v){},set lineWidth(v){},set lineJoin(v){}};
 drawCaptions(ctx,{width:720,height:1280},{captions:cues},.5);
 assert.ok(calls.includes('こんにちは'));assert.equal(calls.at(-1),'restore');
 console.log('caption tests PASS');

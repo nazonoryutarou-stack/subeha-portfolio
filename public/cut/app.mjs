@@ -5,6 +5,7 @@ import {applyEffect} from './effects.mjs';
 import {clipTransform} from './keyframes.mjs';
 import {normalizeExportSettings,supportedRecorderType} from './export-settings.mjs';
 import {styleForText} from './text-styles.mjs';
+import {buildGradeFilter,fxAmountAt} from './fx-lab-core.mjs';
 
 const $ = (id) => document.getElementById(id);
 const canvas=$('preview'),ctx=canvas.getContext('2d',{alpha:false});
@@ -184,7 +185,7 @@ function renderBaseClip(clip,view,asset,alpha=1,local=0){
  const W=canvas.width,H=canvas.height;
  ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,alpha));
  const adj=clip.adjust||{}, props=clipTransform(clip,local);
- ctx.filter=[filters[clip.filter]?.style||'none','brightness('+((adj.brightness??100)/100)+')','contrast('+((adj.contrast??100)/100)+')','saturate('+((adj.saturation??100)/100)+')','hue-rotate('+(adj.hue??0)+'deg)','blur('+(adj.blur??0)+'px)'].join(' ');
+ ctx.filter=[filters[clip.filter]?.style==='none'?'':(filters[clip.filter]?.style||''),'brightness('+((adj.brightness??100)/100)+')','contrast('+((adj.contrast??100)/100)+')','saturate('+((adj.saturation??100)/100)+')','hue-rotate('+(adj.hue??0)+'deg)','blur('+(adj.blur??0)+'px)',buildGradeFilter(clip.grade)==='none'?'':buildGradeFilter(clip.grade)].filter(Boolean).join(' ');
  ctx.globalAlpha*=props.opacity;
  if(props.rotation||clip.flipX||clip.flipY||props.zoom||props.x!==.5||props.y!==.5){ctx.translate(W*props.x,H*props.y);ctx.rotate(props.rotation*Math.PI/180);ctx.scale((clip.flipX?-1:1)*props.zoom,(clip.flipY?-1:1)*props.zoom);ctx.translate(-W/2,-H/2);}
  let source=view,sourceW=asset.width||view.videoWidth,sourceH=asset.height||view.videoHeight;
@@ -224,9 +225,10 @@ function draw(){
  }else if(ready)renderBaseClip(c,view,a,1,at.local);
  if(ready&&c.filter==='glitch'&&!tr){ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=.18;ctx.filter='hue-rotate(150deg)';ctx.translate(Math.sin(state.current*18)*10,0);try{drawFrameWithAspect(view,a.width,a.height);}catch{}ctx.restore();}
  if(c.effect&&c.effect!=='none')applyEffect(ctx,canvas,c.effect,c.effectAmount??.5,state.current);
+ for(const fx of (c.fxStack||[])){const amount=fxAmountAt(fx,at.local);if(amount>0)applyEffect(ctx,canvas,fx.type,amount,state.current);}
  for(const hook of renderHooks){try{hook({canvas,ctx,state});}catch(e){console.warn('render hook',e);}}
  for(const t of state.project.texts){if(state.current<t.start||state.current>t.start+t.duration||!t.text)continue;
-   ctx.save();const age=Math.max(0,state.current-t.start),left=Math.max(0,t.duration-age);let textAlpha=1,textScale=1;if(t.motion==='fade'){textAlpha=Math.min(1,age/.28,left/.28);}else if(t.motion==='pop'){textScale=1+Math.max(0,.28-age)*.75;}else if(t.motion==='slide'){ctx.translate(0,Math.max(0,.4-age)*H*.18);}ctx.globalAlpha=Math.max(0,Math.min(1,textAlpha));ctx.translate(W*t.x,H*t.y);ctx.scale(textScale,textScale);ctx.translate(-W*t.x,-H*t.y);ctx.textAlign='center';ctx.textBaseline='middle';const unit=W/720;const size=t.size*unit;const style=styleForText(t);ctx.font=`${style.weight} ${size}px ${style.font}`;ctx.fillStyle=style.color;ctx.strokeStyle=style.outlineColor;ctx.lineWidth=size*style.outlineWidth;ctx.lineJoin='round';ctx.shadowColor='#000b';ctx.shadowBlur=14*unit;
+   ctx.save();const age=Math.max(0,state.current-t.start),left=Math.max(0,t.duration-age);let textAlpha=1,textScale=1;if(t.motion==='fade'){textAlpha=Math.min(1,age/.28,left/.28);}else if(t.motion==='pop'){textScale=1+Math.max(0,.28-age)*.75;}else if(t.motion==='slide'){ctx.translate(0,Math.max(0,.4-age)*H*.18);}ctx.globalAlpha=Math.max(0,Math.min(1,textAlpha));ctx.translate(W*t.x,H*t.y);ctx.rotate((Number(t.rotation)||0)*Math.PI/180);ctx.scale(textScale,textScale);ctx.translate(-W*t.x,-H*t.y);ctx.textAlign='center';ctx.textBaseline='middle';const unit=W/720;const size=t.size*unit;const style=styleForText(t);ctx.font=`${style.weight} ${size}px ${style.font}`;ctx.fillStyle=style.color;ctx.strokeStyle=style.outlineColor;ctx.lineWidth=size*style.outlineWidth;ctx.lineJoin='round';ctx.shadowColor='#000b';ctx.shadowBlur=14*unit;
    const lines=wrapText(t.text,W*.88,size),lineHeight=size*1.23;
    if(style.box){const wide=Math.max(...lines.map(line=>ctx.measureText(line).width),0);const boxH=lines.length*lineHeight;ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(W*t.x-wide/2-size*.19,H*t.y-boxH/2-size*.11,wide+size*.38,boxH+size*.22);ctx.fillStyle=style.color;}
     for(let i=0;i<lines.length;i++){const y=H*t.y+(i-(lines.length-1)/2)*lineHeight;if(style.outlineWidth>0)ctx.strokeText(lines[i],W*t.x,y);ctx.fillText(lines[i],W*t.x,y);}
