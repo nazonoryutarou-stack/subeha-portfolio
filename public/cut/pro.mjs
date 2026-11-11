@@ -645,6 +645,17 @@ function mount(){
   $('pro-text-motion').onchange=e=>{const t=state.project.texts.find(x=>x.id===state.selectedText);if(t){t.motion=e.target.value;save();draw();}};
   for(const speed of [0.25,0.75,1.25,3,4]){const segments=$('speed-segments');if(segments&&!segments.querySelector('[data-speed="'+speed+'"]')){const b=document.createElement('button');b.dataset.speed=speed;b.textContent=speed+'×';b.onclick=()=>updateClip(c=>c.speed=speed);segments.append(b);}}
   const nativeTabs=document.querySelectorAll('.nav-tab[data-tab]');nativeTabs[0]?.classList.add('active');
+  // Import synthetic narration as a first-class multi-track clip, not legacy one-BGM replacement.
+  window.__subehaImportVoiceFile=async(file,creditInfo)=>{
+    if(!state.project.clips.length)throw Error('先に動画か写真を読み込んでください');
+    const before=new Set(state.assets.keys());await importAudioTracks([file]);
+    const imported=[...state.assets].find(([id,a])=>!before.has(id)&&a.name===file.name);
+    if(!imported)throw Error('音声トラックに取り込めませんでした');
+    const track=state.project.audioTracks?.find(x=>x.assetId===imported[0]);if(track)track.role='voice';
+    state.project.voiceCredits ||= [];
+    state.project.voiceCredits.push({assetId:imported[0],...creditInfo,createdAt:new Date().toISOString()});save();
+    return imported[0];
+  };
   installTrashZone(api);
   touchWorkspace=mountTouchWorkspace({api,
     getZoom:()=>zoom,

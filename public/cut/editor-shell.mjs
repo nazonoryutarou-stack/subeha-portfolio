@@ -91,6 +91,7 @@ function installShell(){
   make('3D映像','cube',()=>window.__subehaCGOpen?.()),
   make('テキスト','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text');}),
   make('音声','audio',()=>openTool('audio')),
+  make('声を作る','audio',()=>window.__subehaVoiceOpen?.()),
   make('色フィルター','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
   make('調整','adjust',()=>window.__subehaFXOpen ? window.__subehaFXOpen('grade') : openTool('adjust')),
   make('映像効果','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('effects') : openTool('effects')),
@@ -98,7 +99,6 @@ function installShell(){
   make('字幕','captions',()=>{openTool('captions');window.__subehaDirectOpen?.('caption');}),
   make('テンプレ','template',()=>openTool('templates')),
   make('保存','save',()=>window.__subehaArchiveSave?.()),
-  make('先進機能','magic',()=>window.__subehaLabOpen?.()),
   make('すべて','more',()=>openExtras()),
  ];
  function openMagicEdit(){
@@ -118,6 +118,7 @@ function installShell(){
   mini.hidden=true;const options=[
    make('マジック編集','magic',()=>openMagicEdit()),
    make('無料素材','template',()=>window.__subehaStockOpen?.()),
+   make('声を作る','audio',()=>window.__subehaVoiceOpen?.()),
    make('キャンバス','canvas',()=>openTool('canvas')),
     make('背景色を消す','filters',()=>openTool('chroma')),
    make('背景切抜','brush',()=>openTool('videoRetouch')),
@@ -129,7 +130,6 @@ function installShell(){
    make('調整','adjust',()=>window.__subehaFXOpen ? window.__subehaFXOpen('grade') : openTool('adjust')),
    make('テンプレ','template',()=>openTool('templates')),
    make('保存/復元','save',()=>openTool('project')),
-   make('先進機能ラボ','magic',()=>{sheet.hidden=true;window.__subehaLabOpen?.();}),
    make('統合エンジン','cube',()=>window.__subehaHubOpen?.()),
    make('3D映像','cube',()=>window.__subehaCGOpen?.()),
    make('書き出す','save',()=>openTool('export')),

@@ -3,6 +3,8 @@
  */
 export const STOCK_MAX_BYTES=80*1024*1024;
 export const STOCK_KINDS=Object.freeze(['image','video','audio']);
+export const LIBRARY_KINDS=Object.freeze(['image','video','music','sfx','audio','model','vrm','texture','hdri']);
+export const normalizeLibraryKind=kind=>({music:'audio',sfx:'audio'}[kind]||kind);
 const allowedMime={image:/^image\/(?:jpeg|png|webp|gif)$/i,video:/^video\/(?:mp4|webm|ogg)$/i,audio:/^audio\/(?:mpeg|mp3|mp4|ogg|wav|webm|flac)$/i};
 const LICENSES=new Map([['cc0','CC0'],['public domain','パブリックドメイン'],['public domain mark','パブリックドメイン（要確認）'],['pdm','パブリックドメイン（要確認）']]);
 export const STOCK_REUSE_NOTE='著作権上の自由利用と、宗教団体の広告に使えることは同義ではありません。人物の肖像・宗教的支持の誤認・商標・建築物・撮影された作品などは個別に確認してください。';
@@ -48,5 +50,18 @@ export function normalizeStockResults(provider,body,kind){
  const rows=provider==='Openverse'?(body?.results||[]):Object.values(body?.query?.pages||{});
  return rows.map(x=>provider==='Openverse'?mapOpenverse(x,kind):mapCommons(x,kind)).filter(Boolean);
 }
-export function sourceSearchLinks(term){const q=encodeURIComponent(String(term||'').trim().slice(0,100)||'nature');return {pixabay:`https://pixabay.com/images/search/${q}/`,pexels:`https://www.pexels.com/search/${q}/`};}
+export function sourceSearchLinks(term){const q=encodeURIComponent(String(term||'').trim().slice(0,100)||'nature');return {
+ pixabay:`https://pixabay.com/images/search/${q}/`,pexels:`https://www.pexels.com/search/${q}/`,
+ polyModels:'https://polyhaven.com/models',polyTextures:'https://polyhaven.com/textures',polyHDRI:'https://polyhaven.com/hdris',
+ vroid:'https://hub.vroid.com/',nasa:'https://images.nasa.gov/',commons:'https://commons.wikimedia.org/',
+ freesound:`https://freesound.org/search/?q=${q}`,internetArchive:`https://archive.org/search?query=${q}`};}
+export const STOCK_EXTERNAL_CATALOG=Object.freeze({
+ video:[{key:'nasa',name:'NASA画像・動画',license:'多くは米国で著作権の対象外。広告・人物・機関の推奨誤認・一部第三者著作物に注意。'},{key:'internetArchive',name:'Internet Archive',license:'動画ごとにライセンスが異なる。パブリックドメイン表示でも原典確認が必要。'}],
+ music:[{key:'freesound',name:'Freesound（音源）',license:'CC0の楽曲のみ選択。CC BY / NCなども含まれるため個別確認。'}],
+ sfx:[{key:'freesound',name:'Freesound（効果音）',license:'CC0を選び、素材ページで許諾を再確認。'}],
+ model:[{key:'polyModels',name:'Poly Haven 3Dモデル',license:'CC0。ダウンロード後、OBJ/GLBを3D編集に読み込み。'}],
+ vrm:[{key:'vroid',name:'VRoid Hub',license:'モデルごとに商用・宗教政治用途を確認。VRM1.0は宗教政治用途の許可が明示される。'}],
+ texture:[{key:'polyTextures',name:'Poly Haven テクスチャ',license:'CC0。素材の色や模様の参考に使える。現行CGエンジンはPBRテクスチャ未対応。'}],
+ hdri:[{key:'polyHDRI',name:'Poly Haven HDRI',license:'CC0。現在のCGレンダラーではHDRI照明は未対応。'}]
+});
 export function stockFileName(item){const extension=({"image/jpeg":'.jpg','image/png':'.png','image/webp':'.webp','image/gif':'.gif','video/mp4':'.mp4','video/webm':'.webm','video/ogg':'.ogv','audio/mpeg':'.mp3','audio/mp4':'.m4a','audio/webm':'.webm','audio/ogg':'.ogg','audio/wav':'.wav','audio/flac':'.flac'})[item.mime]||'.bin';return safeTitle(item.title).replace(/\.[a-z0-9]{2,5}$/i,'').slice(0,70)+extension;}

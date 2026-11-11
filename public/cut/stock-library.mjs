@@ -1,5 +1,5 @@
 /* Copyright-conscious stock media browser, integrated with SUBEHA CUT's existing importer. */
-import {STOCK_MAX_BYTES,STOCK_REUSE_NOTE,openverseQuery,commonsQuery,normalizeStockResults,sourceSearchLinks,stockFileName,safeHttps} from './stock-sources.mjs';
+import {STOCK_MAX_BYTES,STOCK_REUSE_NOTE,openverseQuery,commonsQuery,normalizeStockResults,sourceSearchLinks,stockFileName,safeHttps,normalizeLibraryKind,STOCK_EXTERNAL_CATALOG} from './stock-sources.mjs';
 const $=id=>document.getElementById(id);
 let opened=false,requestSerial=0,current=[],lastQuery='nature';
 const api=()=>window.__subehaCut;
@@ -9,37 +9,46 @@ function setup(){if($('stock-library'))return;
  const overlay=node('div','stock-overlay');overlay.id='stock-library';overlay.hidden=true;
  const sheet=node('section','stock-sheet');sheet.setAttribute('role','dialog');sheet.setAttribute('aria-modal','true');sheet.setAttribute('aria-label','無料素材を探す');
  sheet.innerHTML=`<header class="stock-header"><h2>素材を探す</h2><button id="stock-close" aria-label="閉じる" type="button">×</button></header>
- <p class="stock-intro">無料素材を探して、動画・画像・音声として取り込みます。<strong>宗教団体の宣伝にも使う場合、個別の権利確認が必要です。</strong></p>
- <form id="stock-form"><input id="stock-query" type="search" maxlength="100" placeholder="例：sky, nature, temple, abstract" required value="nature" aria-label="素材の検索語"><select id="stock-kind" aria-label="素材の種類"><option value="image">画像</option><option value="video">動画</option><option value="audio">音声</option></select><select id="stock-provider" aria-label="素材の検索先"><option value="Openverse">Openverse</option><option value="Commons">Wikimedia Commons</option></select><button type="submit">検索</button></form>
+ <p class="stock-intro">動画・音楽・効果音・3Dモデルなど、制作に使う素材を探します。<strong>宗教団体の宣伝にも使う場合、個別の権利確認が必要です。</strong></p>
+ <form id="stock-form"><input id="stock-query" type="search" maxlength="100" placeholder="例：sky, nature, temple, abstract" required value="nature" aria-label="素材の検索語"><select id="stock-kind" aria-label="素材の種類"><option value="image">画像</option><option value="video">動画</option><option value="audio">音声</option><option value="music">音楽</option><option value="sfx">効果音</option><option value="model">3Dモデル</option><option value="vrm">VRMアバター</option><option value="texture">テクスチャ</option><option value="hdri">HDRI（照明）</option></select><select id="stock-provider" aria-label="素材の検索先"><option value="Openverse">Openverse</option><option value="Commons">Wikimedia Commons</option></select><button type="submit">検索</button></form>
  <div class="stock-hints"><span>おすすめ:</span><button type="button" data-keyword="nature">自然</button><button type="button" data-keyword="temple">寺院</button><button type="button" data-keyword="stars">星空</button><button type="button" data-keyword="abstract">抽象</button></div>
  <p class="stock-terms">著作権表示が<strong>CC0またはパブリックドメイン</strong>の結果のみ表示します。素材の情報は提供元で再確認してください。人物が団体の信者・支持者であるかのような誤認表示を避けてください。</p>
  <label class="stock-confirm"><input id="stock-confirm" type="checkbox"> 利用条件と人物・商標等の権利を確認して取り込む</label>
  <div class="stock-credits-toolbar"><button type="button" id="stock-credit-list">使用素材の記録を確認</button><button type="button" id="stock-credit-export">権利情報をテキスト保存</button></div><p id="stock-status" role="status" aria-live="polite">検索すると素材が表示されます。</p><div id="stock-results" class="stock-results"></div>
- <aside class="stock-external"><strong>ほかの素材サイト</strong><p>Pixabay・Pexelsは公式サイトでダウンロードし、「端末から追加」で取り込めます（アプリからの自動取得は未対応）。</p><div><a id="stock-pixabay" target="_blank" rel="noopener noreferrer">Pixabayで探す</a><a id="stock-pexels" target="_blank" rel="noopener noreferrer">Pexelsで探す</a><button type="button" id="stock-local">端末から追加</button></div></aside>
+ <aside class="stock-external"><strong>無料素材の配布元</strong><p>3D/VRM・NASA・Freesoundなどは、配布元で個別のライセンスを確認してダウンロードしてください。CC0でも人物の肖像・商標・団体への推奨誤認は別途注意。</p><div id="stock-catalog-links"></div><div><a id="stock-pixabay" target="_blank" rel="noopener noreferrer">Pixabayで探す</a><a id="stock-pexels" target="_blank" rel="noopener noreferrer">Pexelsで探す</a><button type="button" id="stock-local">端末から追加</button></div></aside>
  <p class="stock-legal"></p>`;
  overlay.append(sheet);document.body.append(overlay);
  sheet.querySelector('.stock-legal').textContent=STOCK_REUSE_NOTE;
  $('stock-close').onclick=close;overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&opened)close();});
- $('stock-kind').onchange=()=>{if($('stock-kind').value==='video')$('stock-provider').value='Commons';else if($('stock-provider').value==='Commons')$('stock-provider').value='Openverse';};
+ $('stock-kind').onchange=()=>{const k=$('stock-kind').value;if(k==='video')$('stock-provider').value='Commons';else if(k==='image'||k==='audio'||k==='music'||k==='sfx')$('stock-provider').value='Openverse';updateLinks();};
  $('stock-provider').onchange=()=>{if($('stock-kind').value==='video'&&$('stock-provider').value==='Openverse')$('stock-provider').value='Commons';};
  $('stock-form').onsubmit=e=>{e.preventDefault();search();};
  sheet.querySelectorAll('[data-keyword]').forEach(b=>b.onclick=()=>{$('stock-query').value=b.dataset.keyword;search();});
- $('stock-local').onclick=()=>{const el=$('stock-kind').value==='audio'?'pro-audio-picker':'file-picker';close();$(el)?.click();};
+ $('stock-local').onclick=()=>{const kind=$('stock-kind').value;if(['model','vrm'].includes(kind)){close();window.__subehaCGOpen?.();$('cg-obj-picker')?.click();return;}const el=['audio','music','sfx'].includes(kind)?'pro-audio-picker':'file-picker';close();$(el)?.click();};
  $('stock-credit-list').onclick=()=>{const rows=api()?.state?.project?.stockCredits||[];status(rows.length?rows.map((x,i)=>`${i+1}. ${x.title}（${x.license}）― ${x.source}`).join(' ／ '):'まだ素材の取り込み記録はありません。');};
  $('stock-credit-export').onclick=()=>{const rows=api()?.state?.project?.stockCredits||[];if(!rows.length){status('権利情報を記録した素材はありません。');return;}const body='SUBEHA CUT 素材の使用記録\n（正式な利用許諾や肖像権を保証するものではありません）\n\n'+rows.map((x,i)=>`${i+1}. ${x.title}\n提供元: ${x.provider}\n作者: ${x.credit}\nライセンス: ${x.license}\nライセンス詳細: ${x.licenseUrl}\n原典: ${x.source}\n`).join('\n');const blob=new Blob([body],{type:'text/plain;charset=utf-8'});const u=URL.createObjectURL(blob);const a=node('a');a.href=u;a.download='subeha-cut-素材の権利記録.txt';a.click();setTimeout(()=>URL.revokeObjectURL(u),3000);status('権利情報の保存を開始しました');};
  updateLinks();
 }
-function updateLinks(){const links=sourceSearchLinks($('stock-query').value||lastQuery);$('stock-pixabay').href=links.pixabay;$('stock-pexels').href=links.pexels;}
+function updateLinks(){const links=sourceSearchLinks($('stock-query').value||lastQuery);$('stock-pixabay').href=links.pixabay;$('stock-pexels').href=links.pexels;
+ const kind=$('stock-kind').value,items=STOCK_EXTERNAL_CATALOG[kind]||[],host=$('stock-catalog-links');host.replaceChildren();
+ for(const item of items){const row=node('div','stock-source-row');const anchor=node('a','stock-source-link',item.name+'  ↗');anchor.href=links[item.key];anchor.target='_blank';anchor.rel='noopener noreferrer';const caption=node('small',null,item.license);row.append(anchor,caption);host.append(row);}
+ const isModel=['model','vrm','texture','hdri'].includes(kind),is3D=['model','vrm'].includes(kind);
+ $('stock-provider').disabled=isModel;$('stock-form').querySelector('button[type=submit]').textContent=isModel?'配布元を表示':'検索';
+ $('stock-local').hidden=['texture','hdri'].includes(kind);
+ $('stock-local').textContent=is3D?'3Dモデルを端末から読み込む':'端末から追加';
+ $('stock-confirm').closest('label').hidden=isModel;
+ document.querySelector('.stock-terms').textContent=isModel?'3D素材は配布元でモデルごとの使用条件を確認してください。とくにVRMの宗教・政治用途と法人利用の可否に注意。':'著作権表示がCC0またはパブリックドメインの検索結果のみ表示。素材元で再確認し、人物・商標・宗教的支持の誤認にも注意してください。';
+}
 function open(){setup();opened=true;$('stock-library').hidden=false;document.body.classList.add('stock-open');$('stock-query').focus();if(!current.length)search();}
 function close(){opened=false;requestSerial++;if($('stock-library'))$('stock-library').hidden=true;document.body.classList.remove('stock-open');}
-async function search(){const q=$('stock-query').value.trim(),kind=$('stock-kind').value;let provider=$('stock-provider').value;
+async function search(){const q=$('stock-query').value.trim(),selectedKind=$('stock-kind').value,kind=normalizeLibraryKind(selectedKind);let provider=$('stock-provider').value;
  if(!q){status('検索語を入力してください');return;}
  if(kind==='video'&&provider==='Openverse'){provider='Commons';$('stock-provider').value=provider;}
  lastQuery=q;updateLinks();const token=++requestSerial;
- $('stock-results').replaceChildren();status('検索中…');
+ $('stock-results').replaceChildren();if(['model','vrm','texture','hdri'].includes(kind)){current=[];status('3D素材は上に表示された配布元で検索してください。公式サイトで利用条件を確認し、保存したファイルを「端末から追加」で読み込めます。');return;}status('検索中…');
  try{
-  const url=provider==='Openverse'?openverseQuery(q,kind):commonsQuery(q,kind);
+  const term=selectedKind==='music'?q+' music':selectedKind==='sfx'?q+' sound effect':q;const url=provider==='Openverse'?openverseQuery(term,kind):commonsQuery(term,kind);
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),14000);
   let response;try{response=await fetch(url,{mode:'cors',signal:controller.signal,headers:{Accept:'application/json'}});}finally{clearTimeout(timeout);}
   if(!response.ok)throw Error(`検索サービスの応答 ${response.status}`);
