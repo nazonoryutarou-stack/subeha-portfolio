@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {rmsWindows,detectSilences,detectBeats,frameDifference,detectSceneCuts,sourceToProjectTime,normalizeMarkers,splitAtMarkers,searchTranscript,parseEditCommand,MAX_SPLITS} from '../feature-lab-core.mjs';
 import {FEATURE_LAB_CATALOG,featureSummary} from '../feature-lab-catalog.mjs';
+import {projectAssetIds} from '../project-archive.mjs';
 const audio=Float32Array.from({length:2500},(_,i)=>i%250<50?.8:.002);
 const buffer={sampleRate:1000,numberOfChannels:1,length:audio.length,getChannelData:()=>audio};
 const windows=rmsWindows(buffer,{stepSeconds:.04});
@@ -30,5 +31,6 @@ assert.equal(parseEditCommand('ミュート').type,'mute');
 assert.equal(parseEditCommand('全部AIで生成'),null);
 assert.equal(FEATURE_LAB_CATALOG.length,42);
 const count=featureSummary();assert.equal(Object.values(count).reduce((a,b)=>a+b,0),42);
-assert.equal(count.active,3);assert.equal(count.research,9);
+assert.equal(count.active,4);assert.equal(count.backend,21);assert.equal(count.research,9);
+assert.deepEqual(new Set(projectAssetIds({clips:[{assetId:'main'}],editBranches:[{key:'A',snapshot:{clips:[{assetId:'branch-only'}],overlays:[],audioTracks:[]}}]})),new Set(['main','branch-only']),'branch-only asset survives portable archive');
 console.log('feature-lab analysis and 42-feature catalog PASS');
