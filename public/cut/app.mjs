@@ -1,3 +1,4 @@
+import {projectAssetIds} from './project-archive.mjs';
 import {drawTitle} from './title-render.mjs';
 import {RATIOS,clipLength,duration,locate,splitAt,clampTime,formatClock,safeName,newID} from './timeline.mjs';
 import {advanceTimeline} from './export-timing.mjs';
@@ -108,7 +109,7 @@ async function restore(){
    db=await openDB(); const project=await idbGet('projects','current');
    if(project?.clips && Array.isArray(project.clips)){
      state.project={name:project.name||'UNTITLED 01',ratio:RATIOS[project.ratio]?project.ratio:'9:16',fit:project.fit==='contain'?'contain':'cover',backgroundColor:project.backgroundColor||'#07080b',blurBackground:!!project.blurBackground,clips:[],texts:Array.isArray(project.texts)?project.texts:[],overlays:Array.isArray(project.overlays)?project.overlays:[],music:project.music||null,audioTracks:Array.isArray(project.audioTracks)?project.audioTracks:[],cgScenes:Array.isArray(project.cgScenes)?project.cgScenes:[],stockCredits:Array.isArray(project.stockCredits)?project.stockCredits:[],analysisMarkers:Array.isArray(project.analysisMarkers)?project.analysisMarkers:[],editBranches:Array.isArray(project.editBranches)?project.editBranches:[],editBranches:[],captions:Array.isArray(project.captions)?project.captions:[],captionStyle:project.captionStyle||null,captionEnabled:project.captionEnabled!==false,exportSettings:{preset:normalizeExportSettings(project.exportSettings).preset,format:normalizeExportSettings(project.exportSettings).format}};
-     const ids=new Set([...project.clips.map(c=>c.assetId),...(project.music?[project.music.assetId]:[]),...(project.overlays||[]).map(o=>o.assetId),...(project.audioTracks||[]).map(o=>o.assetId),...(project.cgScenes||[]).map(o=>o.modelAssetId)]);
+     const ids=new Set(projectAssetIds(project));
      for(const id of ids){try{const item=await idbGet('files',id);if(item?.blob)await buildAsset(id,item.blob,item.type,item.name);}catch(e){console.warn('restore file',id,e);}}
      state.project.clips=project.clips.filter(c=>state.assets.has(c.assetId));state.project.overlays=state.project.overlays.filter(o=>state.assets.has(o.assetId));state.project.audioTracks=state.project.audioTracks.filter(o=>state.assets.has(o.assetId));state.project.cgScenes=state.project.cgScenes.filter(o=>state.assets.has(o.modelAssetId));
      if(project.music&&!state.assets.has(project.music.assetId))state.project.music=null;
