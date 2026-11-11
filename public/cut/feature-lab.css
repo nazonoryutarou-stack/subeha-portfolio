@@ -42,3 +42,7 @@
 .lab-marker-list,.lab-transcript{display:grid;gap:6px;max-height:40dvh;overflow-y:auto}
 .lab-marker,.lab-transcript-row{text-align:left;min-height:39px;overflow-wrap:anywhere}
 @media(min-width:650px){.lab-list{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-sheet{height:min(90dvh,850px)}}
+
+.lab-branch{padding:11px 12px;background:#292931;border:1px solid #41414a;border-radius:10px;display:grid;gap:6px}
+.lab-branch strong{font-size:13px}
+.lab-branch .lab-controls{margin:2px 0}
