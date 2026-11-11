@@ -67,11 +67,11 @@ function showDetail(f){
 function execute(action){
  if(['beat','silence','scenes','transcript','command'].includes(action))return showTool(action);
  close();
- if(action==='fx')return window.__subehaFXOpen?.('effects')||api()?.toast('エフェクトを開けません');
- if(action==='3d')return window.__subehaCGOpen?.()||api()?.toast('3D CGを開けません');
- if(action==='stock')return window.__subehaStockOpen?.()||api()?.toast('素材ライブラリを開けません');
- if(action==='chroma'||action==='tracking')return document.querySelector('[data-pro="'+action+'"]')?.click()||api()?.toast('パネルが見つかりません');
- if(action==='caption')return document.querySelector('[data-tab="text"]')?.click()||api()?.toast('文字ツールを開けません');
+ if(action==='fx'){if(window.__subehaFXOpen)window.__subehaFXOpen('effects');else api()?.toast('エフェクトを開けません');return;}
+ if(action==='3d'){if(window.__subehaCGOpen)window.__subehaCGOpen();else api()?.toast('3D CGを開けません');return;}
+ if(action==='stock'){if(window.__subehaStockOpen)window.__subehaStockOpen();else api()?.toast('素材ライブラリを開けません');return;}
+ const target=(action==='chroma'||action==='tracking')?document.querySelector('[data-pro="'+action+'"]'):action==='caption'?document.querySelector('[data-tab="text"]'):null;
+ if(target)target.click();else api()?.toast('この機能の編集パネルはまだ使用できません');
 }
 function showTool(name){
  const host=container();
@@ -141,7 +141,7 @@ function audioTool(name,host){
   }catch(e){status.textContent=e.message||String(e);}finally{running=false;}
  },'lab-primary');
 }
-async function sampleVideoScenes(asset,clip,{signal,onProgress}={}){
+async function sampleVideoScenes(asset,clip,{signal,onProgress,threshold=.19}={}){
  if(!asset||asset.type!=='video')throw Error('動画クリップを選択してください');
  const video=document.createElement('video');video.src=asset.url;video.muted=true;video.playsInline=true;video.preload='auto';
  const loaded=new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('動画の読み込みに失敗しました')),12000);video.onloadedmetadata=()=>{clearTimeout(timer);resolve();};video.onerror=()=>{clearTimeout(timer);reject(Error('動画を開けません'));};});
@@ -158,7 +158,7 @@ async function sampleVideoScenes(asset,clip,{signal,onProgress}={}){
    if(video.readyState>=2){cx.drawImage(video,0,0,48,27);frames.push({time:target,pixels:cx.getImageData(0,0,48,27).data.slice()});}
    onProgress?.(i+1);
   }
-  return detectSceneCuts(frames);
+  return detectSceneCuts(frames,{threshold});
  }finally{video.pause();video.removeAttribute('src');video.load();}
 }
 function sceneTool(host){
@@ -173,7 +173,7 @@ function sceneTool(host){
   if(!clip||!asset||asset.type!=='video'){status.textContent='先に動画クリップを選択してください。';return;}
   running=true;abortTask=new AbortController();status.textContent='解析中…';
   try{
-   const cuts=await sampleVideoScenes(asset,clip,{signal:abortTask.signal,onProgress:n=>status.textContent=n+'フレーム解析済み…'});
+   const cuts=await sampleVideoScenes(asset,clip,{signal:abortTask.signal,threshold:Number(slider.value),onProgress:n=>status.textContent=n+'フレーム解析済み…'});
    const span=spans(state.project.clips).find(s=>s.clip.id===clip.id);
    currentMarkers=normalizeMarkers(cuts.filter(x=>x.score>=Number(slider.value)).map(c=>({time:sourceToProjectTime(c.time,clip,span?.start||0),kind:'scene',label:'場面切替候補（差分 '+c.score+'）'})).filter(x=>x.time!==null));
    status.textContent=currentMarkers.length+'件の場面境界候補が見つかりました。';
