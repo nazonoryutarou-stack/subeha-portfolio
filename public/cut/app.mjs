@@ -1,3 +1,4 @@
+import {drawTitle} from './title-render.mjs';
 import {RATIOS,clipLength,duration,locate,splitAt,clampTime,formatClock,safeName,newID} from './timeline.mjs';
 import {advanceTimeline} from './export-timing.mjs';
 import {spans,transitionProgress} from './transitions.mjs';
@@ -252,11 +253,12 @@ function draw(){
  }
  for(const hook of renderHooks){try{hook({canvas,ctx,state});}catch(e){console.warn('render hook',e);}}
  for(const t of state.project.texts){if(state.current<t.start||state.current>t.start+t.duration||!t.text)continue;
-   ctx.save();const age=Math.max(0,state.current-t.start),left=Math.max(0,t.duration-age);let textAlpha=1,textScale=1;if(t.motion==='fade'){textAlpha=Math.min(1,age/.28,left/.28);}else if(t.motion==='pop'){textScale=1+Math.max(0,.28-age)*.75;}else if(t.motion==='slide'){ctx.translate(0,Math.max(0,.4-age)*H*.18);}ctx.globalAlpha=Math.max(0,Math.min(1,textAlpha));ctx.translate(W*t.x,H*t.y);ctx.rotate((Number(t.rotation)||0)*Math.PI/180);ctx.scale(textScale,textScale);ctx.translate(-W*t.x,-H*t.y);ctx.textAlign='center';ctx.textBaseline='middle';const unit=W/720;const size=t.size*unit;const style=styleForText(t);ctx.font=`${style.weight} ${size}px ${style.font}`;ctx.fillStyle=style.color;ctx.strokeStyle=style.outlineColor;ctx.lineWidth=size*style.outlineWidth;ctx.lineJoin='round';ctx.shadowColor='#000b';ctx.shadowBlur=14*unit;
-   const lines=wrapText(t.text,W*.88,size),lineHeight=size*1.23;
-   if(style.box){const wide=Math.max(...lines.map(line=>ctx.measureText(line).width),0);const boxH=lines.length*lineHeight;ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(W*t.x-wide/2-size*.19,H*t.y-boxH/2-size*.11,wide+size*.38,boxH+size*.22);ctx.fillStyle=style.color;}
-    for(let i=0;i<lines.length;i++){const y=H*t.y+(i-(lines.length-1)/2)*lineHeight;if(style.outlineWidth>0)ctx.strokeText(lines[i],W*t.x,y);ctx.fillText(lines[i],W*t.x,y);}
-   ctx.restore();}
+  const age=Math.max(0,state.current-t.start),left=Math.max(0,t.duration-age);
+  const appearance={...t};if(t.motion==='fade')appearance.opacity=(t.opacity??1)*Math.min(1,age/.28,left/.28);
+  if(t.motion==='pop')appearance.size=(t.size??62)*(1+Math.max(0,.28-age)*.75);
+  if(t.motion==='slide')appearance.y=(t.y??.76)+Math.max(0,.4-age)*.18;
+  drawTitle(ctx,canvas,appearance);
+ }
 }
 function seek(value){state.current=clampTime(value,state.project.clips);state.lastFrame=performance.now();positionMedia().catch(fail);syncMusic();updateTimecode();}
 function syncMusic(){const m=state.project.music,a=m&&state.assets.get(m.assetId);if(!a)return;
