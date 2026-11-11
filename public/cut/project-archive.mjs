@@ -11,11 +11,18 @@ const u32=(v)=>{const a=new Uint8Array(4);new DataView(a.buffer).setUint32(0,v>>
 function safeId(id){return typeof id==='string'&&/^[a-z0-9_-]{1,90}$/i.test(id);}
 export function projectAssetIds(project){
   const ids=new Set();
-  for(const c of project.clips||[])ids.add(c.assetId);
-  for(const o of project.overlays||[])ids.add(o.assetId);
-  for(const o of project.audioTracks||[])ids.add(o.assetId);
-  for(const scene of project.cgScenes||[])ids.add(scene.modelAssetId);
-  if(project.music)ids.add(project.music.assetId);
+  const collect=p=>{
+    for(const c of p.clips||[])ids.add(c.assetId);
+    for(const o of p.overlays||[])ids.add(o.assetId);
+    for(const o of p.audioTracks||[])ids.add(o.assetId);
+    for(const scene of p.cgScenes||[])ids.add(scene.modelAssetId);
+    if(p.music)ids.add(p.music.assetId);
+  };
+  collect(project);
+  // Branches hold non-recursive project snapshots; preserve their source media in backups.
+  for(const branch of (Array.isArray(project.editBranches)?project.editBranches:[]).slice(0,3)){
+    if(branch?.snapshot && typeof branch.snapshot==='object')collect(branch.snapshot);
+  }
   return [...ids];
 }
 export async function createProjectArchive(project,assetMap){
