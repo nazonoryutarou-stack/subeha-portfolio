@@ -67,14 +67,8 @@
 .pro-motion-options{display:flex;gap:6px;overflow-x:auto;padding-bottom:7px;scrollbar-width:thin}
 #pro-content .pro-motion-options button{flex:0 0 auto;min-width:82px;padding:9px 8px;background:#383942}
 
-
-/* Videoleap 1.40.1 device audit: measured horizontal effects strip.
-   Keep the original SUBEHA icons and local rendering pipeline. */
-.leap-layout .leap-toolstrip:has(.leap-effect-choice){scroll-snap-type:x proximity}
-.leap-layout .leap-tool.selected{color:#ff626d;background:#313137}
-.leap-layout .leap-tool.selected svg{color:#ff626d}
-.leap-layout .leap-tool.selected span{font-weight:700}
-@media(max-width:440px){
- .leap-layout .leap-toolstrip{overscroll-behavior-x:contain}
- .leap-layout .leap-tool{scroll-snap-align:start}
-}
+/* v1.7 — keep an actual project backup action visible in the mobile header. */
+.leap-layout .topbar #project-save{display:flex!important;align-items:center;justify-content:center;position:absolute;left:98px;top:9px;width:42px;height:36px;color:#e6e6eb;background:transparent;border:0;border-radius:7px;z-index:2}
+.leap-layout .topbar #project-save:active{background:#37373f}
+.leap-layout .topbar #save-indicator{display:none}
+@media(min-width:550px){.leap-layout .topbar #save-indicator{display:block;position:absolute;top:40px;right:120px;font-size:9px}}

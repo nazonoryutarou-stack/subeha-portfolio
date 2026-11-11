@@ -7,6 +7,7 @@ import {normalizeExportSettings,supportedRecorderType} from './export-settings.m
 import {styleForText} from './text-styles.mjs';
 import {buildGradeFilter,fxAmountAt} from './fx-lab-core.mjs';
 import {composedFilterStack} from './filter-stack.mjs';
+import {inspectEncodedBlob,exportNotice} from './export-integrity.mjs';
 
 const $ = (id) => document.getElementById(id);
 const canvas=$('preview'),ctx=canvas.getContext('2d',{alpha:false});
@@ -20,6 +21,7 @@ let db=null, audioCtx=null, mixer=null, videoNode=null, musicNode=null, toastTim
 const renderHooks=[];
 const sourceFrameHooks=[];
 const history={undo:[],redo:[],current:null};
+let bootstrapped=false, saveRevision=0, exportSession=null;
 
 function toast(message){const box=$('snackbar');box.textContent=message;box.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>box.classList.remove('visible'),3200);}
 function fail(error){console.error(error);toast(error?.message||String(error));}
@@ -27,7 +29,25 @@ function openDB(){return new Promise((resolve,reject)=>{if(!('indexedDB'in windo
 function idbPut(store,key,value){if(!db)return Promise.resolve();return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(value,key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
 function idbGet(store,key){if(!db)return Promise.resolve(null);return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).get(key);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});}
 function idbDelete(store,key){if(!db)return Promise.resolve();return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});}
-function save(){const snap=JSON.stringify(state.project);if(history.current!==null && snap!==history.current){history.undo.push(history.current);if(history.undo.length>60)history.undo.shift();history.redo=[];}history.current=snap;window.dispatchEvent(new Event('subeha-cut-change'));clearTimeout(state.pendingSave);state.pendingSave=setTimeout(async()=>{try{await idbPut('projects','current',state.project);}catch(e){toast('保存容量不足。大きい素材を減らしてください。');console.warn(e);}},300);}
+function saveIndicator(message,level='ok'){const el=$('save-indicator');if(el){el.textContent=message;el.dataset.state=level;}}
+function save(){
+ // The initial layout setup must never overwrite a project before IndexedDB restoration finishes.
+ if(!bootstrapped)return;
+ const snap=JSON.stringify(state.project);
+ if(history.current!==null && snap!==history.current){history.undo.push(history.current);if(history.undo.length>60)history.undo.shift();history.redo=[];}
+ history.current=snap;
+ window.dispatchEvent(new Event('subeha-cut-change'));
+ clearTimeout(state.pendingSave);
+ const revision=++saveRevision;
+ saveIndicator('保存中…','pending');
+ state.pendingSave=setTimeout(async()=>{
+  try{
+   if(!db)throw new Error('自動保存を利用できません');
+   await idbPut('projects','current',JSON.parse(snap));
+   if(revision===saveRevision)saveIndicator('自動保存済み');
+  }catch(e){if(revision===saveRevision){saveIndicator('保存失敗','error');toast('自動保存できません。素材を含めて保存してください。');}console.warn('autosave',e);}
+ },350);
+}
 const fileObjects=[];
 function videoProbe(url){return new Promise((resolve,reject)=>{const v=document.createElement('video');v.preload='metadata';v.muted=true;v.onloadedmetadata=()=>{resolve({duration:Number.isFinite(v.duration)&&v.duration>0?v.duration:0,width:v.videoWidth,height:v.videoHeight});v.removeAttribute('src');v.load();};v.onerror=()=>reject(new Error('動画を開けませんでした。形式をご確認ください'));v.src=url;});}
 function audioProbe(url){return new Promise((resolve,reject)=>{const a=new Audio();a.preload='metadata';a.onloadedmetadata=()=>{resolve({duration:Number.isFinite(a.duration)?a.duration:0});a.removeAttribute('src');a.load();};a.onerror=()=>reject(new Error('音声を読み込めませんでした'));a.src=url;});}
@@ -95,7 +115,7 @@ async function restore(){
      state.selectedClip=state.project.clips[0]?.id||null;
    }
  }catch(e){console.warn('Project storage unavailable',e);toast('この環境では自動保存できません');}
- history.undo=[];history.redo=[];history.current=JSON.stringify(state.project);refreshAll();await positionMedia();
+ history.undo=[];history.redo=[];history.current=JSON.stringify(state.project);refreshAll();await positionMedia();saveIndicator(db?'自動保存済み':'自動保存不可',db?'ok':'error');
 }
 function selectedClip(){return state.project.clips.find(c=>c.id===state.selectedClip)||null;}
 function selectedText(){return state.project.texts.find(t=>t.id===state.selectedText)||null;}
@@ -282,35 +302,86 @@ function animationLoop(timestamp){
  }
  raf=requestAnimationFrame(animationLoop);
 }
+function finishExport(session){
+ if(!session||session.finished)return;
+ session.finished=true;
+ state.recording=false;state.playing=false;state.exportClockStart=null;state.recorder=null;
+ if(exportSession===session)exportSession=null;
+ $('export-open').disabled=false;$('export-secondary').disabled=false;
+ $('export-progress').hidden=true;
+ for(const track of session.stream?.getTracks()||[])try{track.stop();}catch{}
+ try{state.wakeLock?.release().catch(()=>{});}catch{}
+ state.wakeLock=null;
+ media.pause();bgm.pause();transMedia.pause();updateTimecode();
+}
+function cancelExport(){
+ const session=exportSession;
+ if(!session||session.finished)return;
+ session.canceled=true;state.playing=false;
+ media.pause();bgm.pause();transMedia.pause();
+ $('progress-text').textContent='書き出しを中止しています…';
+ $('export-cancel').disabled=true;
+ try{
+  if(session.recorder?.state==='recording'||session.recorder?.state==='paused')session.recorder.stop();
+  else if(!session.recorder||session.recorder.state==='inactive'){
+   finishExport(session);toast('書き出しを中止しました。');
+  }
+ }catch(e){finishExport(session);toast('書き出しを中止しました。');console.warn('export cancel',e);}
+}
 async function exportMovie(){
  if(state.recording)return;
  const d=duration(state.project.clips);
  if(!d){toast('先に動画または画像を取り込んでください');return;}
- if(d>180){toast('試作版は180秒以内の書き出しを推奨します');return;}
+ if(d>180){toast('この版では180秒を超える動画を安全に書き出せません。短くしてから保存してください');return;}
  if(typeof MediaRecorder==='undefined'||!canvas.captureStream){toast('このブラウザは動画書き出しに非対応です');return;}
- const exportOptions=normalizeExportSettings(state.project.exportSettings);
- const type=supportedRecorderType(MediaRecorder,exportOptions.format);if(!type){toast('対応するエンコード形式がありません');return;}
+ const options=normalizeExportSettings(state.project.exportSettings);
+ const type=supportedRecorderType(MediaRecorder,options.format);
+ if(!type){toast('対応する動画形式がありません');return;}
+ const session={canceled:false,failed:false,finished:false,stream:null,recorder:null};
+ exportSession=session;state.recording=true;
+ $('export-progress').hidden=false;$('progress-text').textContent='動画を準備しています…';$('progress-bar').style.width='0%';
+ $('export-cancel').disabled=false;$('export-open').disabled=true;$('export-secondary').disabled=true;
+ $('export-last-report').hidden=true;
  try{
-   state.recording=true;$('export-progress').hidden=false;$('export-progress').scrollIntoView({block:'nearest',behavior:'smooth'});$('export-open').disabled=true;$('export-secondary').disabled=true;
-   if(state.playing){state.playing=false;media.pause();bgm.pause();transMedia.pause();}
-   seek(0);await positionMedia();draw();audioReady();if(audioCtx)await audioCtx.resume();
-   const stream=canvas.captureStream(exportOptions.fps);
-   if(mixer){for(const track of mixer.stream.getAudioTracks())stream.addTrack(track);}
-   const recorder=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:exportOptions.videoBitsPerSecond,audioBitsPerSecond:exportOptions.audioBitsPerSecond});state.recorder=recorder;
-   const chunks=[];
-   recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
-   recorder.onerror=e=>{console.error(e);toast('書き出しでエラーが発生しました');};
-   recorder.onstop=()=>{
-     try{if(!chunks.length)throw Error('出力データが空です');
-       const actualType=recorder.mimeType||type,ext=actualType.startsWith('video/mp4')?'mp4':'webm';
-       const blob=new Blob(chunks,{type:actualType});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=safeName(state.project.name)+'-'+new Date().toISOString().slice(0,10)+'.'+ext;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
-       toast(`${ext.toUpperCase()}を書き出しました（${(blob.size/1024/1024).toFixed(1)}MB）`);
-     }catch(e){fail(e);}finally{state.recording=false;state.exportClockStart=null;state.recorder=null;$('export-open').disabled=false;$('export-secondary').disabled=false;$('export-progress').hidden=true;for(const track of stream.getTracks())track.stop();state.wakeLock?.release().catch(()=>{});}
-   };
-   recorder.start(500);state.current=0;state.playing=true;state.exportClockStart=performance.now();state.lastFrame=state.exportClockStart;await positionMedia();syncMusic();
-   if(navigator.wakeLock?.request)state.wakeLock=await navigator.wakeLock.request('screen').catch(()=>null);
-   toast('録画方式で書き出し中。画面を閉じないでください');setPanel('export');
- }catch(e){state.recording=false;state.exportClockStart=null;state.recorder=null;$('export-open').disabled=false;$('export-secondary').disabled=false;$('export-progress').hidden=true;fail(e);}
+  if(state.playing){state.playing=false;media.pause();bgm.pause();transMedia.pause();}
+  seek(0);await positionMedia();draw();audioReady();if(audioCtx)await audioCtx.resume();
+  if(session.canceled){finishExport(session);return;}
+  const stream=canvas.captureStream(options.fps);session.stream=stream;
+  if(mixer){for(const track of mixer.stream.getAudioTracks())stream.addTrack(track);}
+  const recorder=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:options.videoBitsPerSecond,audioBitsPerSecond:options.audioBitsPerSecond});
+  session.recorder=recorder;state.recorder=recorder;
+  const chunks=[];
+  recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data);};
+  recorder.onerror=e=>{session.failed=true;console.error('MediaRecorder',e);try{if(recorder.state!=='inactive')recorder.stop();}catch{};};
+  recorder.onstop=async()=>{
+   try{
+    if(session.canceled){toast('書き出しを中止しました。動画は保存していません。');return;}
+    if(session.failed)throw new Error('動画の記録に失敗しました。形式・容量・端末の空き領域をご確認ください。');
+    if(!chunks.length)throw new Error('記録データが空です。別の画質または形式を試してください。');
+    const blob=new Blob(chunks,{type:recorder.mimeType||type});
+    const check=await inspectEncodedBlob(blob,recorder.mimeType||type);
+    const ext=check.extension;
+    const url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download=safeName(state.project.name)+'-'+new Date().toISOString().slice(0,10)+'.'+ext;
+    document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+    const details=check.video+' / '+check.audio;
+    $('export-last-report').textContent=`保存: ${ext.toUpperCase()} (${(blob.size/1024/1024).toFixed(1)}MB) · 映像 ${check.video} · 音声 ${check.audio}。`+' '+exportNotice(check,options.format);
+    $('export-last-report').hidden=false;
+    toast('動画を保存しました。形式: '+ext.toUpperCase()+'／'+details);
+   }catch(e){fail(e);$('export-last-report').textContent='保存に失敗しました: '+e.message;$('export-last-report').hidden=false;}
+   finally{finishExport(session);}
+  };
+  recorder.start(500);
+  state.current=0;state.playing=true;state.exportClockStart=performance.now();state.lastFrame=state.exportClockStart;
+  await positionMedia();syncMusic();
+  if(navigator.wakeLock?.request)state.wakeLock=await navigator.wakeLock.request('screen').catch(()=>null);
+  toast('動画を保存中です。画面を閉じないでください。');setPanel('export');
+ }catch(e){
+  session.failed=true;
+  if(session.recorder?.state==='recording')try{session.recorder.stop();}catch{}
+  finishExport(session);fail(e);
+  $('export-last-report').textContent='書き出しに失敗しました: '+e.message;$('export-last-report').hidden=false;
+ }
 }
 function exportProject(){const blob=new Blob([JSON.stringify({...state.project,note:'編集メタデータのみ。動画・画像・音声ファイルは含まれません。'},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=safeName(state.project.name)+'-project.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);toast('編集情報JSONを書き出しました（素材は含みません）');}
 function updateClip(fn){const c=selectedClip();if(!c||state.recording)return;fn(c);state.current=clampTime(state.current,state.project.clips);save();refreshAll();positionMedia().catch(fail);}
@@ -342,7 +413,7 @@ function bind(){
  $('music-volume').addEventListener('input',e=>{if(!state.project.music)return;state.project.music.volume=Number(e.target.value);syncMusic();save();refreshPanels();});
  $('music-remove').addEventListener('click',()=>{bgm.pause();bgm.removeAttribute('src');bgm.load();state.project.music=null;save();refreshAll();});
  $('export-open').addEventListener('click',()=>{setPanel('export');document.querySelector('.tools-shell').scrollIntoView({behavior:'smooth'});});
- $('export-secondary').addEventListener('click',exportMovie);$('backup-project').addEventListener('click',exportProject);$('project-save').addEventListener('click',exportProject);
+ $('export-secondary').addEventListener('click',exportMovie);$('export-cancel').addEventListener('click',cancelExport);$('backup-project').addEventListener('click',exportProject);$('project-save').addEventListener('click',exportProject);
  $('new-project').addEventListener('click',async()=>{if(!confirm('新規プロジェクトを開始しますか？ 現在の編集内容は上書きされます。'))return;state.playing=false;media.pause();bgm.pause();transMedia.pause();state.project={name:'UNTITLED '+String(Math.floor(Math.random()*90+10)),ratio:'9:16',fit:'cover',backgroundColor:'#07080b',blurBackground:false,clips:[],texts:[],overlays:[],music:null,audioTracks:[],cgScenes:[],captions:[],captionStyle:null,captionEnabled:true,exportSettings:{preset:'standard',format:'auto'}};state.selectedClip=null;state.selectedText=null;state.activeClip=null;state.current=0;setRatio('9:16');save();refreshAll();});
  window.addEventListener('pagehide',()=>{if(state.recording)console.warn('Export interrupted by pagehide');});
 }
@@ -364,5 +435,5 @@ function undo(){if(!history.undo.length)return toast('戻す操作がありま�
 function redo(){if(!history.redo.length)return toast('やり直す操作がありません');history.undo.push(history.current);history.current=history.redo.pop();applyHistory(history.current);}
 window.__subehaSaveAsset=async(id,file,type,name)=>idbPut('files',id,{blob:file,type,name});
 window.__subehaCut={state,canvas,ctx,buildAsset,seek,save,refreshAll,refreshTimeline,draw,selectedClip,updateClip,setPanel,renderHooks,sourceFrameHooks,toast,newID,assetOf,undo,redo,duration,locate,spans,renderBaseClip,getAudioGraph:()=>{audioReady();return {audioCtx,mixer};},loadProjectSnapshot,setRatio};
-async function init(){bind();setRatio('9:16');setPanel('clips');try{if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))await navigator.serviceWorker.register('./sw.js');}catch(e){console.warn('Service worker',e);}await restore();window.dispatchEvent(new Event('subeha-cut-ready'));requestAnimationFrame(animationLoop);}
+async function init(){bind();setRatio('9:16');setPanel('clips');try{if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))await navigator.serviceWorker.register('./sw.js');}catch(e){console.warn('Service worker',e);}await restore();bootstrapped=true;window.dispatchEvent(new Event('subeha-cut-ready'));requestAnimationFrame(animationLoop);}
 init().catch(fail);
