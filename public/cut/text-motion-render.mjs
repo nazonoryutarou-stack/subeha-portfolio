@@ -3,6 +3,7 @@
  */
 import {drawTitle,layoutTitle,measuredLine} from './title-render.mjs';
 import {titleAt,normalizedTextMotion,motionState} from './text-motion-core.mjs';
+import {drawPbrTitle} from './pbr-title-render.mjs';
 const glyphs=str=>Array.from(String(str||''));
 const wordSplitter=typeof Intl!=='undefined'&&Intl.Segmenter?new Intl.Segmenter('ja',{granularity:'word'}):null;
 function groups(line,unit){
@@ -55,7 +56,20 @@ export function drawAnimatedTitle(ctx,canvas,item,localSeconds=0){
   if(t.motion==='fade')appearance.opacity=(t.opacity??1)*Math.min(1,age/.28,left/.28);
   if(t.motion==='pop')appearance.size=(t.size??62)*(1+Math.max(0,.28-age)*.75);
   if(t.motion==='slide')appearance.y=(t.y??.76)+Math.max(0,.4-age)*.18;
-  return drawTitle(ctx,canvas,appearance);
+  return t.pbrEnabled===true?drawPbrTitle(ctx,canvas,appearance,age):drawTitle(ctx,canvas,appearance);
+ }
+ // A 3D-lit title can follow a global entrance animation. Per-letter, per-word
+ // or per-line motion keeps the original fast 2D renderer on mobile.
+ if(t.pbrEnabled===true&&conf.unit==='global'){
+  const unit=motionState(conf,age,t.duration||3,0,1);
+  const modified={...t,
+   x:(t.x??.5)+unit.dx/720,
+   y:(t.y??.76)+unit.dy/720,
+   size:(t.size??62)*unit.scale,
+   rotation:(t.rotation??0)+unit.rotation*180/Math.PI,
+   opacity:(t.opacity??1)*unit.alpha
+  };
+  return drawPbrTitle(ctx,canvas,modified,age);
  }
  const box=layoutTitle(ctx,canvas,{...t,textMotion:conf}),s={...box.style,textMotion:conf};
  ctx.save();
