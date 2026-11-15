@@ -100,6 +100,7 @@ function installShell(){
   make('エフェクト','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('effects') : openTool('effects')),
   make('キャンバス','canvas',()=>openTool('canvas')),
   make('字幕','captions',()=>openTool('captions')),
+  make('すべて','more',()=>openExtras()),
  ];
  function openMagicEdit(){
   sheet.hidden=true;document.querySelector('.tools-shell')?.classList.remove('pro-visible');document.body.classList.remove('pro-open');
