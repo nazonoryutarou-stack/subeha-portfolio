@@ -34,7 +34,7 @@ function mount(){
  function render(){const scroll=sheet.scrollTop;const c=activeClip();sheet.dataset.page=page;sheet.dataset.detail=page==='effects'&&focusedFx?'true':'false';document.body.classList.toggle('cut-effects-mode',!sheet.hidden&&page==='effects');$('cut-fx-title').textContent=({filters:'フィルタ',grade:'調整',effects:'エフェクト'})[page]||'エフェクト';
   sheet.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   if(!c){$('cut-fx-content').innerHTML='<p class="cut-fx-empty">先にタイムラインで動画または画像を選んでください。</p>';return;}
-  if(page==='filters')filters(c);else if(page==='looks')looks(c);else if(page==='grade')grade(c);else effects(c,page==='optics');sheet.scrollTop=scroll;
+  if(page==='filters')filters(c);else if(page==='grade')grade(c);else effects(c,false);sheet.scrollTop=scroll;
  }
  function filters(c){
   const rows=c.filterStack||[];
@@ -112,7 +112,8 @@ function mount(){
   const arr=c.fxStack||[];
   const rows=focusedFx?arr.filter(fx=>fx.id===focusedFx):arr;
   sheet.dataset.detail=page==='effects'&&!!focusedFx&&rows.length?'true':'false';
-  $('cut-fx-content').innerHTML='<p class="cut-fx-help">エフェクトは重ねて使えます。表示中の時間に「◆キー」を付けると強さが時間変化します。</p><div class="cut-fx-picker cut-fx-carousel">'+(onlyOptics?OPTICAL_TYPES.map(type=>[type,FX_LABELS[type],'◇']):REFERENCE_EFFECTS).map(([type,label,glyph])=>`<button type="button" data-add-fx="${type}" title="${label}"><span class="cut-fx-glyph" aria-hidden="true">${glyph}</span><span>${label}</span></button>`).join('')+'</div><div id="cut-fx-stack">'+(rows.length?rows.map((fx,index)=>`<section class="cut-fx-unit" data-fx-row="${clean(fx.id)}"><header><b>${index+1}. ${FX_LABELS[fx.type]||fx.type}</b><div><button data-up="${clean(fx.id)}" aria-label="上へ">↑</button><button data-down="${clean(fx.id)}" aria-label="下へ">↓</button><button data-remove="${clean(fx.id)}" aria-label="削除">×</button></div></header><label>強さ <output data-fx-value="${clean(fx.id)}">${Math.round(fxAmountAt(fx,currentTime(c))*100)}%</output><input type="range" data-fx-input="${clean(fx.id)}" min="0" max="1" step=".01" value="${fxAmountAt(fx,currentTime(c))}"></label>${opticalControls(fx)}<div class="cut-fx-keys"><button data-key="${clean(fx.id)}">◆ 現在位置にキー</button><button data-start="${clean(fx.id)}">IN</button><button data-end="${clean(fx.id)}">OUT</button><button data-clear="${clean(fx.id)}">キー削除</button></div><small>キー ${fx.keys?.length||0}個 ${Number(fx.start)>0?' / IN '+fx.start.toFixed(1)+'s':''} ${Number(fx.end)>0?' / OUT '+fx.end.toFixed(1)+'s':''}</small></section>`).join(''):'<div class="cut-fx-empty">まだ効果がありません。上から追加できます。</div>')+'</div>';
+  $('cut-fx-content').innerHTML='<p class="cut-fx-help">エフェクトは重ねて使えます。表示中の時間に「◆キー」を付けると強さが時間変化します。</p><div class="cut-fx-picker cut-fx-carousel"><button type="button" id="cut-fx-rail-back" class="cut-fx-rail-back" aria-label="エフェクト選択を閉じる">‹</button>'+(onlyOptics?OPTICAL_TYPES.map(type=>[type,FX_LABELS[type],'◇']):REFERENCE_EFFECTS).map(([type,label,glyph])=>`<button type="button" data-add-fx="${type}" title="${label}"><span class="cut-fx-glyph" aria-hidden="true">${glyph}</span><span>${label}</span></button>`).join('')+'</div><div id="cut-fx-stack">'+(rows.length?rows.map((fx,index)=>`<section class="cut-fx-unit" data-fx-row="${clean(fx.id)}"><header><b>${index+1}. ${FX_LABELS[fx.type]||fx.type}</b><div><button data-up="${clean(fx.id)}" aria-label="上へ">↑</button><button data-down="${clean(fx.id)}" aria-label="下へ">↓</button><button data-remove="${clean(fx.id)}" aria-label="削除">×</button></div></header><label>強さ <output data-fx-value="${clean(fx.id)}">${Math.round(fxAmountAt(fx,currentTime(c))*100)}%</output><input type="range" data-fx-input="${clean(fx.id)}" min="0" max="1" step=".01" value="${fxAmountAt(fx,currentTime(c))}"></label>${opticalControls(fx)}<div class="cut-fx-keys"><button data-key="${clean(fx.id)}">◆ 現在位置にキー</button><button data-start="${clean(fx.id)}">IN</button><button data-end="${clean(fx.id)}">OUT</button><button data-clear="${clean(fx.id)}">キー削除</button></div><small>キー ${fx.keys?.length||0}個 ${Number(fx.start)>0?' / IN '+fx.start.toFixed(1)+'s':''} ${Number(fx.end)>0?' / OUT '+fx.end.toFixed(1)+'s':''}</small></section>`).join(''):'<div class="cut-fx-empty">まだ効果がありません。上から追加できます。</div>')+'</div>';
+  $('cut-fx-rail-back').onclick=close;
   for(const b of $('cut-fx-content').querySelectorAll('[data-add-fx]'))b.onclick=()=>{
    const clip=activeClip();if(!clip)return;
    let added=null;
@@ -175,7 +176,7 @@ function mount(){
   }
   for(const action of ['up','down','remove','key','start','end','clear'])for(const b of $('cut-fx-content').querySelectorAll(`[data-${action}]`))b.onclick=()=>{
    const id=b.dataset[action],t=currentTime(activeClip());update(clip=>{const a=clip.fxStack||[],i=a.findIndex(x=>x.id===id),fx=a[i];if(!fx)return;
-     if(action==='remove')a.splice(i,1);
+     if(action==='remove'){a.splice(i,1);if(focusedFx===id)focusedFx=null;}
      if(action==='up'&&i>0)[a[i-1],a[i]]=[a[i],a[i-1]];
      if(action==='down'&&i<a.length-1)[a[i+1],a[i]]=[a[i],a[i+1]];
      if(action==='key'){fx.keys ||= [];fx.keys=fx.keys.filter(k=>Math.abs(k.time-t)>.05);fx.keys.push({time:t,amount:fx.amount});}
