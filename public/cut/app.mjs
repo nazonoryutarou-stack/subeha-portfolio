@@ -3,6 +3,7 @@ import {drawAnimatedTitle} from './text-motion-render.mjs';
 import {RATIOS,clipLength,duration,locate,splitAt,clampTime,formatClock,safeName,newID} from './timeline.mjs';
 import {advanceTimeline} from './export-timing.mjs';
 import {spans,transitionProgress} from './transitions.mjs';
+import {drawIncomingTransition,outgoingTransitionAlpha} from './transition-visuals.mjs';
 import {applyEffect} from './effects.mjs';
 import {clipTransform} from './keyframes.mjs';
 import {rampPlaybackRate} from './speed-ramp.mjs';
@@ -234,20 +235,8 @@ function draw(){
  if(tr){
    const from=tr.fromClip,oldAsset=assetOf(from);
    const oldView=oldAsset?.type==='image'?oldAsset.image:(transMedia.readyState>=2?transMedia:null);
-   if(oldView)renderBaseClip(from,oldView,oldAsset,tr.type==='fade'?Math.max(0,1-progress*2):1,tr.fromLocal);
-   if(ready){
-     ctx.save();
-     if(tr.type==='fade'){renderBaseClip(c,view,a,Math.max(0,progress*2-1),at.local);}
-     else if(tr.type==='wipe-left'||tr.type==='wipe-right'){
-       const edge=W*progress;if(tr.type==='wipe-left'){ctx.beginPath();ctx.rect(0,0,edge,H);ctx.clip();}else{ctx.beginPath();ctx.rect(W-edge,0,edge,H);ctx.clip();}
-       renderBaseClip(c,view,a,1,at.local);
-     }else if(tr.type==='slide-left'){
-       ctx.translate(W*(1-progress),0);renderBaseClip(c,view,a,1,at.local);
-     }else if(tr.type==='zoom'){
-       ctx.translate(W/2,H/2);ctx.scale(.7+.3*progress,.7+.3*progress);ctx.translate(-W/2,-H/2);renderBaseClip(c,view,a,progress,at.local);
-     }else renderBaseClip(c,view,a,progress,at.local);
-     ctx.restore();
-   }
+   if(oldView)renderBaseClip(from,oldView,oldAsset,outgoingTransitionAlpha(tr.type,progress),tr.fromLocal);
+   if(ready)drawIncomingTransition(ctx,canvas,tr.type,progress,alpha=>renderBaseClip(c,view,a,alpha,at.local));
  }else if(ready)renderBaseClip(c,view,a,1,at.local);
  if(ready&&c.filter==='glitch'&&!tr && !(window.__subehaCompareOriginal && !state.recording && window.__subehaCompareClipId===c.id)){ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=.18;ctx.filter='hue-rotate(150deg)';ctx.translate(Math.sin(state.current*18)*10,0);try{drawFrameWithAspect(view,a.width,a.height);}catch{}ctx.restore();}
  if(!(window.__subehaCompareOriginal && !state.recording && window.__subehaCompareClipId===c.id)){
