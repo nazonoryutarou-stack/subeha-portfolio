@@ -72,3 +72,65 @@
 .leap-layout .topbar #project-save:active{background:#37373f}
 .leap-layout .topbar #save-indicator{display:none}
 @media(min-width:550px){.leap-layout .topbar #save-indicator{display:block;position:absolute;top:40px;right:120px;font-size:9px}}
+
+/* v2.7: audit-driven editing surface.
+ * Reference: user-provided Android Videoleap 1.40.1 effects.png + effects.xml.
+ * Original UI art, CG tools and branding intentionally not reproduced.
+ */
+:root{--leap-red:#fb4d5b;--leap-panel:#202023}
+.leap-layout #app,.leap-layout main{background:#202023}
+.leap-layout .topbar{background:#202023;flex-basis:48px!important;height:48px!important}
+.leap-layout .topbar .brand{color:var(--leap-red);font:750 16px/1 system-ui,sans-serif;letter-spacing:0;white-space:nowrap}
+.leap-layout .topbar #project-save{display:none!important}
+.leap-layout #new-project,.leap-layout .leap-head-help{top:6px}
+.leap-layout #export-open{background:#414146;color:#f6f6f8}
+.leap-layout .viewer-shell{background:#141416;min-height:100px}
+.leap-layout .preview-stage{background:#141416}
+.leap-layout .empty-overlay{background:#141416}
+.leap-layout .empty-overlay .empty-emblem{display:none}
+.leap-layout .transport{background:#141416}
+.leap-layout .timeline-shell.cut-touch-enabled{
+ height:clamp(178px,27dvh,304px)!important;
+ flex:0 0 clamp(178px,27dvh,304px)!important;
+ background:#202023;overflow:hidden
+}
+.leap-layout #cut-touch-workspace{height:calc(100% - 38px)!important;min-height:0;flex:1 1 auto;overflow:hidden}
+.leap-layout .cut-timeline-frame{height:100%!important;min-height:0!important;overflow:hidden;max-height:none}
+.leap-layout .cut-timeline-scroll{
+ height:100%!important;max-height:none!important;min-height:0;
+ overflow-x:auto!important;overflow-y:auto!important;
+ touch-action:pan-x pan-y;overscroll-behavior:contain;
+ background:#202023
+}
+.leap-layout .cut-timeline-content{min-height:155px!important;height:auto;overflow:visible!important}
+.leap-layout #cut-video-lane{margin-top:25px;height:58px;background:#202023}
+.leap-layout #cut-overlay-lane{min-height:0;background:#202023}
+.leap-layout #cut-overlay-lane .cut-timeline-pill{height:24px!important}
+.leap-layout #cut-video-lane .cut-video-card{height:56px!important}
+.leap-layout .cut-center-playhead{z-index:9;pointer-events:none;background:#ff4d60}
+.leap-layout .leap-add-media{right:8px;top:76px;background:#ff4e5e}
+.leap-layout .leap-editing-bar{height:38px!important;flex:0 0 38px!important;background:#202023;padding:2px 9px;position:relative;z-index:3}
+.leap-layout .leap-editing-bar .leap-midtools{display:flex!important;align-items:center;gap:4px}
+.leap-layout .leap-editing-bar #leap-zoom{display:none!important}
+.leap-layout .leap-editing-bar button{width:34px;height:32px}
+.leap-layout .leap-editing-bar #cut-layer-stack-open{
+ display:inline-flex!important;align-items:center!important;
+ justify-content:center!important;width:auto!important;min-width:76px;
+ min-height:30px;height:30px;padding:2px 8px;
+ border:1px solid #4b4b52;background:#303036;color:#e2e2e7;font-size:10px;
+ white-space:nowrap;gap:2px
+}
+.leap-layout .leap-editing-bar #cut-layer-stack-open b{font-size:10px;padding:1px 4px}
+.leap-layout .bottomnav{background:#202023}
+.leap-layout .leap-toolstrip{justify-content:flex-start!important}
+.leap-layout .leap-tool{position:relative}
+.leap-layout .leap-tool.has-badge:after{display:none!important}
+.leap-layout .leap-tool svg{width:25px;height:25px;color:#aeb0b6}
+.leap-layout .leap-tool span{font-size:11px;white-space:nowrap}
+.leap-layout .leap-tool:focus-visible,.leap-layout .cut-timeline-pill:focus-visible{outline:2px solid #fb6077;outline-offset:-2px}
+.leap-layout #cut-title-presets{display:none!important}
+@media(max-height:690px){
+ .leap-layout .timeline-shell.cut-touch-enabled{height:clamp(155px,28dvh,210px)!important;flex-basis:clamp(155px,28dvh,210px)!important}
+ .leap-layout #cut-video-lane{margin-top:9px}
+ .leap-layout .leap-add-media{top:61px}
+}
