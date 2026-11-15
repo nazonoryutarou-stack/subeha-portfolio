@@ -203,6 +203,7 @@ function effectivePosition(layer,props){
 function renderLayers(){
   const W=canvas.width,H=canvas.height;
   for(const layer of state.project.overlays||[]){
+    if(layer.visible===false)continue;
     const local=state.current-layer.start;if(local<0||local>layer.duration)continue;
     const asset=state.assets.get(layer.assetId);if(!asset)continue;
     let view=asset.image;
