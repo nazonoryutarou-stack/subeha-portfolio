@@ -399,7 +399,7 @@ function mount(){
   openPanel(tab);};
  function frame(ts){if(ts-lastRender>80){lastRender=ts;
   // Track newly added text and project load without opening a numeric control panel.
-  if(state.selectedText!==lastTextId){lastTextId=state.selectedText;if(lastTextId){const t=(state.project.texts||[]).find(x=>x.id===lastTextId);if(t&&visible('text',t)&&(!selection||selection.kind!=='caption'))selection={kind:'text',id:t.id};}}
+  if(state.selectedText!==lastTextId){lastTextId=state.selectedText;if(lastTextId){const t=(state.project.texts||[]).find(x=>x.id===lastTextId);if(t&&visible('text',t)&&(!selection||selection.kind==='text'))selection={kind:'text',id:t.id};}}
   layout();}
   requestAnimationFrame(frame);
  }
