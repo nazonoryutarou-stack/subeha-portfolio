@@ -92,6 +92,7 @@ function installShell(){
   make('3D映像','cube',()=>window.__subehaCGOpen?.()),
   make('テキスト','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text');}),
   make('文字アニメ','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text','motion');else window.__subehaCut.toast('文字を追加して選択するとアニメーションを編集できます');}),
+  make('立体文字','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text','pbr');else window.__subehaCut.toast('まず文字を追加し、プレビューで選択してください');}),
   make('音声','audio',()=>openTool('audio')),
   make('声を作る','audio',()=>window.__subehaVoiceOpen?.()),
   make('色フィルター','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
