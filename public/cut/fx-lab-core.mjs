@@ -1,11 +1,15 @@
 /* Pure parameters for non-destructive layered effects and time-varying strength. */
-export const FX_TYPES=Object.freeze(['vignette','pixelate','prism','scanlines','grain','lightleak','bloom','letterbox','duotone','ghost']);
-export const FX_LABELS=Object.freeze({vignette:'周辺減光',pixelate:'ピクセル化',prism:'色収差',scanlines:'走査線',grain:'フィルム粒子',lightleak:'光漏れ',bloom:'柔らかな発光',letterbox:'映画スコープ',duotone:'2色調',ghost:'残像'});
+import {OPTICAL_TYPES,OPTICAL_LABELS} from './optical-fx.mjs';
+export const FX_TYPES=Object.freeze(['vignette','pixelate','prism','scanlines','grain','lightleak','bloom','letterbox','duotone','ghost','shake','offset','oldfilm','mosaic','pattern','scan',...OPTICAL_TYPES]);
+export const FX_LABELS=Object.freeze({vignette:'周辺減光',pixelate:'ピクセル化',prism:'簡易プリズム',scanlines:'走査線',grain:'フィルム粒子',lightleak:'光漏れ',bloom:'柔らかな発光',letterbox:'映画スコープ',duotone:'2色調',ghost:'残像',shake:'手ぶれ',offset:'画面オフセット',oldfilm:'古いフィルム',mosaic:'モザイク',pattern:'幾何学模様',scan:'走査線2',...OPTICAL_LABELS});
 export const FX_LOOKS=Object.freeze({
  analog:{name:'アナログ映像',grade:{exposure:0,warmth:18,fade:20,saturation:-10},effects:[['grain',.38],['scanlines',.26],['ghost',.2]]},
  dream:{name:'夢幻',grade:{exposure:8,warmth:-16,fade:10,saturation:18},effects:[['bloom',.45],['lightleak',.25]]},
  monochrome:{name:'白黒映画',grade:{saturation:-100,contrast:16,fade:9},effects:[['grain',.23],['vignette',.25]]},
- synthetic:{name:'人工色彩',grade:{saturation:48,contrast:18,warmth:-28},effects:[['prism',.25],['duotone',.38]]}
+ synthetic:{name:'人工色彩',grade:{saturation:48,contrast:18,warmth:-28},effects:[['prism',.25],['duotone',.38]]},
+ refracted:{name:'屈折する世界',grade:{contrast:16,saturation:38,warmth:-12},effects:[['lenswarp',.45],['chromatic',.35],['halation',.24]]},
+ broadcast:{name:'異常放送',grade:{contrast:27,fade:8,saturation:-18},effects:[['rgb',.4],['displace',.28],['scanlines',.35]]},
+ anamorphic:{name:'超横長レンズ',grade:{exposure:4,contrast:20,saturation:4},effects:[['anamorphic',.55],['halation',.32],['vignette',.15]]}
 });
 const clamp=(x,min,max)=>Math.min(max,Math.max(min,Number.isFinite(+x)?+x:0));
 export function buildGradeFilter(grade={}){
