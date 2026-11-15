@@ -1,5 +1,6 @@
 /* Mobile-first, touch-driven grading and layerable procedural effects. */
 import {FX_TYPES,FX_LABELS,FX_LOOKS,addFx,applyLookToClip,fxAmountAt} from './fx-lab-core.mjs';
+import {OPTICAL_TYPES,OPTICAL_PARAMS} from './optical-fx.mjs';
 import {spans} from './transitions.mjs';
 import {FILTER_TYPES,filterStyle,addFilter,moveFilter,cloneFilterStack,filterCount} from './filter-stack.mjs';
 const $=id=>document.getElementById(id);
@@ -80,11 +81,68 @@ function mount(){
   $('cut-fx-content').querySelectorAll('[data-grade]').forEach(input=>{input.oninput=()=>{const k=input.dataset.grade,$v=$('cut-grade-val-'+k);$v.textContent=input.value;update(c=>{c.grade={...(c.grade||{}),[k]:+input.value};});};input.onchange=store;input.onpointerup=store;});
   $('cut-fx-grade-reset').onclick=()=>{update(c=>c.grade={},true);render();};
  }
+ function opticalValue(fx,key){
+  const parameter=OPTICAL_PARAMS[key],n=Number(fx.optics?.[key]);
+  return Number.isFinite(n)?Math.max(parameter.min,Math.min(parameter.max,n)):parameter.default;
+ }
+ function opticalControls(fx){
+  if(!OPTICAL_TYPES.includes(fx.type))return '';
+  const id=clean(fx.id),cx=opticalValue(fx,'centerX'),cy=opticalValue(fx,'centerY');
+  const rows=Object.entries(OPTICAL_PARAMS).map(([key,p])=>{
+   const v=opticalValue(fx,key);
+   return '<label>'+p.label+' <output data-optic-output="'+id+'-'+key+'">'+v.toFixed(p.step<1?2:0)+'</output>'+
+    '<input type="range" data-optic-id="'+id+'" data-optic-key="'+key+'" min="'+p.min+'" max="'+p.max+'" step="'+p.step+'" value="'+v+'"></label>';
+  }).join('');
+  return '<details class="cut-optics" data-optic-section="'+id+'"><summary>光学レンズの設定（方向・中心・細かさ）</summary>'+
+   '<div class="cut-optic-controls">'+rows+'</div>'+
+   '<p>レンズの中心を指で移動できます。変更はプレビューと書き出しに反映されます。</p>'+
+   '<div class="cut-optic-pad" data-optic-pad="'+id+'" role="group" aria-label="レンズ中心を動かす">'+
+   '<i style="left:'+Math.round(cx*100)+'%;top:'+Math.round((1-cy)*100)+'%"></i></div></details>';
+ }
  function effects(c){
   const arr=c.fxStack||[];
-  $('cut-fx-content').innerHTML='<p class="cut-fx-help">エフェクトは重ねて使えます。表示中の時間に「◆キー」を付けると強さが時間変化します。</p><div class="cut-fx-picker">'+FX_TYPES.map(type=>`<button type="button" data-add-fx="${type}">＋ ${FX_LABELS[type]}</button>`).join('')+'</div><div id="cut-fx-stack">'+(arr.length?arr.map((fx,index)=>`<section class="cut-fx-unit" data-fx-row="${clean(fx.id)}"><header><b>${index+1}. ${FX_LABELS[fx.type]||fx.type}</b><div><button data-up="${clean(fx.id)}" aria-label="上へ">↑</button><button data-down="${clean(fx.id)}" aria-label="下へ">↓</button><button data-remove="${clean(fx.id)}" aria-label="削除">×</button></div></header><label>強さ <output data-fx-value="${clean(fx.id)}">${Math.round(fxAmountAt(fx,currentTime(c))*100)}%</output><input type="range" data-fx-input="${clean(fx.id)}" min="0" max="1" step=".01" value="${fxAmountAt(fx,currentTime(c))}"></label><div class="cut-fx-keys"><button data-key="${clean(fx.id)}">◆ 現在位置にキー</button><button data-start="${clean(fx.id)}">IN</button><button data-end="${clean(fx.id)}">OUT</button><button data-clear="${clean(fx.id)}">キー削除</button></div><small>キー ${fx.keys?.length||0}個 ${Number(fx.start)>0?' / IN '+fx.start.toFixed(1)+'s':''} ${Number(fx.end)>0?' / OUT '+fx.end.toFixed(1)+'s':''}</small></section>`).join(''):'<div class="cut-fx-empty">まだ効果がありません。上から追加できます。</div>')+'</div>';
+  $('cut-fx-content').innerHTML='<p class="cut-fx-help">エフェクトは重ねて使えます。表示中の時間に「◆キー」を付けると強さが時間変化します。</p><div class="cut-fx-picker">'+FX_TYPES.map(type=>`<button type="button" data-add-fx="${type}">＋ ${FX_LABELS[type]}</button>`).join('')+'</div><div id="cut-fx-stack">'+(arr.length?arr.map((fx,index)=>`<section class="cut-fx-unit" data-fx-row="${clean(fx.id)}"><header><b>${index+1}. ${FX_LABELS[fx.type]||fx.type}</b><div><button data-up="${clean(fx.id)}" aria-label="上へ">↑</button><button data-down="${clean(fx.id)}" aria-label="下へ">↓</button><button data-remove="${clean(fx.id)}" aria-label="削除">×</button></div></header><label>強さ <output data-fx-value="${clean(fx.id)}">${Math.round(fxAmountAt(fx,currentTime(c))*100)}%</output><input type="range" data-fx-input="${clean(fx.id)}" min="0" max="1" step=".01" value="${fxAmountAt(fx,currentTime(c))}"></label>${opticalControls(fx)}<div class="cut-fx-keys"><button data-key="${clean(fx.id)}">◆ 現在位置にキー</button><button data-start="${clean(fx.id)}">IN</button><button data-end="${clean(fx.id)}">OUT</button><button data-clear="${clean(fx.id)}">キー削除</button></div><small>キー ${fx.keys?.length||0}個 ${Number(fx.start)>0?' / IN '+fx.start.toFixed(1)+'s':''} ${Number(fx.end)>0?' / OUT '+fx.end.toFixed(1)+'s':''}</small></section>`).join(''):'<div class="cut-fx-empty">まだ効果がありません。上から追加できます。</div>')+'</div>';
   for(const b of $('cut-fx-content').querySelectorAll('[data-add-fx]'))b.onclick=()=>{update(clip=>clip.fxStack=addFx(clip.fxStack,b.dataset.addFx),true);render();};
   const find=id=>(activeClip()?.fxStack||[]).find(fx=>fx.id===id);
+  for(const slider of $('cut-fx-content').querySelectorAll('[data-optic-id]')){
+   slider.oninput=()=>{
+    if(state.recording)return;
+    const fx=find(slider.dataset.opticId);if(!fx)return;
+    const key=slider.dataset.opticKey;fx.optics={...(fx.optics||{}),[key]:Number(slider.value)};
+    const out=$('cut-fx-content').querySelector('[data-optic-output="'+fx.id+'-'+key+'"]');
+    if(out)out.textContent=Number(slider.value).toFixed(OPTICAL_PARAMS[key].step<1?2:0);
+    const pad=$('cut-fx-content').querySelector('[data-optic-pad="'+fx.id+'"]');
+    if(pad&&(key==='centerX'||key==='centerY')){
+     const dot=pad.querySelector('i');dot.style.left=Math.round(opticalValue(fx,'centerX')*100)+'%';
+     dot.style.top=Math.round((1-opticalValue(fx,'centerY'))*100)+'%';
+    }
+    pending=true;api.draw();
+   };
+   slider.onchange=store;slider.onpointerup=store;slider.onpointercancel=store;
+  }
+  for(const pad of $('cut-fx-content').querySelectorAll('[data-optic-pad]')){
+   let grabbed=false;
+   const move=e=>{
+    if(!grabbed||state.recording)return;
+    const fx=find(pad.dataset.opticPad);if(!fx)return;
+    const rect=pad.getBoundingClientRect();
+    const x=Math.max(0,Math.min(1,(e.clientX-rect.left)/Math.max(1,rect.width)));
+    const y=Math.max(0,Math.min(1,1-(e.clientY-rect.top)/Math.max(1,rect.height)));
+    fx.optics={...(fx.optics||{}),centerX:x,centerY:y};
+    pad.querySelector('i').style.left=Math.round(x*100)+'%';
+    pad.querySelector('i').style.top=Math.round((1-y)*100)+'%';
+    for(const [key,v] of [['centerX',x],['centerY',y]]){
+     const range=$('cut-fx-content').querySelector('[data-optic-key="'+key+'"][data-optic-id="'+fx.id+'"]');
+     const out=$('cut-fx-content').querySelector('[data-optic-output="'+fx.id+'-'+key+'"]');
+     if(range)range.value=String(v);if(out)out.textContent=v.toFixed(2);
+    }
+    pending=true;api.draw();
+   };
+   pad.addEventListener('pointerdown',e=>{if(state.recording)return;e.preventDefault();grabbed=true;pad.setPointerCapture(e.pointerId);move(e);});
+   pad.addEventListener('pointermove',move);
+   const finish=()=>{if(grabbed){grabbed=false;store();}};
+   pad.addEventListener('pointerup',finish);pad.addEventListener('pointercancel',finish);
+  }
   for(const range of $('cut-fx-content').querySelectorAll('[data-fx-input]')){
    range.oninput=()=>{const fx=find(range.dataset.fxInput);if(!fx)return;fx.amount=+range.value;
     if((fx.keys||[]).length){const t=currentTime(activeClip()),existing=fx.keys.find(k=>Math.abs(k.time-t)<.05);if(existing)existing.amount=fx.amount;else fx.keys.push({time:t,amount:fx.amount});}
