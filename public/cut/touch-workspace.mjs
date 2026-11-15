@@ -1,6 +1,8 @@
 /* SUBEHA CUT v0.9: touch-first editing layer, independent of proprietary editor UI. */
 import {spans,totalDuration} from './transitions.mjs';
 import {layerSummary,moveOverlayOrder,stackTime} from './layer-stack-core.mjs';
+import {effectEntriesAtSpans} from './fx-timeline-core.mjs';
+import {FX_LABELS} from './fx-lab-core.mjs';
 import {createFilmstripCache} from './filmstrip-cache.mjs';
 import {clamp,timelineScroll,timelineTime,rulerStep,clipTrim,moveClip,applyOverlayTransform} from './touch-edit.mjs';
 
@@ -23,6 +25,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      <div class="cut-time-ruler" id="cut-time-ruler"></div>
      <div class="cut-lane-title">動画・写真</div><div class="cut-lane cut-video-lane" id="cut-video-lane"></div>
      <div class="cut-lane-title">重ねた素材</div><div class="cut-lane cut-overlay-lane" id="cut-overlay-lane"></div>
+     <div class="cut-lane-title">エフェクト</div><div class="cut-lane cut-effect-lane" id="cut-effect-lane"></div>
      <div class="cut-lane-title">音声</div><div class="cut-lane cut-audio-lane" id="cut-audio-lane"></div>
      <div class="cut-lane-title">文字・字幕</div><div class="cut-lane cut-caption-lane" id="cut-caption-lane"></div>
     </div>
@@ -198,6 +201,24 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
       pill.style.top=(rowIndex*29+2)+'px';pill.dataset.layerId=l.id;
      }
      $('cut-layer-stack-count').textContent=String(layerSummary(state.project,state.assets,state.current).entries.filter(item=>item.kind!=='cg').length);
+     // The purple effect strips belong to the same timeline, not a detached
+     // settings dialog. Each overlapping effect remains individually selectable.
+     const effectLane=$('cut-effect-lane');effectLane.replaceChildren();
+     const fxEntries=effectEntriesAtSpans(spans(state.project.clips));
+     effectLane.style.height=(fxEntries.length?fxEntries.length*27:0)+'px';
+     for(const [rowIndex,fx] of fxEntries.entries()){
+      const x=pad+fx.start*scale,w=(fx.end-fx.start)*scale,label=FX_LABELS[fx.type]||'エフェクト';
+      const item=addPill(effectLane,{
+       left:x,width:w,cls:'cut-effect-pill'+(fx.visible?'':' cut-layer-invisible'),
+       text:'◈ '+label,title:label+'を編集',
+       onclick:()=>{
+        state.selectedClip=fx.clipId;
+        seek(Math.min(fx.end-.01,Math.max(fx.start+.01,state.current)));
+        window.__subehaFXFocus?.(fx.clipId,fx.id);
+       }
+      });
+      item.style.top=(rowIndex*27+2)+'px';item.dataset.effectId=fx.id;item.dataset.effectClip=fx.clipId;
+     }
      if(!drawer.hidden)renderInventory();
      const audio=$('cut-audio-lane');audio.replaceChildren();
      for(const a of state.project.audioTracks||[]){const x=pad+number(a.start)*scale,w=number(a.duration)*scale;
