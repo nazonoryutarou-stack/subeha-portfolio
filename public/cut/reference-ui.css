@@ -134,3 +134,23 @@
  .leap-layout #cut-video-lane{margin-top:9px}
  .leap-layout .leap-add-media{top:61px}
 }
+
+/* v2.8: timeline effect tracks resemble the purple FX strip in device evidence.
+ * Each effect has independent time bounds and a tappable marker. */
+.leap-layout #cut-effect-lane{min-height:0;background:#202023;overflow:visible}
+.leap-layout #cut-effect-lane:not(:has([data-effect-id])){display:none!important}
+.leap-layout #cut-effect-lane .cut-effect-pill{
+ height:23px;min-height:23px;padding:2px 5px 2px 29px!important;
+ border:1px solid #985ee8;border-radius:4px;background:#45345eeb;color:#f5edff;
+ font:500 10px/18px system-ui;overflow:hidden;text-overflow:ellipsis;
+ white-space:nowrap;touch-action:pan-x;text-align:left
+}
+.leap-layout #cut-effect-lane .cut-effect-pill::before{
+ content:'▦';position:absolute;left:0;top:-1px;
+ width:24px;height:24px;display:grid;place-items:center;
+ background:#924cda;color:white;border:1px solid #b38af4;
+ border-radius:50%;font-size:16px;font-weight:700;
+}
+.leap-layout #cut-effect-lane .cut-effect-pill:active{outline:2px solid #c18cf2}
+.leap-layout .cut-time-ruler{z-index:1}
+.leap-layout .cut-video-card{min-height:52px}
