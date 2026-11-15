@@ -45,9 +45,9 @@ function installShell(){
  const stage=$('preview-stage');
  const transport=document.querySelector('.transport');
  // Restyle without replacing the existing playback/editor controls or their event handlers.
- document.querySelector('.brand').innerHTML='SUBEHA <strong>CUT</strong>';
+ document.querySelector('.brand').textContent='動画編集';
  $('new-project').innerHTML=svg('home');
- $('new-project').title='新規プロジェクト';
+ $('new-project').title='新しいプロジェクト';
  $('export-open').innerHTML=svg('save')+'<span>書き出す</span>';
  const help=document.createElement('button');help.className='leap-head-help';help.innerHTML=svg('help');help.type='button';help.setAttribute('aria-label','操作ガイド');
  $('new-project').after(help);
@@ -91,14 +91,15 @@ function installShell(){
  }}
  const make=(label,icon,onClick,id='')=>({label,icon,onClick,id});
  const general=[
-  make('重ねる','overlay',()=>openTool('overlay')),
-  make('レイヤー','layers',()=>window.__subehaLayersOpen?.()),
-  make('文字','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text');}),
-  make('音声','audio',()=>openTool('audio')),
-  make('色','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
-  make('効果','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('effects') : openTool('effects')),
-  make('保存','save',()=>window.__subehaArchiveSave?.()),
-  make('すべて','more',()=>openExtras()),
+  make('マジック編集','magic',()=>openMagicEdit()),
+  make('オーバーレイ','overlay',()=>openTool('overlay')),
+  make('テキスト','text',()=>{openTool('text');if(state.selectedText)window.__subehaDirectOpen?.('text');}),
+  make('オーディオ','audio',()=>openTool('audio')),
+  make('フィルタ','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
+  make('調整','adjust',()=>window.__subehaFXOpen ? window.__subehaFXOpen('grade') : openTool('adjust')),
+  make('エフェクト','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('effects') : openTool('effects')),
+  make('キャンバス','canvas',()=>openTool('canvas')),
+  make('字幕','captions',()=>openTool('captions')),
  ];
  function openMagicEdit(){
   sheet.hidden=true;document.querySelector('.tools-shell')?.classList.remove('pro-visible');document.body.classList.remove('pro-open');
@@ -114,37 +115,28 @@ function installShell(){
  }
 
  function openExtras(){
-  mini.hidden=true;const options=[
-   make('マジック編集','magic',()=>openMagicEdit()),
-   make('レイヤー一覧','layers',()=>{sheet.hidden=true;window.__subehaLayersOpen?.();}),
-   make('文字アニメ','text',()=>{sheet.hidden=true;openTool('text');window.__subehaDirectOpen?.('text','motion');}),
-   make('立体文字','text',()=>{sheet.hidden=true;openTool('text');window.__subehaDirectOpen?.('text','pbr');}),
-   make('字幕','captions',()=>{sheet.hidden=true;openTool('captions');window.__subehaDirectOpen?.('caption');}),
-   make('光学レンズ','effect',()=>{sheet.hidden=true;window.__subehaFXOpen?.('optics');}),
-   make('無料素材','template',()=>window.__subehaStockOpen?.()),
-   make('声を作る','audio',()=>window.__subehaVoiceOpen?.()),
+  mini.hidden=true;
+  // Audited editing categories. Original CG, engine-hub and voice-lab tools removed.
+  const options=[
+   make('オーバーレイ','overlay',()=>openTool('overlay')),
+   make('テキスト','text',()=>openTool('text')),
+   make('字幕','captions',()=>openTool('captions')),
+   make('オーディオ','audio',()=>openTool('audio')),
+   make('フィルタ','filters',()=>window.__subehaFXOpen?.('filters')),
+   make('調整','adjust',()=>window.__subehaFXOpen?.('grade')),
+   make('エフェクト','effect',()=>window.__subehaFXOpen?.('effects')),
    make('キャンバス','canvas',()=>openTool('canvas')),
-    make('背景色を消す','filters',()=>openTool('chroma')),
-   make('背景切抜','brush',()=>openTool('videoRetouch')),
-   make('画像修復','brush',()=>openTool('retouch')),
-   make('クリップ複製','duplicate',()=>$('dup-clip')?.click()),
-   make('クリップ削除','delete',()=>$('delete-clip')?.click()),
+   make('レイヤー','layers',()=>{sheet.hidden=true;window.__subehaLayersOpen?.();}),
+   make('素材を探す','template',()=>{sheet.hidden=true;window.__subehaStockOpen?.();}),
    make('切り抜き','crop',()=>openTool('crop')),
-   make('色フィルター','filters',()=>window.__subehaFXOpen?.('filters')),
-   make('映像効果','effect',()=>window.__subehaFXOpen?.('effects')),
-   make('速度','speed',()=>openClipControl('speed')),
-   make('音量','volume',()=>openClipControl('volume')),
-   make('追跡','track',()=>openTool('tracking')),
-   make('アニメ','key',()=>openTool('transform')),
-   make('場面のつなぎ','transitions',()=>openTool('transitions')),
+   make('クロマキー','filters',()=>openTool('chroma')),
+   make('トラッキング','track',()=>openTool('tracking')),
+   make('キーフレーム','key',()=>openTool('transform')),
+   make('トランジション','transitions',()=>openTool('transitions')),
    make('静止','freeze',()=>openTool('freeze')),
-   make('調整','adjust',()=>window.__subehaFXOpen ? window.__subehaFXOpen('grade') : openTool('adjust')),
-   make('テンプレ','template',()=>openTool('templates')),
-   make('保存/復元','save',()=>openTool('project')),
-   make('先進機能ラボ','magic',()=>{sheet.hidden=true;window.__subehaLabOpen?.();}),
-   make('統合エンジン','cube',()=>window.__subehaHubOpen?.()),
-   make('3D映像','cube',()=>window.__subehaCGOpen?.()),
-   make('書き出す','save',()=>openTool('export')),
+   make('保存','save',()=>{$('project-save')?.click();sheet.hidden=true;}),
+   make('読み込み','save',()=>openTool('project')),
+   make('書き出す','save',()=>openTool('export'))
   ];
   const grid=$('leap-extras-grid');grid.replaceChildren();
   for(const item of options){const b=document.createElement('button');b.type='button';b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.onclick=item.onClick;grid.append(b);}sheet.hidden=false;
@@ -207,18 +199,22 @@ function installShell(){
   make('分割','split',()=>$('split-clip')?.click()),
   make('速度','speed',()=>openClipControl('speed')),
   make('音量','volume',()=>openClipControl('volume')),
-  make('色','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
-  make('効果','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('effects') : openTool('effects')),
+  make('フィルタ','filters',()=>window.__subehaFXOpen?.('filters')),
+  make('調整','adjust',()=>window.__subehaFXOpen?.('grade')),
+  make('エフェクト','effect',()=>window.__subehaFXOpen?.('effects')),
+  make('切り抜き','crop',()=>openTool('crop')),
   make('変形','canvas',()=>openTool('transform')),
-  make('つなぎ','transitions',()=>openTool('transitions')),
-  make('すべて','more',()=>openExtras()),
+  make('トランジション','transitions',()=>openTool('transitions')),
+  make('複製','duplicate',()=>$('dup-clip')?.click()),
+  make('削除','delete',()=>$('delete-clip')?.click()),
  ];
  const layerTools=()=>[
   make('‹','back',()=>{modeState.mode='main';renderToolbar();}),
+  make('編集','overlay',()=>openTool('overlay')),
   make('レイヤー','layers',()=>window.__subehaLayersOpen?.()),
-  make('重ねる','overlay',()=>openTool('overlay')),
-  make('追跡','track',()=>openTool('tracking')),
-  make('すべて','more',()=>openExtras()),
+  make('マスク','brush',()=>openTool('overlay')),
+  make('クロマキー','filters',()=>openTool('chroma')),
+  make('トラッキング','track',()=>openTool('tracking')),
  ];
  function renderToolbar(){
   const arr=modeState.mode==='clip'&&state.selectedClip?clipTools():modeState.mode==='layer'?layerTools():general;
@@ -226,7 +222,7 @@ function installShell(){
   const key=modeState.mode==='clip'&&state.selectedClip?'clip':modeState.mode==='layer'?'layer':'main';
   if(current===key && toolstrip.childElementCount===arr.length)return;
   toolstrip.dataset.mode=key;toolstrip.replaceChildren();
-  for(const item of arr){const b=document.createElement('button');b.type='button';b.className='leap-tool';b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.setAttribute('aria-label',item.label);if(item.label==='音声')b.classList.add('has-badge');b.onclick=item.onClick;toolstrip.append(b);}
+  for(const item of arr){const b=document.createElement('button');b.type='button';b.className='leap-tool';b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.setAttribute('aria-label',item.label);b.onclick=item.onClick;toolstrip.append(b);}
   toolstrip.scrollLeft=0;
  }
  function refreshMode(){
