@@ -88,7 +88,7 @@ export function motionState(raw,seconds,clipLength,index=0,count=1){
  const hidden=1-p;
  if(c.type==='wave'){s.dy=Math.sin(age*7-index*.65)*Math.max(4,12)*Math.min(1,age*4);return s;}
  if(c.type==='wiggle'){s.dx=Math.sin(age*13+index*2.3)*6;s.rotation=Math.sin(age*8+index)*.045;return s;}
- if(c.type==='typewriter'){s.alpha=pin>=.85?1:0;return s;}
+ if(c.type==='typewriter'){const current=c.phase==='out'?pout:c.phase==='both'?Math.min(pin,pout):pin;s.alpha=current>=.85?1:0;return s;}
  if(c.type==='flicker'){s.alpha=limit(p*(.77+.23*Math.sin(age*37+index*11)),0,1);return s;}
  if(c.type==='fade'||c.type==='blur'||c.type==='reveal')s.alpha=limit(p);
  if(c.type==='blur')s.blur=hidden*9;
@@ -99,7 +99,7 @@ export function motionState(raw,seconds,clipLength,index=0,count=1){
   if(c.type==='fall')s.alpha=limit(p);
  }
  if(c.type==='scale')s.scale=.3+.7*p;
- if(c.type==='bounce'){s.scale=.25+.75*easing('backInOut',limit(pin));s.alpha=limit(pin*3);}
+ if(c.type==='bounce'){const progress=c.phase==='out'?pout:c.phase==='both'?Math.min(pin,pout):pin;s.scale=.25+.75*easing('backInOut',limit(progress));s.alpha=limit(progress*3);}
  if(c.type==='spin'){s.rotation=hidden*Math.PI*1.8;s.scale=.55+.45*p;s.alpha=limit(p);}
  return s;
 }
