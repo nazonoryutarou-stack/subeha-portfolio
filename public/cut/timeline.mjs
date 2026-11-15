@@ -1,3 +1,4 @@
+import {cutSpeedRamp} from './speed-ramp.mjs';
 import {clipSeconds,totalDuration,locateSpan} from './transitions.mjs';
 import {clipTransform} from './keyframes.mjs';
 export function newID() {
@@ -31,6 +32,12 @@ export function splitAt(clips,seconds) {
   const reverse=!!at.clip.reverse;
   const first={...structuredClone(at.clip),id:newID(),...(reverse?{start:at.mediaTime}:{end:at.mediaTime})};
   const second={...structuredClone(at.clip),id:newID(),...(reverse?{end:at.mediaTime}:{start:at.mediaTime}),transitionIn:{type:'none',duration:0}};
+  if(at.clip.speedRamp){
+    const source=Math.max(0,Number(at.clip.end)-Number(at.clip.start));
+    const progress=source>0?(reverse?Number(at.clip.end)-at.mediaTime:at.mediaTime-Number(at.clip.start))/source:0;
+    const [left,right]=cutSpeedRamp(at.clip.speedRamp,progress);
+    first.speedRamp=left;second.speedRamp=right;
+  }
   if((at.clip.keyframes||[]).length){
     const boundary={...clipTransform(at.clip,at.local),time:at.local};
     first.keyframes=[...at.clip.keyframes.filter(k=>k.time<at.local).map(k=>structuredClone(k)),boundary];
