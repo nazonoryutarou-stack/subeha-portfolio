@@ -34,3 +34,15 @@
 
 #cut-fx-lab>header{position:sticky;top:-8px;z-index:5;background:#24242b;border-bottom:1px solid #393941}
 #cut-fx-lab .cut-fx-tabs{position:sticky;top:32px;z-index:4;background:#24242b}
+
+/* v2.5: touch lens lab for procedural optical FX. */
+.cut-optics{margin:10px 0 12px;padding:10px 9px;border-radius:11px;background:#232634;border:1px solid #525767}
+.cut-optics summary{min-height:35px;display:flex;align-items:center;cursor:pointer;font:700 12px system-ui;color:#f7dfe7;user-select:none}
+.cut-optics p{font:11px/1.55 system-ui;color:#b9bbc5;margin:9px 0}
+.cut-optic-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;margin-top:7px}
+.cut-optic-controls label{display:grid;grid-template-columns:1fr auto;gap:4px;font-size:11px;align-items:center;padding:4px 0;color:#eee}
+.cut-optic-controls input{height:34px;grid-column:1/-1;width:100%;accent-color:#f5719d;touch-action:pan-x}
+.cut-optic-controls output{color:#ffb4ca;font:11px ui-monospace,monospace}
+.cut-optic-pad{margin:10px auto 6px;max-width:330px;height:144px;position:relative;touch-action:none;user-select:none;border-radius:13px;border:2px solid #858ba5;box-shadow:inset 0 0 12px #0008;background:linear-gradient(90deg,transparent calc(50% - 1px),#99aec055 50%,transparent calc(50% + 1px)),linear-gradient(transparent calc(50% - 1px),#99aec055 50%,transparent calc(50% + 1px)),radial-gradient(ellipse at center,#727b9a55,#26293b)}
+.cut-optic-pad i{position:absolute;width:32px;height:32px;border:2px solid #fff9eb;border-radius:50%;background:#f46890;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 2px 8px #000c}
+@media(max-width:380px){.cut-optic-controls{grid-template-columns:1fr}}
