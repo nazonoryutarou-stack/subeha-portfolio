@@ -135,11 +135,13 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
  const action=(label,handler,major=false)=>{const b=el('button',major?'cut-action-primary':'',label);b.type='button';b.onclick=handler;actions.append(b);};
  function selectClip(id,{jump=false}={}){
    if(!state.project.clips.some(c=>c.id===id))return;
+   const span=spans(state.project.clips).find(row=>row.clip.id===id);
    state.selectedClip=id;
    api.setPanel('clips');
-   refreshAll();
-   if(jump){const sp=spans(state.project.clips).find(row=>row.clip.id===id);seek(sp?.start||0);}
-   renderQuick();
+   // Selection and current preview must refer to the same clip when adding
+   // effects or trimming. Preserve playhead position if already inside.
+   if(span&&(jump||state.current<span.start||state.current>=span.end))seek(span.start);
+   refreshAll();renderQuick();
  }
  function renderQuick(){
    const current=state.project.clips.find(c=>c.id===state.selectedClip);
