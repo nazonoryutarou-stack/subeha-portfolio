@@ -5,7 +5,7 @@
 export const TEXT_MOTION_TYPES=Object.freeze(['none','fade','slide','scale','bounce','typewriter','wave','wiggle','flicker','spin','fall','blur','reveal']);
 export const TEXT_MOTION_UNITS=Object.freeze(['glyph','word','line','global']);
 export const TEXT_MOTION_EASINGS=Object.freeze(['linear','quadInOut','expoOut','circInOut','backIn','elasticOut','backInOut','circOut']);
-export const TITLE_KEYFRAME_FIELDS=Object.freeze(['x','y','size','rotation','opacity','width','letterSpacing','lineHeight','outlineWidth','shadowBlur','shadowX','shadowY','boxOpacity','color','outlineColor','boxColor']);
+export const TITLE_KEYFRAME_FIELDS=Object.freeze(['x','y','size','rotation','opacity','width','letterSpacing','lineHeight','outlineWidth','shadowBlur','shadowX','shadowY','boxOpacity','color','outlineColor','boxColor','pbrMetallic','pbrRoughness','pbrBumpiness','pbrEnvironment','pbrDepth','pbrBevel','pbrSpin','pbrLight1Angle','pbrLight1Elevation','pbrLight1Intensity','pbrLight2Angle','pbrLight2Elevation','pbrLight2Intensity','pbrColor','pbrLight1Color','pbrLight2Color']);
 const num=(v,f)=>Number.isFinite(Number(v))?Number(v):f;
 export const limit=(v,min=0,max=1)=>Math.max(min,Math.min(max,num(v,min)));
 export function easing(name,t){
