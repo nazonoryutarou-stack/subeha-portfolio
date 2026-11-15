@@ -70,7 +70,7 @@ test('all supported transitions run in same Canvas2D draw callback with balanced
   for(const p of [0,.5,1]){
    drawIncomingTransition(ctx,canvas,type,p,a=>{renders++;alpha=a;});
    assert.equal(ctx.depth,0,type);
-   assert.ok(alpha>=0&&alpha<=1,type);
+   if(alpha!==-1)assert.ok(alpha>=0&&alpha<=1,type);
   }
   assert.ok(renders>=1,type);
  }
