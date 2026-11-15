@@ -5,6 +5,27 @@ export const limitAngle=(deg)=>{const x=((Number(deg)||0)+180)%360;return (x<0?x
 export function moveBy(start,from,to){return {x:clamp((start.x??.5)+to.x-from.x,-.2,1.2),y:clamp((start.y??.5)+to.y-from.y,-.2,1.2)};}
 export function scaleBy(start,baseDistance,newDistance,min=12,max=240){return clamp(start*newDistance/Math.max(baseDistance,1),min,max);}
 export function rotateBy(base,initial,next){return limitAngle((base||0)+(next-initial)*180/Math.PI);}
+/* Gesture deltas stay continuous when atan2 crosses its ±PI seam. */
+export function shortestAngularDelta(previous,next){
+ const diff=Number(next)-Number(previous);
+ return Math.atan2(Math.sin(diff),Math.cos(diff));
+}
+/* Magnetic snap for meaningful canvas alignment, especially straightening.
+ * Snap to 0, 90, -90 and 180 degrees; always store normalized angles. */
+export function snapRotation(angle,tolerance=5){
+ const deg=limitAngle(angle),snap=[-180,-90,0,90,180];
+ const nearest=snap.reduce((best,candidate)=>
+  Math.abs(limitAngle(deg-candidate))<Math.abs(limitAngle(deg-best))?candidate:best,0);
+ return Math.abs(limitAngle(deg-nearest))<=Math.max(0,Number(tolerance)||0)?limitAngle(nearest):deg;
+}
+export function stepRotation(gesture,angle){
+ if(!gesture||!Number.isFinite(angle))return 0;
+ if(!Number.isFinite(gesture.lastAngle))gesture.lastAngle=angle;
+ gesture.travel=(Number(gesture.travel)||0)+shortestAngularDelta(gesture.lastAngle,angle);
+ gesture.lastAngle=angle;
+ return snapRotation(limitAngle((gesture.props?.rotation||0)+gesture.travel*180/Math.PI));
+}
+
 export function containsRotated(box,point,padding=0){const dx=point.x-box.x,dy=point.y-box.y,a=-(box.rotation||0)*Math.PI/180;const x=dx*Math.cos(a)-dy*Math.sin(a),y=dx*Math.sin(a)+dy*Math.cos(a);return Math.abs(x)<=box.w/2+padding&&Math.abs(y)<=box.h/2+padding;}
 export function textBounds(ctx,canvas,text){return layoutTitle(ctx,canvas,text,false);}
 export function positionFromClient(client,rect){return {x:(client.clientX-rect.left)/rect.width,y:(client.clientY-rect.top)/rect.height};}
