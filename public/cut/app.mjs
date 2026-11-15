@@ -241,7 +241,7 @@ function draw(){
  if(ready&&c.filter==='glitch'&&!tr && !(window.__subehaCompareOriginal && !state.recording && window.__subehaCompareClipId===c.id)){ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=.18;ctx.filter='hue-rotate(150deg)';ctx.translate(Math.sin(state.current*18)*10,0);try{drawFrameWithAspect(view,a.width,a.height);}catch{}ctx.restore();}
  if(!(window.__subehaCompareOriginal && !state.recording && window.__subehaCompareClipId===c.id)){
  if(c.effect&&c.effect!=='none')applyEffect(ctx,canvas,c.effect,c.effectAmount??.5,state.current);
- for(const fx of (c.fxStack||[])){const amount=fxAmountAt(fx,at.local);if(amount>0)applyEffect(ctx,canvas,fx.type,amount,state.current);}
+ for(const fx of (c.fxStack||[])){const amount=fxAmountAt(fx,at.local);if(amount>0)applyEffect(ctx,canvas,fx.type,amount,state.current,fx.optics||{});}
  }
  for(const hook of renderHooks){try{hook({canvas,ctx,state});}catch(e){console.warn('render hook',e);}}
  for(const t of state.project.texts){if(state.current<t.start||state.current>t.start+t.duration||!t.text)continue;
