@@ -4,6 +4,8 @@ import {clamp,containsRotated,textBounds,moveBy,scaleBy,rotateBy,positionFromCli
 import {applyOverlayTransform} from './touch-edit.mjs';
 import {widthFromDrag,nearbyGuides} from './title-gestures.mjs';
 import {TEXT_FONTS,TEXT_PRESETS,applyTextPreset} from './text-styles.mjs';
+import {PBR_TITLE_PRESETS,normalizedPbrTitle,applyPbrPreset} from './pbr-title-core.mjs';
+import {canUsePbrTitle} from './pbr-title-render.mjs';
 import {TEXT_MOTION_TYPES,TEXT_MOTION_UNITS,TEXT_MOTION_EASINGS,TITLE_KEYFRAME_FIELDS,normalizedTextMotion,titleAt,upsertTitleKeyframe} from './text-motion-core.mjs';
 const $=id=>document.getElementById(id);
 const colors=['#ffffff','#000000','#ff526d','#ffe066','#5fd8f5','#ad80ff','#70f4a4'];
@@ -29,6 +31,51 @@ function mount(){
   <div id="cut-title-motion" class="cut-title-pane" hidden><div class="cut-title-alignment"><button data-motion="none">なし</button><button data-motion="fade">ふわっと</button><button data-motion="pop">飛び出す</button><button data-motion="slide">下から</button></div><p>文字の登場演出を選べます。動画と文字は別々に編集できます。</p></div>
   <p class="cut-title-tip">編集枠と操作ボタンは、完成動画には映りません。</p>`;
  $('app').append(panel);
+ const pbrTab=document.createElement('button');pbrTab.type='button';pbrTab.dataset.tab='pbr';pbrTab.textContent='立体文字';
+ $('cut-title-tabs').append(pbrTab);
+ const pbrPane=document.createElement('div');pbrPane.id='cut-title-pbr';pbrPane.className='cut-title-pane';pbrPane.hidden=true;
+ pbrPane.innerHTML='<label class="cut-pbr-enable"><input id="cut-pbr-enable" type="checkbox"> 立体文字のGPU材質を有効にする</label>'+
+ '<p>文字形状を押し出したように見せる2.5D描画。日本語の文字にも対応します。</p>'+
+ '<div id="cut-pbr-presets" class="cut-pbr-presets"></div>'+
+ '<div id="cut-pbr-controls" class="cut-pbr-controls"></div>'+
+ '<details class="cut-pbr-light-details" open><summary>☀ 2つのライトを指で調整</summary>'+
+ '<div class="cut-pbr-lightpad" id="cut-pbr-lightpad" aria-label="光源方向の操作盤"><button type="button" data-pbr-light="1">☀1</button><button type="button" data-pbr-light="2">☀2</button></div>'+
+ '<p>光源の点をドラッグ。中心ほど正面から、外側ほど斜めから照らします。</p>'+
+ '<div id="cut-pbr-light-controls" class="cut-pbr-controls"></div></details>'+
+ '<p id="cut-pbr-gpu-status" role="status">GPUの対応状況を確認中</p>'+
+ '<p>文字・単語・行単位のアニメと同時に使用した場合は軽量2D表示に戻ります。全体アニメではGPU材質を維持します。</p>';
+ $('cut-title-motion').after(pbrPane);
+ const pbrControls=[
+  ['pbrMetallic','金属度',0,1,.01],['pbrRoughness','表面の粗さ',.04,1,.01],
+  ['pbrBumpiness','表面の凹凸',0,1,.01],['pbrEnvironment','環境反射',0,1,.01],
+  ['pbrDepth','文字の厚み',0,36,1],['pbrBevel','縁の丸み',.5,12,.5],
+  ['pbrSpin','反射の回転',-1,1,.05]
+ ];
+ const pbrLightControls=[
+  ['pbrLight1Angle','光源1の角度',0,360,1],['pbrLight1Elevation','光源1の高さ',.05,1,.01],
+  ['pbrLight1Intensity','光源1の明るさ',0,2,.05],
+  ['pbrLight2Angle','光源2の角度',0,360,1],['pbrLight2Elevation','光源2の高さ',.05,1,.01],
+  ['pbrLight2Intensity','光源2の明るさ',0,2,.05]
+ ];
+ function buildPbrControl([key,label,min,max,step]){
+  const el=document.createElement('label');el.className='cut-pbr-slider';
+  const text=document.createElement('span');text.textContent=label;
+  const output=document.createElement('output');output.dataset.pbrOutput=key;
+  const input=document.createElement('input');input.type='range';input.min=min;input.max=max;input.step=step;input.dataset.pbrProp=key;
+  el.append(text,output,input);return el;
+ }
+ const presetBox=$('cut-pbr-presets');for(const [key,preset] of Object.entries(PBR_TITLE_PRESETS)){
+  const b=document.createElement('button');b.type='button';b.dataset.pbrPreset=key;b.textContent=preset.label;b.style.setProperty('--pbr-color',preset.color);
+  presetBox.append(b);
+ }
+ $('cut-pbr-controls').append(...pbrControls.map(buildPbrControl));
+ $('cut-pbr-light-controls').append(...pbrLightControls.map(buildPbrControl));
+ const pbrTint=document.createElement('div');pbrTint.className='cut-pbr-tints';
+ for(const [prop,label] of [['pbrColor','材質の色'],['pbrLight1Color','ライト1の色'],['pbrLight2Color','ライト2の色']]){
+  const row=document.createElement('label');row.textContent=label;const input=document.createElement('input');input.type='color';input.dataset.pbrProp=prop;
+  row.append(input);pbrTint.append(row);
+ }
+ $('cut-pbr-light-controls').after(pbrTint);
  const advanced=document.createElement('div');advanced.id='cut-text-motion-lab';
  advanced.innerHTML=`<div class="cut-motion-grid">
   <label>アニメ<select data-tmotion="type"></select></label>
@@ -173,6 +220,7 @@ function mount(){
  const tabButtons=[...panel.querySelectorAll('#cut-title-tabs [data-tab]')];
  function showTab(tab){activeTab=tab;for(const b of tabButtons){b.classList.toggle('active',b.dataset.tab===tab);b.setAttribute('aria-selected',String(b.dataset.tab===tab));}
   for(const p of panel.querySelectorAll('.cut-title-pane'))p.hidden=p.id!=='cut-title-'+tab;
+  if(tab==='pbr')$('cut-pbr-gpu-status').textContent=canUsePbrTitle()?'WebGLによるGPU描画が利用可能':'WebGL非対応：通常の2D文字で表示します';
  }
  function effectiveStyle(){const t=itemFor(selection);return !t?{}:selection.kind==='caption'?captionAppearance(state.project,t):
   selection.kind==='text'&&$('cut-keyframe-mode')?.checked?titleAt(t,Math.max(0,fps()-t.start)):t;}
@@ -197,8 +245,26 @@ function mount(){
   for(const b of panel.querySelectorAll('[data-align]'))b.classList.toggle('active',b.dataset.align===(st.align||'center'));
   for(const b of panel.querySelectorAll('[data-motion]'))b.classList.toggle('active',b.dataset.motion===(st.motion||'none')&&(!st.textMotion||st.textMotion.type==='none'));
   const isText=selection?.kind==='text',item=itemFor(selection);
-  advanced.hidden=!isText;
+  advanced.hidden=!isText;pbrTab.hidden=!isText;
   if(isText&&item){
+   const pbr=normalizedPbrTitle(st);
+   $('cut-pbr-enable').checked=pbr.enabled;
+   for(const b of presetBox.querySelectorAll('button'))b.classList.toggle('active',b.dataset.pbrPreset===pbr.style);
+   const rawPbr={...PBR_TITLE_PRESETS[pbr.style]};
+   const pbrFields={
+    pbrMetallic:pbr.metallic,pbrRoughness:pbr.roughness,pbrBumpiness:pbr.bumpiness,
+    pbrEnvironment:pbr.environment,pbrDepth:pbr.depth,pbrBevel:pbr.bevel,pbrSpin:pbr.spin,
+    pbrLight1Angle:pbr.light1.angle,pbrLight1Elevation:pbr.light1.elevation,pbrLight1Intensity:pbr.light1.intensity,
+    pbrLight2Angle:pbr.light2.angle,pbrLight2Elevation:pbr.light2.elevation,pbrLight2Intensity:pbr.light2.intensity,
+    pbrColor:pbr.color,pbrLight1Color:pbr.light1.color,pbrLight2Color:pbr.light2.color
+   };
+   for(const input of pbrPane.querySelectorAll('[data-pbr-prop]')){
+    input.value=pbrFields[input.dataset.pbrProp];
+    const output=pbrPane.querySelector('[data-pbr-output="'+input.dataset.pbrProp+'"]');
+    if(output)output.textContent=Number(input.value).toFixed(input.step&&Number(input.step)<1?2:0);
+   }
+   renderPbrLightPad(pbr);
+
    const motion=normalizedTextMotion(item.textMotion);
    for(const [k,v] of Object.entries(motion)){const control=panel.querySelector('[data-tmotion="'+k+'"]');if(!control)continue;if(control.type==='checkbox')control.checked=!!v;else control.value=String(v);}
    $('cut-motion-duration-label').textContent=motion.duration.toFixed(2)+'秒';
@@ -250,6 +316,46 @@ function mount(){
   const t=itemFor(selection);if(!t||selection.kind!=='text')return;
   api.seek(t.start);if(!state.playing)$('play').click();
  };
+ $('cut-pbr-enable').onchange=e=>{updateText({pbrEnabled:e.target.checked});refreshSheet();};
+ for(const b of presetBox.querySelectorAll('[data-pbr-preset]'))b.onclick=()=>{
+  const t=itemFor(selection);if(!t||selection.kind!=='text'||state.recording)return;
+  const result=applyPbrPreset({},b.dataset.pbrPreset);
+  updateText(result);refreshSheet();
+ };
+ for(const input of pbrPane.querySelectorAll('[data-pbr-prop]'))input.oninput=()=>{
+  const t=itemFor(selection);if(!t||selection.kind!=='text'||state.recording)return;
+  const value=input.type==='color'?input.value:Number(input.value);
+  updateText({[input.dataset.pbrProp]:value});
+  const out=pbrPane.querySelector('[data-pbr-output="'+input.dataset.pbrProp+'"]');
+  if(out)out.textContent=Number(value).toFixed(input.step&&Number(input.step)<1?2:0);
+  if(input.dataset.pbrProp.includes('Light')&&input.dataset.pbrProp!=='pbrLight1Color'&&input.dataset.pbrProp!=='pbrLight2Color')renderPbrLightPad(normalizedPbrTitle(effectiveStyle()));
+ };
+ const lightpad=$('cut-pbr-lightpad');
+ let movingLight=null;
+ function renderPbrLightPad(pbr){
+  for(const number of [1,2]){
+   const b=lightpad.querySelector('[data-pbr-light="'+number+'"]');const light=pbr['light'+number];
+   const rad=light.angle*Math.PI/180,dist=(1-light.elevation)*.41;
+   b.style.left=(50+Math.cos(rad)*dist*100)+'%';
+   b.style.top=(50-Math.sin(rad)*dist*100)+'%';
+  }
+ }
+ function pbrLightPointer(e){
+  if(movingLight===null)return;
+  const t=itemFor(selection);if(!t||selection.kind!=='text'||state.recording)return;
+  const r=lightpad.getBoundingClientRect(),dx=(e.clientX-(r.left+r.width/2))/(r.width*.5),dy=((r.top+r.height/2)-e.clientY)/(r.height*.5);
+  const angle=(Math.atan2(dy,dx)*180/Math.PI+360)%360,elevation=Math.max(.05,Math.min(1,1-Math.hypot(dx,dy)));
+  applyTextChanges(t,{['pbrLight'+movingLight+'Angle']:Math.round(angle),['pbrLight'+movingLight+'Elevation']:Math.round(elevation*100)/100});
+  draw();renderPbrLightPad(normalizedPbrTitle(effectiveStyle()));
+ }
+ lightpad.addEventListener('pointerdown',e=>{
+  if(selection?.kind!=='text'||state.recording)return;
+  movingLight=Number(e.target.closest('[data-pbr-light]')?.dataset.pbrLight||1);
+  lightpad.setPointerCapture(e.pointerId);e.preventDefault();pbrLightPointer(e);
+ });
+ lightpad.addEventListener('pointermove',e=>{if(movingLight===null)return;e.preventDefault();pbrLightPointer(e);});
+ const endPbrPointer=()=>{if(movingLight===null)return;movingLight=null;save();refreshSheet();};
+ lightpad.addEventListener('pointerup',endPbrPointer);lightpad.addEventListener('pointercancel',endPbrPointer);
  $('cut-title-center').onclick=()=>{updateText({x:.5,y:.5});refreshSheet();};
  $('cut-direct-close').onclick=()=>{panel.hidden=true;};
  bar.addEventListener('click',e=>{const action=e.target.closest('[data-do]')?.dataset.do,t=itemFor(selection);if(!action||!t)return;
