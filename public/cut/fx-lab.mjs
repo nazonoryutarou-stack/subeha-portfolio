@@ -8,7 +8,7 @@ const clean=s=>String(s||'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':
 function mount(){
  const api=window.__subehaCut;if(!api||$('cut-fx-lab'))return;
  const state=api.state,root=$('app'),sheet=document.createElement('section');sheet.id='cut-fx-lab';sheet.hidden=true;
- sheet.innerHTML='<header><button type="button" id="cut-fx-close">‹</button><strong id="cut-fx-title">カラー・演出ラボ</strong><button type="button" id="cut-fx-compare" title="押している間だけ元の色を表示" aria-label="加工前の映像と比べる">比較</button><button type="button" id="cut-fx-done">✓</button></header><nav class="cut-fx-tabs"><button type="button" data-page="filters">色を重ねる</button><button type="button" data-page="looks">雰囲気</button><button type="button" data-page="grade">色調</button><button type="button" data-page="effects">効果レイヤー</button></nav><div id="cut-fx-content"></div>';
+ sheet.innerHTML='<header><button type="button" id="cut-fx-close">‹</button><strong id="cut-fx-title">カラー・演出ラボ</strong><button type="button" id="cut-fx-compare" title="押している間だけ元の色を表示" aria-label="加工前の映像と比べる">比較</button><button type="button" id="cut-fx-done">✓</button></header><nav class="cut-fx-tabs"><button type="button" data-page="filters">色を重ねる</button><button type="button" data-page="looks">雰囲気</button><button type="button" data-page="grade">色調</button><button type="button" data-page="effects">効果レイヤー</button><button type="button" data-page="optics">光学レンズ</button></nav><div id="cut-fx-content"></div>';
  root.append(sheet);
  let page='filters',pending=false;
  const activeClip=()=>state.project.clips.find(c=>c.id===state.selectedClip)||api.locate(state.project.clips,state.current)?.clip||null;
@@ -25,7 +25,7 @@ function mount(){
  function render(){const scroll=sheet.scrollTop;const c=activeClip();$('cut-fx-title').textContent=c?'カラー・演出 · '+String(c.name).slice(0,17):'カラー・演出ラボ';
   sheet.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   if(!c){$('cut-fx-content').innerHTML='<p class="cut-fx-empty">先にタイムラインで動画または画像を選んでください。</p>';return;}
-  if(page==='filters')filters(c);else if(page==='looks')looks(c);else if(page==='grade')grade(c);else effects(c);sheet.scrollTop=scroll;
+  if(page==='filters')filters(c);else if(page==='looks')looks(c);else if(page==='grade')grade(c);else effects(c,page==='optics');sheet.scrollTop=scroll;
  }
  function filters(c){
   const rows=c.filterStack||[];
@@ -99,9 +99,9 @@ function mount(){
    '<div class="cut-optic-pad" data-optic-pad="'+id+'" role="group" aria-label="レンズ中心を動かす">'+
    '<i style="left:'+Math.round(cx*100)+'%;top:'+Math.round((1-cy)*100)+'%"></i></div></details>';
  }
- function effects(c){
+ function effects(c,onlyOptics=false){
   const arr=c.fxStack||[];
-  $('cut-fx-content').innerHTML='<p class="cut-fx-help">エフェクトは重ねて使えます。表示中の時間に「◆キー」を付けると強さが時間変化します。</p><div class="cut-fx-picker">'+FX_TYPES.map(type=>`<button type="button" data-add-fx="${type}">＋ ${FX_LABELS[type]}</button>`).join('')+'</div><div id="cut-fx-stack">'+(arr.length?arr.map((fx,index)=>`<section class="cut-fx-unit" data-fx-row="${clean(fx.id)}"><header><b>${index+1}. ${FX_LABELS[fx.type]||fx.type}</b><div><button data-up="${clean(fx.id)}" aria-label="上へ">↑</button><button data-down="${clean(fx.id)}" aria-label="下へ">↓</button><button data-remove="${clean(fx.id)}" aria-label="削除">×</button></div></header><label>強さ <output data-fx-value="${clean(fx.id)}">${Math.round(fxAmountAt(fx,currentTime(c))*100)}%</output><input type="range" data-fx-input="${clean(fx.id)}" min="0" max="1" step=".01" value="${fxAmountAt(fx,currentTime(c))}"></label>${opticalControls(fx)}<div class="cut-fx-keys"><button data-key="${clean(fx.id)}">◆ 現在位置にキー</button><button data-start="${clean(fx.id)}">IN</button><button data-end="${clean(fx.id)}">OUT</button><button data-clear="${clean(fx.id)}">キー削除</button></div><small>キー ${fx.keys?.length||0}個 ${Number(fx.start)>0?' / IN '+fx.start.toFixed(1)+'s':''} ${Number(fx.end)>0?' / OUT '+fx.end.toFixed(1)+'s':''}</small></section>`).join(''):'<div class="cut-fx-empty">まだ効果がありません。上から追加できます。</div>')+'</div>';
+  $('cut-fx-content').innerHTML='<p class="cut-fx-help">エフェクトは重ねて使えます。表示中の時間に「◆キー」を付けると強さが時間変化します。</p><div class="cut-fx-picker">'+(onlyOptics?OPTICAL_TYPES:FX_TYPES).map(type=>`<button type="button" data-add-fx="${type}">＋ ${FX_LABELS[type]}</button>`).join('')+'</div><div id="cut-fx-stack">'+(arr.length?arr.map((fx,index)=>`<section class="cut-fx-unit" data-fx-row="${clean(fx.id)}"><header><b>${index+1}. ${FX_LABELS[fx.type]||fx.type}</b><div><button data-up="${clean(fx.id)}" aria-label="上へ">↑</button><button data-down="${clean(fx.id)}" aria-label="下へ">↓</button><button data-remove="${clean(fx.id)}" aria-label="削除">×</button></div></header><label>強さ <output data-fx-value="${clean(fx.id)}">${Math.round(fxAmountAt(fx,currentTime(c))*100)}%</output><input type="range" data-fx-input="${clean(fx.id)}" min="0" max="1" step=".01" value="${fxAmountAt(fx,currentTime(c))}"></label>${opticalControls(fx)}<div class="cut-fx-keys"><button data-key="${clean(fx.id)}">◆ 現在位置にキー</button><button data-start="${clean(fx.id)}">IN</button><button data-end="${clean(fx.id)}">OUT</button><button data-clear="${clean(fx.id)}">キー削除</button></div><small>キー ${fx.keys?.length||0}個 ${Number(fx.start)>0?' / IN '+fx.start.toFixed(1)+'s':''} ${Number(fx.end)>0?' / OUT '+fx.end.toFixed(1)+'s':''}</small></section>`).join(''):'<div class="cut-fx-empty">まだ効果がありません。上から追加できます。</div>')+'</div>';
   for(const b of $('cut-fx-content').querySelectorAll('[data-add-fx]'))b.onclick=()=>{update(clip=>clip.fxStack=addFx(clip.fxStack,b.dataset.addFx),true);render();};
   const find=id=>(activeClip()?.fxStack||[]).find(fx=>fx.id===id);
   for(const slider of $('cut-fx-content').querySelectorAll('[data-optic-id]')){
@@ -160,7 +160,7 @@ function mount(){
      if(action==='clear')fx.keys=[];
    },true);render();};
  }
- window.__subehaFXOpen=(target='filters')=>{if(['filters','looks','grade','effects'].includes(target))page=target;
+ window.__subehaFXOpen=(target='filters')=>{if(['filters','looks','grade','effects','optics'].includes(target))page=target;
   $('leap-mini-sheet')&&($('leap-mini-sheet').hidden=true);$('leap-extras')&&($('leap-extras').hidden=true);
   document.body.classList.remove('pro-open');document.querySelector('.tools-shell')?.classList.remove('pro-visible');
   $('cut-direct-sheet')&&($('cut-direct-sheet').hidden=true);sheet.hidden=false;render();};
