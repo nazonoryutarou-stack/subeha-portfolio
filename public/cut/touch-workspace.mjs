@@ -271,7 +271,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
     e.preventDefault();e.stopPropagation();dragging=true;
     const start=Math.max(0,Number(fx.start)||0);
     const end=Number.isFinite(Number(fx.end))&&Number(fx.end)>start?Number(fx.end):row.length;
-    dragData={mode:'trim-fx',fx,edge:fxHandle.dataset.fxTrim,original:{start,end},duration:row.length,startX:e.clientX};
+    dragData={mode:'trim-fx',fx,pill:fxPill,spanStart:row.start,edge:fxHandle.dataset.fxTrim,original:{start,end},originalEnd:fx.end,duration:row.length,startX:e.clientX};
     scroller.setPointerCapture(e.pointerId);fxPill.classList.add('cut-dragging');return;
    }
    const card=e.target.closest('[data-clip-id]');
@@ -317,6 +317,9 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      const {fx,edge,original,duration}=dragData;
      if(edge==='left')fx.start=clamp(original.start+d,0,Math.max(0,original.end-.08));
      else fx.end=clamp(original.end+d,Math.min(duration,original.start+.08),duration);
+     const left=scroller.clientWidth/2+(dragData.spanStart+Math.max(0,Number(fx.start)||0))*pps();
+     const end=Number.isFinite(Number(fx.end))&&Number(fx.end)>(Number(fx.start)||0)?Number(fx.end):dragData.duration;
+     dragData.pill.style.left=left+'px';dragData.pill.style.width=Math.max(6,(end-(Number(fx.start)||0))*pps())+'px';
      $('cut-selection').textContent='エフェクト '+(edge==='left'?'開始 '+fx.start.toFixed(2):'終了 '+fx.end.toFixed(2))+'秒';
    }else if(dragData.mode==='trim'){
      e.preventDefault();
@@ -351,10 +354,11 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
    if(!dragData)return;
    const data=dragData;dragData=null;
    const wasDragging=dragging;dragging=false;
-   const removed=e.type==='pointerup'&&data.mode!=='trim'?window.__subehaTrash?.finish(e):false;
+   const removed=e.type==='pointerup'&&!['trim','trim-fx'].includes(data.mode)?window.__subehaTrash?.finish(e):false;
    window.__subehaTrash?.cancel();
    if(removed){suppressTapUntil=performance.now()+420;lastSelected='';lastSummary='';render();return;}
    if(data.mode==='trim-fx'){
+     if(e.type==='pointercancel'){data.fx.start=data.original.start;data.fx.end=data.originalEnd;render();return;}
      const after=data.edge==='left'?data.fx.start:data.fx.end;
      const before=data.edge==='left'?data.original.start:data.original.end;
      if(Math.abs(after-before)>.001){save();refreshAll();suppressTapUntil=performance.now()+300;}
