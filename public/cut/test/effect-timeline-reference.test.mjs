@@ -35,6 +35,11 @@ test('effect UI stays in compact horizontal bottom rail until a timeline effect 
  assert.match(shell,/videoLane\.before\(overlayLane,effectLane\)/);
  assert.match(touch,/effectEntriesAtSpans\(spans\(state\.project\.clips\)\)/);
  assert.match(touch,/window\.__subehaFXFocus\?\.\(fx\.clipId,fx\.id\)/);
+ assert.match(touch,/dataset\.fxTrim=edge/);
+ assert.match(touch,/mode:'trim-fx'/);
+ assert.match(touch,/dragData\.pill\.style\.width=/);
+ assert.match(touch,/data\.originalEnd/);
+
  assert.match(fx,/__subehaFXFocus=/);
  assert.match(fx,/added\.start=Math\.max\(0,currentTime\(c\)\)/);
  assert.match(fx,/cut-fx-rail-back/);
