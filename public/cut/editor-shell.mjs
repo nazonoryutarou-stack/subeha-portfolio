@@ -1,4 +1,5 @@
 import {MAGIC_MODES,magicEdit} from './magic-edit.mjs';
+import {RAMP_PRESETS,makeSpeedRamp,rampPoints,rampDuration} from './speed-ramp.mjs';
 /* SUBEHA CUT 1.0 — compact, content-first editor shell. Uses existing editor actions, no copied assets. */
 const $=id=>document.getElementById(id);
 const ICONS={
@@ -150,8 +151,41 @@ function installShell(){
   if(kind==='speed'){
    const choices=[.25,.5,.75,1,1.5,2,3,4];
    const row=document.createElement('div');row.className='leap-mini-options';
-   for(const speed of choices){const b=document.createElement('button');b.textContent=speed+'×';b.className=(Number(clip.speed||1)===speed?'selected':'');b.onclick=()=>{apiUpdate(c=>c.speed=speed);row.querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===b));};row.append(b);}body.append(row);
-   const hint=document.createElement('p');hint.textContent='再生速度を選ぶとタイムラインの長さも変わります。';body.append(hint);
+   for(const speed of choices){const b=document.createElement('button');b.textContent=speed+'×';b.className=(Number(clip.speed||1)===speed?'selected':'');b.onclick=()=>{apiUpdate(c=>{c.speed=speed;c.speedRamp=null;});row.querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===b));};row.append(b);}body.append(row);
+   const hint=document.createElement('p');hint.textContent='一定速度か、速度ランプ（途中で加速・減速）を選べます。';body.append(hint);
+    const ramp=document.createElement('section');ramp.className='leap-speed-ramp';
+    const heading=document.createElement('h4');heading.textContent='速度ランプ — 途中で加速・減速';ramp.append(heading);
+    const presets=document.createElement('div');presets.className='leap-speed-presets';ramp.append(presets);
+    const detail=document.createElement('div');detail.className='leap-speed-control-points';ramp.append(detail);
+    const durationText=document.createElement('p');durationText.className='leap-speed-length';ramp.append(durationText);
+    const controls=document.createElement('p');controls.textContent='以下の5点の速度を調節できます。元動画を破壊せず、プレビューと書き出しへ反映されます。';ramp.append(controls);
+    function paintRamp(){
+     const current=state.project.clips.find(c=>c.id===clip.id)||clip;
+     presets.querySelectorAll('button').forEach(b=>b.classList.toggle('selected',(current.speedRamp?.preset||'flat')===b.dataset.preset));
+     detail.replaceChildren();const pts=rampPoints(current.speedRamp);
+     if(!current.speedRamp){controls.hidden=true;durationText.textContent='一定速度：'+rampDuration(current).toFixed(2)+'秒';return;}
+     controls.hidden=false;
+     durationText.textContent='素材上の速度変化 ／ 編集後 '+rampDuration(current).toFixed(2)+'秒';
+     for(const [i,point] of pts.entries()){
+      const label=document.createElement('label');label.className='leap-speed-point';
+      const title=document.createElement('span');title.textContent=Math.round(point.at*100)+'%';const output=document.createElement('output');output.textContent=point.speed.toFixed(2)+'×';
+      const input=document.createElement('input');input.type='range';input.min='.25';input.max='4';input.step='.05';input.value=String(point.speed);
+      input.setAttribute('aria-label','クリップ'+Math.round(point.at*100)+'%の速度');
+      input.oninput=()=>{const speed=Number(input.value);output.textContent=speed.toFixed(2)+'×';
+       apiUpdate(c=>{if(!c.speedRamp)c.speedRamp=makeSpeedRamp('hero');
+        const points=rampPoints(c.speedRamp);if(points[i])points[i].speed=speed;
+        c.speedRamp={preset:'custom',points};c.speed=1;});
+       durationText.textContent='編集後 '+rampDuration(state.project.clips.find(c=>c.id===clip.id)||clip).toFixed(2)+'秒';
+      };
+      label.append(title,input,output);detail.append(label);
+     }
+    }
+    for(const [key,preset] of Object.entries(RAMP_PRESETS)){
+     const b=document.createElement('button');b.type='button';b.dataset.preset=key;b.textContent=preset.label;
+     b.onclick=()=>{apiUpdate(c=>{c.speedRamp=key==='flat'?null:makeSpeedRamp(key);c.speed=1;});paintRamp();};
+     presets.append(b);
+    }
+    body.append(ramp);paintRamp();
   }else{
    const label=document.createElement('label');label.className='leap-mini-volume';label.textContent='クリップ音量';
    const output=document.createElement('output');output.textContent=Math.round((clip.volume??1)*100)+'%';label.append(output);
