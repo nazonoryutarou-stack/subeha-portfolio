@@ -1,5 +1,3 @@
-import {mountEngineHub} from './engine-hub-ui.mjs';
-import {mountCGStudio} from './cg-studio.mjs';
 import {makeNarrationCues} from './narration-cues.mjs';
 import {drawPipFrame} from './pip-style.mjs'; // read-only compatibility for pre-v1.2 projects
 import {OVERLAY_MOTIONS,overlayMotion} from './overlay-motion.mjs';
@@ -17,8 +15,6 @@ import {decodeWaveform,drawPeaks} from './waveform.mjs';
 import {normalizeEQ} from './audio-eq.mjs';
 import {EXPORT_PRESETS,normalizeExportSettings,supportedRecorderType,estimateBytes,exportWarnings} from './export-settings.mjs';
 import {TEXT_PRESETS,TEXT_FONTS,applyTextPreset} from './text-styles.mjs';
-import {mountRetouchStudio} from './retouch-studio.mjs';
-import {mountVideoRetouchStudio} from './video-retouch-studio.mjs';
 import {retouchFrame,normalizedRetouch} from './video-retouch.mjs';
 import {mountTouchWorkspace} from './touch-workspace.mjs';
 import {installTrashZone} from './trash-zone.mjs';
@@ -51,13 +47,12 @@ function panel(title,body){$('pro-title').textContent=title;$('pro-content').inn
 function openDrawer(){document.body.classList.add('pro-open');document.querySelector('.tools-shell').classList.remove('pro-visible');}
 function closeDrawer(){document.body.classList.remove('pro-open');}
 function installChrome(){
-  document.title='SUBEHA CUT — Editor';
-  document.querySelector('.brand').innerHTML='<span class="pro-brand-symbol">◈</span><span>SUBEHA <b>CUT</b></span>';
+  document.title='動画編集';
+  document.querySelector('.brand').textContent='動画編集';
   $('new-project').textContent='⌂';$('new-project').title='新規プロジェクト';
   $('project-save').textContent='↶';$('project-save').title='編集情報を保存';
   $('export-open').textContent='↥ 保存';
   const header=document.querySelector('.topbar');
-  header.insertAdjacentHTML('beforeend','<span class="pro-head-version">PRO EDITOR</span>');
   document.querySelector('.viewer-head').hidden=true;
   const stage=$('preview-stage');stage.classList.add('pro-stage');
   document.querySelector('.transport').insertAdjacentHTML('afterbegin','<button id="pro-undo" aria-label="元に戻す" class="pro-history">↶</button>');
@@ -622,10 +617,6 @@ function setupExportStudio(){
 function mount(){
   state.project.overlays ||= [];state.project.audioTracks ||= [];state.project.captions ||= [];
   installChrome();
-  mountCGStudio(api,{panel,closeDrawer});
-  mountEngineHub(api,{panel});
-  mountRetouchStudio(api,{panel,closeDrawer});
-  mountVideoRetouchStudio(api,{panel,closeDrawer});
   setupTextStudio();setupExportStudio();
   $('backup-project').textContent='設定だけ保存（素材なし）';
   $('backup-project').title='動画や画像は保存されません。素材込みの保存には上部の「保存」を使います';
