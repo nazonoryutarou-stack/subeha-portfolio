@@ -200,24 +200,31 @@ export function drawPbrTitle(ctx,canvas,item,localSeconds=0){
  const material=normalizedPbrTitle(item);
  try{
   bindUniforms(state,mask,material,localSeconds);
-  ctx.save();ctx.translate(box.x,box.y);ctx.rotate(box.rotation*Math.PI/180);ctx.globalAlpha*=box.style.opacity;
-  if(box.style.box){
-   ctx.save();ctx.fillStyle=box.style.boxColor;ctx.globalAlpha*=box.style.boxOpacity;
-   ctx.beginPath();
-   if(ctx.roundRect)ctx.roundRect(-box.w/2,-box.h/2,box.w,box.h,box.size*.2);
-   else ctx.rect(-box.w/2,-box.h/2,box.w,box.h);
-   ctx.fill();ctx.restore();
-  }
-  // Extrusion and its shadow stay inside the image export canvas.
-  ctx.shadowColor='rgba(0,0,0,.58)';
-  ctx.shadowBlur=Math.min(26,material.depth*.75)*canvas.width/720;
-  ctx.shadowOffsetX=material.depth*.36*canvas.width/720;
-  ctx.shadowOffsetY=material.depth*.55*canvas.width/720;
-  ctx.drawImage(state.canvas,-mask.rasterW/2,-mask.rasterH/2,mask.rasterW,mask.rasterH);
-  ctx.restore();
+  ctx.save();
+  try{
+   ctx.translate(box.x,box.y);ctx.rotate(box.rotation*Math.PI/180);ctx.globalAlpha*=box.style.opacity;
+   if(box.style.box){
+    ctx.save();
+    try{
+     ctx.fillStyle=box.style.boxColor;ctx.globalAlpha*=box.style.boxOpacity;
+     ctx.beginPath();
+     if(ctx.roundRect)ctx.roundRect(-box.w/2,-box.h/2,box.w,box.h,box.size*.2);
+     else ctx.rect(-box.w/2,-box.h/2,box.w,box.h);
+     ctx.fill();
+    }finally{ctx.restore();}
+   }
+   ctx.shadowColor='rgba(0,0,0,.58)';
+   ctx.shadowBlur=Math.min(26,material.depth*.75)*canvas.width/720;
+   ctx.shadowOffsetX=material.depth*.36*canvas.width/720;
+   ctx.shadowOffsetY=material.depth*.55*canvas.width/720;
+   ctx.drawImage(state.canvas,-mask.rasterW/2,-mask.rasterH/2,mask.rasterW,mask.rasterH);
+  }finally{ctx.restore();}
   return box;
  }catch(e){
+  // Runtime WebGL failures must not leave the export canvas transformed, nor
+  // spam every frame with the same exception.
   console.warn('SUBEHA CUT PBR renderer fallback:',e);
+  unavailable=true;
   return drawTitle(ctx,canvas,item);
  }
 }
