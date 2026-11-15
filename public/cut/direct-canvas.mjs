@@ -1,6 +1,6 @@
 /* Touch-first overlay manipulation. DOM handles are editor-only; never appear in export frames. */
 import {activeCue,captionLayout,captionAppearance} from './subtitles.mjs';
-import {clamp,containsRotated,textBounds,moveBy,scaleBy,rotateBy,positionFromClient,pointerGap,pointerAngle} from './direct-geometry.mjs';
+import {clamp,containsRotated,textBounds,moveBy,scaleBy,stepRotation,positionFromClient,pointerGap,pointerAngle} from './direct-geometry.mjs';
 import {applyOverlayTransform} from './touch-edit.mjs';
 import {widthFromDrag,nearbyGuides} from './title-gestures.mjs';
 import {TEXT_FONTS,TEXT_PRESETS,applyTextPreset} from './text-styles.mjs';
@@ -19,7 +19,7 @@ function mount(){
  stage.append(box);
  const guides=document.createElement('div');guides.id='cut-title-guides';guides.hidden=true;guides.innerHTML='<i class="cut-guide-v"></i><i class="cut-guide-h"></i>';stage.append(guides);
  const bar=document.createElement('div');bar.id='cut-direct-bar';bar.hidden=true;
- bar.innerHTML='<button data-do="edit">✎ 文字</button><button data-do="style">▧ デザイン</button><button data-do="color">● 色</button><button data-do="duplicate">▣ 複製</button><button data-do="delete">× 削除</button><button data-do="close">完了</button>';
+ bar.innerHTML='<button data-do="edit">編集</button><button data-do="straighten" aria-label="角度を0度に戻す">⟲ 0°</button><button data-do="duplicate">複製</button><button data-do="delete">削除</button><button data-do="close">✓</button>';
  stage.append(bar);
  const panel=document.createElement('div');panel.id='cut-direct-sheet';panel.hidden=true;
  panel.innerHTML=`<header><strong id="cut-direct-title">文字を編集</strong><button id="cut-direct-close" aria-label="閉じる">×</button></header>
@@ -165,13 +165,19 @@ function mount(){
   const p=point(e);contacts.set(e.pointerId,{clientX:e.clientX,clientY:e.clientY});
   const props=currentProps();if(!props)return;
   const item=itemFor(selection);if(item&&selection.kind!=='layer')props.width=(selection.kind==='caption'?captionAppearance(state.project,item):item).width??.88;
-  if(contacts.size===1)gest={mode,from:p,fromScreen:{x:e.clientX,y:e.clientY},props,changed:false};
-  else if(contacts.size===2){const [a,b]=[...contacts.values()];gest={mode:'pinch',props,distance:pointerGap(a,b)||1,angle:pointerAngle(a,b),changed:false};}
+  if(contacts.size===1){
+   gest={mode,from:p,fromScreen:{x:e.clientX,y:e.clientY},props,changed:false};
+   if(mode==='rotate'){
+    const r=canvas.getBoundingClientRect(),c={x:r.left+r.width*props.x,y:r.top+r.height*props.y};
+    gest.lastAngle=Math.atan2(e.clientY-c.y,e.clientX-c.x);gest.travel=0;
+   }
+  }
+  else if(contacts.size===2){const [a,b]=[...contacts.values()];const angle=pointerAngle(a,b);gest={mode:'pinch',props,distance:pointerGap(a,b)||1,lastAngle:angle,travel:0,changed:false};}
  }
  function motion(e){if(!contacts.has(e.pointerId)||!gest)return;
   contacts.set(e.pointerId,{clientX:e.clientX,clientY:e.clientY});const g=gest;
   if(contacts.size===2){const [a,b]=[...contacts.values()];const size=scaleBy(g.props.size,g.distance,pointerGap(a,b),selection.kind==='layer'?8:12,selection.kind==='layer'?350:240);
-   const rotation=rotateBy(g.props.rotation,g.angle,pointerAngle(a,b));applyPatch({size,rotation});
+   const rotation=stepRotation(g,pointerAngle(a,b));applyPatch({size,rotation});
   }else if(g.mode==='move'){
    if(contacts.size===1&&Math.hypot(e.clientX-g.fromScreen.x,e.clientY-g.fromScreen.y)>12){
      if(!window.__subehaTrash?.active())window.__subehaTrash?.begin(selection.kind,selection.id,e);
@@ -191,8 +197,8 @@ function mount(){
    applyPatch({size:clamp(g.props.size+sign*delta*(720/Math.max(canvas.getBoundingClientRect().width,1)),selection.kind==='layer'?8:12,selection.kind==='layer'?350:240)});
   }else if(g.mode==='rotate'){
    const r=canvas.getBoundingClientRect(),c={clientX:r.left+r.width*g.props.x,clientY:r.top+r.height*g.props.y};
-   const start=Math.atan2(g.fromScreen.y-c.clientY,g.fromScreen.x-c.clientX),end=Math.atan2(e.clientY-c.clientY,e.clientX-c.clientX);
-   applyPatch({rotation:rotateBy(g.props.rotation,start,end)});
+   const end=Math.atan2(e.clientY-c.clientY,e.clientX-c.clientX);
+   applyPatch({rotation:stepRotation(g,end)});
   }
   g.changed=true;
  }
@@ -240,7 +246,8 @@ function mount(){
    buildSlider('boxOpacity','背景の濃さ',0,1,.05,.72),buildSlider('opacity','文字の透明度',0,1,.05,1));
   $('cut-title-layout-sliders').replaceChildren(
    buildSlider('width','改行する幅',.18,.98,.01,.88),buildSlider('letterSpacing','文字の間隔',-9,28,.5,0),
-   buildSlider('lineHeight','行の間隔',.75,2.2,.05,selection.kind==='caption'?1.34:1.23));
+   buildSlider('lineHeight','行の間隔',.75,2.2,.05,selection.kind==='caption'?1.34:1.23),
+   buildSlider('rotation','角度（0°が水平）',-180,180,1,0));
   $('cut-title-font-weight')?.replaceChildren(buildSlider('weight','文字の太さ',400,900,100,800));
   for(const b of panel.querySelectorAll('[data-align]'))b.classList.toggle('active',b.dataset.align===(st.align||'center'));
   for(const b of panel.querySelectorAll('[data-motion]'))b.classList.toggle('active',b.dataset.motion===(st.motion||'none')&&(!st.textMotion||st.textMotion.type==='none'));
@@ -360,6 +367,11 @@ function mount(){
  $('cut-direct-close').onclick=()=>{panel.hidden=true;};
  bar.addEventListener('click',e=>{const action=e.target.closest('[data-do]')?.dataset.do,t=itemFor(selection);if(!action||!t)return;
   if(action==='close'){clear();return;}
+  if(action==='straighten'){
+   if(state.recording)return;
+   applyPatch({rotation:0});dirty=false;save();refreshAll();layout();
+   api.toast('水平（0°）に戻しました');return;
+  }
   if(['edit','color','style'].includes(action)){openPanel(action==='edit'?'words':action==='color'?'appearance':'font');return;}
   if(action==='duplicate'){
    if(selection.kind==='layer'){const copy={...structuredClone(t),id:api.newID(),x:clamp((t.x??.5)+.06,0,1)};state.project.overlays.push(copy);pick({kind:'layer',id:copy.id});}
@@ -371,6 +383,10 @@ function mount(){
    const key=selection.kind==='caption'?'captions':selection.kind==='layer'?'overlays':'texts';state.project[key]=state.project[key].filter(x=>x.id!==t.id);if(selection.kind==='text')state.selectedText=null;save();refreshAll();clear();
   }
  });
+ window.__subehaDirectSelect=(kind,id)=>{
+  const valid=['text','layer','caption'].includes(kind)?itemFor({kind,id}):null;
+  if(!valid)return false;pick({kind,id});return true;
+ };
  window.__subehaDirectOpen=(kind='auto',tab='words')=>{if(kind==='caption'){const cue=cueNow();if(cue)pick({kind:'caption',id:cue.id});else{api.toast('まず再生位置に字幕を表示してください');return;} }
   else if(kind==='text'){const t=(state.project.texts||[]).find(t=>t.id===state.selectedText);if(t)pick({kind:'text',id:t.id});else{api.toast('まずテキストを追加してください');return;}}
   openPanel(tab);};
