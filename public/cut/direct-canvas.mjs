@@ -4,6 +4,7 @@ import {clamp,containsRotated,textBounds,moveBy,scaleBy,rotateBy,positionFromCli
 import {applyOverlayTransform} from './touch-edit.mjs';
 import {widthFromDrag,nearbyGuides} from './title-gestures.mjs';
 import {TEXT_FONTS,TEXT_PRESETS,applyTextPreset} from './text-styles.mjs';
+import {TEXT_MOTION_TYPES,TEXT_MOTION_UNITS,TEXT_MOTION_EASINGS,TITLE_KEYFRAME_FIELDS,normalizedTextMotion,titleAt,upsertTitleKeyframe} from './text-motion-core.mjs';
 const $=id=>document.getElementById(id);
 const colors=['#ffffff','#000000','#ff526d','#ffe066','#5fd8f5','#ad80ff','#70f4a4'];
 const safe=s=>String(s||'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
@@ -28,6 +29,33 @@ function mount(){
   <div id="cut-title-motion" class="cut-title-pane" hidden><div class="cut-title-alignment"><button data-motion="none">なし</button><button data-motion="fade">ふわっと</button><button data-motion="pop">飛び出す</button><button data-motion="slide">下から</button></div><p>文字の登場演出を選べます。動画と文字は別々に編集できます。</p></div>
   <p class="cut-title-tip">編集枠と操作ボタンは、完成動画には映りません。</p>`;
  $('app').append(panel);
+ const advanced=document.createElement('div');advanced.id='cut-text-motion-lab';
+ advanced.innerHTML=`<div class="cut-motion-grid">
+  <label>アニメ<select data-tmotion="type"></select></label>
+  <label>動かす単位<select data-tmotion="unit"></select></label>
+  <label>方向<select data-tmotion="direction"></select></label>
+  <label>登場・退場<select data-tmotion="phase"></select></label>
+  <label>動きの補間<select data-tmotion="easing"></select></label>
+ </div>
+ <label class="cut-motion-slider">効果時間 <output id="cut-motion-duration-label">0.80秒</output><input data-tmotion="duration" type="range" min=".15" max="4" step=".05" value=".8"></label>
+ <label class="cut-motion-slider">文字の時間差 <output id="cut-motion-stagger-label">0.09秒</output><input data-tmotion="stagger" type="range" min="0" max=".4" step=".01" value=".09"></label>
+ <label class="cut-motion-check"><input data-tmotion="reverse" type="checkbox"> 逆順に動かす</label>
+ <button id="cut-motion-preview" class="cut-title-pill" type="button">▶ この文字を再生</button>
+ <div class="cut-motion-keyframes"><strong>◇ 文字のキーフレーム</strong>
+  <p>時刻を動かしてキーを記録すると、その時点の位置・拡大率・色・字間などを補間します。</p>
+  <label class="cut-motion-check"><input id="cut-keyframe-mode" type="checkbox"> 指の操作・色と配置の変更を現在の時刻に記録</label>
+  <div class="cut-motion-actions"><button id="cut-keyframe-add" type="button">＋ 現在位置にキーを追加</button><button id="cut-keyframe-clear" type="button">全キー削除</button></div>
+  <label>キー間の補間 <select id="cut-keyframe-easing"></select></label>
+  <small id="cut-keyframe-count">0個のキーフレーム</small>
+ </div>`;
+ $('cut-title-motion').append(advanced);
+ const choices=(key,entries)=>{const select=panel.querySelector('[data-tmotion="'+key+'"]');for(const [value,label] of entries){const opt=document.createElement('option');opt.value=value;opt.textContent=label;select.append(opt);}};
+ choices('type',TEXT_MOTION_TYPES.map(k=>[k,({none:'なし',fade:'ふわっと',slide:'スライド',scale:'拡大',bounce:'バウンド',typewriter:'タイプライター',wave:'波',wiggle:'揺れ',flicker:'点滅',spin:'回転',fall:'落下',blur:'ぼけ',reveal:'出現'}[k]||k)]));
+ choices('unit',TEXT_MOTION_UNITS.map(k=>[k,({glyph:'文字ごと',word:'単語ごと',line:'行ごと',global:'全体'}[k]||k)]));
+ choices('direction',[['up','上から'],['down','下から'],['left','左から'],['right','右から']]);
+ choices('phase',[['in','登場'],['out','退場'],['both','登場＋退場']]);
+ choices('easing',TEXT_MOTION_EASINGS.map(k=>[k,({linear:'一定',quadInOut:'滑らか',expoOut:'急停止',circInOut:'円弧',backIn:'引いて入る',elasticOut:'弾性',backInOut:'前後に反動',circOut:'円弧の停止'}[k]||k)]));
+ const keyEase=$('cut-keyframe-easing');for(const k of TEXT_MOTION_EASINGS){const option=document.createElement('option');option.value=k;option.textContent=({linear:'一定',quadInOut:'滑らか',expoOut:'急停止',circInOut:'円弧',backIn:'引いて入る',elasticOut:'弾性',backInOut:'前後に反動',circOut:'円弧の停止'}[k]||k);keyEase.append(option);}
  let selection=null,gest=null,lastTextId=null,dirty=false,lastRender=0,lastTap=null,activeTab="words";
  const fps=()=>state.current;
  const cueNow=()=>activeCue(state.project.captions||[],fps());
@@ -40,7 +68,7 @@ function mount(){
   const t=clamp((local-a.time)/(b.time-a.time),0,1),out={...base};for(const key of Object.keys(base))out[key]=(Number(a[key]??base[key]))+(Number(b[key]??base[key])-Number(a[key]??base[key]))*t;return out;
  }
  function region(kind,item){
-  if(kind==='text')return textBounds(ctx,canvas,item);
+  if(kind==='text')return textBounds(ctx,canvas,titleAt(item,Math.max(0,fps()-item.start)));
   if(kind==='caption')return captionLayout(ctx,canvas,state.project,item);
   const p=overlayProps(item),asset=state.assets.get(item.assetId),ratio=clamp((asset?.height||1)/(asset?.width||1),.08,8);
   return {x:p.x*canvas.width,y:p.y*canvas.height,w:canvas.width*p.scale,h:canvas.width*p.scale*ratio,rotation:p.rotation||0,size:p.scale*canvas.width};
@@ -70,10 +98,19 @@ function mount(){
  }
  function point(e){const r=canvas.getBoundingClientRect(),p=positionFromClient(e,r);return {x:p.x*canvas.width,y:p.y*canvas.height};}
  const contacts=new Map();
- function currentProps(){const cur=current();if(!cur)return null;const t=cur.item;return selection.kind==='layer'?{x:cur.box.x/canvas.width,y:cur.box.y/canvas.height,size:(cur.box.w/canvas.width)*100,rotation:cur.box.rotation}:selection.kind==='caption'?{x:cur.box.x/canvas.width,y:cur.box.y/canvas.height,size:cur.box.size*720/canvas.width,rotation:cur.box.rotation}:{x:t.x??.5,y:t.y??.76,size:t.size??62,rotation:t.rotation||0};}
+ function currentProps(){const cur=current();if(!cur)return null;const t=cur.item;return selection.kind==='layer'?{x:cur.box.x/canvas.width,y:cur.box.y/canvas.height,size:(cur.box.w/canvas.width)*100,rotation:cur.box.rotation}:selection.kind==='caption'?{x:cur.box.x/canvas.width,y:cur.box.y/canvas.height,size:cur.box.size*720/canvas.width,rotation:cur.box.rotation}:(p=>({x:p.x??.5,y:p.y??.76,size:p.size??62,rotation:p.rotation||0}))(titleAt(t,Math.max(0,fps()-t.start)));}
+ function applyTextChanges(t,patch){
+  if($('cut-keyframe-mode')?.checked){
+   const timed={},global={};
+   for(const [k,v] of Object.entries(patch))if(TITLE_KEYFRAME_FIELDS.includes(k))timed[k]=v;else global[k]=v;
+   Object.assign(t,global);
+   if(Object.keys(timed).length)t.titleKeyframes=upsertTitleKeyframe(t,Math.max(0,Math.min(t.duration||3,fps()-t.start)),timed);
+  }else Object.assign(t,patch);
+ }
  function applyPatch(patch){const t=itemFor(selection);if(!t||state.recording)return;
   if(selection.kind==='caption'){t.style={...captionAppearance(state.project,t),...t.style,...patch};}
   else if(selection.kind==='layer'){const transfer={...patch};if(transfer.size!==undefined){transfer.scale=transfer.size/100;delete transfer.size;}Object.assign(t,applyOverlayTransform(t,fps(),transfer));}
+  else if(selection.kind==='text')applyTextChanges(t,patch);
   else Object.assign(t,patch);
   dirty=true;draw();layout();
  }
@@ -137,10 +174,11 @@ function mount(){
  function showTab(tab){activeTab=tab;for(const b of tabButtons){b.classList.toggle('active',b.dataset.tab===tab);b.setAttribute('aria-selected',String(b.dataset.tab===tab));}
   for(const p of panel.querySelectorAll('.cut-title-pane'))p.hidden=p.id!=='cut-title-'+tab;
  }
- function effectiveStyle(){const t=itemFor(selection);return !t?{}:selection.kind==='caption'?captionAppearance(state.project,t):t;}
+ function effectiveStyle(){const t=itemFor(selection);return !t?{}:selection.kind==='caption'?captionAppearance(state.project,t):
+  selection.kind==='text'&&$('cut-keyframe-mode')?.checked?titleAt(t,Math.max(0,fps()-t.start)):t;}
  function updateText(change){const t=itemFor(selection);if(!t||state.recording)return;
   if(selection.kind==='caption'){if('text' in change)t.text=change.text;const copy={...change};delete copy.text;t.style={...t.style,...copy};}
-  else Object.assign(t,change);save();draw();layout();
+  else if(selection.kind==='text')applyTextChanges(t,change);else Object.assign(t,change);save();draw();layout();
  }
  function buildSlider(key,label,min,max,step,defaultValue){const st=effectiveStyle();const el=document.createElement('label');el.className='cut-title-slider';
   el.innerHTML=`<span>${label}<output>${Number(st[key]??defaultValue).toFixed(step<.1?2:step<1?1:0)}</output></span><input type="range" min="${min}" max="${max}" step="${step}" value="${st[key]??defaultValue}" data-title-range="${key}">`;
@@ -157,7 +195,18 @@ function mount(){
    buildSlider('lineHeight','行の間隔',.75,2.2,.05,selection.kind==='caption'?1.34:1.23));
   $('cut-title-font-weight')?.replaceChildren(buildSlider('weight','文字の太さ',400,900,100,800));
   for(const b of panel.querySelectorAll('[data-align]'))b.classList.toggle('active',b.dataset.align===(st.align||'center'));
-  for(const b of panel.querySelectorAll('[data-motion]'))b.classList.toggle('active',b.dataset.motion===(st.motion||'none'));
+  for(const b of panel.querySelectorAll('[data-motion]'))b.classList.toggle('active',b.dataset.motion===(st.motion||'none')&&(!st.textMotion||st.textMotion.type==='none'));
+  const isText=selection?.kind==='text',item=itemFor(selection);
+  advanced.hidden=!isText;
+  if(isText&&item){
+   const motion=normalizedTextMotion(item.textMotion);
+   for(const [k,v] of Object.entries(motion)){const control=panel.querySelector('[data-tmotion="'+k+'"]');if(!control)continue;if(control.type==='checkbox')control.checked=!!v;else control.value=String(v);}
+   $('cut-motion-duration-label').textContent=motion.duration.toFixed(2)+'秒';
+   $('cut-motion-stagger-label').textContent=motion.stagger.toFixed(2)+'秒';
+   $('cut-keyframe-easing').value=TEXT_MOTION_EASINGS.includes(item.titleEasing)?item.titleEasing:'linear';
+   const frames=item.titleKeyframes||[];
+   $('cut-keyframe-count').textContent=frames.length+'個のキーフレーム '+(frames.length?'／ '+frames.map(f=>Number(f.time).toFixed(2)+'秒').join('、'):'');
+  }
  }
  function openPanel(tab='words'){const cur=current();if(!cur)return;
   panel.hidden=false;const t=cur.item;
@@ -179,7 +228,28 @@ function mount(){
  for(const sw of panel.querySelectorAll('[data-color]'))sw.onclick=()=>{updateText({color:sw.dataset.color});$('cut-direct-color').value=sw.dataset.color;};
  $('cut-direct-bg').onclick=()=>{const st=effectiveStyle();updateText(selection.kind==='caption'?{background:st.background===false}:{box:!st.box});};
  for(const b of panel.querySelectorAll('[data-align]'))b.onclick=()=>{updateText({align:b.dataset.align});refreshSheet();};
- for(const b of panel.querySelectorAll('[data-motion]'))b.onclick=()=>{updateText({motion:b.dataset.motion});refreshSheet();};
+ for(const b of panel.querySelectorAll('[data-motion]'))b.onclick=()=>{updateText({motion:b.dataset.motion,textMotion:null});refreshSheet();};
+ for(const control of advanced.querySelectorAll('[data-tmotion]'))control.addEventListener('input',()=>{
+  const t=itemFor(selection);if(!t||selection.kind!=='text'||state.recording)return;
+  const field=control.dataset.tmotion,value=control.type==='checkbox'?control.checked:control.type==='range'?Number(control.value):control.value;
+  t.textMotion={...normalizedTextMotion(t.textMotion),[field]:value};
+  t.motion='none';save();draw();refreshSheet();
+ });
+ $('cut-keyframe-add').onclick=()=>{
+  const t=itemFor(selection);if(!t||selection.kind!=='text'||state.recording)return;
+  t.titleKeyframes=upsertTitleKeyframe(t,Math.max(0,Math.min(t.duration||3,fps()-t.start)));
+  $('cut-keyframe-mode').checked=true;save();draw();refreshSheet();layout();
+ };
+ $('cut-keyframe-clear').onclick=()=>{
+  const t=itemFor(selection);if(!t||selection.kind!=='text'||state.recording)return;
+  t.titleKeyframes=[];$('cut-keyframe-mode').checked=false;save();draw();refreshSheet();layout();
+ };
+ $('cut-keyframe-mode').onchange=()=>refreshSheet();
+ $('cut-keyframe-easing').onchange=e=>{const t=itemFor(selection);if(!t||selection.kind!=='text'||state.recording)return;t.titleEasing=e.target.value;save();draw();};
+ $('cut-motion-preview').onclick=()=>{
+  const t=itemFor(selection);if(!t||selection.kind!=='text')return;
+  api.seek(t.start);if(!state.playing)$('play').click();
+ };
  $('cut-title-center').onclick=()=>{updateText({x:.5,y:.5});refreshSheet();};
  $('cut-direct-close').onclick=()=>{panel.hidden=true;};
  bar.addEventListener('click',e=>{const action=e.target.closest('[data-do]')?.dataset.do,t=itemFor(selection);if(!action||!t)return;
