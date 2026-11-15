@@ -60,7 +60,8 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
  stackButton.onclick=()=>toggleDrawer();
  window.__subehaLayersOpen=()=>toggleDrawer(true);
  function renderInventory(){
-  const summary=layerSummary(state.project,state.assets,state.current),list=$('cut-layer-inventory');
+  const found=layerSummary(state.project,state.assets,state.current),entries=found.entries.filter(item=>item.kind!=='cg');
+  const summary={...found,entries,total:entries.length,active:entries.filter(item=>item.active).length},list=$('cut-layer-inventory');
   $('cut-layer-stack-count').textContent=String(summary.total);
   $('cut-layer-inventory-count').textContent=summary.total+'件 · 現在表示 '+summary.active+'件';
   list.replaceChildren();
@@ -85,8 +86,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      if(!window.__subehaDirectSelect?.('text',item.id)){api.setPanel('text');}
     }else if(item.kind==='caption'){
      if(!window.__subehaDirectSelect?.('caption',item.id))onSelectCaption(item.id);
-    }else if(item.kind==='cg')window.__subehaCGSelect?.(item.id);
-    else if(item.kind==='audio')onSelectAudio(item.id);
+    }else if(item.kind==='audio')onSelectAudio(item.id);
     drawer.hidden=true;stackButton.setAttribute('aria-expanded','false');
     refreshAll();
    };
@@ -190,22 +190,14 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      const overlay=$('cut-overlay-lane');overlay.replaceChildren();
      // Never overlap different assets in one visual row: every source has its own
      // height and retains its timeline timing. Frontmost source is on the first row.
-     const overlayRows=[
-      ...(state.project.overlays||[]).slice().reverse().map(l=>({kind:'layer',item:l})),
-      ...(state.project.cgScenes||[]).map(item=>({kind:'cg',item}))
-     ];
+     const overlayRows=(state.project.overlays||[]).slice().reverse().map(item=>({kind:'layer',item}));
      overlay.style.height=(overlayRows.length?overlayRows.length*29:0)+'px';
      for(const [rowIndex,record] of overlayRows.entries()){
       const l=record.item,x=pad+number(l.start)*scale,w=number(l.duration)*scale;
-      if(record.kind==='layer'){
-       const pill=addPill(overlay,{left:x,width:w,cls:'cut-overlay-pill'+(l.visible===false?' cut-layer-invisible':''),text:'▧ '+(state.assets.get(l.assetId)?.name||'レイヤー').slice(0,18),title:'この素材を選択',onclick:()=>{seek(Math.max(0,l.start+.02));if(!window.__subehaDirectSelect?.('layer',l.id))onSelectLayer(l.id);}});
-       pill.style.top=(rowIndex*29+2)+'px';pill.dataset.layerId=l.id;
-      }else{
-       const pill=addPill(overlay,{left:x,width:w,cls:'cut-cg-pill',text:'◇ '+(l.name||'3D CG').slice(0,16),title:'3Dシーンを選択',onclick:()=>{seek(l.start);window.__subehaCGSelect?.(l.id);}});
-       pill.style.top=(rowIndex*29+2)+'px';pill.dataset.cgId=l.id;
-      }
+      const pill=addPill(overlay,{left:x,width:w,cls:'cut-overlay-pill'+(l.visible===false?' cut-layer-invisible':''),text:'▧ '+(state.assets.get(l.assetId)?.name||'レイヤー').slice(0,18),title:'この素材を選択',onclick:()=>{seek(Math.max(0,l.start+.02));if(!window.__subehaDirectSelect?.('layer',l.id))onSelectLayer(l.id);}});
+      pill.style.top=(rowIndex*29+2)+'px';pill.dataset.layerId=l.id;
      }
-     $('cut-layer-stack-count').textContent=String(layerSummary(state.project,state.assets,state.current).total);
+     $('cut-layer-stack-count').textContent=String(layerSummary(state.project,state.assets,state.current).entries.filter(item=>item.kind!=='cg').length);
      if(!drawer.hidden)renderInventory();
      const audio=$('cut-audio-lane');audio.replaceChildren();
      for(const a of state.project.audioTracks||[]){const x=pad+number(a.start)*scale,w=number(a.duration)*scale;
