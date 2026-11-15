@@ -46,3 +46,40 @@
 .cut-optic-pad{margin:10px auto 6px;max-width:330px;height:144px;position:relative;touch-action:none;user-select:none;border-radius:13px;border:2px solid #858ba5;box-shadow:inset 0 0 12px #0008;background:linear-gradient(90deg,transparent calc(50% - 1px),#99aec055 50%,transparent calc(50% + 1px)),linear-gradient(transparent calc(50% - 1px),#99aec055 50%,transparent calc(50% + 1px)),radial-gradient(ellipse at center,#727b9a55,#26293b)}
 .cut-optic-pad i{position:absolute;width:32px;height:32px;border:2px solid #fff9eb;border-radius:50%;background:#f46890;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 2px 8px #000c}
 @media(max-width:380px){.cut-optic-controls{grid-template-columns:1fr}}
+
+/* v2.7: photographed Videoleap effect carousel, not the custom laboratory UI. */
+#cut-fx-lab{background:#202023;border-color:#33343a;border-radius:12px 12px 0 0}
+#cut-fx-lab>header{background:#202023}
+#cut-fx-lab .cut-fx-tabs{background:#202023;justify-content:space-around}
+#cut-fx-lab .cut-fx-tabs button{background:transparent;border-radius:0;min-height:38px;color:#9b9ba4}
+#cut-fx-lab .cut-fx-tabs button.active{background:transparent;color:#fff;border-bottom:2px solid #ff5866}
+#cut-fx-lab[data-page="effects"]{
+ bottom:env(safe-area-inset-bottom);max-height:min(38dvh,350px);
+ padding:6px 6px 9px;border-radius:0;box-shadow:0 -7px 22px #0007
+}
+#cut-fx-lab[data-page="effects"]>header{height:31px;padding:0 5px;border:0}
+#cut-fx-lab[data-page="effects"]>header button{background:transparent;border:0}
+#cut-fx-lab[data-page="effects"] .cut-fx-tabs{display:none!important}
+#cut-fx-lab[data-page="effects"] .cut-fx-help{display:none}
+#cut-fx-lab[data-page="effects"] .cut-fx-carousel{
+ display:flex;gap:0;overflow-x:auto;overflow-y:hidden;
+ padding:7px 0 9px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+ touch-action:pan-x;scroll-snap-type:x proximity
+}
+#cut-fx-lab[data-page="effects"] .cut-fx-carousel::-webkit-scrollbar{display:none}
+#cut-fx-lab[data-page="effects"] .cut-fx-carousel button{
+ display:flex;flex:0 0 76px;min-width:76px;min-height:73px;
+ flex-direction:column;align-items:center;justify-content:center;
+ gap:8px;padding:5px 2px;background:transparent;border:0;
+ border-radius:0;box-shadow:none;color:#e6e6eb;font-size:11px;
+ scroll-snap-align:start;white-space:nowrap
+}
+#cut-fx-lab[data-page="effects"] .cut-fx-glyph{
+ display:grid;place-items:center;width:34px;height:34px;color:#b6b6bf;
+ font:28px/1 system-ui;letter-spacing:0
+}
+#cut-fx-lab[data-page="effects"] .cut-fx-carousel button:active,
+#cut-fx-lab[data-page="effects"] .cut-fx-carousel button:focus-visible{color:#ff6b7b}
+#cut-fx-lab[data-page="effects"] .cut-fx-carousel button:active .cut-fx-glyph{color:#ff6b7b}
+#cut-fx-lab[data-page="effects"] #cut-fx-stack{border-top:1px solid #3c3c41;padding-top:8px}
+#cut-fx-lab[data-page="effects"] .cut-fx-unit{background:#29292e;border-radius:6px;border:1px solid #4b4b53}
