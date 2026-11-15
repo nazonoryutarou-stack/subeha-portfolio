@@ -61,13 +61,6 @@ export function drawAnimatedTitle(ctx,canvas,item,localSeconds=0){
  ctx.save();
  ctx.translate(box.x,box.y);ctx.rotate(box.rotation*Math.PI/180);
  ctx.globalAlpha*=s.opacity;
- if(s.box){
-  ctx.save();ctx.fillStyle=s.boxColor;ctx.globalAlpha*=s.boxOpacity;
-  ctx.beginPath();
-  if(ctx.roundRect)ctx.roundRect(-box.w/2,-box.h/2,box.w,box.h,box.size*.2);
-  else ctx.rect(-box.w/2,-box.h/2,box.w,box.h);
-  ctx.fill();ctx.restore();
- }
  ctx.font=`${s.weight} ${box.size}px ${s.font}`;
  ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
  ctx.strokeStyle=s.outlineColor;ctx.lineWidth=box.size*s.outlineWidth;
@@ -79,6 +72,13 @@ export function drawAnimatedTitle(ctx,canvas,item,localSeconds=0){
  // per-unit canvas state switches on memory-limited phones.
  if(records.length>180){
   ctx.restore();return drawTitle(ctx,canvas,t);
+ }
+ if(s.box){
+  ctx.save();ctx.fillStyle=s.boxColor;ctx.globalAlpha*=s.boxOpacity;
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(-box.w/2,-box.h/2,box.w,box.h,box.size*.2);
+  else ctx.rect(-box.w/2,-box.h/2,box.w,box.h);
+  ctx.fill();ctx.restore();
  }
  for(const part of records){
   if(!part.text)continue;
