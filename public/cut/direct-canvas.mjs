@@ -265,9 +265,9 @@ function mount(){
    const key=selection.kind==='caption'?'captions':selection.kind==='layer'?'overlays':'texts';state.project[key]=state.project[key].filter(x=>x.id!==t.id);if(selection.kind==='text')state.selectedText=null;save();refreshAll();clear();
   }
  });
- window.__subehaDirectOpen=(kind='auto')=>{if(kind==='caption'){const cue=cueNow();if(cue)pick({kind:'caption',id:cue.id});else{api.toast('まず再生位置に字幕を表示してください');return;} }
+ window.__subehaDirectOpen=(kind='auto',tab='words')=>{if(kind==='caption'){const cue=cueNow();if(cue)pick({kind:'caption',id:cue.id});else{api.toast('まず再生位置に字幕を表示してください');return;} }
   else if(kind==='text'){const t=(state.project.texts||[]).find(t=>t.id===state.selectedText);if(t)pick({kind:'text',id:t.id});else{api.toast('まずテキストを追加してください');return;}}
-  openPanel('words');};
+  openPanel(tab);};
  function frame(ts){if(ts-lastRender>80){lastRender=ts;
   // Track newly added text and project load without opening a numeric control panel.
   if(state.selectedText!==lastTextId){lastTextId=state.selectedText;if(lastTextId){const t=(state.project.texts||[]).find(x=>x.id===lastTextId);if(t&&visible('text',t)&&(!selection||selection.kind!=='caption'))selection={kind:'text',id:t.id};}}
