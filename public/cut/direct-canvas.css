@@ -63,3 +63,32 @@
 #cut-keyframe-add{background:#bf405d;border-color:#bf405d;font-weight:700}
 #cut-keyframe-count{display:block;margin-top:8px;color:#b4c3cf;font:11px/1.6 ui-monospace,monospace;overflow-wrap:anywhere}
 @media(max-width:360px){.cut-motion-grid{grid-template-columns:1fr}}
+
+/* GPU embossed typography controls. All interaction remains editor-only. */
+#cut-title-pbr[hidden]{display:none!important}
+#cut-title-pbr{padding:5px 1px 18px}
+#cut-title-pbr>p{color:#b8b9c3;font:11px/1.6 system-ui;margin:10px 2px}
+.cut-pbr-enable{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid #64606c;border-radius:12px;background:#333139;font-size:13px;font-weight:700}
+.cut-pbr-enable input{width:22px;height:22px;accent-color:#ee637e}
+.cut-pbr-presets{display:flex;gap:9px;overflow-x:auto;padding:11px 2px 14px;scroll-snap-type:x mandatory}
+.cut-pbr-presets button{position:relative;scroll-snap-align:center;flex:0 0 auto;min-width:91px;min-height:51px;border:1px solid #696675;border-radius:12px;background:linear-gradient(150deg,#45434c,#28272e);color:#f6f5fa;font-size:12px;font-weight:700}
+.cut-pbr-presets button:before{content:"";position:absolute;left:10px;top:7px;width:20px;height:20px;border-radius:50%;background:var(--pbr-color);box-shadow:inset -5px -4px 7px #05050588,inset 3px 2px 6px #ffffffaa}
+.cut-pbr-presets button{padding-left:26px}
+.cut-pbr-presets button.active{background:#713b51;border-color:#ff96b0;box-shadow:0 0 0 2px #eb577443}
+.cut-pbr-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 13px}
+.cut-pbr-slider{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px;padding:6px 0;font-size:12px;color:#e5e5eb}
+.cut-pbr-slider span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cut-pbr-slider output{color:#ffafbd;font:11px ui-monospace,monospace}
+.cut-pbr-slider input{grid-column:1/-1;width:100%;height:33px;accent-color:#f06883;touch-action:pan-x}
+.cut-pbr-light-details{border:1px solid #5d5c68;border-radius:12px;padding:11px;margin-top:12px;background:#292932}
+.cut-pbr-light-details summary{cursor:pointer;font-size:13px;font-weight:700;color:white;min-height:28px;list-style:disclosure-closed}
+.cut-pbr-light-details[open] summary{list-style:disclosure-open}
+.cut-pbr-lightpad{height:166px;width:min(100%,330px);margin:13px auto 6px;position:relative;border-radius:50%;border:2px solid #6f7082;background:radial-gradient(circle at 50% 50%,#76798d66 0%,#393a4866 40%,#262633 70%,#11131e 100%);touch-action:none;user-select:none;box-shadow:inset 0 0 0 1px #ffffff28}
+.cut-pbr-lightpad:after{content:"+";position:absolute;top:50%;left:50%;color:#a7a7b4;transform:translate(-50%,-50%);font:16px monospace;pointer-events:none}
+.cut-pbr-lightpad button{position:absolute;z-index:2;transform:translate(-50%,-50%);width:41px;height:41px;min-height:41px;border-radius:50%;border:2px solid #f8d7df;color:#111318;background:#ffd9a7;font-size:13px;font-weight:900;box-shadow:0 3px 10px #000a;touch-action:none;pointer-events:auto}
+.cut-pbr-lightpad [data-pbr-light="2"]{background:#b8cbff;border-color:#d9e1ff}
+.cut-pbr-tints{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
+.cut-pbr-tints label{display:flex;align-items:center;gap:7px;min-width:115px;font-size:11px;color:#dfdfeb}
+.cut-pbr-tints input{width:38px;height:36px;padding:0;border:0;background:transparent}
+#cut-pbr-gpu-status{font-size:11px!important;color:#9de3b8!important}
+@media(max-width:360px){.cut-pbr-controls{grid-template-columns:1fr}.cut-pbr-lightpad{height:148px}}
