@@ -30,7 +30,7 @@ export function drawIncomingTransition(ctx,canvas,type,progress,draw){
   const scale=1.4-.4*p;ctx.translate(W/2,H/2);ctx.scale(scale,scale);ctx.translate(-W/2,-H/2);alpha=p;break;
  }
  case 'iris-in':case 'iris-out':{
-  const r=Math.hypot(W,H)*p*.68;
+  const r=Math.hypot(W,H)*(type==='iris-out'?1-p:p)*.68;
   ctx.beginPath();
   if(type==='iris-out'){ctx.rect(0,0,W,H);ctx.moveTo(W/2+r,H/2);ctx.arc(W/2,H/2,r,0,Math.PI*2,true);ctx.clip('evenodd');}
   else {ctx.arc(W/2,H/2,r,0,Math.PI*2);ctx.clip();}
