@@ -46,9 +46,17 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
  stackButton.setAttribute('aria-expanded','false');
  function toggleDrawer(force){
   const open=force===undefined?drawer.hidden:!!force;
+  if(open){
+   for(const id of ['cut-direct-sheet','leap-mini-sheet','leap-extras','cut-fx-lab']){
+    const el=$(id);if(el)el.hidden=true;
+   }
+   document.body.classList.remove('pro-open');
+   document.querySelector('.tools-shell')?.classList.remove('pro-visible');
+  }
   drawer.hidden=!open;stackButton.setAttribute('aria-expanded',String(open));
   if(open)renderInventory();
  }
+ window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!drawer.hidden)toggleDrawer(false);});
  stackButton.onclick=()=>toggleDrawer();
  window.__subehaLayersOpen=()=>toggleDrawer(true);
  function renderInventory(){
