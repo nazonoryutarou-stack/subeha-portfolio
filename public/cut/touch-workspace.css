@@ -68,3 +68,36 @@
 
 /* v1.3 OBJ CG appears on the overlay lane without adding an empty track. */
 .cut-cg-pill{height:24px;top:3px;background:#3d5e81;border:1px solid #8db6e5;color:#e2eeff}
+
+/* v2.6: every overlaid source has a separate timeline row and complete inventory. */
+.cut-timeline-scroll{overflow-y:auto;touch-action:pan-x pan-y;max-height:min(43dvh,410px);overscroll-behavior:contain}
+.cut-overlay-lane{min-height:0}
+.cut-overlay-lane .cut-timeline-pill{height:24px}
+.cut-layer-invisible{opacity:.38}
+#cut-layer-stack-open{flex:0 0 auto;min-height:31px;border:1px solid #555760;background:#292a32;color:#f3f3f7;border-radius:8px;padding:5px 9px;font-size:11px;white-space:nowrap}
+#cut-layer-stack-open b{display:inline-grid;place-items:center;background:#484954;color:#fff;border-radius:11px;min-width:20px;margin-left:3px;padding:1px 5px;font:700 11px ui-monospace,monospace}
+#cut-layer-stack-open[aria-expanded="true"]{border-color:#f36b85;background:#5c3544}
+#cut-layer-drawer[hidden]{display:none!important}
+#cut-layer-drawer{position:fixed;z-index:29;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));width:min(100%,800px);max-height:min(67dvh,630px);display:flex;flex-direction:column;overflow:hidden;background:#24242a;border:1px solid #565761;border-radius:16px 16px 0 0;box-shadow:0 -16px 36px #000b;color:#f6f6f9}
+#cut-layer-drawer>header{display:flex;justify-content:space-between;align-items:center;padding:13px 14px 11px;border-bottom:1px solid #41414b}
+#cut-layer-drawer>header div{display:flex;align-items:baseline;gap:9px}
+#cut-layer-drawer>header strong{font-size:15px}
+#cut-layer-drawer>header small{font-size:10px;color:#afb0bc}
+#cut-layer-stack-close{width:37px;height:37px;border:0;border-radius:50%;background:#454650;color:white;font-size:23px}
+.cut-layer-inventory{overflow-y:auto;overscroll-behavior:contain;padding:8px 10px 11px;scrollbar-width:thin;min-height:0}
+.cut-layer-entry{display:flex;align-items:center;gap:5px;min-width:0;border:1px solid #424550;background:#2c2d35;border-radius:10px;padding:3px 5px;margin-bottom:6px;min-height:55px}
+.cut-layer-entry.is-active{border-color:#d46e88;background:#35303b}
+.cut-layer-entry.is-hidden .cut-layer-focus{opacity:.48}
+.cut-layer-focus{display:flex;align-items:center;gap:9px;flex:1;min-width:0;min-height:48px;text-align:left;background:transparent;border:0;color:#f5f4f9;padding:4px}
+.cut-layer-kind{display:grid;place-items:center;flex:0 0 36px;min-height:31px;background:#51435e;border:1px solid #715b80;border-radius:8px;font-size:10px}
+.cut-layer-entry[data-kind="audio"] .cut-layer-kind{background:#305650;border-color:#519d92}
+.cut-layer-entry[data-kind="text"] .cut-layer-kind,.cut-layer-entry[data-kind="caption"] .cut-layer-kind{background:#694753;border-color:#a96b82}
+.cut-layer-labels{display:flex;min-width:0;flex-direction:column;gap:4px}
+.cut-layer-name{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:650}
+.cut-layer-time{color:#aaa9b4;font:10px ui-monospace,monospace;white-space:nowrap}
+.cut-layer-visibility,.cut-layer-reorder{flex:0 0 34px;min-width:34px;min-height:40px;border:0;border-radius:8px;background:#3e3f49;color:#ececf2;font-size:16px}
+.cut-layer-visibility{color:#ffa9be}
+.cut-layer-reorder:disabled{opacity:.25}
+.cut-layer-hint{flex:0 0 auto;margin:0;padding:10px 13px;font-size:10px;color:#a4a6b1;border-top:1px solid #393a42}
+.cut-layer-empty{margin:0;padding:18px;text-align:center;font-size:12px;color:#b7b7bf}
+@media(max-width:370px){.cut-layer-inventory{padding-inline:5px}.cut-layer-entry{gap:3px}.cut-layer-reorder,.cut-layer-visibility{flex-basis:31px;min-width:31px}.cut-workspace-foot>span{display:none}}
