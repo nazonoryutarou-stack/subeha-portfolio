@@ -120,7 +120,7 @@ function mount(){
   const p=overlayProps(item),asset=state.assets.get(item.assetId),ratio=clamp((asset?.height||1)/(asset?.width||1),.08,8);
   return {x:p.x*canvas.width,y:p.y*canvas.height,w:canvas.width*p.scale,h:canvas.width*p.scale*ratio,rotation:p.rotation||0,size:p.scale*canvas.width};
  }
- const current=()=>{const item=itemFor(selection);if(!item||!visible(selection.kind,item)&&selection.kind!=='layer')return null;return {item,box:region(selection.kind,item)};};
+ const current=()=>{const item=itemFor(selection);if(!item||(selection.kind==='layer'&&item.visible===false)||(!visible(selection.kind,item)&&selection.kind!=='layer'))return null;return {item,box:region(selection.kind,item)};};
  function layout(){
   const cur=current(),canvasRect=canvas.getBoundingClientRect(),parent=stage.getBoundingClientRect();
   if(!cur||canvasRect.width<3){box.hidden=true;bar.hidden=true;return;}
