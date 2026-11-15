@@ -59,8 +59,8 @@ function installShell(){
  const timeline=workspace.querySelector('.cut-timeline-frame');
  const laneContainer=$('cut-timeline-content');
  // Overlay tracks sit above the main filmstrip; unused tracks take no space.
- const videoLane=$('cut-video-lane'),overlayLane=$('cut-overlay-lane');
- videoLane.before(overlayLane);
+ const videoLane=$('cut-video-lane'),overlayLane=$('cut-overlay-lane'),effectLane=$('cut-effect-lane');
+ videoLane.before(overlayLane,effectLane);
  const plus=document.createElement('button');plus.id='leap-add-media';plus.type='button';plus.className='leap-add-media';plus.textContent='＋';plus.title='クリップを追加';plus.setAttribute('aria-label','クリップを追加');plus.onclick=()=>$('file-picker').click();
  timeline.append(plus);
  const editingBar=document.createElement('div');editingBar.className='leap-editing-bar';editingBar.innerHTML=
@@ -83,7 +83,7 @@ function installShell(){
  $('leap-extras-close').onclick=()=>{sheet.hidden=true;};
  const modeState={mode:'main',lastSelected:null};
  const clickNative=(kind,name)=>{const b=navigation.querySelector(`.nav-tab[data-${kind}="${name}"]`);if(!b)return false;b.click();return true;};
- function openTool(name){mini.hidden=true;sheet.hidden=true;const kind=['text','audio','look','export','clips'].includes(name)?'tab':'pro';if(!clickNative(kind,name)){
+ function openTool(name){window.__subehaFXClose?.();mini.hidden=true;sheet.hidden=true;const kind=['text','audio','look','export','clips'].includes(name)?'tab':'pro';if(!clickNative(kind,name)){
   if(name==='templates' || name==='retouch' || name==='videoRetouch'){
    const b=name==='templates'?navigation.querySelector('[data-retouch=template]'):name==='retouch'?navigation.querySelector('[data-retouch=image]'):[...navigation.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')?.includes('動画背景切り抜き'));
    if(b)b.click();else window.__subehaCut.toast('このツールは現在利用できません');
@@ -103,7 +103,7 @@ function installShell(){
   make('すべて','more',()=>openExtras()),
  ];
  function openMagicEdit(){
-  sheet.hidden=true;document.querySelector('.tools-shell')?.classList.remove('pro-visible');document.body.classList.remove('pro-open');
+  window.__subehaFXClose?.();sheet.hidden=true;document.querySelector('.tools-shell')?.classList.remove('pro-visible');document.body.classList.remove('pro-open');
   mini.innerHTML='<header><button id="leap-magic-close" aria-label="閉じる">‹</button><strong>マジック編集</strong><span>✦</span></header><div class="leap-magic-info">映像にまとめて色彩・効果・場面転換を設定します。動画を生成するAIではありません。元の素材や音声は保持されます。</div><div id="leap-magic-row" class="leap-magic-row"></div>';
   mini.hidden=false;mini.querySelector('#leap-magic-close').onclick=()=>mini.hidden=true;
   const desc={film:'柔らかなディゾルブ、映画風の色調と周辺減光',rhythm:'短いワイプ、鮮やかな色と軽い色収差',memory:'ゆったりしたフェード、古いフィルムの質感'};
@@ -116,7 +116,7 @@ function installShell(){
  }
 
  function openExtras(){
-  mini.hidden=true;
+  window.__subehaFXClose?.();mini.hidden=true;
   // Audited editing categories. Original CG, engine-hub and voice-lab tools removed.
   const options=[
    make('オーバーレイ','overlay',()=>openTool('overlay')),
@@ -143,7 +143,7 @@ function installShell(){
   for(const item of options){const b=document.createElement('button');b.type='button';b.innerHTML=svg(item.icon)+`<span>${item.label}</span>`;b.onclick=item.onClick;grid.append(b);}sheet.hidden=false;
  }
  function openClipControl(kind){
-  const clip=state.project.clips.find(c=>c.id===state.selectedClip);if(!clip){window.__subehaCut.toast('クリップを選択してください');return;}
+  window.__subehaFXClose?.();const clip=state.project.clips.find(c=>c.id===state.selectedClip);if(!clip){window.__subehaCut.toast('クリップを選択してください');return;}
   sheet.hidden=true;document.body.classList.remove('pro-open');document.querySelector('.tools-shell')?.classList.remove('pro-visible');
   const title=kind==='speed'?'速度':'音量';
   mini.innerHTML=`<header><button id="leap-mini-back" aria-label="閉じる">‹</button><strong>${title}</strong><button id="leap-mini-done">✓</button></header><div id="leap-mini-body"></div>`;mini.hidden=false;
@@ -237,6 +237,7 @@ function installShell(){
  timeline.addEventListener('click',e=>{
   if(e.target.closest('[data-clip-id]')){modeState.mode='clip';requestAnimationFrame(refreshMode);}
   else if(e.target.closest('[data-layer-id]')){modeState.mode='layer';requestAnimationFrame(refreshMode);}
+  else if(e.target.closest('[data-effect-id]')){modeState.mode='clip';requestAnimationFrame(refreshMode);}
   else if(e.target.closest('[data-audio-id]')){modeState.mode='main';requestAnimationFrame(refreshMode);}
  });
  window.addEventListener('subeha-cut-change',()=>requestAnimationFrame(refreshMode));
