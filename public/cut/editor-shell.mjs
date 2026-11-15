@@ -65,6 +65,10 @@ function installShell(){
  const editingBar=document.createElement('div');editingBar.className='leap-editing-bar';editingBar.innerHTML=
  `<div class="leap-history"><button id="leap-undo" aria-label="元に戻す">${svg('undo')}</button><button id="leap-redo" aria-label="やり直す">${svg('redo')}</button></div><div class="leap-midtools"><button id="leap-split" aria-label="再生ヘッドで分割">${svg('split')}</button><button id="leap-key" aria-label="キーフレームを設定">${svg('key')}</button></div><button id="leap-zoom" aria-label="タイムラインの拡大率を変更">${svg('adjust')}</button>`;
  workspace.after(editingBar);
+ // The default Videoleap-like shell hides the old workspace footer.
+ // Move the full inventory trigger into the existing toolbar, not a new row.
+ const layerTrigger=$('cut-layer-stack-open');
+ if(layerTrigger)editingBar.querySelector('.leap-midtools').append(layerTrigger);
  $('leap-undo').onclick=()=>$('pro-undo')?.click();
  $('leap-redo').onclick=()=>$('pro-redo')?.click();
  $('leap-split').onclick=()=>$('split-clip')?.click();
@@ -86,24 +90,13 @@ function installShell(){
  }}
  const make=(label,icon,onClick,id='')=>({label,icon,onClick,id});
  const general=[
-  make('マジック編集','magic',()=>openMagicEdit()),
-  make('素材を重ねる','overlay',()=>openTool('overlay')),
-  make('無料素材','template',()=>window.__subehaStockOpen?.()),
-  make('3D映像','cube',()=>window.__subehaCGOpen?.()),
-  make('テキスト','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text');}),
-  make('文字アニメ','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text','motion');else window.__subehaCut.toast('文字を追加して選択するとアニメーションを編集できます');}),
-  make('立体文字','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text','pbr');else window.__subehaCut.toast('まず文字を追加し、プレビューで選択してください');}),
+  make('重ねる','overlay',()=>openTool('overlay')),
+  make('レイヤー','layers',()=>window.__subehaLayersOpen?.()),
+  make('文字','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text');}),
   make('音声','audio',()=>openTool('audio')),
-  make('声を作る','audio',()=>window.__subehaVoiceOpen?.()),
-  make('色フィルター','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
-  make('調整','adjust',()=>window.__subehaFXOpen ? window.__subehaFXOpen('grade') : openTool('adjust')),
-  make('映像効果','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('effects') : openTool('effects')),
-  make('光学レンズ','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('optics') : openTool('effects')),
-  make('キャンバス','canvas',()=>openTool('canvas')),
-  make('字幕','captions',()=>{openTool('captions');window.__subehaDirectOpen?.('caption');}),
-  make('テンプレ','template',()=>openTool('templates')),
+  make('色','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
+  make('効果','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('effects') : openTool('effects')),
   make('保存','save',()=>window.__subehaArchiveSave?.()),
-  make('先進機能','magic',()=>window.__subehaLabOpen?.()),
   make('すべて','more',()=>openExtras()),
  ];
  function openMagicEdit(){
@@ -122,6 +115,11 @@ function installShell(){
  function openExtras(){
   mini.hidden=true;const options=[
    make('マジック編集','magic',()=>openMagicEdit()),
+   make('レイヤー一覧','layers',()=>{sheet.hidden=true;window.__subehaLayersOpen?.();}),
+   make('文字アニメ','text',()=>{sheet.hidden=true;openTool('text');window.__subehaDirectOpen?.('text','motion');}),
+   make('立体文字','text',()=>{sheet.hidden=true;openTool('text');window.__subehaDirectOpen?.('text','pbr');}),
+   make('字幕','captions',()=>{sheet.hidden=true;openTool('captions');window.__subehaDirectOpen?.('caption');}),
+   make('光学レンズ','effect',()=>{sheet.hidden=true;window.__subehaFXOpen?.('optics');}),
    make('無料素材','template',()=>window.__subehaStockOpen?.()),
    make('声を作る','audio',()=>window.__subehaVoiceOpen?.()),
    make('キャンバス','canvas',()=>openTool('canvas')),
@@ -201,23 +199,17 @@ function installShell(){
   make('分割','split',()=>$('split-clip')?.click()),
   make('速度','speed',()=>openClipControl('speed')),
   make('音量','volume',()=>openClipControl('volume')),
-  make('フィルター','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
-  make('光学レンズ','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('optics') : openTool('effects')),
-  make('調整','adjust',()=>window.__subehaFXOpen ? window.__subehaFXOpen('grade') : openTool('adjust')),
-  make('切り抜き','crop',()=>openTool('crop')),
+  make('色','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
+  make('効果','effect',()=>window.__subehaFXOpen ? window.__subehaFXOpen('effects') : openTool('effects')),
   make('変形','canvas',()=>openTool('transform')),
-  make('場面のつなぎ','transitions',()=>openTool('transitions')),
-  make('複製','duplicate',()=>$('dup-clip')?.click()),
-  make('削除','delete',()=>$('delete-clip')?.click()),
+  make('つなぎ','transitions',()=>openTool('transitions')),
   make('すべて','more',()=>openExtras()),
  ];
  const layerTools=()=>[
   make('‹','back',()=>{modeState.mode='main';renderToolbar();}),
-  make('素材を重ねる','overlay',()=>openTool('overlay')),
-  make('無料素材','template',()=>window.__subehaStockOpen?.()),
-  make('背景色を消す','filters',()=>openTool('chroma')),
+  make('レイヤー','layers',()=>window.__subehaLayersOpen?.()),
+  make('重ねる','overlay',()=>openTool('overlay')),
   make('追跡','track',()=>openTool('tracking')),
-  make('切り抜き','brush',()=>openTool('videoRetouch')),
   make('すべて','more',()=>openExtras()),
  ];
  function renderToolbar(){
