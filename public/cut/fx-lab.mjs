@@ -123,7 +123,8 @@ function mount(){
     if(next.length===initial.length){api.toast('エフェクトは10個まで追加できます');return;}
     added=next[next.length-1];
     // Videoleap places an effect at the current timeline position, not at 00:00.
-    added.start=Math.max(0,currentTime(c));c.fxStack=next;
+    const span=spans(state.project.clips).find(row=>row.clip.id===c.id);
+    added.start=Math.max(0,Math.min(currentTime(c),Math.max(0,(span?.length||0)-.08)));c.fxStack=next;
    },true);
    if(added){focusedFx=added.id;api.refreshAll();}
    render();
