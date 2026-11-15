@@ -90,6 +90,7 @@ function installShell(){
   make('無料素材','template',()=>window.__subehaStockOpen?.()),
   make('3D映像','cube',()=>window.__subehaCGOpen?.()),
   make('テキスト','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text');}),
+  make('文字アニメ','text',()=>{openTool('text');if(window.__subehaCut.state.selectedText)window.__subehaDirectOpen?.('text','motion');else window.__subehaCut.toast('文字を追加して選択するとアニメーションを編集できます');}),
   make('音声','audio',()=>openTool('audio')),
   make('声を作る','audio',()=>window.__subehaVoiceOpen?.()),
   make('色フィルター','filters',()=>window.__subehaFXOpen ? window.__subehaFXOpen('filters') : openTool('look')),
