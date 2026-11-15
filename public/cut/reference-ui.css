@@ -154,3 +154,17 @@
 .leap-layout #cut-effect-lane .cut-effect-pill:active{outline:2px solid #c18cf2}
 .leap-layout .cut-time-ruler{z-index:1}
 .leap-layout .cut-video-card{min-height:52px}
+
+/* Effect IN/OUT draggable trim handles (editor-only UI). */
+.leap-layout #cut-effect-lane .cut-fx-trim-handle{
+ position:absolute;z-index:3;top:-2px;bottom:-2px;
+ width:12px;min-height:23px;background:#e3d5fc;
+ touch-action:none;cursor:ew-resize;border:1px solid #aa86f1;
+ box-shadow:0 0 2px #0009
+}
+.leap-layout #cut-effect-lane .cut-fx-trim-handle.left{left:0;border-radius:4px 0 0 4px}
+.leap-layout #cut-effect-lane .cut-fx-trim-handle.right{right:0;border-radius:0 4px 4px 0}
+.leap-layout #cut-effect-lane .cut-fx-trim-handle:after{
+ content:'';display:block;position:absolute;top:calc(50% - 6px);
+ left:5px;width:2px;height:12px;background:#7954b8;border-radius:1px
+}
