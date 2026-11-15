@@ -147,7 +147,7 @@ function mount(){
  const contacts=new Map();
  function currentProps(){const cur=current();if(!cur)return null;const t=cur.item;return selection.kind==='layer'?{x:cur.box.x/canvas.width,y:cur.box.y/canvas.height,size:(cur.box.w/canvas.width)*100,rotation:cur.box.rotation}:selection.kind==='caption'?{x:cur.box.x/canvas.width,y:cur.box.y/canvas.height,size:cur.box.size*720/canvas.width,rotation:cur.box.rotation}:(p=>({x:p.x??.5,y:p.y??.76,size:p.size??62,rotation:p.rotation||0}))(titleAt(t,Math.max(0,fps()-t.start)));}
  function applyTextChanges(t,patch){
-  if($('cut-keyframe-mode')?.checked){
+  if($('cut-keyframe-mode')?.checked||(t.titleKeyframes?.length&&Object.keys(patch).some(key=>TITLE_KEYFRAME_FIELDS.includes(key)))){
    const timed={},global={};
    for(const [k,v] of Object.entries(patch))if(TITLE_KEYFRAME_FIELDS.includes(k))timed[k]=v;else global[k]=v;
    Object.assign(t,global);
@@ -369,7 +369,14 @@ function mount(){
   if(action==='close'){clear();return;}
   if(action==='straighten'){
    if(state.recording)return;
-   applyPatch({rotation:0});dirty=false;save();refreshAll();layout();
+   // Never rely on the base rotation when an existing keyframe overrides it.
+   // The current frame must become horizontal immediately, even in old projects.
+   if(selection.kind==='text'&&t.titleKeyframes?.length){
+    const local=Math.max(0,Math.min(t.duration||3,fps()-t.start));
+    t.titleKeyframes=upsertTitleKeyframe(t,local,{rotation:0});
+    dirty=false;draw();layout();
+   }else applyPatch({rotation:0});
+   dirty=false;save();refreshAll();layout();
    api.toast('水平（0°）に戻しました');return;
   }
   if(['edit','color','style'].includes(action)){openPanel(action==='edit'?'words':action==='color'?'appearance':'font');return;}
