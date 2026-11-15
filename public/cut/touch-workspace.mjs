@@ -220,6 +220,13 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
        }
       });
       item.style.top=(rowIndex*27+2)+'px';item.dataset.effectId=fx.id;item.dataset.effectClip=fx.clipId;
+      if(w>=55){
+       for(const edge of ['left','right']){
+        const h=el('span','cut-fx-trim-handle '+edge);h.dataset.fxTrim=edge;
+        h.setAttribute('role','slider');h.setAttribute('aria-label',edge==='left'?'効果の開始位置':'効果の終了位置');
+        item.append(h);
+       }
+      }
      }
      if(!drawer.hidden)renderInventory();
      const audio=$('cut-audio-lane');audio.replaceChildren();
@@ -247,7 +254,7 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      if(Math.abs(t-state.current)>.018)seek(t);
    });
  }
- scroller.addEventListener('contextmenu',e=>{if(e.target.closest('[data-clip-id],[data-text-id],[data-caption-id],[data-layer-id],[data-audio-id],[data-cg-id]'))e.preventDefault();});
+ scroller.addEventListener('contextmenu',e=>{if(e.target.closest('[data-clip-id],[data-effect-id],[data-text-id],[data-caption-id],[data-layer-id],[data-audio-id]'))e.preventDefault();});
  scroller.addEventListener('scroll',updateFromScroll,{passive:true});
  scroller.addEventListener('click',e=>{
    if(!e.target.closest('.cut-time-ruler')||dragging||pinching)return;
@@ -257,6 +264,16 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
  });
  scroller.addEventListener('click',e=>{if(performance.now()<suppressTapUntil){e.preventDefault();e.stopImmediatePropagation();}},true);
  scroller.addEventListener('pointerdown',e=>{
+   const fxHandle=e.target.closest('[data-fx-trim]'),fxPill=e.target.closest('[data-effect-id]');
+   if(fxHandle&&fxPill){
+    const row=spans(state.project.clips).find(x=>x.clip.id===fxPill.dataset.effectClip);
+    const fx=row?.clip?.fxStack?.find(x=>x.id===fxPill.dataset.effectId);if(!fx)return;
+    e.preventDefault();e.stopPropagation();dragging=true;
+    const start=Math.max(0,Number(fx.start)||0);
+    const end=Number.isFinite(Number(fx.end))&&Number(fx.end)>start?Number(fx.end):row.length;
+    dragData={mode:'trim-fx',fx,edge:fxHandle.dataset.fxTrim,original:{start,end},duration:row.length,startX:e.clientX};
+    scroller.setPointerCapture(e.pointerId);fxPill.classList.add('cut-dragging');return;
+   }
    const card=e.target.closest('[data-clip-id]');
    const handle=e.target.closest('[data-trim-edge]');
    if(handle&&card){
@@ -294,7 +311,14 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
      if(!p || !pendingHoldStart || Math.hypot(e.clientX-pendingHoldStart.x,e.clientY-pendingHoldStart.y)>10){clearTimeout(longTimer);longTimer=null;pendingHoldStart=null;}
    }
    if(!dragData)return;
-   if(dragData.mode==='trim'){
+   if(dragData.mode==='trim-fx'){
+     e.preventDefault();
+     const d=(e.clientX-dragData.startX)/pps();
+     const {fx,edge,original,duration}=dragData;
+     if(edge==='left')fx.start=clamp(original.start+d,0,Math.max(0,original.end-.08));
+     else fx.end=clamp(original.end+d,Math.min(duration,original.start+.08),duration);
+     $('cut-selection').textContent='エフェクト '+(edge==='left'?'開始 '+fx.start.toFixed(2):'終了 '+fx.end.toFixed(2))+'秒';
+   }else if(dragData.mode==='trim'){
      e.preventDefault();
      const next=clipTrim(dragData.snapshot,dragData.edge,e.clientX-dragData.startX,pps(),dragData.assetSeconds);
      dragData.clip.start=next.start;dragData.clip.end=next.end;
@@ -330,7 +354,11 @@ export function mountTouchWorkspace({api,getZoom,setZoom,getLayer,getLayerProps,
    const removed=e.type==='pointerup'&&data.mode!=='trim'?window.__subehaTrash?.finish(e):false;
    window.__subehaTrash?.cancel();
    if(removed){suppressTapUntil=performance.now()+420;lastSelected='';lastSummary='';render();return;}
-   if(data.mode==='trim'){
+   if(data.mode==='trim-fx'){
+     const after=data.edge==='left'?data.fx.start:data.fx.end;
+     const before=data.edge==='left'?data.original.start:data.original.end;
+     if(Math.abs(after-before)>.001){save();refreshAll();suppressTapUntil=performance.now()+300;}
+   }else if(data.mode==='trim'){
      if(Math.abs(data.snapshot.start-data.clip.start)+Math.abs(data.snapshot.end-data.clip.end)>.001){save();refreshAll();const row=spans(state.project.clips).find(r=>r.clip.id===data.clip.id);seek((row?.start||0)+(data.edge==='right'?row?.length||0:0));}
    }else if(data.mode==='reorder'){
      const next=moveClip(state.project.clips,data.id,data.currentIndex);
