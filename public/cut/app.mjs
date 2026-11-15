@@ -1,5 +1,5 @@
 import {projectAssetIds} from './project-archive.mjs';
-import {drawTitle} from './title-render.mjs';
+import {drawAnimatedTitle} from './text-motion-render.mjs';
 import {RATIOS,clipLength,duration,locate,splitAt,clampTime,formatClock,safeName,newID} from './timeline.mjs';
 import {advanceTimeline} from './export-timing.mjs';
 import {spans,transitionProgress} from './transitions.mjs';
@@ -254,11 +254,7 @@ function draw(){
  }
  for(const hook of renderHooks){try{hook({canvas,ctx,state});}catch(e){console.warn('render hook',e);}}
  for(const t of state.project.texts){if(state.current<t.start||state.current>t.start+t.duration||!t.text)continue;
-  const age=Math.max(0,state.current-t.start),left=Math.max(0,t.duration-age);
-  const appearance={...t};if(t.motion==='fade')appearance.opacity=(t.opacity??1)*Math.min(1,age/.28,left/.28);
-  if(t.motion==='pop')appearance.size=(t.size??62)*(1+Math.max(0,.28-age)*.75);
-  if(t.motion==='slide')appearance.y=(t.y??.76)+Math.max(0,.4-age)*.18;
-  drawTitle(ctx,canvas,appearance);
+  drawAnimatedTitle(ctx,canvas,t,state.current-t.start);
  }
 }
 function seek(value){state.current=clampTime(value,state.project.clips);state.lastFrame=performance.now();positionMedia().catch(fail);syncMusic();updateTimecode();}
