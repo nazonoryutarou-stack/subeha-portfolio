@@ -5,6 +5,7 @@ import {advanceTimeline} from './export-timing.mjs';
 import {spans,transitionProgress} from './transitions.mjs';
 import {applyEffect} from './effects.mjs';
 import {clipTransform} from './keyframes.mjs';
+import {rampPlaybackRate} from './speed-ramp.mjs';
 import {normalizeExportSettings,supportedRecorderType} from './export-settings.mjs';
 import {styleForText} from './text-styles.mjs';
 import {buildGradeFilter,fxAmountAt} from './fx-lab-core.mjs';
@@ -153,7 +154,8 @@ function refreshAll(){
 }
 function updateTimecode(){const d=duration(state.project.clips);$('timecode').innerHTML=`${formatClock(state.current)} <span>/ ${formatClock(d)}</span>`;$('scrubber').value=String(Math.min(state.current,d));$('play').textContent=state.playing?'Ⅱ':'▶';$('viewer-status').textContent=state.recording?'● REC':state.playing?'PLAYING':'READY';}
 function clipVideo(url){if(media.dataset.asseturl===url)return;media.pause();media.dataset.asseturl=url;media.src=url;media.load();}
-let lastReverseSeek=0;
+let lastReverseSeek=0,lastRampSeek=0;
+const safePlaybackRate=(c,local)=>Math.max(.25,Math.min(8,rampPlaybackRate(c,local)));
 function syncTransitionMedia(at){
  const trans=at?.transition;
  if(!trans){if(!transMedia.paused)transMedia.pause();outgoingClip=null;const volume=(at?.clip.muted||at?.clip.reverse)?0:(at?.clip.volume??1);if(mainVolume)mainVolume.gain.value=volume;else media.volume=volume;if(outgoingVolume)outgoingVolume.gain.value=0;return;}
@@ -165,8 +167,8 @@ function syncTransitionMedia(at){
    outgoingClip=from.id;transMedia.pause();transMedia.dataset.asseturl=asset.url;transMedia.src=asset.url;transMedia.load();
  }
  if(transMedia.readyState>=1){
-   transMedia.playbackRate=Number(from.speed)||1;
-   if(Number.isFinite(trans.fromMediaTime)&&Math.abs((transMedia.currentTime||0)-trans.fromMediaTime)>.35)try{transMedia.currentTime=trans.fromMediaTime;}catch{}
+   transMedia.playbackRate=safePlaybackRate(from,trans.fromLocal);
+   if(Number.isFinite(trans.fromMediaTime)&&Math.abs((transMedia.currentTime||0)-trans.fromMediaTime)>(from.speedRamp?.16:.35))try{transMedia.currentTime=trans.fromMediaTime;}catch{}
    if(state.playing&&!from.reverse&&transMedia.paused)transMedia.play().catch(()=>{});
    if((!state.playing||from.reverse)&&!transMedia.paused)transMedia.pause();
  }
@@ -180,13 +182,13 @@ async function positionMedia(){
      clipVideo(a.url);
      if(media.readyState<1)await new Promise(res=>{const done=()=>res();media.addEventListener('loadedmetadata',done,{once:true});media.addEventListener('error',done,{once:true});setTimeout(done,1600);});
      if(token!==renderToken)return;
-     media.playbackRate=c.speed;
+     media.playbackRate=safePlaybackRate(c,at.local);
      if(Number.isFinite(at.mediaTime))try{media.currentTime=c.reverse?Math.max(c.start,Math.min(c.end-.001,at.mediaTime)):at.mediaTime;}catch{}
      if(state.playing&&!c.reverse)media.play().catch(()=>{if(!state.recording)toast('再生を開始できませんでした。もう一度タップしてください。');});
    }else media.pause();
  }else if(a.type==='video'){
-   media.playbackRate=c.speed;
-   if(Number.isFinite(media.currentTime)&&Math.abs(media.currentTime-at.mediaTime)>.35){try{media.currentTime=c.reverse?Math.max(c.start,Math.min(c.end-.001,at.mediaTime)):at.mediaTime;}catch{}}
+   media.playbackRate=safePlaybackRate(c,at.local);
+   if(Number.isFinite(media.currentTime)&&Math.abs(media.currentTime-at.mediaTime)>(c.speedRamp?.16:.35)){try{media.currentTime=c.reverse?Math.max(c.start,Math.min(c.end-.001,at.mediaTime)):at.mediaTime;}catch{}}
    if(state.playing&&!c.reverse&&media.paused)media.play().catch(()=>{if(!state.recording)toast('動画の再生を開始できませんでした');});
    else if(!state.playing||c.reverse)media.pause();
  }
@@ -293,6 +295,13 @@ function animationLoop(timestamp){
    }else{
      const at=locate(state.project.clips,state.current);
      if(at && state.activeClip!==at.clip.id)positionMedia().catch(fail);else syncTransitionMedia(at);
+      // Keep the source-frame clock aligned with each ramped output frame.
+      if(at?.clip?.speedRamp && at.clip.type==='video' && !at.clip.reverse && media.readyState>=1){
+       media.playbackRate=safePlaybackRate(at.clip,at.local);
+       if(timestamp-lastRampSeek>95 && !media.seeking && Math.abs(media.currentTime-at.mediaTime)>.13){
+        lastRampSeek=timestamp;try{media.currentTime=at.mediaTime;}catch{}
+       }
+      }
      if(at?.clip.reverse && at.clip.type==='video' && media.readyState>=1 && timestamp-lastReverseSeek>75){lastReverseSeek=timestamp;media.pause();const target=Math.max(at.clip.start,Math.min(at.clip.end-.001,at.mediaTime));if(Math.abs(media.currentTime-target)>.04&&!media.seeking)try{media.currentTime=target;}catch{}}
      if(at?.transition?.fromClip.reverse && transMedia.readyState>=1 && timestamp-lastReverseSeek>75){transMedia.pause();const target=Math.max(at.transition.fromClip.start,Math.min(at.transition.fromClip.end-.001,at.transition.fromMediaTime));if(Math.abs(transMedia.currentTime-target)>.04&&!transMedia.seeking)try{transMedia.currentTime=target;}catch{}}
    }
