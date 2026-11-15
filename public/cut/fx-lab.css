@@ -83,3 +83,44 @@
 #cut-fx-lab[data-page="effects"] .cut-fx-carousel button:active .cut-fx-glyph{color:#ff6b7b}
 #cut-fx-lab[data-page="effects"] #cut-fx-stack{border-top:1px solid #3c3c41;padding-top:8px}
 #cut-fx-lab[data-page="effects"] .cut-fx-unit{background:#29292e;border-radius:6px;border:1px solid #4b4b53}
+
+/* v2.8: effect picker replaces the bottom edit tools, as in the actual audit.
+ * Selecting the purple timeline FX chip opens the detail panel. */
+body.cut-effects-mode.leap-layout .bottomnav{visibility:hidden}
+#cut-fx-lab[data-page="effects"][data-detail="false"]{
+ position:fixed;bottom:0!important;height:calc(70px + env(safe-area-inset-bottom));
+ min-height:0;max-height:none!important;overflow:hidden;
+ padding:0 0 env(safe-area-inset-bottom);border:0;
+ background:#202023;box-shadow:none
+}
+#cut-fx-lab[data-page="effects"][data-detail="false"]>header,
+#cut-fx-lab[data-page="effects"][data-detail="false"] .cut-fx-tabs,
+#cut-fx-lab[data-page="effects"][data-detail="false"] #cut-fx-stack{display:none!important}
+#cut-fx-lab[data-page="effects"][data-detail="false"] #cut-fx-content{height:70px;overflow:hidden}
+#cut-fx-lab[data-page="effects"][data-detail="false"] .cut-fx-carousel{
+ margin:0;height:70px;padding:0;overflow-x:auto;scroll-snap-type:x proximity;
+ justify-content:flex-start;align-items:stretch
+}
+#cut-fx-lab[data-page="effects"][data-detail="false"] .cut-fx-carousel button{
+ flex:0 0 75px;min-width:75px;min-height:69px;height:69px;
+ gap:4px;justify-content:center;padding:3px 0;font-size:10px
+}
+#cut-fx-lab[data-page="effects"] .cut-fx-rail-back{
+ color:#f0f0f3!important;font-size:30px!important;
+ flex-basis:47px!important;min-width:47px!important;
+ background:#393940!important;border-radius:5px!important
+}
+#cut-fx-lab[data-page="effects"][data-detail="false"] .cut-fx-glyph{
+ width:30px;height:35px;font-size:27px
+}
+#cut-fx-lab[data-page="effects"][data-detail="true"]{
+ bottom:0!important;max-height:min(50dvh,445px)!important;
+ padding-bottom:calc(12px + env(safe-area-inset-bottom));
+ background:#202023;overflow-y:auto
+}
+#cut-fx-lab[data-page="effects"][data-detail="true"] #cut-fx-stack{display:block}
+#cut-fx-lab[data-page="effects"][data-detail="true"] #cut-fx-stack .cut-fx-empty{display:none}
+#cut-fx-lab[data-page="effects"][data-detail="true"] .cut-fx-carousel{min-height:65px}
+@media(max-height:610px){
+ #cut-fx-lab[data-page="effects"][data-detail="true"]{max-height:59dvh!important}
+}
