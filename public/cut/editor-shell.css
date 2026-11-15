@@ -112,3 +112,12 @@ html,body{background:#17171a!important;overflow:hidden}
 .leap-speed-point input{width:100%;height:35px;accent-color:#f35571;touch-action:pan-x}
 .leap-speed-point output{font:12px ui-monospace,monospace;text-align:right;color:#f9a3b3}
 .leap-speed-length{font-weight:750!important;color:#ffb5c0!important;font-size:13px!important}
+
+/* v2.6: layer inventory lives in the compact editing bar. */
+.leap-layout #cut-layer-stack-open{display:inline-flex!important;align-items:center;justify-content:center;width:auto;min-width:88px;height:31px;min-height:31px;margin-left:5px;padding:4px 8px;font-size:11px;border:1px solid #555760;border-radius:9px;gap:3px;color:#f0f0f4;background:#303038}
+.leap-layout #cut-layer-stack-open[aria-expanded="true"]{background:#674050;border-color:#e76c86}
+.leap-layout #cut-layer-stack-open b{display:inline-grid;background:#4b4c57;border-radius:9px;min-width:18px;padding:1px 4px;font-size:10px}
+.leap-layout .cut-timeline-scroll{overflow-x:auto;overflow-y:auto;touch-action:pan-x pan-y;max-height:min(33dvh,265px);overscroll-behavior:contain}
+.leap-layout #cut-overlay-lane{min-height:0}
+.leap-layout .leap-tool{font-size:10px;gap:4px}
+.leap-layout .leap-toolstrip{scroll-snap-type:x proximity}
