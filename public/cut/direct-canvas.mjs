@@ -136,7 +136,7 @@ function mount(){
   if(sel?.kind==='layer')window.__subehaSelectLayer?.(sel.id);
   panel.hidden=true;layout();}
  function clear(){selection=null;box.hidden=true;bar.hidden=true;panel.hidden=true;guides.hidden=true;}
- function renderedLayers(){return [...(state.project.overlays||[])].filter(l=>fps()>=l.start&&fps()<=l.start+l.duration).reverse().map(l=>({kind:'layer',item:l}));}
+ function renderedLayers(){return [...(state.project.overlays||[])].filter(l=>l.visible!==false&&fps()>=l.start&&fps()<=l.start+l.duration).reverse().map(l=>({kind:'layer',item:l}));}
  function chooseAt(p){const candidates=[...(state.project.texts||[]).filter(t=>visible('text',t)).reverse().map(item=>({kind:'text',item})),
    ...(cueNow()?[{kind:'caption',item:cueNow()}]:[]),...renderedLayers()];
   const allowance=Math.min(canvas.width,canvas.height)*.012;
