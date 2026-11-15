@@ -1,6 +1,6 @@
 import {rampDuration,rampMediaTime} from './speed-ramp.mjs';
 /* Time-overlap transitions. Incoming clip owns transitionIn; exact project time is shortened by overlap. */
-export const TRANSITIONS = Object.freeze(['none','dissolve','fade','wipe-left','wipe-right','slide-left','zoom']);
+export const TRANSITIONS = Object.freeze(['none','dissolve','fade','wipe-left','wipe-right','wipe-up','wipe-down','slide-left','slide-right','slide-up','slide-down','zoom','zoom-in','zoom-out','iris-in','iris-out','flash','glitch','roll-left','roll-right']);
 export function clipSeconds(clip) { return rampDuration(clip); }
 export function transitionAt(clips,index) {
   if(index<=0 || index>=clips.length)return {type:'none',duration:0};
