@@ -56,6 +56,51 @@ function feature(node){
   "<a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>ライセンス</a>。墨や模式図は本サイト用に制作。</p></details></div>"
  ].join("");
 }
+
+/* Chapter 1-2: the manuscript is read from data/thought-nodes.json. */
+function ghostFeature(node){
+ const p=node.body;
+ if(!Array.isArray(p)||p.length!==8)return ordinary(node);
+ return [
+  "<div class='gh-page'>",
+  "<header class='hero gh-hero'>",
+  "<img class='gh-plate deco' src='./art/oboroge-plate.svg' alt='' aria-hidden='true' decoding='async'>",
+  "<span class='gh-hero-vertical deco' aria-hidden='true'>朧気 / GHOST FIELD NOTES</span>",
+  "<div class='hero-titles'><div class='hero-kicker'><b>"+clean(node.id)+"</b><span>RECORD OF ANOTHER WORLD</span></div>",
+  "<h1>"+clean(node.title)+"</h1><div class='underline-ink deco' aria-hidden='true'></div>",
+  "<p class='hero-folio'>すべての歯が見える　／　記録 002</p></div>",
+  "<div class='gh-edition-mark deco' aria-hidden='true'><i></i><span>OBOROGE / A NATURAL HISTORY</span></div>",
+  "</header>",
+  "<div class='article-content gh-article'>",
+  "<section class='gh-entry gh-first'><div><span class='label'>01 / MEASURE OF FEAR</span>",
+   para(p[0],0,"lead"),"</div><div class='gh-seal deco' aria-hidden='true'>ブー</div></section>",
+  "<section class='gh-entry gh-origin'><div><span class='label'>02 / COMPOSITION</span>",
+   para(p[1],1),"</div><figure class='gh-origin-plate deco'><img src='./art/oboroge-plate.svg' alt='' loading='lazy' decoding='async'>",
+   "<figcaption class='gh-plate-caption'>朧気　／　模式図</figcaption></figure></section>",
+  "<section class='gh-entry gh-other'><span class='label'>03 / ORIGIN</span>",
+   para(p[2],2),
+   "<div class='gh-dual deco' aria-hidden='true'><figure><b>幽霊</b></figure><figure><b>妖怪</b></figure></div></section>",
+  "<section class='gh-entry gh-individual'><div><span class='label'>04 / INDIVIDUAL</span>",
+   para(p[3],3),"</div><div class='gh-one deco' aria-hidden='true'>1 : 1<small>個体　／　種</small></div></section>",
+  "<section class='gh-entry gh-uptake'><span class='label'>05 / METABOLISM</span>",
+   "<div class='gh-uptake-modes deco' aria-hidden='true'>",
+   "<figure><i class='gh-mode-icon pred'></i><figcaption>捕食</figcaption></figure>",
+   "<figure><i class='gh-mode-icon breath'></i><figcaption>呼吸</figcaption></figure>",
+   "<figure><i class='gh-mode-icon surface'></i><figcaption>吸収</figcaption></figure>",
+   "<figure><i class='gh-mode-icon inner'></i><figcaption>生成</figcaption></figure></div>",
+   para(p[4],4),"</section>",
+  "<section class='gh-entry gh-horror'><span class='label'>06 / ECOLOGY</span>",
+   para(p[5],5),"<div class='gh-boo deco' aria-hidden='true'><span>FEAR LEVEL</span>150 ブー</div></section>",
+  "<section class='gh-entry gh-divine'><div><span class='label'>07 / STABILITY</span>",
+   para(p[6],6),"</div><div class='gh-divine-figure deco' aria-hidden='true'><span>STRUCTURE / STABILITY</span></div></section>",
+  "<section class='gh-entry gh-final'><span class='label'>08 / NEXT STAGE</span>",
+   para(p[7],7),
+   "<div class='gh-final-stage deco' aria-hidden='true'><i class='gh-stone'></i><i class='gh-stone'></i><i class='gh-stone'></i><i class='gh-stone'></i></div>",
+   "<div class='gh-final-footer deco' aria-hidden='true'>BEYOND THE VISIBLE / 002</div></section>",
+  "</div></div>"
+ ].join("");
+}
+
 function ordinary(node){
  return "<header class='hero hero-regular'><div class='regular-orb deco' aria-hidden='true'></div>"+
  "<div class='regular-crest deco'><img src='./hitotsu-ore-choji.png' alt=''></div>"+
@@ -92,7 +137,7 @@ function closeMenu(focus){el.panel.hidden=true;document.body.classList.remove("i
 function openMenu(){el.panel.hidden=false;document.body.classList.add("index-open");el.menu.setAttribute("aria-expanded","true");el.close.focus();}
 function show(id,changeHistory){
  const index=nodes.findIndex(node=>node.id===id);if(index===-1)return;
- active=index;const node=nodes[index];el.story.innerHTML=node.id==="1-1"?feature(node):ordinary(node);
+ active=index;const node=nodes[index];el.story.innerHTML=node.id==="1-1"?feature(node):node.id==="1-2"?ghostFeature(node):ordinary(node);
  el.story.querySelectorAll('img[data-fallback]').forEach(img=>{
    img.addEventListener('error',()=>{
      const fallback=img.getAttribute('data-fallback');
