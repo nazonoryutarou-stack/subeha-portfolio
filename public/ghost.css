@@ -28,7 +28,7 @@
 .gh-origin-plate{position:relative;min-height:430px;display:grid;place-items:center}
 .gh-origin-plate::before{content:"";position:absolute;inset:10%;border-radius:50%;background:radial-gradient(circle,#e4ded1 5%,#c8c0b2 37%,transparent 68%);filter:blur(4px)}
 .gh-origin-plate::after{content:"";position:absolute;inset:8%;border-radius:50%;border:1px solid #8f8373;transform:rotate(20deg) scaleX(.77);opacity:.55}
-.gh-origin-plate img{position:relative;z-index:2;width:105%;mix-blend-mode:multiply;opacity:.85;filter:grayscale(1) contrast(1.4)}
+.gh-origin-plate img{position:relative;z-index:2;width:105%;mix-blend-mode:multiply;opacity:.77;filter:grayscale(1) brightness(.32) contrast(1.45)}
 .gh-plate-caption{position:absolute;bottom:9px;right:0;color:#665d56;font:10px var(--sans);letter-spacing:.16em}
 .gh-origin .copy{font-size:clamp(19px,1.85vw,24px)}
 .gh-other{margin:0 calc(-1 * clamp(24px,6vw,78px));padding:85px clamp(24px,6vw,78px) 95px;background:#e5ddcf;border-top:5px solid #a6433f;border-bottom:1px solid #928d83}
