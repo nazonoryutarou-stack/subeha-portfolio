@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-label="朧気の抽象図版">
+<defs>
+ <radialGradient id="fog" cx="55%" cy="46%" r="54%">
+  <stop stop-color="#eee6d5" stop-opacity=".66"/>
+  <stop offset=".42" stop-color="#b4afa2" stop-opacity=".35"/>
+  <stop offset="1" stop-color="#e4decf" stop-opacity="0"/>
+ </radialGradient>
+ <radialGradient id="inner" cx="45%" cy="25%" r="70%">
+  <stop stop-color="#f1ebdf" stop-opacity=".9"/>
+  <stop offset=".54" stop-color="#d2cbbd" stop-opacity=".43"/>
+  <stop offset="1" stop-color="#d2cbbd" stop-opacity="0"/>
+ </radialGradient>
+ <filter id="bleed" x="-30%" y="-30%" width="160%" height="160%">
+  <feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="3" seed="19" result="n"/>
+  <feDisplacementMap in="SourceGraphic" in2="n" scale="18"/>
+ </filter>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".27" numOctaves="3" seed="11" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".12"/></feComponentTransfer></filter>
+</defs>
+<circle cx="450" cy="454" r="400" fill="url(#fog)"/>
+<g fill="none" stroke="#d7d0bf" stroke-opacity=".33">
+ <circle cx="470" cy="450" r="337" stroke-width="1.2"/>
+ <circle cx="470" cy="450" r="318" stroke-dasharray="2 15" stroke-width="2"/>
+ <circle cx="470" cy="450" r="281" stroke-width=".8"/>
+ <path d="M85 450H830 M470 80V836" stroke-width=".8"/>
+ <path d="M156 180L765 735 M759 169L147 745" stroke-dasharray="1 12"/>
+</g>
+<g filter="url(#bleed)" opacity=".86">
+ <path d="M431 132C343 127 285 218 299 308c9 54 49 102 43 165-7 79-107 106-90 181 18 79 124 89 180 69 48-17 77-49 129-49 48 0 92 12 121-27 36-49 5-111-32-141-47-38-54-74-24-135 41-85-5-209-111-235-32-8-64-11-84-4Z" fill="url(#inner)" opacity=".8"/>
+ <path d="M424 157c-97 27-127 118-108 186 30 107 108 116 68 204-26 56-107 81-74 144 23 46 93 42 146 23 72-26 107-15 149-15 60 0 111-57 68-117-36-50-91-52-92-128-2-84 66-132 23-224-31-68-118-94-180-73Z" stroke="#eee6d5" stroke-width="13" fill="none" opacity=".5"/>
+</g>
+<g fill="none" stroke="#f5eee1" stroke-linecap="round" opacity=".73">
+ <path d="M458 194c-76 8-128 78-120 154 7 60 59 94 57 153-3 72-80 96-54 149 18 39 60 41 107 22 62-26 127-42 168-1" stroke-width="2"/>
+ <path d="M497 205c71 22 96 87 81 149-24 95-6 126 58 166 55 34 52 104 7 128" stroke-width="3"/>
+ <path d="M430 256c-46 22-59 67-40 104 18 37 55 49 56 95 2 63-52 99-24 141" stroke-width="1.6"/>
+ <path d="M496 276c53 31 50 80 27 129-30 62-18 95 25 131" stroke-width="1.8"/>
+ <path d="M406 337c21-16 54-15 72 4 18 19 14 52-8 64-29 14-64-4-60-32" stroke-width="2.8"/>
+ <path d="M477 469c-53 47-40 118 3 134 36 13 69-16 96-4" stroke-width="2"/>
+</g>
+<g fill="none" stroke="#b65753" stroke-opacity=".68">
+ <path d="M241 345c50-148 173-227 290-181" stroke-width="2"/>
+ <path d="M625 246c87 85 111 191 54 312" stroke-width="1"/>
+ <path d="M312 710c112 83 242 54 333 4" stroke-width="2"/>
+ <path d="M640 323l19-9 11 16M258 591l-16 20 17 13" stroke-width="1.7"/>
+</g>
+<g fill="#f0e7da" opacity=".77">
+ <circle cx="229" cy="285" r="2.4"/><circle cx="673" cy="229" r="2"/><circle cx="719" cy="484" r="3"/>
+ <circle cx="276" cy="715" r="2"/><circle cx="507" cy="774" r="2.7"/><circle cx="176" cy="513" r="1.5"/>
+ <circle cx="737" cy="644" r="1.8"/><circle cx="334" cy="174" r="1.6"/>
+</g>
+<rect x="65" y="65" width="770" height="770" fill="none" stroke="#d5cab9" stroke-opacity=".22"/>
+<rect x="65" y="65" width="770" height="770" filter="url(#grain)" opacity=".13"/>
+</svg>
