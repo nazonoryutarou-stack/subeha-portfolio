@@ -341,3 +341,126 @@ html.quiet-mode .cinema-master{display:none!important}
  #story .cinema-intro-word{animation:none!important}
 }
 html.cinema-still #story .cinema-intro{display:none!important}
+
+
+/* Each scene has its own lettering mechanics: 16 distinct arrivals, not one preset. */
+#story .cinema--signature .cinema-char{
+ transform:translate3d(-.65em,.2em,0) skewX(-28deg) scaleX(1.8);
+ filter:blur(3px);transition-timing-function:cubic-bezier(.08,.88,.08,1);
+}
+#story .cinema--signature.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--hail .cinema-char{
+ transform:translate3d(calc(var(--ci)*12px),-1.1em,0) rotate(-18deg) scale(.75);
+ filter:blur(7px);transition-timing-function:cubic-bezier(.09,.98,.14,1.2);
+}
+#story .cinema--hail.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--invisible .cinema-char{
+ transform:scale(.38) translateY(.2em) rotate(19deg);
+ opacity:0;filter:blur(26px);
+ transition-duration:1.45s;
+}
+#story .cinema--invisible.is-on .cinema-char{transform:none;filter:none;opacity:1}
+#story .cinema--ritual .cinema-char{
+ transform:rotate(110deg) scale(.6) translateX(-1em);opacity:0;
+ filter:blur(6px);transition-duration:1.3s;
+}
+#story .cinema--ritual.is-on .cinema-char{transform:none;filter:none;opacity:1}
+#story .cinema--name .cinema-char{
+ transform:translateY(calc(-.6em + var(--ci)*3px)) rotate(-10deg);
+ filter:blur(4px);transition-duration:.93s;
+}
+#story .cinema--name.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--sake .cinema-char{
+ transform:translateY(1.5em) rotate(22deg) scale(1.25);
+ filter:blur(3px);transition-timing-function:cubic-bezier(.13,1.22,.19,1.07);
+}
+#story .cinema--sake.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--persimmon .cinema-char{
+ transform:scale(2) rotate(-75deg);
+ filter:blur(13px);transition-duration:1s;
+}
+#story .cinema--persimmon.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--danjiri .cinema-char{
+ transform:translateX(1.4em) rotateY(75deg) skewX(18deg);
+ filter:blur(8px);transition-duration:.8s;
+}
+#story .cinema--danjiri.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--fear .cinema-char{
+ transform:translateY(.14em) scale(2.15) rotate(-16deg);
+ opacity:0;filter:blur(18px);
+ transition-timing-function:cubic-bezier(.14,1.15,.17,1);
+}
+#story .cinema--fear.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--oboroge .cinema-char{
+ transform:translateY(-.8em) scale(.5) rotate(28deg);
+ filter:blur(26px);transition-duration:1.45s;
+}
+#story .cinema--oboroge.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--yokai .cinema-char{
+ transform:translateX(calc((var(--ci) - 2)*-50px)) skewY(13deg) scale(.75);
+ filter:blur(13px);
+}
+#story .cinema--yokai.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--yokai.is-on .cinema-char:nth-child(2n){
+ transform:rotate(-4deg);-webkit-text-stroke:1px #221b20;
+}
+#story .cinema--species .cinema-char{
+ transform:translate(calc(var(--ci)*14px),calc(var(--ci)*-26px)) rotate(calc(var(--ci)*29deg));
+ filter:blur(5px);
+}
+#story .cinema--species.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--decay .cinema-char{
+ transform:translate3d(0,-.7em,0) scale(1.5) rotate(6deg);
+ filter:blur(10px);transition-duration:1.2s;
+}
+#story .cinema--decay.is-on .cinema-char{transform:translateY(calc(var(--drive)*13px));filter:none}
+#story .cinema--ecology .cinema-char{
+ transform:translateY(.8em) scaleX(1.8) skewX(-23deg);
+ filter:blur(8px);transition-timing-function:cubic-bezier(.16,1.08,.26,1);
+}
+#story .cinema--ecology.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--god .cinema-char{
+ transform:translateX(calc((var(--ci) - 1)*75px)) scale(1.4) rotate(-12deg);
+ opacity:0;filter:blur(12px);
+ transition-duration:1.55s;
+}
+#story .cinema--god.is-on .cinema-char{transform:none;opacity:1;filter:none}
+#story .cinema--threshold .cinema-char{
+ transform:translateX(calc((var(--ci) + 1)*-60px)) translateY(1em) skewX(-30deg);
+ filter:blur(7px);transition-duration:1.1s;
+}
+#story .cinema--threshold.is-on .cinema-char{transform:none;filter:none}
+
+/* Impact overprints evoke physically misregistered cel animation. */
+#story .cinema-char::before{
+ content:attr(data-letter);position:absolute;inset:0;opacity:0;
+ color:transparent;-webkit-text-stroke:2px var(--cine-a);
+ pointer-events:none;transform:translate(0,0);
+}
+#story .cinema-beat.is-struck .cinema-char::before{
+ animation:cinema-afterprint .76s cubic-bezier(.16,.7,.21,1) both;
+ animation-delay:calc(var(--ci)*25ms);
+}
+@keyframes cinema-afterprint{
+ 0%{opacity:.83;transform:translate(-14px,11px) skewX(-13deg)}
+ 45%{opacity:.5;transform:translate(8px,-5px) skewX(9deg)}
+ 100%{opacity:0;transform:translate(22px,-18px) scale(1.08)}
+}
+html.cinema-still #story .cinema-char::before{animation:none!important;opacity:0!important}
+html.cinema-still #story .hero-sun,
+html.cinema-still #story .hero-brush,
+html.cinema-still #story .hero-archive-mark,
+html.cinema-still #story .hero-buddha img,
+html.cinema-still #story .hero-vertical,
+html.cinema-still #story .drink-poster strong,
+html.cinema-still #story .gh-plate,
+html.cinema-still #story .gh-divine-figure::before,
+html.cinema-still #story .gh-divine-figure::after,
+html.cinema-still #story .gh-final-stage::after{
+ animation:none!important;transition:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+ #story .cinema-beat .cinema-char{transform:none!important;filter:none!important;opacity:1!important}
+ #story .cinema-char::before{animation:none!important;opacity:0!important}
+}
+html.cinema-still #story .cinema-char{transform:none!important;filter:none!important;opacity:1!important}
