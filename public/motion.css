@@ -1,0 +1,218 @@
+/* Responsive, progressive motion: 1-1 and 1-2. All motion is decorative. */
+html.motion-ready #story .entry,
+html.motion-ready #story .gh-entry{
+  opacity:0;
+  transform:translate3d(0,30px,0);
+  transition:opacity .8s ease,transform .9s cubic-bezier(.19,1,.22,1);
+}
+html.motion-ready #story .entry.motion-visible,
+html.motion-ready #story .gh-entry.motion-visible{opacity:1;transform:translate3d(0,0,0)}
+html.motion-ready #story .entry.motion-visible .para-no,
+html.motion-ready #story .gh-entry.motion-visible .para-no{
+  animation:motion-marker .7s ease both;
+}
+#story.chapter-arrive .hero h1{animation:motion-title 1.05s cubic-bezier(.17,.7,.24,1) both}
+#story.chapter-arrive .hero-kicker{animation:motion-kicker .8s ease both}
+@keyframes motion-title{from{opacity:.1;transform:translate3d(0,28px,0);filter:blur(5px)}to{opacity:1;transform:translate3d(0,0,0);filter:blur(0)}}
+@keyframes motion-kicker{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes motion-marker{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+
+/* 1-1: the static editorial montage becomes a living surface. */
+#story[data-node="1-1"] .hero-sun{animation:motion-sun 12s ease-in-out infinite alternate}
+#story[data-node="1-1"] .hero-brush{animation:motion-brush 14s ease-in-out infinite alternate}
+#story[data-node="1-1"] .hero-buddha img{
+  transform:translate3d(var(--hero-x,0px),var(--hero-y,0px),0) scale(1.045);
+  transition:transform .2s linear;
+  animation:motion-buddha 17s ease-in-out infinite alternate;
+}
+#story[data-node="1-1"] .hero-archive-mark{animation:motion-stamp 9s ease-in-out infinite alternate}
+#story[data-node="1-1"] .hero-main .hero-vertical{animation:motion-label 7s ease-in-out infinite alternate}
+#story[data-node="1-1"] .diagram img{transition:transform .6s ease,filter .6s ease}
+#story[data-node="1-1"] .diagram:hover img,
+#story[data-node="1-1"] .diagram:active img{transform:rotate(-3deg) scale(1.06);filter:drop-shadow(0 12px 10px rgba(41,26,23,.12))}
+#story[data-node="1-1"] .entry-hail img{transition:transform .85s ease}
+#story[data-node="1-1"] .entry-hail .hail-figure:hover img{transform:scale(1.065) rotate(-2deg)}
+#story[data-node="1-1"] .drink-poster strong{animation:motion-drink 5s ease-in-out infinite alternate}
+#story[data-node="1-1"] .danjiri-photo{transition:transform .5s ease}
+#story[data-node="1-1"] .danjiri-photo:hover{transform:rotate(0deg) translateY(-7px)}
+@keyframes motion-sun{from{transform:translate3d(0,0,0) scale(1);opacity:.84}to{transform:translate3d(-14px,13px,0) scale(1.075);opacity:.7}}
+@keyframes motion-brush{from{transform:rotate(-10deg) translateY(0)}to{transform:rotate(-7deg) translateY(18px)}}
+@keyframes motion-buddha{from{object-position:center 12%;filter:brightness(1)}to{object-position:center 19%;filter:brightness(.92)}}
+@keyframes motion-stamp{from{opacity:.75;transform:rotate(-8deg)}to{opacity:1;transform:rotate(-6deg)}}
+@keyframes motion-label{from{opacity:.9}to{opacity:.68}}
+@keyframes motion-drink{from{transform:rotate(-8deg)}to{transform:rotate(-4deg) scale(1.065)}}
+
+/* 1-2: the oboroge field is responsive to touch. */
+.gh-hero .gh-plate{
+  translate:var(--ghost-x,0px) var(--ghost-y,0px);
+  animation:motion-ghost 9s ease-in-out infinite alternate;
+  transition:translate .28s ease;
+  will-change:opacity,translate;
+}
+.gh-hero::after{pointer-events:none}
+.gh-hero .hero-titles{pointer-events:none}
+@keyframes motion-ghost{from{opacity:.62;filter:contrast(1.08) brightness(.84)}to{opacity:.92;filter:contrast(1.28) brightness(1.14)}}
+.gh-page .gh-first{isolation:isolate}
+.gh-page .gh-seal{
+  appearance:none;background:rgba(253,247,234,.6);cursor:pointer;
+  font:800 54px/1.25 var(--serif);
+  -webkit-tap-highlight-color:transparent;
+  transition:box-shadow .35s ease,background .35s ease,scale .35s ease;
+  touch-action:manipulation;
+}
+.gh-page .gh-seal:hover,.gh-page .gh-seal:focus-visible{
+  background:#fdf8ef;box-shadow:0 9px 28px rgba(124,49,44,.15);scale:1.04;
+}
+.gh-page .gh-seal:focus-visible{outline:3px solid var(--red);outline-offset:4px}
+.gh-page .gh-seal::before{
+  inset:-10px;border:0;border-radius:50%;
+  background:conic-gradient(#a8443e var(--fear,0%),rgba(164,68,62,.13) var(--fear,0%));
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));
+  opacity:.94;
+}
+.gh-page .gh-seal::after{content:"TOUCH / MEASURE";bottom:8px;font-size:8px}
+.gh-fear-core{z-index:1;position:relative;display:block;transform:translateY(-13px)}
+.gh-fear-counter{
+  display:block;position:absolute;bottom:28px;left:0;right:0;text-align:center;
+  font:700 13px/1.4 var(--sans);letter-spacing:.08em;color:#872d29;
+}
+.gh-seal.is-measuring{animation:motion-boo .43s ease both}
+.gh-seal.is-full{background:#a43a35;color:#fff2df;border-color:#782723}
+.gh-seal.is-full .gh-fear-counter{color:#fff2df}
+.gh-seal.is-full::after{color:#ffe0d2}
+@keyframes motion-boo{0%{transform:rotate(-8deg) scale(1)}48%{transform:rotate(6deg) scale(1.1)}100%{transform:rotate(-8deg) scale(1)}}
+.gh-origin-plate{overflow:visible}
+.gh-mist-touch{
+  appearance:none;position:relative;border:0;background:transparent;
+  width:100%;min-height:380px;padding:0;display:grid;place-items:center;
+  cursor:crosshair;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.gh-mist-touch img{
+  pointer-events:none;position:relative;z-index:1;
+  transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .6s ease;
+}
+.gh-mist-touch:hover img,.gh-mist-touch:focus-visible img{transform:scale(1.075) rotate(5deg)}
+.gh-mist-touch:focus-visible{outline:2px dashed #a64640;outline-offset:-18px}
+.gh-touch-label{
+  position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+  font:10px var(--sans);letter-spacing:.12em;color:#775f55;
+  white-space:nowrap;z-index:3;padding:8px 13px;border:1px solid rgba(123,98,87,.34);
+  background:rgba(246,240,228,.78);transition:background .3s ease;
+}
+.gh-mist-touch:hover .gh-touch-label{background:#f5e7da}
+.gh-mist-touch.is-stirring img{animation:motion-stir 1.35s ease both}
+.gh-wisp{
+  position:absolute;z-index:2;top:var(--wy,50%);left:var(--wx,50%);
+  pointer-events:none;width:18px;height:18px;border-radius:50%;
+  border:1px solid rgba(115,67,65,.65);background:rgba(239,222,211,.25);
+  transform:translate(-50%,-50%) scale(.45);opacity:0;
+  animation:motion-wisp 1.2s ease-out both;
+  animation-delay:var(--delay,0ms);
+}
+@keyframes motion-stir{0%{transform:rotate(0) scale(1)}28%{transform:rotate(-10deg) scale(1.05)}62%{transform:rotate(8deg) scale(1.17);opacity:.65}100%{transform:rotate(0) scale(1);opacity:.77}}
+@keyframes motion-wisp{0%{opacity:.75;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(calc(-50% + var(--vx,0px)),calc(-50% + var(--vy,-30px))) scale(6)}}
+.gh-uptake-modes .gh-mode{
+  appearance:none;min-width:0;margin:0;padding:30px 8px 24px;
+  background:rgba(251,248,238,.55);border:1px solid #b9ac9a;
+  display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;
+  transition:transform .25s ease,background .25s ease,border-color .25s ease,box-shadow .25s ease;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.gh-uptake-modes .gh-mode:hover,.gh-uptake-modes .gh-mode:focus-visible{
+  transform:translateY(-6px);border-color:#a7433e;background:#faf0e5;
+  box-shadow:0 10px 22px rgba(93,63,52,.12);
+}
+.gh-uptake-modes .gh-mode:focus-visible{outline:3px solid #a7433e;outline-offset:2px}
+.gh-uptake-modes .gh-mode.is-active{border-color:#9c3934;background:#f6e6da;box-shadow:inset 0 -4px 0 #ac4b44}
+.gh-uptake-modes .gh-mode-caption{
+  font:12px var(--serif);letter-spacing:.1em;color:#403a34;
+}
+.gh-uptake-modes .gh-mode.is-active .gh-mode-icon.pred::before{animation:motion-pred .65s ease infinite alternate}
+.gh-uptake-modes .gh-mode.is-active .gh-mode-icon.breath::before{animation:motion-breath 1.5s ease-in-out infinite alternate}
+.gh-uptake-modes .gh-mode.is-active .gh-mode-icon.breath::after{animation:motion-breath 1.5s ease-in-out infinite alternate-reverse}
+.gh-uptake-modes .gh-mode.is-active .gh-mode-icon.surface::before{animation:motion-surface 1.3s ease-in-out infinite alternate}
+.gh-uptake-modes .gh-mode.is-active .gh-mode-icon.inner::before{animation:motion-inner 1.25s ease-in-out infinite alternate}
+@keyframes motion-pred{from{transform:translateX(-8px)}to{transform:translateX(8px)}}
+@keyframes motion-breath{from{transform:scale(.76);opacity:.6}to{transform:scale(1.25);opacity:1}}
+@keyframes motion-surface{from{transform:rotate(-25deg) translateY(-6px)}to{transform:rotate(4deg) translateY(7px)}}
+@keyframes motion-inner{from{transform:scale(.7);box-shadow:0 0 0 1px rgba(166,67,64,.2)}to{transform:scale(1.12);box-shadow:0 0 0 14px rgba(166,67,64,.22)}}
+.gh-page .gh-divine-figure{
+  appearance:none;border:0;width:100%;background:transparent;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.gh-page .gh-divine-figure:focus-visible{outline:3px solid #a63f3b;outline-offset:2px}
+.gh-divine-figure::before{animation:motion-god-pulse 4.8s ease-in-out infinite alternate}
+.gh-divine-figure::after{animation:motion-god-orbit 15s linear infinite}
+.gh-divine-figure.is-stable::after{animation-play-state:paused;border-color:#b6403a;opacity:1}
+.gh-divine-figure.is-stable::before{animation:none;box-shadow:0 0 0 6px #d3c6b4,0 0 0 9px #34362f,0 0 0 25px rgba(48,48,41,.07),0 0 0 43px rgba(52,47,42,.06)}
+.gh-page .gh-divine-figure span{font-size:9px}
+@keyframes motion-god-pulse{from{box-shadow:0 0 0 6px #d3c6b4,0 0 0 9px #34362f,0 0 0 25px rgba(48,48,41,.07),0 0 0 43px rgba(52,47,42,.06)}to{box-shadow:0 0 0 6px #d3c6b4,0 0 0 9px #34362f,0 0 0 40px rgba(48,48,41,.12),0 0 0 67px rgba(52,47,42,.06)}}
+@keyframes motion-god-orbit{from{transform:rotate(-16deg) scaleX(.75)}to{transform:rotate(344deg) scaleX(.75)}}
+.gh-page .gh-stone{
+  cursor:pointer;border:0;border-radius:1px;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:background .25s ease,filter .25s ease,opacity .25s ease,translate .25s ease;
+}
+.gh-page .gh-stone:focus-visible{outline:3px solid #f2dfbf;outline-offset:4px}
+.gh-page .gh-stone:hover{background:#e6c09c;filter:drop-shadow(0 0 10px rgba(255,219,176,.65))}
+.gh-page .gh-stone.is-touched{background:#f0e0c5;translate:0 -18px}
+.gh-page .gh-stone:active{translate:0 9px}
+.gh-stage-status{
+  font:11px var(--sans);letter-spacing:.15em;text-align:center;
+  margin:10px auto 0;min-height:24px;color:#d7b7a4;position:relative;z-index:3;
+}
+.gh-final-stage .gh-splash{
+  width:45px;height:10px;border:2px solid rgba(229,244,255,.62);
+  border-radius:50%;position:absolute;top:126px;left:var(--splash-x,50%);
+  transform:translateX(-50%);opacity:0;pointer-events:none;z-index:5;
+}
+.gh-final-stage.is-failed .gh-splash{animation:motion-splash .75s ease-out both}
+.gh-final-stage.is-failed .gh-stone:not(.is-touched){opacity:.55}
+.gh-final-stage.is-cleared .gh-stone{background:#e3c4a3;filter:drop-shadow(0 0 14px rgba(238,210,179,.8))}
+@keyframes motion-splash{0%{opacity:0;scale:.1}20%{opacity:1;scale:.6}100%{opacity:0;scale:3.4}}
+.gh-final-stage.is-cleared::after{animation:motion-water 1.6s linear infinite alternate}
+@keyframes motion-water{from{opacity:.23;transform:translateY(0)}to{opacity:.7;transform:translateY(-9px)}}
+
+/* Small-screen controls stay comfortably tappable without covering the prose. */
+@media(max-width:640px){
+ .gh-page .gh-seal{font-size:32px}
+ .gh-fear-core{transform:translateY(-9px)}
+ .gh-fear-counter{font-size:10px;bottom:22px}
+ .gh-page .gh-seal::after{font-size:6px;bottom:4px}
+ .gh-mist-touch{min-height:250px}
+ .gh-touch-label{font-size:9px;bottom:0}
+ .gh-uptake-modes .gh-mode{padding:20px 4px 18px;min-height:116px;gap:12px}
+ .gh-uptake-modes .gh-mode-caption{font-size:12px}
+ .gh-page .gh-stone{min-height:53px}
+ .gh-page .gh-divine-figure{min-height:280px}
+ .gh-final-stage .gh-splash{top:100px}
+}
+@media(hover:none){
+ #story[data-node="1-1"] .diagram:hover img,
+ #story[data-node="1-1"] .entry-hail .hail-figure:hover img{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+ html.motion-ready #story .entry,html.motion-ready #story .gh-entry{
+  opacity:1!important;transform:none!important;transition:none!important;
+ }
+ #story.chapter-arrive .hero h1,#story.chapter-arrive .hero-kicker,
+ #story[data-node="1-1"] .hero-sun,#story[data-node="1-1"] .hero-brush,
+ #story[data-node="1-1"] .hero-buddha img,#story[data-node="1-1"] .hero-archive-mark,
+ #story[data-node="1-1"] .hero-main .hero-vertical,
+ #story[data-node="1-1"] .drink-poster strong,
+ .gh-hero .gh-plate,.gh-seal.is-measuring,.gh-mist-touch.is-stirring img,
+ .gh-wisp,.gh-uptake-modes .gh-mode.is-active .gh-mode-icon,
+ .gh-divine-figure::before,.gh-divine-figure::after,
+ .gh-final-stage.is-failed .gh-splash,.gh-final-stage.is-cleared::after{
+  animation:none!important;transition:none!important;
+ }
+ .gh-hero .gh-plate{translate:0 0}
+ .gh-mist-touch:hover img,.gh-mist-touch:focus-visible img{transform:none}
+ .gh-uptake-modes .gh-mode:hover,.gh-uptake-modes .gh-mode:focus-visible{transform:none}
+}
+@media print{
+ html.motion-ready #story .entry,html.motion-ready #story .gh-entry{opacity:1!important;transform:none!important}
+ .gh-mist-touch,.gh-page .gh-divine-figure,.gh-uptake-modes .gh-mode{animation:none!important}
+}
