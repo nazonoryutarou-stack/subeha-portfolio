@@ -464,3 +464,62 @@ html.cinema-still #story .gh-final-stage::after{
  #story .cinema-char::before{animation:none!important;opacity:0!important}
 }
 html.cinema-still #story .cinema-char{transform:none!important;filter:none!important;opacity:1!important}
+
+
+/* Chapter 1-3: botany, anesthesia, and the minimum effective pinch. */
+#story .cinema--clove{
+ background:radial-gradient(circle at 75% 42%,#a17b65,#573e35 38%,#1f2524 84%);
+ --cine-a:#f6d3aa;--cine-b:#ab5b4b;
+}
+#story .cinema--anesthetic{
+ background:radial-gradient(circle at 66% 44%,#e3d7c0,#988b7d 50%,#292d2b 100%);
+ --cine-a:#a33f3a;--cine-b:#e8bb94;
+}
+#story .cinema--anesthetic .cinema-kinetic{color:#6f2424;text-shadow:0 12px 24px rgba(45,19,21,.16)}
+#story .cinema--anesthetic .cinema-sub,#story .cinema--anesthetic .cinema-hud{color:#602c2b}
+#story .cinema--anesthetic .cinema-index{-webkit-text-stroke-color:rgba(89,42,36,.37)}
+#story .cinema--pinch{
+ background:radial-gradient(circle at 70% 25%,#a76b47,#432c28 52%,#121a1b 95%);
+ --cine-a:#efc18b;
+}
+#story .cinema--clove .cinema-char{
+ transform:translateY(.6em) rotate(-45deg) scale(.6);filter:blur(12px);
+ transition-duration:1.2s;
+}
+#story .cinema--clove.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--anesthetic .cinema-char{
+ transform:translateY(-1em) scale(2);filter:blur(23px);
+ transition-duration:1.4s;
+}
+#story .cinema--anesthetic.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--pinch .cinema-char{
+ transform:translateX(calc((var(--ci) - 2)*-38px)) translateY(-.55em);
+ filter:blur(10px);transition-duration:1.15s;
+}
+#story .cinema--pinch.is-on .cinema-char{transform:none;filter:none}
+
+/* Chapter 1-4: the absurdly indestructible anatomical organ is monumental. */
+#story .cinema--liver{
+ background:radial-gradient(circle at 76% 48%,#a13c39 0%,#612729 42%,#191921 87%);
+ --cine-a:#ffceaa;--cine-b:#ee8973;
+ min-height:clamp(480px,65vw,760px);
+}
+#story .cinema--liver .cinema-layer{min-height:clamp(480px,65vw,760px)}
+#story .cinema--liver .cinema-char{
+ transform:translateY(.8em) scale(1.7) skewX(-14deg);
+ filter:blur(11px);transition-duration:1.13s;
+}
+#story .cinema--liver.is-on .cinema-char{transform:none;filter:none}
+#story .cinema--liver .cinema-kinetic{
+ color:#ffe5cb;text-shadow:7px 12px 0 rgba(35,10,15,.18);
+ font-size:clamp(45px,9vw,145px);
+}
+#story .cinema--liver .cinema-kinetic::after{height:7px}
+#story .hero-regular .cinema-hero-canvas{mix-blend-mode:multiply;opacity:.5}
+#story .hero-regular .cinema-hero-mark{color:#593c33;background:rgba(249,236,215,.72);border-color:rgba(113,61,52,.45)}
+#story .cinema-intro[data-chapter="1-3"]{background:linear-gradient(130deg,#282620,#8a4a3d 65%,#ecd8b7)}
+#story .cinema-intro[data-chapter="1-4"]{background:radial-gradient(circle at 70% 40%,#b74d46,#4d1822 59%,#12191e)}
+@media(max-width:640px){
+ #story .cinema--liver,#story .cinema--liver .cinema-layer{min-height:460px}
+ #story .cinema--liver .cinema-kinetic{font-size:clamp(38px,10vw,68px)}
+}
