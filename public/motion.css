@@ -91,7 +91,9 @@ html.motion-ready #story .gh-entry.motion-visible .para-no{
 .gh-mist-touch img{
   pointer-events:none;position:relative;z-index:1;
   transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .6s ease;
+  animation:motion-mist-idle 8s ease-in-out infinite alternate;
 }
+@keyframes motion-mist-idle{from{opacity:.68;scale:.985}to{opacity:.85;scale:1.03}}
 .gh-mist-touch:hover img,.gh-mist-touch:focus-visible img{transform:scale(1.075) rotate(5deg)}
 .gh-mist-touch:focus-visible{outline:2px dashed #a64640;outline-offset:-18px}
 .gh-touch-label{
@@ -163,6 +165,8 @@ html.motion-ready #story .gh-entry.motion-visible .para-no{
   font:11px var(--sans);letter-spacing:.15em;text-align:center;
   margin:10px auto 0;min-height:24px;color:#d7b7a4;position:relative;z-index:3;
 }
+.gh-final-stage::after{animation:motion-water-idle 4s ease-in-out infinite alternate}
+@keyframes motion-water-idle{from{opacity:.18;transform:translateY(0)}to{opacity:.48;transform:translateY(-5px)}}
 .gh-final-stage .gh-splash{
   width:45px;height:10px;border:2px solid rgba(229,244,255,.62);
   border-radius:50%;position:absolute;top:126px;left:var(--splash-x,50%);
@@ -203,7 +207,7 @@ html.motion-ready #story .gh-entry.motion-visible .para-no{
  #story[data-node="1-1"] .hero-main .hero-vertical,
  #story[data-node="1-1"] .drink-poster strong,
  .gh-hero .gh-plate,.gh-seal.is-measuring,.gh-mist-touch.is-stirring img,
- .gh-wisp,.gh-uptake-modes .gh-mode.is-active .gh-mode-icon,
+ .gh-wisp,.gh-mist-touch img,.gh-final-stage::after,.gh-uptake-modes .gh-mode.is-active .gh-mode-icon,
  .gh-divine-figure::before,.gh-divine-figure::after,
  .gh-final-stage.is-failed .gh-splash,.gh-final-stage.is-cleared::after{
   animation:none!important;transition:none!important;
