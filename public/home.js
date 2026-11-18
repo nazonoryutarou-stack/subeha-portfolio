@@ -86,7 +86,30 @@
     button.dataset.mode=String(mode);
     label.textContent="一つ折れ丁子　/　0"+(mode+1);
     paint();
+    if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      for(let i=0;i<9;i++){
+        const speck=document.createElement("span");
+        speck.className="entrance-spark";
+        speck.setAttribute("aria-hidden","true");
+        speck.style.setProperty("--a",(i*40)+"deg");
+        button.appendChild(speck);
+        speck.addEventListener("animationend",()=>speck.remove(),{once:true});
+      }
+    }
   });
+  if(window.matchMedia("(hover: hover) and (pointer: fine)").matches){
+    button.addEventListener("pointermove",event=>{
+      const rect=button.getBoundingClientRect();
+      const x=((event.clientX-rect.left)/rect.width-.5)*24;
+      const y=((event.clientY-rect.top)/rect.height-.5)*24;
+      button.style.setProperty("--crest-x",x.toFixed(1)+"px");
+      button.style.setProperty("--crest-y",y.toFixed(1)+"px");
+    },{passive:true});
+    button.addEventListener("pointerleave",()=>{
+      button.style.removeProperty("--crest-x");
+      button.style.removeProperty("--crest-y");
+    },{passive:true});
+  }
   window.addEventListener("resize",resize,{passive:true});
   resize();
 })();
