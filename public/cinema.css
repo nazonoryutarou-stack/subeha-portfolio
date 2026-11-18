@@ -267,3 +267,77 @@ html.cinema-still #story .cinema-beat *{animation:none!important;transition:none
  #story .cinema-char,#story .cinema-sub{opacity:1!important;transform:none!important;color:#1d1b1a!important}
  #story .cinema-hero-canvas,#story .cinema-canvas,#story .cinema-switch{display:none!important}
 }
+
+
+/* Cinematic chapter-change slate: one purposeful wipe, no strobing. */
+#story .cinema-intro{
+ position:absolute;z-index:25;top:0;left:0;right:0;height:clamp(450px,56vw,720px);
+ pointer-events:none;overflow:hidden;display:grid;place-items:center;
+ color:#fff4e0;background:linear-gradient(136deg,#162325,#631e22 100%);
+ animation:cinema-curtain 1.6s cubic-bezier(.6,.03,.24,.97) both;
+}
+#story .cinema-intro[data-chapter="1-1"]{
+ background:linear-gradient(127deg,#ede0c5 0%,#a34b44 58%,#1c2629);
+}
+#story .cinema-intro::before{
+ content:"";position:absolute;inset:0;
+ background:repeating-linear-gradient(-12deg,transparent 0 60px,rgba(244,227,204,.09) 61px 64px),
+ radial-gradient(circle at 70% 36%,rgba(255,245,223,.24),transparent 46%);
+ opacity:.7;
+}
+#story .cinema-intro::after{
+ content:"";position:absolute;inset:9%;
+ border:1px solid rgba(255,244,225,.37);
+ transform:skewX(-5deg);
+}
+#story .cinema-intro-word{
+ position:relative;z-index:3;max-width:96%;text-align:center;
+ font:900 clamp(68px,13vw,173px)/1.3 "Shippori Mincho",var(--serif);
+ letter-spacing:-.09em;
+ text-shadow:7px 10px 0 rgba(10,13,15,.2);
+ animation:cinema-intro-word 1.35s cubic-bezier(.1,.7,.25,1) both;
+}
+#story .cinema-intro-code{
+ position:absolute;z-index:3;top:8%;left:7%;
+ font:800 12px var(--sans);letter-spacing:.3em;
+}
+@keyframes cinema-curtain{
+ 0%,51%{clip-path:inset(0 0 0 0);opacity:1}
+ 100%{clip-path:inset(0 0 0 100%);opacity:0}
+}
+@keyframes cinema-intro-word{
+ 0%{opacity:0;transform:translateX(-14%) skewX(-13%) scale(1.3);filter:blur(12px)}
+ 44%{opacity:1;transform:translateX(0) skewX(0) scale(1);filter:blur(0)}
+ 100%{opacity:1;transform:translateX(3%) skewX(0) scale(1.01)}
+}
+.cinema-master{
+ position:fixed;z-index:58;bottom:max(16px,env(safe-area-inset-bottom));left:16px;
+ appearance:none;border:1px solid rgba(229,216,190,.76);
+ background:rgba(27,30,29,.89);color:#f1e4ce;
+ padding:10px 12px;font:700 11px/1.3 system-ui,sans-serif;letter-spacing:.09em;
+ min-height:40px;min-width:90px;
+ box-shadow:0 4px 16px rgba(22,19,16,.21);cursor:pointer;
+ backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+}
+.cinema-master:focus-visible{outline:3px solid #d85e51;outline-offset:4px}
+.cinema-master:hover{background:#a33f3a}
+html.cinema-still .cinema-master{background:#eee5d6;color:#211b19}
+html.cinema-still #story .entry,html.cinema-still #story .gh-entry{
+ opacity:1!important;transform:none!important;transition:none!important
+}
+html.quiet-mode #story .cinema-beat,
+html.quiet-mode #story .cinema-intro,
+html.quiet-mode #story .cinema-hero-halo,
+html.quiet-mode #story .cinema-hero-canvas,
+html.quiet-mode #story .cinema-hero-mark{display:none!important}
+html.quiet-mode .cinema-master{display:none!important}
+@media(max-width:640px){
+ #story .cinema-intro{height:570px}
+ #story .cinema-intro-word{font-size:clamp(56px,15vw,90px)}
+ .cinema-master{bottom:max(13px,env(safe-area-inset-bottom));left:11px;padding:9px 10px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ #story .cinema-intro{display:none!important;animation:none!important}
+ #story .cinema-intro-word{animation:none!important}
+}
+html.cinema-still #story .cinema-intro{display:none!important}
