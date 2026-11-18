@@ -73,9 +73,9 @@ function ghostFeature(node){
   "</header>",
   "<div class='article-content gh-article'>",
   "<section class='gh-entry gh-first'><div><span class='label'>01 / MEASURE OF FEAR</span>",
-   para(p[0],0,"lead"),"</div><div class='gh-seal deco' aria-hidden='true'>ブー</div></section>",
+   para(p[0],0,"lead"),"</div><button type='button' class='gh-seal' data-fear aria-label='ブーを計測する。押すと25ずつ増えます'><span class='gh-fear-core'>ブー</span><span class='gh-fear-counter' aria-live='polite'>0 / 150</span></button></section>",
   "<section class='gh-entry gh-origin'><div><span class='label'>02 / COMPOSITION</span>",
-   para(p[1],1),"</div><figure class='gh-origin-plate deco'><img src='./art/oboroge-plate.svg' alt='' loading='lazy' decoding='async'>",
+   para(p[1],1),"</div><figure class='gh-origin-plate'><button type='button' class='gh-mist-touch' data-mist aria-label='朧気をかき混ぜる'><img src='./art/oboroge-plate.svg' alt='' loading='lazy' decoding='async'><span class='gh-touch-label' aria-hidden='true'>触れると揺らぐ ＋</span></button>",
    "<figcaption class='gh-plate-caption'>朧気　／　模式図</figcaption></figure></section>",
   "<section class='gh-entry gh-other'><span class='label'>03 / ORIGIN</span>",
    para(p[2],2),
@@ -83,19 +83,19 @@ function ghostFeature(node){
   "<section class='gh-entry gh-individual'><div><span class='label'>04 / INDIVIDUAL</span>",
    para(p[3],3),"</div><div class='gh-one deco' aria-hidden='true'>1 : 1<small>個体　／　種</small></div></section>",
   "<section class='gh-entry gh-uptake'><span class='label'>05 / METABOLISM</span>",
-   "<div class='gh-uptake-modes deco' aria-hidden='true'>",
-   "<figure><i class='gh-mode-icon pred'></i><figcaption>捕食</figcaption></figure>",
-   "<figure><i class='gh-mode-icon breath'></i><figcaption>呼吸</figcaption></figure>",
-   "<figure><i class='gh-mode-icon surface'></i><figcaption>吸収</figcaption></figure>",
-   "<figure><i class='gh-mode-icon inner'></i><figcaption>生成</figcaption></figure></div>",
+   "<div class='gh-uptake-modes' role='group' aria-label='朧気の摂取方法を選択する'>",
+   "<button type='button' class='gh-mode' data-mode='pred' aria-pressed='false'><i class='gh-mode-icon pred' aria-hidden='true'></i><span class='gh-mode-caption'>捕食</span></button>",
+   "<button type='button' class='gh-mode' data-mode='breath' aria-pressed='false'><i class='gh-mode-icon breath' aria-hidden='true'></i><span class='gh-mode-caption'>呼吸</span></button>",
+   "<button type='button' class='gh-mode' data-mode='surface' aria-pressed='false'><i class='gh-mode-icon surface' aria-hidden='true'></i><span class='gh-mode-caption'>吸収</span></button>",
+   "<button type='button' class='gh-mode' data-mode='inner' aria-pressed='false'><i class='gh-mode-icon inner' aria-hidden='true'></i><span class='gh-mode-caption'>生成</span></button></div>",
    para(p[4],4),"</section>",
   "<section class='gh-entry gh-horror'><span class='label'>06 / ECOLOGY</span>",
    para(p[5],5),"<div class='gh-boo deco' aria-hidden='true'><span>FEAR LEVEL</span>150 ブー</div></section>",
   "<section class='gh-entry gh-divine'><div><span class='label'>07 / STABILITY</span>",
-   para(p[6],6),"</div><div class='gh-divine-figure deco' aria-hidden='true'><span>STRUCTURE / STABILITY</span></div></section>",
+   para(p[6],6),"</div><button type='button' class='gh-divine-figure' data-stabilize aria-pressed='false' aria-label='神の構造を安定させる'><span>STRUCTURE / TOUCH TO STABILIZE</span></button></section>",
   "<section class='gh-entry gh-final'><span class='label'>08 / NEXT STAGE</span>",
    para(p[7],7),
-   "<div class='gh-final-stage deco' aria-hidden='true'><i class='gh-stone'></i><i class='gh-stone'></i><i class='gh-stone'></i><i class='gh-stone'></i></div>",
+   "<div class='gh-final-stage' role='group' aria-label='足場を左から順番に踏む'><button type='button' class='gh-stone' data-step='0' aria-label='足場1'></button><button type='button' class='gh-stone' data-step='1' aria-label='足場2'></button><button type='button' class='gh-stone' data-step='2' aria-label='足場3'></button><button type='button' class='gh-stone' data-step='3' aria-label='足場4'></button><span class='gh-splash' aria-hidden='true'></span></div><p class='gh-stage-status' role='status' aria-live='polite'>左から足場を踏む</p>",
    "<div class='gh-final-footer deco' aria-hidden='true'>BEYOND THE VISIBLE / 002</div></section>",
   "</div></div>"
  ].join("");
@@ -146,7 +146,7 @@ function show(id,changeHistory){
  });
  el.story.dataset.node=node.id;document.title=node.id+" "+node.title+" — すべての歯が見える";
  navigation();if(changeHistory)history.pushState(null,"","#node-"+node.id);
- closeMenu(false);window.scrollTo(0,0);requestAnimationFrame(drawInk);requestAnimationFrame(updateReadingProgress);
+ closeMenu(false);window.scrollTo(0,0);requestAnimationFrame(drawInk);requestAnimationFrame(updateReadingProgress);window.dispatchEvent(new CustomEvent('thought:render',{detail:{id:node.id}}));
 }
 function updateReadingProgress(){
  const progress=document.querySelector('#readingProgress span');if(!progress)return;
