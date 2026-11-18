@@ -39,6 +39,14 @@ const SCENES={
  ["150ブー","何が起きても不思議ではない。","ecology","異","ECOLOGY / UNPREDICTABLE"],
  ["神","それを神と呼んでいる。","god","神","STRUCTURE / STABILITY"],
  ["どの世","あの世→その世→どの世","threshold","世","THE NEXT STAGE"]
+],
+"1-3":[
+ ["丁子","丁子（グローブ）は、古くから魔除けとして使われた。","clove","丁","CLOVE / TALISMAN"],
+ ["魔を祓い","魔を祓い、痛みを取る。","anesthetic","紋","WARD / ANESTHESIA"],
+ ["ひとつまみ","ひとつまみ","pinch","丁","ONE PINCH / SPICE"]
+],
+"1-4":[
+ ["壊れない肝臓","全人類が「壊れない肝臓」を持っていること。","liver","肝","HAPPINESS / INVULNERABILITY"]
 ]};
 const states=[],visible=new Set();
 let observer=null,frame=0,scrollFrame=0,lastFrame=0,token=0;
@@ -241,6 +249,65 @@ function stepping(ctx,s,t){
  for(let j=0;j<5;j++){ctx.beginPath();ctx.ellipse(cx,h*.86,17+j*25,7+j*6,0,0,TAU);ctx.stroke();}
  ctx.restore();
 }
+function clove(ctx,s,t){
+ const {w,h}=s,cx=w*.72,cy=h*.45,R=Math.min(w,h)*.28;
+ ctx.save();ctx.translate(cx,cy);ctx.rotate(Math.sin(t*.34)*.14-.22);
+ ctx.strokeStyle="rgba(249,224,195,.73)";ctx.lineWidth=4;
+ ctx.beginPath();ctx.moveTo(0,-R*.16);ctx.bezierCurveTo(-R*.06,R*.15,-R*.08,R*.7,-R*.09,R*1.15);ctx.stroke();
+ ctx.fillStyle="rgba(168,73,66,.68)";ctx.strokeStyle="rgba(250,215,179,.7)";
+ for(let i=0;i<4;i++){
+   const a=i*TAU/4+t*.018;
+   ctx.beginPath();ctx.ellipse(Math.cos(a)*R*.15,-R*.25+Math.sin(a)*R*.12,
+     R*.26,R*.42,a-.6,0,TAU);ctx.fill();ctx.stroke();
+ }
+ ctx.fillStyle="rgba(249,221,192,.64)";point(ctx,0,-R*.22,R*.14);
+ ctx.restore();
+ s.particles.forEach((p,i)=>{
+   const a=p.angle+t*.13*p.dir,r=R*(.8+p.rad*1.4);
+   ctx.fillStyle=i%4?"rgba(245,219,184,.35)":"rgba(234,121,80,.78)";
+   point(ctx,cx+Math.cos(a)*r,cy+Math.sin(a)*r,p.size*.6);
+ });
+}
+function anesthetic(ctx,s,t){
+ const {w,h}=s,cx=w*.72,cy=h*.47,R=Math.min(w,h)*.42;
+ ctx.save();for(let i=0;i<8;i++){
+   const spread=((i/8+t*.075)%1),r=R*spread;
+   ctx.strokeStyle=i%3?"rgba(235,227,202,"+(1-spread)*.66+")":"rgba(195,80,73,"+(1-spread)*.7+")";
+   ctx.lineWidth=1.5+spread*2;
+   ctx.beginPath();ctx.ellipse(cx,cy,r,r*.84,0,0,TAU);ctx.stroke();
+ }
+ ctx.strokeStyle="rgba(247,230,209,.65)";ctx.lineWidth=2;
+ segment(ctx,cx-R*.63,cy,cx+R*.63,cy);segment(ctx,cx,cy-R*.62,cx,cy+R*.62);
+ ctx.restore();
+}
+function pinch(ctx,s,t){
+ const {w,h}=s,cx=w*.71,cy=h*.33;ctx.save();
+ s.particles.forEach((p,i)=>{
+   const fall=(p.rad+t*(.018+p.rate*.014))%1;
+   const x=cx+(p.x-.5)*w*.29+Math.sin(p.phase+t*.7)*13;
+   const y=cy+fall*h*.48;
+   ctx.globalAlpha=(1-fall)*.87;
+   ctx.fillStyle=i%5?"#f2cf9c":"#c55044";
+   point(ctx,x,y,1+p.size*.9);
+ });ctx.globalAlpha=1;ctx.restore();
+}
+function liver(ctx,s,t){
+ const {w,h}=s,cx=w*.73,cy=h*.48,R=Math.min(w,h)*.37;
+ ctx.save();ctx.translate(cx,cy);const breathe=1+Math.sin(t*1.12)*.028;ctx.scale(breathe,breathe);
+ ctx.fillStyle="rgba(147,47,49,.67)";ctx.strokeStyle="rgba(251,213,178,.81)";ctx.lineWidth=2.3;
+ ctx.beginPath();ctx.moveTo(-R*.97,-R*.12);
+ ctx.bezierCurveTo(-R*1.02,-R*.76,R*.10,-R*.94,R*.87,-R*.34);
+ ctx.bezierCurveTo(R*1.34,R*.17,R*.35,R*.53,R*.11,R*.51);
+ ctx.bezierCurveTo(-R*.09,R*.73,-R*.38,R*.28,-R*.57,R*.51);
+ ctx.bezierCurveTo(-R*.94,R*.48,-R*1.08,R*.12,-R*.97,-R*.12);
+ ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.strokeStyle="rgba(249,229,211,.37)";
+ for(let i=0;i<5;i++){
+   ctx.beginPath();ctx.ellipse(0,0,R*(.2+i*.13),R*(.13+i*.11),-.16,0,TAU);
+   ctx.stroke();
+ }
+ ctx.restore();
+}
 function paint(s,ms){
  if(!resize(s))return;
  const ctx=s.ctx,t=ms*.001;
@@ -253,6 +320,10 @@ function paint(s,ms){
  else if(s.mode==="sake")sake(ctx,s,t);
  else if(s.mode==="danjiri")parade(ctx,s,t);
  else if(s.mode==="threshold")stepping(ctx,s,t);
+ else if(s.mode==="clove")clove(ctx,s,t);
+ else if(s.mode==="anesthetic")anesthetic(ctx,s,t);
+ else if(s.mode==="pinch")pinch(ctx,s,t);
+ else if(s.mode==="liver")liver(ctx,s,t);
  if(s.energy>.015){
    const x=s.px*s.w,y=s.py*s.h;ctx.save();
    ctx.strokeStyle="rgba(255,225,198,"+(.57*s.energy)+")";ctx.lineWidth=2.5;
@@ -304,8 +375,10 @@ function addPortal(chapter){
  halo.className="cinema-hero-halo";halo.setAttribute("aria-hidden","true");hero.appendChild(halo);
  const mark=document.createElement("span");
  mark.className="cinema-hero-mark";mark.setAttribute("aria-hidden","true");
- mark.textContent=chapter==="1-1"?"2019.11.11 / 01":"朧気 / 02";hero.appendChild(mark);
- const s=makeState(hero,chapter==="1-1"?"portalHail":"portalGhost",99);
+ const marks={"1-1":"2019.11.11 / 01","1-2":"朧気 / 02","1-3":"一つ折れ丁子 / 03","1-4":"幸せな世界 / 04"};
+ mark.textContent=marks[chapter]||chapter;hero.appendChild(mark);
+ const portals={"1-1":"portalHail","1-2":"portalGhost","1-3":"clove","1-4":"liver"};
+ const s=makeState(hero,portals[chapter]||"portalGhost",99);
  if(s){states.push(s);observe(s);}
 }
 function showCurtain(chapter){
@@ -328,7 +401,7 @@ function start(){
  clear();
  const chapter=story.dataset.node,config=SCENES[chapter];if(!config)return;
  const paragraphs=[...story.querySelectorAll(".article-content > section.entry,.article-content > section.gh-entry")];
- if(paragraphs.length!==8)return;
+ if(paragraphs.length!==config.length)return;
  if(!config.every((sc,i)=>paragraphs[i].querySelector(".copy")?.textContent.includes(sc[1])))return;
  story.classList.add("cinema-enhanced");
  master.hidden=false;
