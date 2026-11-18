@@ -75,7 +75,7 @@ function createBeat(chapter,i,scene){
  glyphs.forEach((c,j)=>{
    const element=document.createElement("span");
    element.className="cinema-char";element.style.setProperty("--ci",j);
-   element.textContent=c;titleElement.appendChild(element);
+   element.textContent=c;element.dataset.letter=c;titleElement.appendChild(element);
  });
  if(glyphs.length>=8)titleElement.classList.add("is-long");
  else if(glyphs.length>=4)titleElement.classList.add("is-medium");
