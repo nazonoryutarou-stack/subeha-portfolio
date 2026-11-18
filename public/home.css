@@ -34,3 +34,45 @@ a{color:inherit}
 @media(max-width:650px){.poster-meta{top:20px;font-size:8px}.poster-seal{left:18px;top:35%;font-size:24px}.site-title{font-size:clamp(25px,7.2vw,36px)}.crest-stage{width:min(68vw,300px)}.poster-brush{top:7%;left:-16%;width:110vw;height:38vw;opacity:.44}.poster-footer{bottom:10px;font-size:8px}.enter-wrap{margin-top:35px}}
 @media(max-height:670px){.entrance{grid-template-rows:30px auto auto auto 20px}.site-title{margin:0 0 12px}.crest-stage{width:min(40vh,240px)}.enter-wrap{margin-top:20px}.poster-meta{top:8px}.poster-footer{bottom:4px}.crest-stage-note{bottom:-8px}}
 @media(prefers-reduced-motion:reduce){.crest-image,.crest-orbit{transition:none!important}}
+
+
+/* Interactive entrance, 2026-11-18 — the seal is alive even before its first tap. */
+.crest-stage{isolation:isolate}
+.crest-stage::before,.crest-stage::after{content:"";position:absolute;pointer-events:none;border-radius:50%;z-index:0}
+.crest-stage::before{inset:-10%;border:1px dashed rgba(118,55,48,.27);opacity:.9}
+.crest-stage::after{inset:15%;border:1px dotted rgba(112,70,63,.5);opacity:.6}
+.crest-stage .crest-image{translate:var(--crest-x,0px) var(--crest-y,0px)}
+.entrance-spark{
+ position:absolute;z-index:5;top:50%;left:50%;
+ width:6px;height:6px;background:#ac3731;border-radius:50%;
+ transform:rotate(var(--a,0deg)) translateX(14px);pointer-events:none;
+ animation:entrance-spark .7s ease-out both;
+}
+.crest-stage:active .crest-image{filter:sepia(.8) contrast(1.6)}
+.enter-link span{display:inline-block}
+@media(prefers-reduced-motion:no-preference){
+ .crest-stage::before{animation:entrance-orbit 26s linear infinite}
+ .crest-stage::after{animation:entrance-orbit 19s linear infinite reverse}
+ .crest-stage{animation:entrance-hover 6.4s ease-in-out infinite alternate}
+ .poster-brush{animation:entrance-ink 16s ease-in-out infinite alternate}
+ .entrance::after{animation:entrance-corner 10s ease-in-out infinite alternate}
+ .site-title{animation:entrance-letter 1.3s ease-out both}
+ .poster-seal{animation:entrance-red-stamp 11s ease-in-out infinite alternate}
+ .enter-link span{animation:entrance-arrow 2.6s ease-in-out infinite}
+ .crest-stage[data-mode="1"]::after{border-style:dashed}
+ .crest-stage[data-mode="2"]::after{border-width:3px;opacity:.25}
+ .crest-stage[data-mode="3"]::after{border-color:#9d3c35}
+}
+@keyframes entrance-orbit{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes entrance-hover{from{translate:0 -3px}to{translate:0 6px}}
+@keyframes entrance-ink{from{transform:rotate(-13deg) translate(0,0)}to{transform:rotate(-10deg) translate(16px,17px)}}
+@keyframes entrance-corner{from{transform:translate(9%,-12%) scale(1)}to{transform:translate(3%,-8%) scale(1.13)}}
+@keyframes entrance-letter{from{opacity:0;transform:translateY(19px);filter:blur(4px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes entrance-red-stamp{from{transform:rotate(-9deg)}to{transform:rotate(-5deg)}}
+@keyframes entrance-arrow{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+@keyframes entrance-spark{0%{opacity:1;transform:rotate(var(--a,0deg)) translateX(18px) scale(1)}100%{opacity:0;transform:rotate(var(--a,0deg)) translateX(152px) scale(.35)}}
+@media(prefers-reduced-motion:reduce){
+ .crest-stage::before,.crest-stage::after,.entrance-spark{animation:none!important}
+ .entrance-spark{display:none}
+ .crest-stage .crest-image{translate:0 0}
+}
