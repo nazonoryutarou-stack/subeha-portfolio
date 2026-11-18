@@ -7,6 +7,14 @@
 "use strict";
 const story=document.getElementById("story");
 if(!story)return;
+const master=document.createElement("button");
+master.type="button";
+master.className="cinema-master";
+master.textContent="演出を止める";
+master.setAttribute("aria-label","モーショングラフィックスを一時停止する");
+master.setAttribute("aria-pressed","false");
+master.hidden=true;
+document.body.appendChild(master);
 const reducedQuery=matchMedia("(prefers-reduced-motion: reduce)");
 const saveData=!!(navigator.connection&&navigator.connection.saveData);
 const smallQuery=matchMedia("(max-width:640px)");
@@ -35,7 +43,7 @@ const SCENES={
 const states=[],visible=new Set();
 let observer=null,frame=0,scrollFrame=0,lastFrame=0,token=0;
 const TAU=2*Math.PI,clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
-const reduced=()=>reducedQuery.matches||saveData||document.documentElement.classList.contains("cinema-still");
+const reduced=()=>reducedQuery.matches||saveData||document.documentElement.classList.contains("cinema-still")||document.documentElement.classList.contains("quiet-mode");
 function random(seed){let n=seed>>>0;return()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);}
 function chars(s){return typeof Intl.Segmenter==="function"
 ?[...new Intl.Segmenter("ja",{granularity:"grapheme"}).segment(s)].map(c=>c.segment):Array.from(s);}
@@ -254,6 +262,10 @@ function paint(s,ms){
  }else s.energy=0;
 }
 function updateLoop(){
+ if(document.documentElement.classList.contains("quiet-mode")){
+   if(frame){cancelAnimationFrame(frame);frame=0;}
+   return;
+ }
  if(reduced()){
    if(frame){cancelAnimationFrame(frame);frame=0;}
    for(const s of states){s.el.classList.add("is-on");paint(s,0);}
@@ -281,6 +293,7 @@ function clear(){
  if(scrollFrame){cancelAnimationFrame(scrollFrame);scrollFrame=0;}
  visible.clear();states.length=0;lastFrame=0;
  story.classList.remove("cinema-enhanced");
+ master.hidden=true;
 }
 function addPortal(chapter){
  const hero=story.querySelector(".hero");if(!hero)return;
@@ -295,6 +308,22 @@ function addPortal(chapter){
  const s=makeState(hero,chapter==="1-1"?"portalHail":"portalGhost",99);
  if(s){states.push(s);observe(s);}
 }
+function showCurtain(chapter){
+ if(reduced())return;
+ const intro=document.createElement("div");
+ intro.className="cinema-intro";
+ intro.dataset.chapter=chapter;
+ intro.setAttribute("aria-hidden","true");
+ const title=document.createElement("div");
+ title.className="cinema-intro-word";
+ title.textContent=story.querySelector(".hero h1")?.textContent||"";
+ const code=document.createElement("span");
+ code.className="cinema-intro-code";
+ code.textContent="RITUAL NOTES / "+chapter;
+ intro.append(code,title);
+ story.prepend(intro);
+ setTimeout(()=>{if(intro.isConnected)intro.remove();},1690);
+}
 function start(){
  clear();
  const chapter=story.dataset.node,config=SCENES[chapter];if(!config)return;
@@ -302,6 +331,10 @@ function start(){
  if(paragraphs.length!==8)return;
  if(!config.every((sc,i)=>paragraphs[i].querySelector(".copy")?.textContent.includes(sc[1])))return;
  story.classList.add("cinema-enhanced");
+ master.hidden=false;
+ master.textContent=document.documentElement.classList.contains("cinema-still")?"演出を再開":"演出を止める";
+ master.setAttribute("aria-pressed",String(document.documentElement.classList.contains("cinema-still")));
+ showCurtain(chapter);
  if("IntersectionObserver" in window){
    observer=new IntersectionObserver(entries=>{
      for(const e of entries){
@@ -354,6 +387,14 @@ function updateScroll(){
  }
 }
 function onScroll(){if(!scrollFrame&&!reduced())scrollFrame=requestAnimationFrame(updateScroll);}
+master.addEventListener("click",()=>{
+ const still=document.documentElement.classList.toggle("cinema-still");
+ master.textContent=still?"演出を再開":"演出を止める";
+ master.setAttribute("aria-pressed",String(still));
+ master.setAttribute("aria-label",still?"モーショングラフィックスを再開する":"モーショングラフィックスを一時停止する");
+ updateLoop();
+});
+new MutationObserver(()=>updateLoop()).observe(document.documentElement,{attributes:true,attributeFilter:["class"]});
 window.addEventListener("thought:render",start);
 document.addEventListener("visibilitychange",updateLoop);
 window.addEventListener("scroll",onScroll,{passive:true});
