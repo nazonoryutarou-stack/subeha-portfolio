@@ -1,0 +1,19 @@
+{
+  "name": "AVATAR ATELIER - 3Dアバター制作",
+  "short_name": "アバター工房",
+  "description": "スマホで顔・髪・体型・衣装を編集し、GLBやVRM 1.0に書き出すアプリ",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f0ed",
+  "theme_color": "#f3f0ed",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
