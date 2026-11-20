@@ -53,6 +53,11 @@
     <label class="slider">動きの大きさ <output id="intensity-value">75%</output><input id="intensity" type="range" min="0" max="1" step=".05" value=".75"></label>
     <label class="slider">カメラの左右位置 <output id="framing-value">中央</output><input id="framing" type="range" min="-1" max="1" step=".1" value="0"></label>
    </div>
+   <details class="expression-panel" open>
+    <summary>モデルの表情モーフを個別調整</summary>
+    <div id="expression-controls"><p class="pose-help">Subeha.vrmを読み込むと、収録されている表情が一覧表示されます。</p></div>
+    <button id="reset-expression" type="button">このカットの表情調整をリセット</button>
+   </details>
    <section class="pose-panel" aria-label="モデルの関節を編集">
     <header class="pose-heading"><div><strong>全身ポーズ編集</strong><small>カットごとに関節を調整 · 値はJSONに保存</small></div><button id="pose-reset" type="button">姿勢をリセット</button></header>
     <div class="pose-presets" id="pose-presets"></div>
