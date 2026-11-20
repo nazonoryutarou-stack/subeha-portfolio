@@ -1,5 +1,5 @@
 /* Offline shell only. 3D libraries are fetched from remote CDN on first load. */
-const CACHE='avatar-atelier-shell-v1';
+const CACHE='avatar-atelier-shell-v2';
 const ASSETS=['./','./index.html','./style.css','./model.mjs','./geometry.mjs','./app.mjs','./export-vrm.mjs','./icon.svg','./manifest.webmanifest'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('avatar-atelier-shell-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
