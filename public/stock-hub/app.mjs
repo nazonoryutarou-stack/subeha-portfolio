@@ -57,9 +57,15 @@ function queryLinks(q,kind){
  }
 }
 async function getJSON(url,signal){
- const response=await fetch(url,{signal,mode:'cors',credentials:'omit',headers:{Accept:'application/json'}});
- if(!response.ok)throw Error('HTTP '+response.status);
- return response.json();
+ const timeoutController=new AbortController();
+ const timer=setTimeout(()=>timeoutController.abort(),11000);
+ const cancel=()=>timeoutController.abort();
+ signal?.addEventListener('abort',cancel,{once:true});
+ try{
+  const response=await fetch(url,{signal:timeoutController.signal,mode:'cors',credentials:'omit',headers:{Accept:'application/json'}});
+  if(!response.ok)throw Error('HTTP '+response.status);
+  return await response.json();
+ }finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);}
 }
 function mapNasa(body,kind){
  const rows=body?.collection?.items||[];
@@ -75,7 +81,7 @@ function mapNasa(body,kind){
 function polyEntries(body,q,kind){
  const typed={model:'models',texture:'textures',hdri:'hdris'}[kind];
  return Object.entries(body||{}).filter(([id,x])=>{
-  if(typed&&x.type&&x.type!==typed&&x.type!==(typed==='models'?0:typed==='textures'?1:2))return false;
+  // The endpoint query already filters type; asset metadata uses provider-specific type enums.
   const words=[id,x.name||'',...(x.tags||[]),...(x.categories||[])].join(' ').toLowerCase();
   return words.includes(q.toLowerCase());
  }).slice(0,40).map(([id,x])=>({id:'poly-'+id,provider:'Poly Haven',kind,title:x.name||id,source:'https://polyhaven.com/a/'+encodeURIComponent(id),
