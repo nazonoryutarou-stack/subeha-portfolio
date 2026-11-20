@@ -74,7 +74,7 @@ async function loadModelBytes(bytes,name,origin='local'){
   bounds={minY:Number.isFinite(box.min.y)?box.min.y:0,height:Number.isFinite(height)&&height>.2?height:1.7};
   loadPoseBones();modelName=name;sourceModel=origin;lastStatusModel=name;
   const mgr=vrm.expressionManager;
-  supportedExpressions=Array.from(new Set((mgr?.expressions||[]).map(x=>x.expressionName).filter(Boolean)));
+  supportedExpressions=Object.keys(mgr?.expressionMap||{});
   $('view-hint').hidden=true;refreshAssetNames();renderPoseControls();renderModelInfo();
   status(name+' を読み込みました。関節・表情・カット演出を調整できます。');return true;
  }catch(e){console.error(e);status('VRMの読み込みに失敗: '+(e?.message||e));return false;}
@@ -336,6 +336,68 @@ async function loadProject(file){
   status('設定を読み込みました。音声とVRMは必要に応じて読み直してください。');
  }catch(e){status('設定読み込み失敗: '+e.message);}
 }
+
+function setupPoseControls(){
+ const select=$('pose-bone');select.replaceChildren();
+ for(const [key,title] of POSE_BONES){
+  const option=document.createElement('option');option.value=key;option.textContent=title;select.append(option);
+ }
+ select.value=poseBone;
+ const presets=$('pose-presets');presets.replaceChildren();
+ for(const [id,label] of POSE_PRESETS){
+  const button=document.createElement('button');button.type='button';button.textContent=label;
+  button.onclick=()=>{
+   const shot=selectedShot();if(!shot)return;
+   shot.pose=presetPose(id);renderPoseControls();status(label+' をこのカットへ適用しました。');
+  };
+  presets.append(button);
+ }
+ renderPoseControls();
+}
+function renderPoseControls(){
+ const shot=selectedShot();if(!shot)return;
+ const selector=$('pose-bone');
+ for(const opt of selector.options)opt.disabled=!!vrm&&!getNode(opt.value);
+ if(vrm&&!getNode(poseBone)){
+  const first=POSE_BONES.find(([key])=>!!getNode(key));
+  if(first)poseBone=first[0];
+ }
+ selector.value=poseBone;
+ const angles=shot.pose?.[poseBone]||[0,0,0];
+ ['x','y','z'].forEach((axis,i)=>{
+  const slider=$('pose-'+axis),value=$('pose-'+axis+'-value');
+  slider.value=String(angles[i]||0);value.textContent=(angles[i]||0)+'°';
+  slider.disabled=!!vrm&&!getNode(poseBone);
+ });
+}
+function updatePoseAxis(axis,value){
+ const shot=selectedShot();if(!shot)return;
+ const index={x:0,y:1,z:2}[axis];if(index===undefined)return;
+ if(vrm&&!getNode(poseBone))return;
+ const copy={...(shot.pose||{})};
+ const degrees=[...(copy[poseBone]||[0,0,0])];degrees[index]=clamp(value,-130,130);
+ copy[poseBone]=degrees;shot.pose=normalizePose(copy);
+ $('pose-'+axis+'-value').textContent=degrees[index]+'°';
+}
+function renderModelInfo(){
+ const box=$('model-info');box.replaceChildren();
+ const add=text=>{const p=document.createElement('p');p.textContent=text;box.append(p);};
+ if(!vrm){add('まだモデルが読み込まれていません。Subeha.vrmを読み込むとボーンと表情を確認できます。');return;}
+ const bones=POSE_BONES.filter(([key])=>!!getNode(key));
+ const mgr=vrm.expressionManager;
+ const expressions=Object.keys(mgr?.expressionMap||{});
+ supportedExpressions=expressions;
+ add('モデル: '+modelName+' / '+(sourceModel==='built-in'?'GitHub版':'端末から選択'));
+ add('操作できる関節: '+bones.length+'/'+POSE_BONES.length+'（'+bones.map(([,label])=>label).join('、')+'）');
+ add('モデルに含まれる表情: '+(expressions.join(' / ')||'なし'));
+ add('動画・静止画を書き出す際も、モデル原本は変更しません。ポーズは設定JSONに保存されます。');
+ const expressionSelect=$('expression');
+ for(const opt of expressionSelect.options){
+  if(opt.value==='neutral'){opt.disabled=false;continue;}
+  opt.disabled=!mgr?.getExpression?.(opt.value);
+ }
+}
+
 function bind(){
  $('vrm-input').onchange=e=>{loadModel(e.target.files?.[0]);e.target.value='';};
  $('load-subeha').onclick=loadBuiltIn;
