@@ -515,3 +515,4 @@ function bind(){
 }
 bind();setupPoseControls();renderShots();renderSelection();renderClock();
 try{init3D();}catch(e){console.error(e);status('WebGLの初期化に失敗: '+e.message);}
+if(new URLSearchParams(window.location.search).get('model')==='subeha')loadBuiltIn();
