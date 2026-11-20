@@ -280,7 +280,7 @@ function applyPose(time,dt){
 function frame(now){
  requestAnimationFrame(frame);
  const dt=Math.min(.05,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
- if(playingSilent){previewTime+=dt;if(previewTime>=duration){previewTime=duration;stopPlayback();}}
+ if(playingSilent){previewTime+=dt;if(previewTime>=duration){previewTime=duration;stopPlayback();if(recording?.state==='recording'&&!audio.src)recording.stop();}}
  if(audio.src&&audio.readyState>=1)previewTime=audio.currentTime;
  const time=clamp(previewTime,0,duration);
  if(vrm)applyPose(time,dt);
@@ -288,33 +288,56 @@ function frame(now){
  renderClock();
 }
 async function exportVideo(){
- if(recording){recording.stop();return;}
- if(!renderer||!vrm||!audio.src){status('動画を書き出すにはVRMモデルと音声ファイルが必要です。');return;}
- if(!renderer.domElement.captureStream||typeof MediaRecorder==='undefined'){status('このブラウザには動画収録APIがありません。');return;}
- const mime=['video/mp4;codecs="avc1.42E01E,mp4a.40.2"','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(x=>MediaRecorder.isTypeSupported(x));
- if(!mime){status('動画と音声を一緒に収録できる形式がありません。');return;}
+ if(recording){if(recording.state==='recording')recording.stop();return;}
+ if(!renderer||!vrm){status('動画を書き出すにはVRMモデルが必要です。');return;}
+ if(!renderer.domElement.captureStream||typeof MediaRecorder==='undefined'){
+  status('このブラウザでは動画収録APIを利用できません。');return;
+ }
+ const withAudio=!!audio.src;
+ const options=withAudio
+  ? ['video/mp4;codecs="avc1.42E01E,mp4a.40.2"','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']
+  : ['video/mp4;codecs="avc1.42E01E"','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+ const mime=options.find(format=>{try{return MediaRecorder.isTypeSupported(format);}catch{return false;}});
+ if(!mime){status('収録できるMP4/WebM形式が見つかりません。');return;}
  try{
-  await ensureAudioGraph();if(!audioDestination)throw Error('音声キャプチャが利用できません');
+  if(withAudio){
+   await ensureAudioGraph();
+   if(!audioDestination)throw Error('音声キャプチャが利用できません');
+  }
   stopPlayback();setTime(0);
   recordingStream=renderer.domElement.captureStream(30);
-  for(const track of audioDestination.stream.getAudioTracks())recordingStream.addTrack(track);
+  if(withAudio)for(const track of audioDestination.stream.getAudioTracks())recordingStream.addTrack(track);
   recordingChunks=[];recordingExtension=mime.includes('mp4')?'mp4':'webm';
   recording=new MediaRecorder(recordingStream,{mimeType:mime,videoBitsPerSecond:3800000});
   const currentRecorder=recording;
   currentRecorder.ondataavailable=e=>{if(e.data?.size)recordingChunks.push(e.data);};
-  currentRecorder.onerror=e=>status('書き出しで問題が発生: '+(e.error?.message||'収録に失敗'));
+  currentRecorder.onerror=e=>status('動画収録エラー: '+(e.error?.message||'録画に失敗'));
   currentRecorder.onstop=()=>{
-   audio.pause();$('play').textContent='▶';
-   for(const track of recordingStream?.getVideoTracks()||[])track.stop();
-   if(recordingChunks.length){const blob=new Blob(recordingChunks,{type:currentRecorder.mimeType});saveBlob(blob,'VRM_STAGE_'+Date.now()+'.'+recordingExtension);status('動画を保存しました。'+recordingExtension.toUpperCase()+'形式です。');}
-   else status('動画データを保存できませんでした。');
-   recording=null;recordingStream=null;recordingChunks=[];$('export-video').textContent='動画を書き出す';
+   stopPlayback();
+   for(const track of recordingStream?.getTracks()||[])if(track.kind==='video')track.stop();
+   if(recordingChunks.length){
+    saveBlob(new Blob(recordingChunks,{type:currentRecorder.mimeType}),'Subeha_STAGE_'+Date.now()+'.'+recordingExtension);
+    status('動画を保存しました（'+recordingExtension.toUpperCase()+'）。ブラウザがWebMを選んだ場合はVideoleap向けにMP4へ変換してください。');
+   }else status('動画データを保存できませんでした。');
+   recording=null;recordingStream=null;recordingChunks=[];
+   $('export-video').textContent='動画を書き出す';
   };
-  audio.onended=()=>{previewTime=duration;$('play').textContent='▶';if(recording&&recording.state!=='inactive')recording.stop();};
-  recording.start(1000);$('export-video').textContent='収録を終了';status('実時間で映像を収録中です。再生が終わるまで画面を閉じないでください。');
-  try{await audio.play();$('play').textContent='Ⅱ';}
-  catch(e){currentRecorder.stop();throw e;}
- }catch(e){console.error(e);status('書き出しに失敗: '+e.message);}
+  if(withAudio)audio.onended=()=>{
+   previewTime=duration;$('play').textContent='▶';
+   if(recording?.state==='recording')recording.stop();
+  };
+  recording.start(1000);
+  $('export-video').textContent='収録を終了';
+  status('実時間で動画を収録中です。再生が終わるまで画面を閉じないでください。');
+  if(withAudio){
+   try{await audio.play();$('play').textContent='Ⅱ';}
+   catch(e){if(recording?.state==='recording')recording.stop();throw e;}
+  }else{
+   playingSilent=true;$('play').textContent='Ⅱ';
+  }
+ }catch(e){
+  console.error(e);status('動画書き出しに失敗: '+(e?.message||e));
+ }
 }
 function saveProject(){
  const doc=projectJSON(shots,duration);
@@ -340,7 +363,7 @@ async function loadProject(file){
   for(const [key,color] of Object.entries(doc.materialOverrides||{})){
    if(/^\d{1,3}$/.test(key)&&Number(key)<300&&/^#[0-9a-f]{6}$/i.test(color))materialOverrides[key]=color;
   }
-  applyMaterialOverrides();renderMaterialUI();
+  if(modelName===materialOwner)applyMaterialOverrides();renderMaterialUI();
   if(['9:16','16:9','1:1'].includes(doc.ratio)){$('ratio').value=doc.ratio;configureRatio();}
   $('seek').max=duration;renderShots();renderSelection();setTime(0);
   status('設定を読み込みました。音声とVRMは必要に応じて読み直してください。');
