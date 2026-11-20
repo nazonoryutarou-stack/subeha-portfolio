@@ -44,3 +44,14 @@
 .expression-row output{text-align:right;color:#ffaad1;font:11px ui-monospace,monospace}
 .expression-row input[type=range]{grid-column:1/-1;width:100%;accent-color:#ef83b0;touch-action:pan-x}
 #reset-expression{padding:8px 10px;color:#ded1e5;border:1px solid #5f4c61;border-radius:7px;background:#35303b;font-size:11px}
+
+/* Mobile touch bone handles */
+.pose-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end}
+.pose-toolbar button{min-height:38px;padding:8px 10px;border-radius:8px;border:1px solid #655667;background:#38313f;color:#f5edf6;font-size:11px;white-space:nowrap}
+.pose-toolbar button:disabled{opacity:.35}
+#touch-pose[aria-pressed="true"]{background:#eee6f0;color:#251a2a;border-color:#eee6f0;font-weight:700}
+#viewport .pose-dot{position:absolute;z-index:7;width:18px;height:18px;transform:translate(-50%,-50%);border-radius:50%;background:#ffcddbcc;border:2px solid #351c34;box-shadow:0 0 0 3px #ffffff44,0 0 12px #e76fac88;pointer-events:none}
+#viewport .pose-dot[hidden]{display:none}
+#viewport .pose-dot.active{width:23px;height:23px;background:#ffe4a3;border-color:#382524;box-shadow:0 0 0 4px #ffe6a355,0 0 15px #e5c684}
+#viewport .pose-dot.active::after{content:attr(data-label);position:absolute;top:-32px;left:50%;transform:translateX(-50%);background:#111115e8;color:#fff;border-radius:5px;padding:4px 7px;white-space:nowrap;font-size:11px;font-weight:700}
+@media(max-width:700px){.pose-toolbar{justify-content:flex-start}.pose-toolbar button{flex:1 0 auto}.pose-panel .pose-heading{flex-wrap:wrap;gap:10px}#viewport .pose-dot{width:20px;height:20px}}
