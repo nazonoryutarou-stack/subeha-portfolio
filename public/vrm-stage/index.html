@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17171c">
+<meta name="description" content="音声とVRMを組み合わせ、カットごとに表情・動き・カメラを演出する映像制作ツール">
+<title>VRM STAGE — 音声でアバターを演出</title>
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{"imports":{
+ "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+ "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+ "@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.js"
+}}
+</script>
+</head>
+<body>
+<div id="root">
+ <header class="apphead">
+  <div><small>映像素材制作</small><h1>VRM STAGE</h1></div>
+  <div class="head-actions"><button id="save-project" title="演出設定をJSONで保存">設定保存</button><button id="load-project" title="演出設定を読み込む">設定読込</button><button id="export-video" class="primary">動画を書き出す</button></div>
+ </header>
+ <main class="stage-main">
+  <section class="view-area" aria-label="VRMプレビュー">
+   <div id="viewport">
+    <div class="view-hint" id="view-hint">VRMモデルを読み込んでください。<small>VRM 0.x / 1.0、端末内で処理</small></div>
+   </div>
+   <div class="asset-bar">
+    <label class="file-button">VRMを選択<input id="vrm-input" type="file" accept=".vrm,.glb,model/gltf-binary" hidden></label>
+    <label class="file-button">音声を選択<input id="audio-input" type="file" accept="audio/*" hidden></label>
+    <span id="asset-names">モデル未選択／音声未選択</span>
+   </div>
+   <div class="transport">
+    <button id="play" class="play" aria-label="再生または停止">▶</button>
+    <time id="clock">00:00.00 / 00:20.00</time>
+    <input type="range" id="seek" min="0" max="20" value="0" step=".01" aria-label="再生位置">
+    <button id="snapshot" title="現在フレームを画像で保存">PNG</button>
+    <label class="ratio">画角<select id="ratio"><option value="9:16">9:16</option><option value="16:9">16:9</option><option value="1:1">1:1</option></select></label>
+   </div>
+  </section>
+  <section class="work-area">
+   <header class="work-head"><div><strong>カット割り</strong><small>音声の再生位置でカットを分割</small></div><button id="split" class="accent">＋ ここでカット</button></header>
+   <div class="shot-timeline" id="shot-timeline" aria-label="カット一覧"></div>
+   <div class="shot-edit-head"><strong id="shot-heading">カット 1</strong><span id="shot-range">0:00 – 0:20</span><button id="delete-shot" class="subtle">カット削除</button></div>
+   <div class="editor-grid">
+    <label>表情 <select id="expression"><option value="neutral">通常</option><option value="happy">笑顔</option><option value="angry">怒り</option><option value="sad">悲しみ</option><option value="relaxed">リラックス</option><option value="surprised">驚き</option></select></label>
+    <label>動き <select id="movement"><option value="idle">待機・呼吸</option><option value="talk">話す・身振り</option><option value="nod">うなずく</option><option value="shake">首を振る</option><option value="wave">手を振る</option><option value="bow">お辞儀</option><option value="listen">聞き入る</option></select></label>
+    <label>カメラ <select id="camera"><option value="full">全身</option><option value="medium">上半身</option><option value="close">顔アップ</option></select></label>
+    <label>口の動き <select id="mouth"><option value="auto">音量に連動</option><option value="closed">閉じる</option><option value="aa">あ</option><option value="ee">え</option><option value="ih">い</option><option value="oh">お</option><option value="ou">う</option></select></label>
+    <label class="slider">動きの大きさ <output id="intensity-value">75%</output><input id="intensity" type="range" min="0" max="1" step=".05" value=".75"></label>
+    <label class="slider">カメラの左右位置 <output id="framing-value">中央</output><input id="framing" type="range" min="-1" max="1" step=".1" value="0"></label>
+   </div>
+   <div class="boundary" id="boundary-wrap" hidden><label>このカットの開始位置 <output id="boundary-value"></output><input id="boundary" type="range" min="0" max="20" step=".05"></label><small>境界を動かすと、前のカットとの長さを調整します。</small></div>
+   <footer class="work-foot"><p id="status" role="status" aria-live="polite">モデルと音声を読み込むと、音声に合わせてVRMが動きます。</p><small>音声連動は音量ベースです。厳密な日本語音素解析・モーションキャプチャではありません。</small></footer>
+  </section>
+ </main>
+</div>
+<input id="project-input" type="file" accept="application/json,.json" hidden>
+<audio id="audio" preload="metadata"></audio>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
