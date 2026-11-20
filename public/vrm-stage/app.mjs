@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {VRMLoaderPlugin, VRMUtils} from '@pixiv/three-vrm';
+import {recolorVRM} from './recolor-vrm.mjs';
 import {EXPRESSIONS, SHOT_DEFAULT, POSE_BONES, POSE_PRESETS, normalizePose, normalizeExpressionMix, presetPose, normalizeShots, newShot, splitShot, moveCut, removeShot, findShot, computeEnvelope, amplitudeAt, clamp, projectJSON} from './shots.mjs';
 
 const $=id=>document.getElementById(id);
@@ -16,6 +17,7 @@ let recording=null,recordingStream=null,recordingChunks=[],recordingExtension=''
 let cameraYaw=0,cameraPitch=0,cameraTurn=0,backgroundColor='#1c1b24',sourceModel='';
 let poseBone='head',supportedExpressions=[],lastStatusModel='';
 let modelMaterials=[],materialOverrides={},materialOwner='',selectedMaterial=0;
+let sourceVRMBytes=null;
 const compiler=()=>new GLTFLoader().register(parser=>new VRMLoaderPlugin(parser));
 function init3D(){
  scene=new THREE.Scene();scene.background=new THREE.Color(0x1c1b24);
@@ -75,7 +77,7 @@ async function loadModelBytes(bytes,name,origin='local'){
   bounds={minY:Number.isFinite(box.min.y)?box.min.y:0,height:Number.isFinite(height)&&height>.2?height:1.7};
   loadPoseBones();modelName=name;sourceModel=origin;lastStatusModel=name;
   if(materialOwner!==name){materialOverrides={};materialOwner=name;}
-  collectMaterials();
+  sourceVRMBytes=bytes;collectMaterials(gltf.parser);
   const mgr=vrm.expressionManager;
   supportedExpressions=Object.keys(mgr?.expressionMap||{});
   $('view-hint').hidden=true;refreshAssetNames();renderPoseControls();renderModelInfo();
@@ -375,13 +377,17 @@ async function loadProject(file){
 }
 
 
-function collectMaterials(){
+function collectMaterials(parser){
  modelMaterials=[];const seen=new Set();
  vrm?.scene.traverse(object=>{
   for(const m of (Array.isArray(object.material)?object.material:[object.material])){
    if(!m?.color?.isColor||seen.has(m.uuid))continue;
    seen.add(m.uuid);
-   if(modelMaterials.length<300)modelMaterials.push({material:m,original:m.color.clone(),name:m.name||object.name||'材質'});
+   if(modelMaterials.length<300){
+    const association=parser?.associations?.get(m);
+    const index=association?.materials??(association?.type==='materials'?association.index:-1);
+    modelMaterials.push({material:m,original:m.color.clone(),name:m.name||object.name||'材質',sourceIndex:Number.isInteger(index)?index:-1});
+   }
   }
  });
  selectedMaterial=0;applyMaterialOverrides();
@@ -405,6 +411,7 @@ function renderMaterialUI(){
  const color=$('material-color'),select=$('material-select');
  select.disabled=!modelMaterials.length;color.disabled=!entry;
  $('material-reset').disabled=!entry;$('material-reset-all').disabled=!modelMaterials.length;
+ $('export-recolored-vrm').disabled=!sourceVRMBytes||!modelMaterials.length;
  if(entry){select.value=String(selectedMaterial);color.value='#'+entry.material.color.getHexString();}
 }
 function setMaterialColor(value){
@@ -450,6 +457,23 @@ function renderExpressionControls(){
   });
   label.append(title,output,slider);root.append(label);
  }
+}
+
+
+function exportRecoloredVRM(){
+ if(!sourceVRMBytes||!vrm){status('まずVRMを読み込んでください。');return;}
+ try{
+  const patches={};
+  for(const [key,color] of Object.entries(materialOverrides)){
+   const entry=modelMaterials[Number(key)];
+   if(!entry||entry.sourceIndex<0)throw Error('この材質と元VRMとの対応が確認できないため中止しました');
+   patches[String(entry.sourceIndex)]=color;
+  }
+  const output=recolorVRM(sourceVRMBytes,patches);
+  const filename=String(modelName||'Subeha').replace(/\.vrm$/i,'').replace(/[\\/:*?"<>|]/g,'_').slice(0,70)+'_recolored.vrm';
+  saveBlob(new Blob([output.bytes],{type:'model/gltf-binary'}),filename);
+  status(output.changed+'種類の材質色を変更したVRMを保存しました。元のVRMは上書きしません。');
+ }catch(e){console.error(e);status('VRM書き出しに失敗: '+(e?.message||e));}
 }
 
 function setupPoseControls(){
@@ -529,6 +553,7 @@ function bind(){
  $('material-color').oninput=e=>setMaterialColor(e.target.value);
  $('material-reset').onclick=()=>resetMaterial(selectedMaterial);
  $('material-reset-all').onclick=()=>{materialOverrides={};applyMaterialOverrides();renderMaterialUI();status('モデルの色を初期状態へ戻しました。');};
+ $('export-recolored-vrm').onclick=exportRecoloredVRM;
  $('pose-bone').onchange=e=>{poseBone=e.target.value;renderPoseControls();};
  for(const axis of ['x','y','z'])$('pose-'+axis).oninput=e=>updatePoseAxis(axis,Number(e.target.value));
  $('pose-reset').onclick=()=>{const shot=selectedShot();if(shot){shot.pose={};renderPoseControls();}};
