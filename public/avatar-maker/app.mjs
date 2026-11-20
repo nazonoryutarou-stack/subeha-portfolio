@@ -46,7 +46,7 @@ function init(){
  engine={renderer,control,observer};
  installHairCanvas(renderer.domElement);
  const clock=new THREE.Clock();
- const tick=()=>{requestAnimationFrame(tick);const dt=Math.min(.05,clock.getDelta());control.update();if(model){
+ const tick=()=>{requestAnimationFrame(tick);const dt=Math.min(.05,clock.getDelta());control.update();if(model&&!loading){
   // In real avatar exports, animation is stopped and rest pose is restored.
   posePreview(model,clock.elapsedTime,previewExpression,animate?'wave':'idle');
   if(!animate){for(const bone of Object.values(model.bones))bone.rotation.set(0,0,0);}
