@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f0ed">
+<meta name="description" content="スマートフォンでも3Dアバターを制作できるアバターアトリエ。顔、髪、体型、衣装を編集してVRMやGLBで保存。">
+<title>AVATAR ATELIER — 3Dキャラクター制作</title>
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{"imports":{
+ "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+ "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+ "@pixiv/three-vrm":"https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.js"
+}}
+</script>
+</head>
+<body>
+<div id="app">
+<header class="head">
+ <div class="identity"><span class="brandicon">A<span>✦</span></span><div><small>3D CHARACTER WORKSHOP</small><h1>AVATAR ATELIER</h1></div></div>
+ <div class="head-actions">
+  <button class="header-btn" id="project-save" title="設定JSONを保存">設定保存</button>
+  <button class="header-btn primary" id="open-export">モデル書き出し <span>↗</span></button>
+ </div>
+</header>
+<main class="editor">
+ <nav class="categories" id="categories" aria-label="編集カテゴリ">
+  <button type="button" data-tab="face" class="active"><span>◡</span><small>顔</small></button>
+  <button type="button" data-tab="hair"><span>⌁</span><small>髪型</small></button>
+  <button type="button" data-tab="body"><span>♙</span><small>体型</small></button>
+  <button type="button" data-tab="clothes"><span>♧</span><small>衣装</small></button>
+  <button type="button" data-tab="accessory"><span>✧</span><small>装飾</small></button>
+  <button type="button" data-tab="color"><span>◈</span><small>色</small></button>
+  <button type="button" data-tab="presets"><span>▧</span><small>セット</small></button>
+ </nav>
+ <section class="viewport-col">
+  <div class="stage" id="stage" aria-label="3Dアバタープレビュー">
+   <div id="canvas-host"></div>
+   <div class="stage-legend">指で回転 · 2本指で拡大縮小</div>
+   <div class="stage-top"><div class="stage-badge"><i></i> LIVE MODEL</div><div class="stage-btns"><button id="reset-camera" title="カメラを正面へ">正面</button><button id="turn-camera" title="横から見る">側面</button></div></div>
+   <div class="floor-shadow"></div>
+  </div>
+  <div class="viewport-controls">
+   <div class="expression-select">
+    <label for="preview-expression">表情テスト</label>
+    <select id="preview-expression">
+     <option value="neutral">通常</option><option value="happy">笑顔</option>
+     <option value="angry">怒り</option><option value="sad">悲しみ</option>
+     <option value="surprised">驚き</option><option value="relaxed">穏やか</option>
+     <option value="blink">まばたき</option><option value="aa">あ（口パク）</option>
+    </select>
+   </div>
+   <button id="preview-animation" aria-pressed="true">動作テスト ON</button>
+   <button id="image-save" title="透過PNGの静止画を保存">PNG保存</button>
+  </div>
+  <div class="stage-hint" id="status" role="status" aria-live="polite">モデルを生成しています…</div>
+ </section>
+ <section class="inspector" id="inspector" aria-label="キャラクターの編集">
+  <div class="panel-heading"><div><small>EDIT / CUSTOMIZE</small><h2 id="panel-title">顔</h2></div><button id="reset-category">この項目を初期化</button></div>
+  <div id="panel-content" class="panel-content"></div>
+  <div class="panel-footer"><button id="undo" title="前の変更を元に戻す">↶ 戻す</button><button id="redo" title="やり直す">↷ やり直し</button><button id="random" title="キャラクターをランダム生成">⚄ ランダム</button></div>
+ </section>
+</main>
+<footer class="footer"><span>PREVIEW EDITION 0.1 · 自作3Dモデル</span><div><a href="../vrm-stage/">VRM STAGEで演技をつける</a><a href="../tools/">制作ツール一覧</a></div></footer>
+</div>
+<dialog id="export-dialog">
+ <form method="dialog" class="modal-head"><h2>キャラクターを書き出す</h2><button value="close" aria-label="閉じる">×</button></form>
+ <div class="modal-body">
+  <label class="textinput">モデル名<input id="model-name" type="text" maxlength="64" value="New Avatar"></label>
+  <label class="textinput">作者名<input id="model-author" type="text" maxlength="64" value="Avatar creator"></label>
+  <p>VRM 1.0に付与するモデルの利用条件です。自分が制作権限を持つモデルに設定してください。</p>
+  <div class="permissions">
+   <label><input type="checkbox" id="lic-public">作者以外のアバター利用を許可</label>
+   <label><input type="checkbox" id="lic-commercial">商用利用を許可</label>
+   <label><input type="checkbox" id="lic-religious">政治・宗教的用途を許可</label>
+   <label><input type="checkbox" id="lic-redistribute">再配布・改変再配布を許可</label>
+   <label><input type="checkbox" id="lic-credit" checked>クレジット表記を要求</label>
+  </div>
+  <div class="export-actions">
+   <button type="button" id="export-vrm" class="primary">VRM 1.0 保存</button>
+   <button type="button" id="export-glb">GLB 保存</button>
+   <button type="button" id="project-save-dialog">編集設定JSON 保存</button>
+   <button type="button" id="project-load">編集設定JSON 読込</button>
+  </div>
+  <p class="modal-caution">VRMはヒューマノイドボーンと表情モーフを含みますが、モデルの実際の品質・互換性はアプリによって異なります。書き出し時に再読み込み検証を行います。現時点でVRoid Studioのすべての機能を再現したものではありません。</p>
+ </div>
+</dialog>
+<input id="project-file" type="file" accept=".json,application/json" hidden>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
