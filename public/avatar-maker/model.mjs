@@ -44,7 +44,7 @@ export const DEFAULT_AVATAR=Object.freeze({
  skinColor:'#f6c8b3',hairColor:'#49312d',eyeColor:'#5585a9',topColor:'#eae9e7',
  bottomColor:'#424c65',shoeColor:'#393b41',accentColor:'#d17d90',
  hairStyle:'bob',hairPart:'side',topStyle:'hoodie',bottomStyle:'skirt',
- accessory:'none',eyeStyle:'round',
+ accessory:'none',eyeStyle:'round',customHair:[],
  ...Object.fromEntries(Object.entries(PARAMS).map(([k,v])=>[k,v.base]))
 });
 export const PRESETS=Object.freeze([
@@ -61,6 +61,12 @@ export function normalizeAvatar(value={}){
  for(const [key,def] of Object.entries(PARAMS))out[key]=clamp(value[key]??def.base,def.min,def.max);
  for(const entry of COLOR_FIELDS)out[entry.key]=allowedColor(value[entry.key])||DEFAULT_AVATAR[entry.key];
  for(const [key,options] of Object.entries(CATEGORY_OPTIONS))out[key]=options.some(option=>option[0]===value[key])?value[key]:DEFAULT_AVATAR[key];
+ // Hand-drawn front-view hair locks. Limit and normalize every point before saving.
+ out.customHair=(Array.isArray(value.customHair)?value.customHair:[]).slice(0,36)
+  .filter(line=>Array.isArray(line)&&line.length>=2)
+  .map(line=>line.slice(0,72).filter(point=>Array.isArray(point)&&point.length===3)
+   .map(point=>point.map(n=>+clamp(n,-1.5,1.5).toFixed(4))))
+  .filter(line=>line.length>=2);
  out.name=String(value.name||DEFAULT_AVATAR.name).replace(/[\u0000-\u001f<>]/g,'').slice(0,64)||DEFAULT_AVATAR.name;
  out.author=String(value.author||DEFAULT_AVATAR.author).replace(/[\u0000-\u001f<>]/g,'').slice(0,64)||DEFAULT_AVATAR.author;
  return out;
