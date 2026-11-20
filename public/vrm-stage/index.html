@@ -59,7 +59,8 @@
     <button id="reset-expression" type="button">このカットの表情調整をリセット</button>
    </details>
    <section class="pose-panel" aria-label="モデルの関節を編集">
-    <header class="pose-heading"><div><strong>全身ポーズ編集</strong><small>カットごとに関節を調整 · 値はJSONに保存</small></div><button id="pose-reset" type="button">姿勢をリセット</button></header>
+    <header class="pose-heading"><div><strong>全身ポーズ編集</strong><small>関節の指操作 · カット別保存 · 取り消し可能</small></div><div class="pose-toolbar"><button id="touch-pose" type="button" aria-pressed="false">指でポーズ編集</button><button id="pose-undo" type="button" title="直前のポーズ編集を戻す" disabled>↶ 戻す</button><button id="pose-redo" type="button" title="ポーズをやり直す" disabled>↷ 進む</button><button id="pose-reset" type="button">姿勢をリセット</button></div></header>
+    <p class="pose-help">「指でポーズ編集」を押すとモデル上に関節の点が表示されます。点を選んでドラッグすると骨が動きます（上下＝X、左右＝Z、ねじり＝Yスライダー）。点のない場所のドラッグはカメラ回転です。</p>
     <div class="pose-presets" id="pose-presets"></div>
     <div class="pose-bone-controls">
      <label>動かす関節<select id="pose-bone"></select></label>
