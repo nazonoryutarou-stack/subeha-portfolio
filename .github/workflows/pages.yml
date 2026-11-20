@@ -46,6 +46,12 @@ jobs:
         with:
           path: _site
 
+      # The Pages API can briefly return zero artifacts immediately after upload.
+      # Give artifact indexing time before deploy-pages asks for metadata.
+      - name: Wait for uploaded Pages artifact to be indexed
+        shell: bash
+        run: sleep 25
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
