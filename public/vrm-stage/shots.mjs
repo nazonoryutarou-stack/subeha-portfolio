@@ -29,6 +29,18 @@ export function normalizePose(raw){
  }
  return result;
 }
+
+export function normalizeExpressionMix(raw){
+ const out={};
+ if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
+ for(const [key,value] of Object.entries(raw).slice(0,64)){
+  if(!/^[A-Za-z0-9_-]{1,64}$/.test(key))continue;
+  const amount=clamp(value,0,1);
+  if(amount>0)out[key]=Math.round(amount*1000)/1000;
+ }
+ return out;
+}
+
 export function presetPose(name){
  const result={
   neutral:{},
@@ -57,6 +69,7 @@ export function normalizeShots(shots,duration=20){
   camera:CAMERAS.includes(shot.camera)?shot.camera:'medium',
   mouth:MOUTHS.includes(shot.mouth)?shot.mouth:'auto',
   pose:normalizePose(shot.pose),
+  expressionMix:normalizeExpressionMix(shot.expressionMix),
   zoom:clamp(shot.zoom??1,.45,2.3)})).sort((a,b)=>a.start-b.start);
  if(!list.length)list.push(newShot(0,total));
  list[0].start=0;
@@ -102,5 +115,5 @@ export function amplitudeAt(envelope,t,step=1/40,gain=6){
  return clamp(Math.max(0,raw-.018)*gain,0,1);
 }
 export function projectJSON(shots,duration){
- return {schema:'vrm-stage/v1',duration:seconds(duration),shots:normalizeShots(shots,duration).map(({id,start,expression,movement,camera,mouth,intensity,framing,pose,zoom})=>({id,start,expression,movement,camera,mouth,intensity,framing,pose,zoom}))};
+ return {schema:'vrm-stage/v1',duration:seconds(duration),shots:normalizeShots(shots,duration).map(({id,start,expression,movement,camera,mouth,intensity,framing,pose,expressionMix,zoom})=>({id,start,expression,movement,camera,mouth,intensity,framing,pose,expressionMix,zoom}))};
 }
