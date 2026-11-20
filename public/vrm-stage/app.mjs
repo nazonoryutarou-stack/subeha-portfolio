@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {VRMLoaderPlugin, VRMUtils} from '@pixiv/three-vrm';
-import {EXPRESSIONS, SHOT_DEFAULT, POSE_BONES, POSE_PRESETS, normalizePose, presetPose, normalizeShots, newShot, splitShot, moveCut, removeShot, findShot, computeEnvelope, amplitudeAt, clamp, projectJSON} from './shots.mjs';
+import {EXPRESSIONS, SHOT_DEFAULT, POSE_BONES, POSE_PRESETS, normalizePose, normalizeExpressionMix, presetPose, normalizeShots, newShot, splitShot, moveCut, removeShot, findShot, computeEnvelope, amplitudeAt, clamp, projectJSON} from './shots.mjs';
 
 const $=id=>document.getElementById(id);
 const audio=$('audio'),stage=$('viewport');
@@ -197,7 +197,7 @@ function renderSelection(){
  $('shot-range').textContent=stamp(shot.start)+' – '+stamp(shot.end);
  for(const key of ['expression','movement','camera','mouth','intensity','framing'])$(key).value=String(shot[key]);
  $('zoom').value=String(shot.zoom??1);$('zoom-value').textContent=Math.round((shot.zoom??1)*100)+'%';
- renderPoseControls();
+ renderPoseControls();renderExpressionControls();
  $('intensity-value').textContent=Math.round(shot.intensity*100)+'%';
  $('framing-value').textContent=shot.framing===0?'中央':shot.framing<0?'左 '+Math.round(-shot.framing*100)+'%':'右 '+Math.round(shot.framing*100)+'%';
  $('delete-shot').disabled=shots.length<=1;
@@ -258,6 +258,7 @@ function applyPose(time,dt){
  }
  const manager=vrm.expressionManager;
  if(manager){
+  for(const name of Object.keys(manager.expressionMap||{}))try{manager.setValue(name,0);}catch{}
   for(const name of EXPRESSIONS){try{if(manager.getExpression(name))manager.setValue(name,shot.expression===name?1:0);}catch{}}
   const blink=Math.pow(Math.max(0,Math.sin(time*1.85+1.6)),25)*.95;
   try{if(manager.getExpression('blink'))manager.setValue('blink',blink);}catch{}
@@ -266,6 +267,9 @@ function applyPose(time,dt){
   const mouth=shot.mouth==='closed'?null:shot.mouth==='auto'?'aa':shot.mouth;
   for(const viseme of ['aa','ee','ih','oh','ou']){
    try{if(manager.getExpression(viseme))manager.setValue(viseme,mouth===viseme?(shot.mouth==='auto'?mouthLevel:Math.max(.35,mouthLevel)):0);}catch{}
+  }
+  for(const [name,weight] of Object.entries(shot.expressionMix||{})){
+   try{if(manager.getExpression(name))manager.setValue(name,weight);}catch{}
   }
  }
  vrm.update(dt);
@@ -415,6 +419,39 @@ function resetMaterial(index){
  entry.material.needsUpdate=true;renderMaterialUI();
 }
 
+
+function renderExpressionControls(){
+ const root=$('expression-controls');root.replaceChildren();
+ const names=Object.keys(vrm?.expressionManager?.expressionMap||{}).filter(name=>name.length>0&&name.length<=80).slice(0,64);
+ if(!names.length){
+  const p=document.createElement('p');p.className='pose-help';
+  p.textContent='モデルを読み込むと、内蔵モーフが表示されます。';
+  root.append(p);$('reset-expression').disabled=true;return;
+ }
+ $('reset-expression').disabled=false;
+ const shot=selectedShot();if(!shot)return;
+ const priorities=['aa','ih','ou','ee','oh','blink','happy','angry','sad','relaxed','surprised'];
+ names.sort((a,b)=>{
+  const ai=priorities.indexOf(a),bi=priorities.indexOf(b);
+  return (ai===-1?999:ai)-(bi===-1?999:bi)||a.localeCompare(b);
+ });
+ for(const name of names){
+  const label=document.createElement('label');label.className='expression-row';
+  const title=document.createElement('span');title.textContent=name;
+  const output=document.createElement('output');output.textContent=Math.round((shot.expressionMix?.[name]||0)*100)+'%';
+  const slider=document.createElement('input');slider.type='range';slider.min='0';slider.max='1';slider.step='.05';
+  slider.value=String(shot.expressionMix?.[name]||0);slider.setAttribute('aria-label',name+' モーフ強度');
+  slider.addEventListener('input',()=>{
+   const value=Number(slider.value),current=selectedShot();if(!current)return;
+   const raw={...(current.expressionMix||{})};
+   if(value>0)raw[name]=value;else delete raw[name];
+   current.expressionMix=normalizeExpressionMix(raw);
+   output.textContent=Math.round(value*100)+'%';
+  });
+  label.append(title,output,slider);root.append(label);
+ }
+}
+
 function setupPoseControls(){
  const select=$('pose-bone');select.replaceChildren();
  for(const [key,title] of POSE_BONES){
@@ -469,6 +506,7 @@ function renderModelInfo(){
  add('操作できる関節: '+bones.length+'/'+POSE_BONES.length+'（'+bones.map(([,label])=>label).join('、')+'）');
  add('モデルに含まれる表情: '+(expressions.join(' / ')||'なし'));
  add('動画・静止画を書き出す際も、モデル原本は変更しません。ポーズは設定JSONに保存されます。');
+ renderExpressionControls();
  const expressionSelect=$('expression');
  for(const opt of expressionSelect.options){
   if(opt.value==='neutral'){opt.disabled=false;continue;}
@@ -494,6 +532,7 @@ function bind(){
  $('pose-bone').onchange=e=>{poseBone=e.target.value;renderPoseControls();};
  for(const axis of ['x','y','z'])$('pose-'+axis).oninput=e=>updatePoseAxis(axis,Number(e.target.value));
  $('pose-reset').onclick=()=>{const shot=selectedShot();if(shot){shot.pose={};renderPoseControls();}};
+ $('reset-expression').onclick=()=>{const shot=selectedShot();if(shot){shot.expressionMix={};renderExpressionControls();}};
  $('pose-reset-bone').onclick=()=>{const shot=selectedShot();if(shot){delete shot.pose[poseBone];renderPoseControls();}};
  $('snapshot').onclick=()=>{if(!renderer||!vrm)return status('先にVRMを読み込んでください');renderer.domElement.toBlob(blob=>{if(blob)saveBlob(blob,'VRM_STAGE_'+Math.floor(currentTime()*1000)+'.png');},'image/png');};
  for(const key of ['expression','movement','camera','mouth','intensity','framing']){
