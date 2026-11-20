@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191d">
+<title>素材横断検索 — STOCK HUB</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;color:#f5f5f7;background:#15171c}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.5}a{color:#c4deff}header{padding:22px max(16px,calc((100vw - 1100px)/2));border-bottom:1px solid #3c3e46;background:#20222a}h1{margin:0 0 8px;font-size:24px}header p{color:#b0b3c0;margin:0;line-height:1.6;font-size:12px}.tag{font-size:10px;color:#d1c9e6;letter-spacing:.2em}main{max-width:1120px;margin:auto;padding:16px}.searchbar{display:flex;gap:8px;align-items:stretch;background:#22252c;padding:12px;border:1px solid #3c404a;border-radius:12px;flex-wrap:wrap}.searchbar input[type=search]{flex:1;min-width:160px}.searchbar input,.searchbar select,.searchbar button{padding:12px;border-radius:9px;border:1px solid #484c57;background:#30333b;color:#f6f6f8}.searchbar button{background:#df5c74;border-color:#df5c74;font-weight:700}.searchbar .key{flex:0 1 180px;width:180px;font-size:12px}.disclaimer{margin:13px 3px;color:#b4b7c1;font-size:11px;line-height:1.7}h2{font-size:15px;margin:22px 0 10px}.filters{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:9px 2px}.filters label{color:#bdc0c8;font-size:11px}.filters button{background:#2c3038;border:1px solid #454955;border-radius:8px;color:#e2e3eb;padding:8px 11px;font-size:11px}.filters button[aria-pressed=true]{background:#5c3f51;border-color:#de758e}.status{margin:8px 2px;color:#f1b8c9;font-size:12px;min-height:20px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:11px}.card{background:#242730;border:1px solid #3b3d49;border-radius:10px;overflow:hidden;min-width:0}.preview{height:115px;background:#323740;display:flex;align-items:center;justify-content:center;font-size:37px;color:#aeaabb}.preview img{display:block;width:100%;height:100%;object-fit:cover}.meta{padding:11px}.meta strong{display:block;font-size:12px;line-height:1.45;overflow-wrap:anywhere;min-height:2.7em}.meta small{display:block;color:#b2b7c1;font-size:10px;margin-top:7px;overflow-wrap:anywhere}.label{font-size:10px;border:1px solid #52645c;color:#d8ecdf;border-radius:5px;padding:3px 5px;display:inline-block;margin:9px 0 5px}.card-actions{display:flex;gap:6px;flex-wrap:wrap;padding-top:5px}.card-actions a{background:#3a3d48;border:1px solid #555b66;color:#fff;text-decoration:none;border-radius:7px;font-size:11px;padding:7px 8px}.sources{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:9px}.source{display:block;text-decoration:none;background:#252830;border:1px solid #3e434e;padding:12px;border-radius:9px}.source strong{display:block;font-size:13px;color:#f5f6fa}.source span{display:block;font-size:10px;color:#adb5c6;margin-top:6px;line-height:1.5}.foot{color:#a8acb6;font-size:11px;line-height:1.7;padding:24px 1px 35px}
+@media(max-width:580px){header{padding:15px}h1{font-size:20px}main{padding:9px}.searchbar{padding:9px}.searchbar .key{flex-basis:100%;width:100%}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.preview{height:105px}.meta{padding:8px}.meta strong{font-size:11px}.card-actions a{padding:6px;font-size:10px}}
+</style>
+</head>
+<body>
+<header><span class="tag">OPEN ASSET DISCOVERY</span><h1>STOCK HUB｜素材横断検索</h1><p>画像・映像・音楽・効果音・VRM・3Dモデル・テクスチャ・HDRIを、複数の素材サービスから探す。</p></header>
+<main>
+<form class="searchbar" id="search-form">
+ <input type="search" id="query" value="nature" maxlength="100" required aria-label="検索語" placeholder="検索語（日本語・英語）">
+ <select id="kind" aria-label="素材の種別"><option value="image">画像</option><option value="video">映像</option><option value="audio">音楽・効果音</option><option value="vrm">VRM</option><option value="model">3Dモデル</option><option value="texture">テクスチャ</option><option value="hdri">HDRI</option></select>
+ <button type="submit">横断検索</button>
+ <input class="key" id="pixabay-key" type="password" autocomplete="off" placeholder="Pixabay APIキー（任意）" aria-label="任意のPixabay APIキー">
+</form>
+<p class="disclaimer">直接検索はCC0表示のある公開APIを中心に実行します。Pixabay・NASA等は別の利用条件を表示します。外部サイトの素材は再利用前に必ず原ページでライセンス・肖像・商標・用途制限を確認してください。APIキーは保存しません。</p>
+<div class="filters"><label>利用確認:</label><button type="button" id="cc0-filter" aria-pressed="false">CC0のみ表示</button><button type="button" id="all-filter" aria-pressed="true">取得した全結果</button><span id="search-status" class="status" role="status" aria-live="polite"></span></div>
+<h2>API検索結果</h2>
+<div class="grid" id="results"></div>
+<h2>専門素材サイトへの横断リンク</h2>
+<div class="sources" id="sources"></div>
+<footer class="foot">Openverse / Wikimedia Commons / Poly Haven / NASA / Pixabay のAPIを利用できる範囲で検索し、ほかの専門サイトへ移動できます。サイトのAPI制限・CORS・アカウント要件があるため全世界の無料素材を一括取得できるわけではありません。検索結果やライセンス表示は権利保証ではありません。</footer>
+</main>
+<script type="module" src="./app.mjs"></script>
+</body></html>
