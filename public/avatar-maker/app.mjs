@@ -285,3 +285,4 @@ function initUI(){
  updateUndo();renderPanel();
 }
 initUI();init();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('Offline shell disabled',e));
