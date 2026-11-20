@@ -35,3 +35,12 @@
 .appearance-fields select{width:100%;padding:9px;background:#30303b;color:#eee;border-radius:7px;border:1px solid #56505e}
 .appearance-fields input[type=color]{width:60px;height:34px;border:1px solid #56505e;border-radius:7px;background:transparent}
 .appearance-fields button{border:1px solid #62526a;background:#39313f;color:#e5dce9;padding:9px;border-radius:7px;font-size:10px}
+
+/* Native blendshape controls for original VRM assets */
+.expression-panel{margin-top:12px;border:1px solid #51445a;border-radius:10px;background:#25232d;padding:12px}
+.expression-panel summary{font-size:13px;font-weight:700;cursor:pointer;color:#f0d4e5}
+#expression-controls{max-height:230px;overflow-y:auto;display:grid;gap:10px;margin:12px 0;padding-right:7px;scrollbar-width:thin}
+.expression-row{display:grid;grid-template-columns:minmax(75px,1fr) 45px;align-items:center;gap:4px 8px;color:#dcd5e5;font-size:11px}
+.expression-row output{text-align:right;color:#ffaad1;font:11px ui-monospace,monospace}
+.expression-row input[type=range]{grid-column:1/-1;width:100%;accent-color:#ef83b0;touch-action:pan-x}
+#reset-expression{padding:8px 10px;color:#ded1e5;border:1px solid #5f4c61;border-radius:7px;background:#35303b;font-size:11px}
