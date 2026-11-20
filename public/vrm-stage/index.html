@@ -76,6 +76,16 @@
     </div>
     <div id="model-info" hidden role="status"></div>
    </section>
+   <details class="appearance-panel">
+    <summary>モデルの色を調整（材質別）</summary>
+    <div class="appearance-fields">
+      <label>材質<select id="material-select"><option value="">モデルを読み込んでください</option></select></label>
+      <label>色<input id="material-color" type="color" value="#ffffff" aria-label="材質色"></label>
+      <button id="material-reset" type="button">この材質を元に戻す</button>
+      <button id="material-reset-all" type="button">すべての色を戻す</button>
+    </div>
+    <p class="pose-help">色はプレビュー・映像・静止画に反映されます。テクスチャの描き換えではなく材質の色調整です。元のVRMファイルは変更しません。</p>
+   </details>
    <div class="boundary" id="boundary-wrap" hidden><label>このカットの開始位置 <output id="boundary-value"></output><input id="boundary" type="range" min="0" max="20" step=".05"></label><small>境界を動かすと、前のカットとの長さを調整します。</small></div>
    <footer class="work-foot"><p id="status" role="status" aria-live="polite">モデルと音声を読み込むと、音声に合わせてVRMが動きます。</p><small>音声連動は音量ベースです。厳密な日本語音素解析・モーションキャプチャではありません。</small></footer>
   </section>
