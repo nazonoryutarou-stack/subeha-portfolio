@@ -16,6 +16,7 @@ const selectFields={
 let avatar=(()=>{try{const saved=JSON.parse(localStorage.getItem(STORAGE)||'null');return saved?.schema==='avatar-atelier/v1'?fromProject(saved):normalizeAvatar(DEFAULT_AVATAR);}catch{return normalizeAvatar(DEFAULT_AVATAR);}})();
 let tab='face',model=null,engine=null,previewExpression='neutral',animate=true,angle=0,loading=false;
 let history=[],future=[],gestureSnapshot=null,buildTimer=null,savingTimer=null,randomSeed=Date.now()>>>0;
+let drawingHair=false,activeHairPointer=null;
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xf3eff3);
 const camera=new THREE.PerspectiveCamera(35,1,.01,120);
 const $status=$('status');
@@ -43,6 +44,7 @@ function init(){
  const resize=()=>{const w=Math.max(50,host.clientWidth),h=Math.max(50,host.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();};
  const observer=new ResizeObserver(resize);observer.observe(host);resize();
  engine={renderer,control,observer};
+ installHairCanvas(renderer.domElement);
  const clock=new THREE.Clock();
  const tick=()=>{requestAnimationFrame(tick);const dt=Math.min(.05,clock.getDelta());control.update();if(model){
   // In real avatar exports, animation is stopped and rest pose is restored.
@@ -140,7 +142,20 @@ function renderPanel(){
   choiceGroup(root,'hairStyle','髪のスタイル');
   choiceGroup(root,'hairPart','前髪');
   parameterGroup(root,'hair');
-  note(root,'髪は複数の曲線ストランドから構成されています。より細かい毛束描画とテクスチャ塗装は次の開発対象です。');
+  const hairPainter=section(root,'指で毛束を描く');
+  const controls=node('div','hair-drawing-actions');
+  const draw=node('button','option-button hair-draw-button'+(drawingHair?' active':''),drawingHair?'描画中 · 終了する':'✎ 髪を描く');
+  draw.setAttribute('aria-pressed',String(drawingHair));
+  draw.onclick=()=>setHairDrawing(!drawingHair);
+  const remove=node('button','option-button','最後の毛束を削除');
+  remove.disabled=!avatar.customHair.length;
+  remove.onclick=()=>{
+   if(!avatar.customHair.length)return;
+   updateAvatar(a=>({...a,customHair:a.customHair.slice(0,-1)}),{undo:true});renderPanel();
+  };
+  const count=node('small','hair-strand-count',avatar.customHair.length+' 本の毛束を描画済み');
+  controls.append(draw,remove);hairPainter.append(controls,count);
+  note(root,'描画をONにすると正面カメラへ移動します。頭の上から下へ指を滑らせて前髪を描き足します。毛束は頭の3Dボーンに付き、エクスポートにも含まれます。');
  }else if(tab==='body'){
   parameterGroup(root,'body');
   note(root,'体型変更時もヒューマノイドボーンの階層を維持します。');
@@ -180,6 +195,7 @@ function updateSelectionUI(){
  }
 }
 function setTab(next){
+ if(next!=='hair'&&drawingHair)setHairDrawing(false);
  tab=next;for(const btn of $('categories').querySelectorAll('button'))btn.classList.toggle('active',btn.dataset.tab===tab);
  renderPanel();
 }
@@ -194,7 +210,7 @@ function resetTab(){
  const categorical=Object.keys(selectFields).includes(tab)?selectFields[tab].map(x=>x[0]):[];
  if(tab==='color'){updateAvatar(a=>{for(const {key} of COLOR_FIELDS)a[key]=DEFAULT_AVATAR[key];return a;},{undo:true});}
  else if(tab==='presets'){updateAvatar(()=>normalizeAvatar(DEFAULT_AVATAR),{undo:true});}
- else{updateAvatar(a=>{for(const k of [...keys,...categorical])a[k]=DEFAULT_AVATAR[k];return a;},{undo:true});}
+ else{updateAvatar(a=>{for(const k of [...keys,...categorical])a[k]=DEFAULT_AVATAR[k];if(tab==='hair')a.customHair=[];return a;},{undo:true});}
  renderPanel();
 }
 function saveProject(){
@@ -264,6 +280,74 @@ function saveImage(){
  engine.renderer.render(scene,camera);
  canvas.toBlob(blob=>{if(blob){download(blob,nameFile(avatar.name,'png'));status('現在のカメラ位置でPNG保存しました。');}else status('PNGを保存できませんでした。',true);},'image/png');
 }
+
+function setHairDrawing(enabled){
+ drawingHair=!!enabled;
+ activeHairPointer=null;
+ if(engine)engine.control.enabled=!drawingHair;
+ if(drawingHair){
+  animate=false;
+  $('preview-animation').setAttribute('aria-pressed','false');
+  $('preview-animation').textContent='動作テスト OFF';
+  resetCamera();
+  camera.position.set(0,1.65,1.65);
+  engine?.control.target.set(0,1.64,0);
+  engine?.control.update();
+  status('描画モード：髪の毛を上から下へ指でなぞってください。');
+ }else status('描画を終了しました。毛束はモデルの一部として残ります。');
+ if(tab==='hair')renderPanel();
+}
+function installHairCanvas(canvas){
+ const caster=new THREE.Raycaster(),mouse=new THREE.Vector2();
+ const pointAt=e=>{
+  if(!model)return null;
+  const box=canvas.getBoundingClientRect();
+  if(box.width<10||box.height<10)return null;
+  mouse.set(((e.clientX-box.left)/box.width)*2-1,1-((e.clientY-box.top)/box.height)*2);
+  caster.setFromCamera(mouse,camera);
+  const head=model.bones.head,center=new THREE.Vector3();
+  model.root.updateMatrixWorld(true);head.getWorldPosition(center);
+  const scale=avatar.headSize*avatar.bodyHeight;
+  const plane=new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0,0,1),center.clone().add(new THREE.Vector3(0,0,.245*scale)));
+  const hit=caster.ray.intersectPlane(plane,new THREE.Vector3());
+  if(!hit)return null;
+  const local=head.worldToLocal(hit.clone());
+  const xyz=[local.x/scale,local.y/scale,local.z/scale];
+  if(Math.abs(xyz[0])>.65||xyz[1]<-1.45||xyz[1]>.65)return null;
+  return xyz.map(n=>+n.toFixed(4));
+ };
+ canvas.addEventListener('pointerdown',e=>{
+  if(!drawingHair||!model||activeHairPointer!==null)return;
+  if(avatar.customHair.length>=36){status('毛束は36本まで追加できます。');return;}
+  const point=pointAt(e);if(!point)return;
+  e.preventDefault();e.stopPropagation();
+  canvas.setPointerCapture(e.pointerId);activeHairPointer=e.pointerId;
+  pushHistory(avatar);
+  const copy=structuredClone(avatar);
+  copy.customHair=[...copy.customHair,[point,[point[0],point[1]-.023,point[2]]]];
+  avatar=normalizeAvatar(copy);scheduleRebuild();persist();
+ },true);
+ canvas.addEventListener('pointermove',e=>{
+  if(!drawingHair||activeHairPointer!==e.pointerId)return;
+  e.preventDefault();e.stopPropagation();
+  const point=pointAt(e);if(!point)return;
+  const current=avatar.customHair.at(-1);if(!current)return;
+  const previous=current.at(-1);
+  if(Math.hypot(point[0]-previous[0],point[1]-previous[1],point[2]-previous[2])<.018)return;
+  if(current.length>=72)return;
+  const copy=structuredClone(avatar);
+  copy.customHair.at(-1).push(point);
+  avatar=normalizeAvatar(copy);scheduleRebuild();persist();
+ },true);
+ const release=e=>{
+  if(activeHairPointer!==e.pointerId)return;
+  activeHairPointer=null;if(tab==='hair')renderPanel();
+  status('毛束を追加しました。必要ならUndoで元に戻せます。');
+ };
+ canvas.addEventListener('pointerup',release,true);
+ canvas.addEventListener('pointercancel',release,true);
+}
+
 function initUI(){
  for(const b of $('categories').querySelectorAll('button'))b.onclick=()=>setTab(b.dataset.tab);
  $('reset-category').onclick=resetTab;
