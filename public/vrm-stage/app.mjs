@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {VRMLoaderPlugin, VRMUtils} from '@pixiv/three-vrm';
 import {recolorVRM} from './recolor-vrm.mjs';
+import {nearestPoseBone, dragPoseAngles} from './pose-gestures.mjs';
 import {EXPRESSIONS, SHOT_DEFAULT, POSE_BONES, POSE_PRESETS, normalizePose, normalizeExpressionMix, presetPose, normalizeShots, newShot, splitShot, moveCut, removeShot, findShot, computeEnvelope, amplitudeAt, clamp, projectJSON} from './shots.mjs';
 
 const $=id=>document.getElementById(id);
@@ -19,6 +20,64 @@ let poseBone='head',supportedExpressions=[],lastStatusModel='';
 let modelMaterials=[],materialOverrides={},materialOwner='',selectedMaterial=0;
 let sourceVRMBytes=null;
 const compiler=()=>new GLTFLoader().register(parser=>new VRMLoaderPlugin(parser));
+let poseTouchMode=false,poseDots=new Map(),visiblePosePoints=[],lastPoseMarkerFrame=0;
+let poseUndoStack=[],poseRedoStack=[];
+function poseSnapshot(shot){return {shotId:shot.id,pose:normalizePose(shot.pose)};}
+function refreshPoseHistoryButtons(){
+ $('pose-undo').disabled=!poseUndoStack.length;
+ $('pose-redo').disabled=!poseRedoStack.length;
+}
+function clearPoseHistory(){poseUndoStack=[];poseRedoStack=[];refreshPoseHistoryButtons();}
+function checkpointPose(){
+ const shot=selectedShot();if(!shot)return;
+ poseUndoStack.push(poseSnapshot(shot));
+ if(poseUndoStack.length>80)poseUndoStack.shift();
+ poseRedoStack=[];refreshPoseHistoryButtons();
+}
+function movePoseHistory(source,destination){
+ const previous=source.pop();if(!previous)return;
+ const shot=shots.find(s=>s.id===previous.shotId);
+ if(shot){
+  destination.push(poseSnapshot(shot));
+  shot.pose=normalizePose(previous.pose);
+  selectShot(shot.id,{seek:false});
+  status('ポーズ編集を'+(source===poseUndoStack?'取り消しました。':'やり直しました。'));
+ }
+ refreshPoseHistoryButtons();
+}
+function refreshPoseHandles(){
+ if(!poseTouchMode||!vrm||!renderer){for(const dot of poseDots.values())dot.hidden=true;visiblePosePoints=[];return;}
+ const rect=renderer.domElement.getBoundingClientRect(),stageRect=stage.getBoundingClientRect();
+ if(rect.width<2||rect.height<2)return;
+ camera.updateMatrixWorld(true);vrm.scene.updateMatrixWorld(true);
+ const points=[],world=new THREE.Vector3();
+ for(const [name,label] of POSE_BONES){
+  const node=getNode(name);
+  let dot=poseDots.get(name);
+  if(!node){if(dot)dot.hidden=true;continue;}
+  if(!dot){
+   dot=document.createElement('span');dot.className='pose-dot';dot.dataset.label=label;
+   dot.setAttribute('aria-hidden','true');stage.append(dot);poseDots.set(name,dot);
+  }
+  node.getWorldPosition(world);world.project(camera);
+  if(!Number.isFinite(world.x)||!Number.isFinite(world.y)||world.z< -1||world.z>1){dot.hidden=true;continue;}
+  const x=rect.left+(world.x+1)*rect.width*.5,y=rect.top+(1-world.y)*rect.height*.5;
+  const inside=x>=rect.left-2&&x<=rect.right+2&&y>=rect.top-2&&y<=rect.bottom+2;
+  dot.hidden=!inside;if(!inside)continue;
+  dot.style.left=(x-stageRect.left)+'px';dot.style.top=(y-stageRect.top)+'px';
+  dot.classList.toggle('active',name===poseBone);
+  points.push({name,x,y});
+ }
+ visiblePosePoints=points;
+}
+function toggleTouchPose(){
+ if(!vrm){status('まずVRMモデルを読み込んでください。');return;}
+ poseTouchMode=!poseTouchMode;
+ $('touch-pose').setAttribute('aria-pressed',String(poseTouchMode));
+ $('touch-pose').textContent=poseTouchMode?'指で編集中 ✓':'指でポーズ編集';
+ refreshPoseHandles();
+ status(poseTouchMode?'点で関節を選び、指をドラッグしてください。上下=X軸、左右=Z軸。':'カメラを指で回すモードです。');
+}
 function init3D(){
  scene=new THREE.Scene();scene.background=new THREE.Color(0x1c1b24);
  camera=new THREE.PerspectiveCamera(35,1,.03,200);
@@ -30,16 +89,46 @@ function init3D(){
  renderer.setClearColor(0x191a20);renderer.domElement.setAttribute('aria-label','VRMキャラクターの3Dプレビュー');
  stage.append(renderer.domElement);configureRatio();
  let drag=null;
- renderer.domElement.addEventListener('pointerdown',e=>{
-  if(recording)return;drag={x:e.clientX,y:e.clientY,yaw:cameraYaw,pitch:cameraPitch};
-  renderer.domElement.setPointerCapture(e.pointerId);
+ const canvas=renderer.domElement;
+ canvas.style.touchAction='none';
+ canvas.addEventListener('pointerdown',e=>{
+  if(recording||e.button>0)return;
+  if(poseTouchMode&&vrm){
+   refreshPoseHandles();
+   const radius=Math.max(45,Math.min(65,canvas.getBoundingClientRect().width*.1));
+   const bone=nearestPoseBone(visiblePosePoints,e.clientX,e.clientY,radius);
+   if(bone){
+    poseBone=bone;renderPoseControls();
+    const shot=selectedShot();
+    drag={mode:'pose',pointerId:e.pointerId,x:e.clientX,y:e.clientY,bone,shotId:shot.id,
+     initial:[...(shot.pose?.[bone]||[0,0,0])],changed:false};
+    canvas.setPointerCapture(e.pointerId);e.preventDefault();
+    return;
+   }
+  }
+  drag={mode:'camera',pointerId:e.pointerId,x:e.clientX,y:e.clientY,yaw:cameraYaw,pitch:cameraPitch};
+  canvas.setPointerCapture(e.pointerId);
  });
- renderer.domElement.addEventListener('pointermove',e=>{
-  if(!drag||recording)return;
-  cameraYaw=clamp(drag.yaw+(e.clientX-drag.x)/260,-3.14,3.14);
-  cameraPitch=clamp(drag.pitch-(e.clientY-drag.y)/300,-1.1,1.1);
+ canvas.addEventListener('pointermove',e=>{
+  if(!drag||drag.pointerId!==e.pointerId||recording)return;
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+  if(drag.mode==='pose'){
+   const shot=shots.find(s=>s.id===drag.shotId);
+   if(!shot)return;
+   if(!drag.changed&&Math.hypot(dx,dy)>4){checkpointPose();drag.changed=true;}
+   if(drag.changed){
+    shot.pose=normalizePose({...shot.pose,[drag.bone]:dragPoseAngles(drag.initial,dx,dy)});
+    renderPoseControls();refreshPoseHandles();
+   }
+  }else{
+   cameraYaw=clamp(drag.yaw+dx/260,-3.14,3.14);
+   cameraPitch=clamp(drag.pitch-dy/300,-1.1,1.1);
+  }
+  e.preventDefault();
  });
- for(const event of ['pointerup','pointercancel','lostpointercapture'])renderer.domElement.addEventListener(event,()=>drag=null);
+ for(const event of ['pointerup','pointercancel','lostpointercapture']){
+  canvas.addEventListener(event,e=>{if(drag?.pointerId===e.pointerId)drag=null;});
+ }
  requestAnimationFrame(frame);
 }
 function configureRatio(){
@@ -75,7 +164,7 @@ async function loadModelBytes(bytes,name,origin='local'){
   scene.add(vrm.scene);
   const box=new THREE.Box3().setFromObject(vrm.scene),height=box.getSize(new THREE.Vector3()).y;
   bounds={minY:Number.isFinite(box.min.y)?box.min.y:0,height:Number.isFinite(height)&&height>.2?height:1.7};
-  loadPoseBones();modelName=name;sourceModel=origin;lastStatusModel=name;
+  loadPoseBones();clearPoseHistory();modelName=name;sourceModel=origin;lastStatusModel=name;
   if(materialOwner!==name){materialOverrides={};materialOwner=name;}
   sourceVRMBytes=bytes;collectMaterials(gltf.parser);
   const mgr=vrm.expressionManager;
@@ -291,6 +380,7 @@ function frame(now){
  const time=clamp(previewTime,0,duration);
  if(vrm)applyPose(time,dt);
  if(renderer)renderer.render(scene,camera);
+ if(poseTouchMode&&now-lastPoseMarkerFrame>70){lastPoseMarkerFrame=now;refreshPoseHandles();}
  renderClock();
 }
 async function exportVideo(){
@@ -359,7 +449,7 @@ async function loadProject(file){
   const doc=JSON.parse(await file.text());
   if(doc.schema!=='vrm-stage/v1'||!Array.isArray(doc.shots)||doc.shots.length>500)throw Error('VRM STAGEの設定ファイルではありません');
   duration=audio.src?duration:clamp(doc.duration,1,7200);
-  shots=normalizeShots(doc.shots,duration);selectedId=shots[0].id;
+  shots=normalizeShots(doc.shots,duration);selectedId=shots[0].id;clearPoseHistory();
   if(/^#[0-9a-f]{6}$/i.test(doc.backgroundColor||'')){backgroundColor=doc.backgroundColor;$('background-color').value=backgroundColor;if(scene)scene.background=new THREE.Color(backgroundColor);}
   cameraYaw=clamp(doc.cameraYaw??0,-3.14,3.14);
   cameraPitch=clamp(doc.cameraPitch??0,-1.1,1.1);
@@ -487,7 +577,7 @@ function setupPoseControls(){
   const button=document.createElement('button');button.type='button';button.textContent=label;
   button.onclick=()=>{
    const shot=selectedShot();if(!shot)return;
-   shot.pose=presetPose(id);renderPoseControls();status(label+' をこのカットへ適用しました。');
+   checkpointPose();shot.pose=presetPose(id);renderPoseControls();status(label+' をこのカットへ適用しました。');
   };
   presets.append(button);
  }
@@ -554,11 +644,22 @@ function bind(){
  $('material-reset').onclick=()=>resetMaterial(selectedMaterial);
  $('material-reset-all').onclick=()=>{materialOverrides={};applyMaterialOverrides();renderMaterialUI();status('モデルの色を初期状態へ戻しました。');};
  $('export-recolored-vrm').onclick=exportRecoloredVRM;
- $('pose-bone').onchange=e=>{poseBone=e.target.value;renderPoseControls();};
- for(const axis of ['x','y','z'])$('pose-'+axis).oninput=e=>updatePoseAxis(axis,Number(e.target.value));
- $('pose-reset').onclick=()=>{const shot=selectedShot();if(shot){shot.pose={};renderPoseControls();}};
+ $('pose-bone').onchange=e=>{poseBone=e.target.value;renderPoseControls();refreshPoseHandles();};
+ $('touch-pose').onclick=toggleTouchPose;
+ $('pose-undo').onclick=()=>movePoseHistory(poseUndoStack,poseRedoStack);
+ $('pose-redo').onclick=()=>movePoseHistory(poseRedoStack,poseUndoStack);
+ for(const axis of ['x','y','z']){
+  const slider=$('pose-'+axis);let editing=false;
+  slider.addEventListener('input',e=>{
+   if(!editing){checkpointPose();editing=true;}
+   updatePoseAxis(axis,Number(e.target.value));
+  });
+  slider.addEventListener('change',()=>{editing=false;});
+  slider.addEventListener('pointercancel',()=>{editing=false;});
+ }
+ $('pose-reset').onclick=()=>{const shot=selectedShot();if(shot){checkpointPose();shot.pose={};renderPoseControls();}};
  $('reset-expression').onclick=()=>{const shot=selectedShot();if(shot){shot.expressionMix={};renderExpressionControls();}};
- $('pose-reset-bone').onclick=()=>{const shot=selectedShot();if(shot){delete shot.pose[poseBone];renderPoseControls();}};
+ $('pose-reset-bone').onclick=()=>{const shot=selectedShot();if(shot){checkpointPose();delete shot.pose[poseBone];renderPoseControls();}};
  $('snapshot').onclick=()=>{if(!renderer||!vrm)return status('先にVRMを読み込んでください');renderer.domElement.toBlob(blob=>{if(blob)saveBlob(blob,'VRM_STAGE_'+Math.floor(currentTime()*1000)+'.png');},'image/png');};
  for(const key of ['expression','movement','camera','mouth','intensity','framing']){
   $(key).addEventListener('input',e=>mutateShot(key,['intensity','framing'].includes(key)?Number(e.target.value):e.target.value));
