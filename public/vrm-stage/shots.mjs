@@ -34,7 +34,7 @@ export function normalizeExpressionMix(raw){
  const out={};
  if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
  for(const [key,value] of Object.entries(raw).slice(0,64)){
-  if(!/^[A-Za-z0-9_-]{1,64}$/.test(key))continue;
+  if(typeof key!=='string'||!key||key.length>80||/[<>\\x00-\\x1f]/.test(key))continue;
   const amount=clamp(value,0,1);
   if(amount>0)out[key]=Math.round(amount*1000)/1000;
  }
