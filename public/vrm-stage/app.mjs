@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {VRMLoaderPlugin, VRMUtils} from '@pixiv/three-vrm';
-import {EXPRESSIONS, SHOT_DEFAULT, normalizeShots, newShot, splitShot, moveCut, removeShot, findShot, computeEnvelope, amplitudeAt, clamp, projectJSON} from './shots.mjs';
+import {EXPRESSIONS, SHOT_DEFAULT, POSE_BONES, POSE_PRESETS, normalizePose, presetPose, normalizeShots, newShot, splitShot, moveCut, removeShot, findShot, computeEnvelope, amplitudeAt, clamp, projectJSON} from './shots.mjs';
 
 const $=id=>document.getElementById(id);
 const audio=$('audio'),stage=$('viewport');
@@ -13,7 +13,8 @@ let duration=20,shots=normalizeShots([],20),selectedId=shots[0].id,previewTime=0
 let modelName='',audioName='',audioUrl=null,playingSilent=false,lastFrame=performance.now(),lastShotId='',mouthLevel=0;
 let audioContext=null,audioSource=null,audioAnalyser=null,audioDestination=null,envelope=[],levelData=null;
 let recording=null,recordingStream=null,recordingChunks=[],recordingExtension='';
-let cameraYaw=0;
+let cameraYaw=0,cameraPitch=0,cameraTurn=0,backgroundColor='#1c1b24',sourceModel='';
+let poseBone='head',supportedExpressions=[],lastStatusModel='';
 const compiler=()=>new GLTFLoader().register(parser=>new VRMLoaderPlugin(parser));
 function init3D(){
  scene=new THREE.Scene();scene.background=new THREE.Color(0x1c1b24);
@@ -26,8 +27,15 @@ function init3D(){
  renderer.setClearColor(0x191a20);renderer.domElement.setAttribute('aria-label','VRMキャラクターの3Dプレビュー');
  stage.append(renderer.domElement);configureRatio();
  let drag=null;
- renderer.domElement.addEventListener('pointerdown',e=>{if(recording)return;drag={x:e.clientX,yaw:cameraYaw};renderer.domElement.setPointerCapture(e.pointerId);});
- renderer.domElement.addEventListener('pointermove',e=>{if(!drag||recording)return;cameraYaw=clamp(drag.yaw+(e.clientX-drag.x)/300,-1.4,1.4);});
+ renderer.domElement.addEventListener('pointerdown',e=>{
+  if(recording)return;drag={x:e.clientX,y:e.clientY,yaw:cameraYaw,pitch:cameraPitch};
+  renderer.domElement.setPointerCapture(e.pointerId);
+ });
+ renderer.domElement.addEventListener('pointermove',e=>{
+  if(!drag||recording)return;
+  cameraYaw=clamp(drag.yaw+(e.clientX-drag.x)/260,-3.14,3.14);
+  cameraPitch=clamp(drag.pitch-(e.clientY-drag.y)/300,-1.1,1.1);
+ });
  for(const event of ['pointerup','pointercancel','lostpointercapture'])renderer.domElement.addEventListener(event,()=>drag=null);
  requestAnimationFrame(frame);
 }
@@ -41,16 +49,20 @@ function configureRatio(){
 function getNode(name){return vrm?.humanoid?.getNormalizedBoneNode(name)||null;}
 function loadPoseBones(){
  baseRotations={};
- for(const name of ['head','neck','chest','spine','hips','leftUpperArm','rightUpperArm','leftLowerArm','rightLowerArm']){
+ for(const [name] of POSE_BONES){
   const node=getNode(name);if(node)baseRotations[name]=node.quaternion.clone();
  }
 }
 async function loadModel(file){
  if(!file)return;
  if(file.size>75*1024*1024){status('VRMの上限は75MBです。');return;}
- status('VRMを読み込んでいます…');
+ return loadModelBytes(await file.arrayBuffer(),file.name,'local');
+}
+async function loadModelBytes(bytes,name,origin='local'){
+ if(!renderer){status('WebGLが起動していません。');return false;}
+ status('VRMを解析しています…');
  try{
-  const bytes=await file.arrayBuffer(),gltf=await compiler().parseAsync(bytes,'');
+  const gltf=await compiler().parseAsync(bytes,'');
   const loaded=gltf.userData.vrm;
   if(!loaded)throw Error('VRM拡張情報がありません。VRM 0.x/1.0形式を選んでください。');
   if(vrm){scene.remove(vrm.scene);vrm.scene.traverse(obj=>{if(obj.geometry)obj.geometry.dispose();});}
@@ -60,9 +72,27 @@ async function loadModel(file){
   scene.add(vrm.scene);
   const box=new THREE.Box3().setFromObject(vrm.scene),height=box.getSize(new THREE.Vector3()).y;
   bounds={minY:Number.isFinite(box.min.y)?box.min.y:0,height:Number.isFinite(height)&&height>.2?height:1.7};
-  loadPoseBones();modelName=file.name;
-  $('view-hint').hidden=true;refreshAssetNames();status('VRMを読み込みました。音声とカット演出を設定してください。');
- }catch(e){console.error(e);status('VRMの読み込みに失敗: '+(e?.message||e));}
+  loadPoseBones();modelName=name;sourceModel=origin;lastStatusModel=name;
+  const mgr=vrm.expressionManager;
+  supportedExpressions=Array.from(new Set((mgr?.expressions||[]).map(x=>x.expressionName).filter(Boolean)));
+  $('view-hint').hidden=true;refreshAssetNames();renderPoseControls();renderModelInfo();
+  status(name+' を読み込みました。関節・表情・カット演出を調整できます。');return true;
+ }catch(e){console.error(e);status('VRMの読み込みに失敗: '+(e?.message||e));return false;}
+}
+async function loadBuiltIn(){
+ const button=$('load-subeha');button.disabled=true;
+ status('GitHubのSubeha.vrm（19.55MB）を読み込んでいます…');
+ try{
+  const url=new URL('../models/Subeha.vrm',import.meta.url);
+  const response=await fetch(url,{cache:'default'});
+  if(!response.ok)throw Error('公開ファイルを取得できません（HTTP '+response.status+'）。Pages反映状況を確認してください。');
+  const size=Number(response.headers.get('content-length'))||0;
+  if(size>75*1024*1024)throw Error('ファイルサイズが75MBを超えています');
+  const bytes=await response.arrayBuffer();
+  if(bytes.byteLength<1000000||bytes.byteLength>75*1024*1024)throw Error('VRMファイルのサイズが異常です');
+  await loadModelBytes(bytes,'Subeha.vrm','built-in');
+ }catch(e){console.error(e);status('Subeha.vrmの取得に失敗: '+(e?.message||e));}
+ finally{button.disabled=false;}
 }
 async function ensureAudioGraph(){
  if(!audio.src)return;
@@ -163,6 +193,8 @@ function renderSelection(){
  $('shot-heading').textContent='カット '+(i+1);
  $('shot-range').textContent=stamp(shot.start)+' – '+stamp(shot.end);
  for(const key of ['expression','movement','camera','mouth','intensity','framing'])$(key).value=String(shot[key]);
+ $('zoom').value=String(shot.zoom??1);$('zoom-value').textContent=Math.round((shot.zoom??1)*100)+'%';
+ renderPoseControls();
  $('intensity-value').textContent=Math.round(shot.intensity*100)+'%';
  $('framing-value').textContent=shot.framing===0?'中央':shot.framing<0?'左 '+Math.round(-shot.framing*100)+'%':'右 '+Math.round(shot.framing*100)+'%';
  $('delete-shot').disabled=shots.length<=1;
@@ -215,6 +247,12 @@ function applyPose(time,dt){
   deltaQuat.setFromEuler(new THREE.Euler(...angle));
   node.quaternion.multiply(deltaQuat);
  }
+ // Author-controlled cut pose takes precedence as an additive local rotation.
+ for(const [name,degrees] of Object.entries(shot.pose||{})){
+  const node=getNode(name);if(!node||!baseRotations[name])continue;
+  deltaQuat.setFromEuler(new THREE.Euler(...degrees.map(v=>THREE.MathUtils.degToRad(v)),'XYZ'));
+  node.quaternion.multiply(deltaQuat);
+ }
  const manager=vrm.expressionManager;
  if(manager){
   for(const name of EXPRESSIONS){try{if(manager.getExpression(name))manager.setValue(name,shot.expression===name?1:0);}catch{}}
@@ -228,10 +266,12 @@ function applyPose(time,dt){
   }
  }
  vrm.update(dt);
- const [targetY,dist]=shot.camera==='close'?[.83,.84]:shot.camera==='full'?[.5,2.9]:[.67,1.65];
+ const [targetY,baseDistance]=shot.camera==='close'?[.83,.84]:shot.camera==='full'?[.5,2.9]:[.67,1.65];
+ const dist=baseDistance/clamp(shot.zoom??1,.45,2.3);
  const y=bounds.minY+bounds.height*targetY,offset=shot.framing*bounds.height*.16;
- const rotation=cameraYaw;
- camera.position.set(offset+Math.sin(rotation)*dist*bounds.height, y+bounds.height*.07,Math.cos(rotation)*dist*bounds.height);
+ const rotation=cameraYaw+cameraTurn,cp=Math.cos(cameraPitch),sp=Math.sin(cameraPitch);
+ camera.position.set(offset+Math.sin(rotation)*dist*bounds.height*cp,
+  y+(.07+dist*sp)*bounds.height,Math.cos(rotation)*dist*bounds.height*cp);
  camera.lookAt(offset,y,0);
 }
 function frame(now){
@@ -275,7 +315,8 @@ async function exportVideo(){
 }
 function saveProject(){
  const doc=projectJSON(shots,duration);
- doc.modelFileName=modelName;doc.audioFileName=audioName;doc.ratio=$('ratio').value;
+ doc.modelFileName=modelName;doc.modelSource=sourceModel;doc.audioFileName=audioName;doc.ratio=$('ratio').value;
+ doc.backgroundColor=backgroundColor;doc.cameraYaw=cameraYaw;doc.cameraPitch=cameraPitch;doc.cameraTurn=cameraTurn;
  saveBlob(new Blob([JSON.stringify(doc,null,2)],{type:'application/json'}),'VRM_STAGE_shots.json');
  status('カットの設定を保存しました。VRM・音声ファイル本体は含みません。');
 }
@@ -286,6 +327,10 @@ async function loadProject(file){
   if(doc.schema!=='vrm-stage/v1'||!Array.isArray(doc.shots)||doc.shots.length>500)throw Error('VRM STAGEの設定ファイルではありません');
   duration=audio.src?duration:clamp(doc.duration,1,7200);
   shots=normalizeShots(doc.shots,duration);selectedId=shots[0].id;
+  if(/^#[0-9a-f]{6}$/i.test(doc.backgroundColor||'')){backgroundColor=doc.backgroundColor;$('background-color').value=backgroundColor;if(scene)scene.background=new THREE.Color(backgroundColor);}
+  cameraYaw=clamp(doc.cameraYaw??0,-3.14,3.14);
+  cameraPitch=clamp(doc.cameraPitch??0,-1.1,1.1);
+  cameraTurn=doc.cameraTurn===Math.PI?Math.PI:0;
   if(['9:16','16:9','1:1'].includes(doc.ratio)){$('ratio').value=doc.ratio;configureRatio();}
   $('seek').max=duration;renderShots();renderSelection();setTime(0);
   status('設定を読み込みました。音声とVRMは必要に応じて読み直してください。');
@@ -293,9 +338,19 @@ async function loadProject(file){
 }
 function bind(){
  $('vrm-input').onchange=e=>{loadModel(e.target.files?.[0]);e.target.value='';};
+ $('load-subeha').onclick=loadBuiltIn;
  $('audio-input').onchange=e=>{loadAudio(e.target.files?.[0]);e.target.value='';};
  $('play').onclick=togglePlay;$('split').onclick=split;$('seek').oninput=e=>setTime(Number(e.target.value));
  $('ratio').onchange=configureRatio;$('export-video').onclick=exportVideo;
+ $('front-camera').onclick=()=>{cameraYaw=0;cameraPitch=0;cameraTurn=0;};
+ $('turn-camera').onclick=()=>{cameraTurn=cameraTurn===0?Math.PI:0;};
+ $('background-color').oninput=e=>{if(!/^#[0-9a-f]{6}$/i.test(e.target.value))return;backgroundColor=e.target.value;if(scene)scene.background=new THREE.Color(backgroundColor);};
+ $('zoom').oninput=e=>{const shot=selectedShot();if(!shot)return;shot.zoom=clamp(e.target.value,.45,2.3);$('zoom-value').textContent=Math.round(shot.zoom*100)+'%';};
+ $('model-info-toggle').onclick=()=>{$('model-info').hidden=!$('model-info').hidden;renderModelInfo();};
+ $('pose-bone').onchange=e=>{poseBone=e.target.value;renderPoseControls();};
+ for(const axis of ['x','y','z'])$('pose-'+axis).oninput=e=>updatePoseAxis(axis,Number(e.target.value));
+ $('pose-reset').onclick=()=>{const shot=selectedShot();if(shot){shot.pose={};renderPoseControls();}};
+ $('pose-reset-bone').onclick=()=>{const shot=selectedShot();if(shot){delete shot.pose[poseBone];renderPoseControls();}};
  $('snapshot').onclick=()=>{if(!renderer||!vrm)return status('先にVRMを読み込んでください');renderer.domElement.toBlob(blob=>{if(blob)saveBlob(blob,'VRM_STAGE_'+Math.floor(currentTime()*1000)+'.png');},'image/png');};
  for(const key of ['expression','movement','camera','mouth','intensity','framing']){
   $(key).addEventListener('input',e=>mutateShot(key,['intensity','framing'].includes(key)?Number(e.target.value):e.target.value));
@@ -314,5 +369,5 @@ function bind(){
  audio.addEventListener('ended',()=>{previewTime=duration;playingSilent=false;$('play').textContent='▶';});
  window.addEventListener('pagehide',()=>{if(recording?.state==='recording')recording.stop();if(audioUrl)URL.revokeObjectURL(audioUrl);});
 }
-bind();renderShots();renderSelection();renderClock();
+bind();setupPoseControls();renderShots();renderSelection();renderClock();
 try{init3D();}catch(e){console.error(e);status('WebGLの初期化に失敗: '+e.message);}
