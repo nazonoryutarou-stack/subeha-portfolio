@@ -30,6 +30,10 @@ jobs:
         run: |
           rm -rf _site
           cp -R public _site
+          # Publish the existing source VRM without duplicating a 19.6 MB binary in Git.
+          test -s Subeha.vrm
+          mkdir -p _site/models
+          cp Subeha.vrm _site/models/Subeha.vrm
           cp hitotsu-ore-choji.png _site/hitotsu-ore-choji.png
           node scripts/build-komonjo.mjs _site/komonjo/data.json
           touch _site/.nojekyll
