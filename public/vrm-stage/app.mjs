@@ -35,7 +35,7 @@ function configureRatio(){
  if(!renderer)return;
  const ratio=$('ratio').value;
  const [w,h]=ratio==='16:9'?[960,540]:ratio==='1:1'?[720,720]:[540,960];
- renderer.setSize(w,h,false);renderer.domElement.style.width='100%';renderer.domElement.style.height='100%';
+ renderer.setSize(w,h,false);renderer.domElement.style.width='auto';renderer.domElement.style.height='auto';renderer.domElement.style.maxWidth='100%';renderer.domElement.style.maxHeight='100%';
  camera.aspect=w/h;camera.updateProjectionMatrix();
 }
 function getNode(name){return vrm?.humanoid?.getNormalizedBoneNode(name)||null;}
