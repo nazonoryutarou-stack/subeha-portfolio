@@ -25,3 +25,13 @@
 #model-info{margin:13px 0 0;padding:12px;border:1px solid #44434f;border-radius:8px;background:#202028;color:#c7c4d0;font-size:11px;line-height:1.7;overflow-wrap:anywhere}
 #model-info p{margin:5px 0}
 @media(max-width:800px){.builtin-model{font-size:11px;padding:7px}.pose-panel,.model-inspector{padding:11px;margin-top:10px}.pose-heading strong{font-size:13px}.model-camera-controls label:first-child{min-width:120px}}
+
+
+.appearance-panel{margin-top:13px;border:1px solid #454052;border-radius:10px;background:#292630;padding:12px}
+.appearance-panel summary{font-weight:650;font-size:13px;cursor:pointer;list-style:disclosure-closed}
+.appearance-fields{display:flex;gap:9px;flex-wrap:wrap;align-items:end;margin-top:12px}
+.appearance-fields label{font-size:11px;color:#cfc4d3;display:flex;flex-direction:column;gap:6px}
+.appearance-fields label:first-child{flex:1;min-width:160px}
+.appearance-fields select{width:100%;padding:9px;background:#30303b;color:#eee;border-radius:7px;border:1px solid #56505e}
+.appearance-fields input[type=color]{width:60px;height:34px;border:1px solid #56505e;border-radius:7px;background:transparent}
+.appearance-fields button{border:1px solid #62526a;background:#39313f;color:#e5dce9;padding:9px;border-radius:7px;font-size:10px}
