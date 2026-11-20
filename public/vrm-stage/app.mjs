@@ -15,6 +15,7 @@ let audioContext=null,audioSource=null,audioAnalyser=null,audioDestination=null,
 let recording=null,recordingStream=null,recordingChunks=[],recordingExtension='';
 let cameraYaw=0,cameraPitch=0,cameraTurn=0,backgroundColor='#1c1b24',sourceModel='';
 let poseBone='head',supportedExpressions=[],lastStatusModel='';
+let modelMaterials=[],materialOverrides={},materialOwner='',selectedMaterial=0;
 const compiler=()=>new GLTFLoader().register(parser=>new VRMLoaderPlugin(parser));
 function init3D(){
  scene=new THREE.Scene();scene.background=new THREE.Color(0x1c1b24);
@@ -73,6 +74,8 @@ async function loadModelBytes(bytes,name,origin='local'){
   const box=new THREE.Box3().setFromObject(vrm.scene),height=box.getSize(new THREE.Vector3()).y;
   bounds={minY:Number.isFinite(box.min.y)?box.min.y:0,height:Number.isFinite(height)&&height>.2?height:1.7};
   loadPoseBones();modelName=name;sourceModel=origin;lastStatusModel=name;
+  if(materialOwner!==name){materialOverrides={};materialOwner=name;}
+  collectMaterials();
   const mgr=vrm.expressionManager;
   supportedExpressions=Object.keys(mgr?.expressionMap||{});
   $('view-hint').hidden=true;refreshAssetNames();renderPoseControls();renderModelInfo();
@@ -317,6 +320,7 @@ function saveProject(){
  const doc=projectJSON(shots,duration);
  doc.modelFileName=modelName;doc.modelSource=sourceModel;doc.audioFileName=audioName;doc.ratio=$('ratio').value;
  doc.backgroundColor=backgroundColor;doc.cameraYaw=cameraYaw;doc.cameraPitch=cameraPitch;doc.cameraTurn=cameraTurn;
+ doc.materialOverrides={...materialOverrides};doc.materialOwner=materialOwner;
  saveBlob(new Blob([JSON.stringify(doc,null,2)],{type:'application/json'}),'VRM_STAGE_shots.json');
  status('カットの設定を保存しました。VRM・音声ファイル本体は含みません。');
 }
@@ -331,10 +335,61 @@ async function loadProject(file){
   cameraYaw=clamp(doc.cameraYaw??0,-3.14,3.14);
   cameraPitch=clamp(doc.cameraPitch??0,-1.1,1.1);
   cameraTurn=doc.cameraTurn===Math.PI?Math.PI:0;
+  materialOwner=String(doc.materialOwner||doc.modelFileName||'');
+  materialOverrides={};
+  for(const [key,color] of Object.entries(doc.materialOverrides||{})){
+   if(/^\d{1,3}$/.test(key)&&Number(key)<300&&/^#[0-9a-f]{6}$/i.test(color))materialOverrides[key]=color;
+  }
+  applyMaterialOverrides();renderMaterialUI();
   if(['9:16','16:9','1:1'].includes(doc.ratio)){$('ratio').value=doc.ratio;configureRatio();}
   $('seek').max=duration;renderShots();renderSelection();setTime(0);
   status('設定を読み込みました。音声とVRMは必要に応じて読み直してください。');
  }catch(e){status('設定読み込み失敗: '+e.message);}
+}
+
+
+function collectMaterials(){
+ modelMaterials=[];const seen=new Set();
+ vrm?.scene.traverse(object=>{
+  for(const m of (Array.isArray(object.material)?object.material:[object.material])){
+   if(!m?.color?.isColor||seen.has(m.uuid))continue;
+   seen.add(m.uuid);
+   if(modelMaterials.length<300)modelMaterials.push({material:m,original:m.color.clone(),name:m.name||object.name||'材質'});
+  }
+ });
+ selectedMaterial=0;applyMaterialOverrides();
+ const select=$('material-select');select.replaceChildren();
+ modelMaterials.forEach((entry,i)=>{
+  const opt=document.createElement('option');opt.value=String(i);
+  opt.textContent=(i+1)+'. '+String(entry.name).slice(0,42);select.append(opt);
+ });
+ renderMaterialUI();
+}
+function applyMaterialOverrides(){
+ modelMaterials.forEach((entry,index)=>{
+  const color=materialOverrides[String(index)];
+  if(color&&/^#[0-9a-f]{6}$/i.test(color))entry.material.color.set(color);
+  else entry.material.color.copy(entry.original);
+  entry.material.needsUpdate=true;
+ });
+}
+function renderMaterialUI(){
+ const entry=modelMaterials[selectedMaterial];
+ const color=$('material-color'),select=$('material-select');
+ select.disabled=!modelMaterials.length;color.disabled=!entry;
+ $('material-reset').disabled=!entry;$('material-reset-all').disabled=!modelMaterials.length;
+ if(entry){select.value=String(selectedMaterial);color.value='#'+entry.material.color.getHexString();}
+}
+function setMaterialColor(value){
+ if(!/^#[0-9a-f]{6}$/i.test(value))return;
+ const entry=modelMaterials[selectedMaterial];if(!entry)return;
+ entry.material.color.set(value);entry.material.needsUpdate=true;
+ materialOverrides[String(selectedMaterial)]=value;
+}
+function resetMaterial(index){
+ const entry=modelMaterials[index];if(!entry)return;
+ delete materialOverrides[String(index)];entry.material.color.copy(entry.original);
+ entry.material.needsUpdate=true;renderMaterialUI();
 }
 
 function setupPoseControls(){
@@ -409,6 +464,10 @@ function bind(){
  $('background-color').oninput=e=>{if(!/^#[0-9a-f]{6}$/i.test(e.target.value))return;backgroundColor=e.target.value;if(scene)scene.background=new THREE.Color(backgroundColor);};
  $('zoom').oninput=e=>{const shot=selectedShot();if(!shot)return;shot.zoom=clamp(e.target.value,.45,2.3);$('zoom-value').textContent=Math.round(shot.zoom*100)+'%';};
  $('model-info-toggle').onclick=()=>{$('model-info').hidden=!$('model-info').hidden;renderModelInfo();};
+ $('material-select').onchange=e=>{selectedMaterial=Number(e.target.value)||0;renderMaterialUI();};
+ $('material-color').oninput=e=>setMaterialColor(e.target.value);
+ $('material-reset').onclick=()=>resetMaterial(selectedMaterial);
+ $('material-reset-all').onclick=()=>{materialOverrides={};applyMaterialOverrides();renderMaterialUI();status('モデルの色を初期状態へ戻しました。');};
  $('pose-bone').onchange=e=>{poseBone=e.target.value;renderPoseControls();};
  for(const axis of ['x','y','z'])$('pose-'+axis).oninput=e=>updatePoseAxis(axis,Number(e.target.value));
  $('pose-reset').onclick=()=>{const shot=selectedShot();if(shot){shot.pose={};renderPoseControls();}};
