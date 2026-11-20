@@ -256,6 +256,14 @@ export function buildAvatar(input){
    }
   }
  }
+ // Front-view hair painting: author-created curves are head-bone children,
+ // so GLB / VRM exports and animations retain the hand-drawn strands.
+ for(const [index,stroke] of p.customHair.entries()){
+  if(stroke.length<2)continue;
+  const points=stroke.map(v=>v.map(component=>component*headS));
+  if(points.every(point=>Math.hypot(...point.map((n,i)=>n-points[0][i]))<.002*headS))continue;
+  curve(head,'Hair_Custom_'+index,points,.016*p.hairVolume*headS,hair);
+ }
  if(p.accessory==='glasses'){
   for(const sign of [-1,1]){
    const m=new THREE.Mesh(new THREE.TorusGeometry(.085*headS,.009*headS,8,32),black);
