@@ -133,6 +133,9 @@ export function buildAvatar(input){
   geo.translate(0,pelvisY-.145*H,0);
   skinned('Clothes_Skirt',geo,skirtMat,'hips');
  }
+ if(p.collarHeight>.05){
+  weightedBall('Clothes_Collar',[0,positions.neck.y-.062*H,.10*H],[.082*H,.029*p.collarHeight*H,.032*H],p.topStyle==='jacket'?accent:top,'upperChest');
+ }
  if(p.topStyle==='hoodie'){
   weightedBall('Clothes_Hood',[0,positions.neck.y-.02*H,-.098*H],[.13*H,.155*H,.10*H],top,'upperChest');
   weightedSegment('Hood_Lace_Left','neck','chest',.005*H,.005*H,white,'upperChest');
@@ -181,6 +184,23 @@ export function buildAvatar(input){
    {name:'sad',sx:.9,sy:1.3,sz:1},{name:'angry',sx:.8,sy:.7,sz:1},
    {name:'surprised',sx:.83,sy:3.7,sz:1},{name:'relaxed',sx:1.1,sy:1,sz:1}
   ]);
+ // Lift the mouth corners, without altering the exported expression targets.
+ // The same deformation is applied to every morph target for predictable smiles.
+ if(Math.abs(p.mouthSmile)>.001){
+  const g=mouth.geometry,base=g.attributes.position;
+  const width=.047*p.mouthWidth*headS||1;
+  const tweak=(attr)=>{
+   for(let j=0;j<attr.count;j++){
+    const x=attr.getX(j),y=attr.getY(j);
+    const lift=Math.pow(Math.abs(x)/width,1.7)*p.mouthSmile*.019*headS;
+    attr.setY(j,y+lift);
+   }
+   attr.needsUpdate=true;
+  };
+  tweak(base);
+  for(const attr of g.morphAttributes.position)tweak(attr);
+  g.computeVertexNormals();
+ }
  mouthMeshes.push(mouth);
  // Hair: scalp cap, hair panels and guide-strand curves move with the head bone.
  const hairS=p.hairVolume,brx=rx*1.11*hairS,bry=ry*1.09,brz=rz*1.09*hairS;
@@ -196,7 +216,7 @@ export function buildAvatar(input){
    const x=sign*(brx*.75+Math.sin(theta)*brx*.30),z=Math.cos(theta)*brz*.35-brz*.40;
    const yy=brx*.24;
    curve(head,'Hair_Side_'+sign+'_'+i,[
-    [x*.73,ry*.65,-.0],[x,yy*.62,z],[x*1.05,-length*.47,z-.012],[x*.90,-length,z+.02*Math.sin(i*2)]
+    [x*.73,ry*.65,-.0],[x,yy*.62,z],[x*1.05+p.hairWaves*Math.sin(i*1.3)*.06*headS,-length*.47,z-.012],[x*.90+p.hairWaves*Math.sin(i*2.1)*.09*headS,-length,z+.02*Math.sin(i*2)]
    ],(.018+.004*hairS)*headS,hair);
   }
  }
@@ -208,8 +228,8 @@ export function buildAvatar(input){
   curve(head,'Hair_Bang_'+i,[
    [x*.58,ry*.93,brz*.17],
    [x*.93,ry*.62,brz*.64],
-   [x+side,Math.max(0,endY+.11*headS),brz*.91],
-   [x+side*1.5,endY,brz*.92]
+   [x+side+p.hairWaves*Math.sin(i*3)*.02*headS,Math.max(0,endY+.11*headS),brz*.91],
+   [x+side*1.5+p.hairWaves*Math.cos(i*2)*.035*headS,endY,brz*.92]
   ],(.021+.006*p.hairVolume)*headS,hair);
  }
  if(p.hairStyle==='ponytail'){
