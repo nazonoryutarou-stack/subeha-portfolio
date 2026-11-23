@@ -25,6 +25,9 @@ jobs:
       - name: Test DeepDream v21 runtime contract
         run: node deepdream/test-v21.mjs
 
+      - name: Test VRM stage editing and art direction
+        run: node --test public/vrm-stage/test/*.test.mjs
+
       - name: Run static QA
         shell: python
         run: |
