@@ -75,6 +75,7 @@ function toggleTouchPose(){
  poseTouchMode=!poseTouchMode;
  $('touch-pose').setAttribute('aria-pressed',String(poseTouchMode));
  $('touch-pose').textContent=poseTouchMode?'指で編集中 ✓':'指でポーズ編集';
+ const modeLabel=$('stage-mode-label');if(modeLabel)modeLabel.textContent=poseTouchMode?'POSE / TOUCH':'CAMERA';
  refreshPoseHandles();
  status(poseTouchMode?'点で関節を選び、指をドラッグしてください。上下=X軸、左右=Z軸。':'カメラを指で回すモードです。');
 }
