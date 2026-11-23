@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#17171c">
+<meta name="theme-color" content="#101114">
 <meta name="description" content="Subeha.vrmを読み込み、表情・骨のポーズ・音声連動・カット割りと動画出力を行うVRM演出アプリ">
 <title>VRM STAGE — 音声でアバターを演出</title>
 <link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./art-direction.css">
 <script type="importmap">
 {"imports":{
  "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
@@ -18,13 +19,23 @@
 <body>
 <div id="root">
  <header class="apphead">
-  <div><small>映像素材制作</small><h1>VRM STAGE</h1></div>
-  <div class="head-actions"><a href="../avatar-maker/" style="display:inline-flex;align-items:center;color:#eee;font-size:11px;padding:8px 10px;border:1px solid #626170;border-radius:8px;text-decoration:none">アバターを作る</a><button id="save-project" title="演出設定をJSONで保存">設定保存</button><button id="load-project" title="演出設定を読み込む">設定読込</button><button id="export-video" class="primary">動画を書き出す</button></div>
+  <div class="brand-block"><small>SUBEHA / CHARACTER WORKBENCH</small><h1>VRM <span>STAGE</span></h1></div>
+  <div class="head-actions">
+   <label class="skin-select">表示
+    <select id="visual-skin" aria-label="デザインを切り替える"><option value="console">編集機</option><option value="gallery">展示室</option></select>
+   </label>
+   <a class="head-link" href="../avatar-maker/">新規モデル</a>
+   <button id="save-project" title="演出設定をJSONで保存">設定保存</button>
+   <button id="load-project" title="演出設定を読み込む">設定読込</button>
+   <button id="export-video" class="primary">動画を書き出す</button>
+  </div>
  </header>
  <main class="stage-main">
   <section class="view-area" aria-label="VRMプレビュー">
    <div id="viewport">
-    <div class="view-hint" id="view-hint">GitHubのSubeha.vrmを読み込めます。<small>モデル読込後、表情・ポーズ・カットごとに編集</small></div>
+    <div class="view-brand" aria-hidden="true"><span>01 / MODEL</span><span id="stage-mode-label">CAMERA</span></div>
+    <div class="view-hint" id="view-hint">SUBEHA / VRM<small>「Subeha.vrmを読み込む」から編集を始められます。</small></div>
+    <div class="view-grid" aria-hidden="true"></div>
    </div>
    <div class="asset-bar">
     <button id="load-subeha" type="button" class="builtin-model">Subeha.vrm を読み込む <small>19.55MB</small></button>
@@ -41,10 +52,16 @@
     <label class="ratio">画角<select id="ratio"><option value="9:16">9:16</option><option value="16:9">16:9</option><option value="1:1">1:1</option></select></label>
    </div>
   </section>
-  <section class="work-area">
+  <section class="work-area" data-workspace="pose" aria-label="VRM編集パネル">
    <header class="work-head"><div><strong>カット割り</strong><small>音声の再生位置でカットを分割</small></div><button id="split" class="accent">＋ ここでカット</button></header>
    <div class="shot-timeline" id="shot-timeline" aria-label="カット一覧"></div>
    <div class="shot-edit-head"><strong id="shot-heading">カット 1</strong><span id="shot-range">0:00 – 0:20</span><button id="delete-shot" class="subtle">カット削除</button></div>
+   <nav class="workspace-nav" aria-label="編集項目の切り替え">
+    <button type="button" data-workspace-button="pose" aria-pressed="true">姿勢 <small>POSE</small></button>
+    <button type="button" data-workspace-button="face" aria-pressed="false">表情 <small>FACE</small></button>
+    <button type="button" data-workspace-button="scene" aria-pressed="false">演出 <small>SCENE</small></button>
+    <button type="button" data-workspace-button="material" aria-pressed="false">質感 <small>LOOK</small></button>
+   </nav>
    <div class="editor-grid">
     <label>表情 <select id="expression"><option value="neutral">通常</option><option value="happy">笑顔</option><option value="angry">怒り</option><option value="sad">悲しみ</option><option value="relaxed">リラックス</option><option value="surprised">驚き</option></select></label>
     <label>動き <select id="movement"><option value="idle">待機・呼吸</option><option value="talk">話す・身振り</option><option value="nod">うなずく</option><option value="shake">首を振る</option><option value="wave">手を振る</option><option value="bow">お辞儀</option><option value="listen">聞き入る</option></select></label>
@@ -100,6 +117,7 @@
 </div>
 <input id="project-input" type="file" accept="application/json,.json" hidden>
 <audio id="audio" preload="metadata"></audio>
+<script type="module" src="./art-direction.mjs"></script>
 <script type="module" src="./app.mjs"></script>
 </body>
 </html>
