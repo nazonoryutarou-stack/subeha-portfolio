@@ -164,6 +164,7 @@ python ~/ai-phone-bridge/phone_bridge.py disarm
 {
   "id": "blender-rotate-view-0001",
   "target_package": "実際のBlenderパッケージ名",
+  "expires_at": 0,
   "steps": [
     {"op":"snapshot"},
     {"op":"swipe", "x":0.55,"y":0.47,"to_x":0.75,"to_y":0.48,"ms":380},
@@ -172,7 +173,9 @@ python ~/ai-phone-bridge/phone_bridge.py disarm
 }
 ```
 
-座標は画面幅・高さに対する比率（0～1）です。`tap`, `swipe`, `back`, `home`, `wait`, `status`, `snapshot`以外は拒否。文字入力、任意シェル、APKインストール、画面ロック解除などは許可していません。
+座標は画面幅・高さに対する比率（0～1）です。入力操作や画面取得には、JSON内の`expires_at`を**生成時点から最大15分後のUNIX時刻（秒）**に設定する必要があります（上の`0`は置き換える仮値です）。期限切れの古い命令を後で意図せず実行しないためです。
+
+`tap`, `swipe`, `back`, `home`, `wait`, `status`, `snapshot`以外は拒否。文字入力、任意シェル、APKインストール、画面ロック解除などは許可していません。操作開始時点でジョブIDを記録するため、途中でTermuxが強制終了しても、同じ命令が自動的に二重実行されることはありません。
 
 ## 注意事項
 
