@@ -289,6 +289,7 @@ function renderSelection(){
  $('shot-heading').textContent='カット '+(i+1);
  $('shot-range').textContent=stamp(shot.start)+' – '+stamp(shot.end);
  for(const key of ['expression','movement','camera','mouth','intensity','framing'])$(key).value=String(shot[key]);
+ $('pose-movement').value=shot.movement;
  $('zoom').value=String(shot.zoom??1);$('zoom-value').textContent=Math.round((shot.zoom??1)*100)+'%';
  renderPoseControls();renderExpressionControls();
  $('intensity-value').textContent=Math.round(shot.intensity*100)+'%';
@@ -303,6 +304,7 @@ function renderSelection(){
 }
 function mutateShot(key,value){
  const shot=selectedShot();if(!shot)return;shot[key]=value;
+ if(key==='movement')$('pose-movement').value=value;
  if(key==='intensity')$('intensity-value').textContent=Math.round(value*100)+'%';
  if(key==='framing')$('framing-value').textContent=value===0?'中央':value<0?'左 '+Math.round(-value*100)+'%':'右 '+Math.round(value*100)+'%';
  renderShots();
@@ -636,6 +638,7 @@ function bind(){
  $('material-reset').onclick=()=>resetMaterial(selectedMaterial);
  $('material-reset-all').onclick=()=>{materialOverrides={};applyMaterialOverrides();renderMaterialUI();status('モデルの色を初期状態へ戻しました。');};
  $('export-recolored-vrm').onclick=exportRecoloredVRM;
+ $('pose-movement').onchange=e=>{$('movement').value=e.target.value;mutateShot('movement',e.target.value);};
  $('pose-bone').onchange=e=>{poseBone=e.target.value;renderPoseControls();refreshPoseHandles();};
  $('touch-pose').onclick=toggleTouchPose;
  $('pose-undo').onclick=()=>movePoseHistory(poseUndoStack,poseRedoStack);
