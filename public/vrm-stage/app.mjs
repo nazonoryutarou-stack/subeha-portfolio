@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {VRMLoaderPlugin, VRMUtils} from '@pixiv/three-vrm';
 import {recolorVRM} from './recolor-vrm.mjs';
+import {RELAXED_BASE_POSE, movementAngles} from './motion-rig.mjs';
 import {nearestPoseBone, dragPoseAngles} from './pose-gestures.mjs';
 import {EXPRESSIONS, SHOT_DEFAULT, POSE_BONES, POSE_PRESETS, normalizePose, normalizeExpressionMix, presetPose, normalizeShots, newShot, splitShot, moveCut, removeShot, findShot, computeEnvelope, amplitudeAt, clamp, projectJSON} from './shots.mjs';
 
@@ -317,29 +318,19 @@ function applyPose(time,dt){
  if(!vrm)return;
  const shot=findShot(shots,time)||SHOT_DEFAULT,local=time-shot.start,amount=shot.intensity||0;
  for(const [name,base] of Object.entries(baseRotations)){const node=getNode(name);if(node)node.quaternion.copy(base);}
- const angles={};
- const move=shot.movement;
- const breathe=Math.sin(time*2.2)*.012*amount;
- angles.spine=[breathe,0,Math.sin(time*.8)*.014*amount];
- angles.chest=[breathe,0,0];
- if(move==='nod')angles.head=[Math.sin(local*7)*.27*amount,0,0];
- if(move==='shake')angles.head=[0,Math.sin(local*7)*.38*amount,0];
- if(move==='bow')angles.spine=[Math.min(1,local*2)*.48*amount+breathe,0,0];
- if(move==='listen')angles.head=[-.1*amount,-.13*amount,.11*amount];
- if(move==='talk'){
-  angles.head=[Math.sin(local*2.4)*.1*amount,Math.sin(local*1.5)*.12*amount,0];
-  angles.leftUpperArm=[-.28*amount,0,.15*amount+Math.sin(local*4)*.12*amount];
-  angles.rightUpperArm=[-.35*amount,0,-.18*amount-Math.sin(local*3)*.12*amount];
- }
- if(move==='wave'){
-  angles.rightUpperArm=[-.25*amount,0,-1.25*amount];
-  angles.rightLowerArm=[0,0,(-.4+Math.sin(local*9)*.3)*amount];
- }
- if(move==='idle')angles.head=[Math.sin(time*1.1)*.025*amount,Math.sin(time*.45)*.028*amount,0];
+ const angles=movementAngles(shot.movement,time,shot.start,amount);
+ // An authored pose is relative to an A-like neutral stance (arms at sides).
+ // Apply on normalized bone nodes, never the raw VRM skeleton; changes are non-destructive.
  const deltaQuat=new THREE.Quaternion();
+ for(const [name,degrees] of Object.entries(RELAXED_BASE_POSE)){
+  const node=getNode(name);if(!node||!baseRotations[name])continue;
+  deltaQuat.setFromEuler(new THREE.Euler(...degrees.map(THREE.MathUtils.degToRad),'XYZ'));
+  node.quaternion.multiply(deltaQuat);
+ }
+
  for(const [name,angle] of Object.entries(angles)){
   const node=getNode(name);if(!node||!baseRotations[name])continue;
-  deltaQuat.setFromEuler(new THREE.Euler(...angle));
+  deltaQuat.setFromEuler(new THREE.Euler(...angle,'XYZ'));
   node.quaternion.multiply(deltaQuat);
  }
  // Author-controlled cut pose takes precedence as an additive local rotation.
@@ -575,7 +566,7 @@ function setupPoseControls(){
  select.value=poseBone;
  const presets=$('pose-presets');presets.replaceChildren();
  for(const [id,label] of POSE_PRESETS){
-  const button=document.createElement('button');button.type='button';button.textContent=label;
+  const button=document.createElement('button');button.type='button';button.textContent=label;button.title='現在のカットに '+label+' のポーズを適用';
   button.onclick=()=>{
    const shot=selectedShot();if(!shot)return;
    checkpointPose();shot.pose=presetPose(id);renderPoseControls();status(label+' をこのカットへ適用しました。');
