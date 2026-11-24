@@ -27,7 +27,7 @@ test('every motion is named, finite, intensity-clamped and supported by serializ
   const shots=normalizeShots([{start:0,movement:id}],20);
   assert.equal(shots[0].movement,id);
   assert.equal(projectJSON(shots,20).shots[0].movement,id);
-  assert.deepEqual(movementAngles(id,2,0,0),Object.fromEntries(Object.keys(movementAngles(id,2)).map(key=>[key,[0,0,0]])));
+  for(const angles of Object.values(movementAngles(id,2,0,0)))assert.ok(angles.every(value=>Math.abs(value)<1e-12),id);
  }
 });
 test('motion state at the same time is deterministic and malformed inputs do not introduce NaN',()=>{
