@@ -178,3 +178,12 @@ body[data-skin="gallery"] #pose-x,body[data-skin="gallery"] #pose-y,body[data-sk
 @media(max-width:380px){.transport{flex-wrap:nowrap}.transport input[type=range]{order:0;flex-basis:60px}.workspace-nav button small{font-size:8px}}
 @media(max-height:620px) and (max-width:800px){.view-area{position:relative;top:auto;box-shadow:none}.view-area #viewport{height:32dvh;min-height:135px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{scroll-behavior:auto!important}}
+
+/* One motion selector stays beside the pose presets on touch devices. */
+.pose-motion-control{display:flex;align-items:center;gap:12px;margin:0 0 13px;padding:9px 0 12px;border-bottom:1px solid #404649}
+.pose-motion-control label{font-size:12px;color:#d7d5cf;flex:0 0 auto;font-weight:650}
+.pose-motion-control select{flex:1;min-width:0;min-height:42px;border:1px solid #5b6164;border-radius:4px;background:#272c2e;color:#fff;padding:9px;font-size:13px}
+body[data-skin="gallery"] .pose-motion-control{border-color:#c9c2b6}
+body[data-skin="gallery"] .pose-motion-control label{color:#333a35}
+body[data-skin="gallery"] .pose-motion-control select{background:#fdfcf9;color:#262b28;border-color:#aaa99f}
+@media(max-width:420px){.pose-motion-control{display:block}.pose-motion-control label{display:block;margin-bottom:8px}.pose-motion-control select{width:100%}}
