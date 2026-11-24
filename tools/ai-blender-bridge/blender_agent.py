@@ -115,16 +115,27 @@ def orient_to(obj, target):
     obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
 
 
+def make_mesh_object(name, vertices, faces, material=None):
+    scene = studio()
+    mesh = bpy.data.meshes.new(name + " mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    scene.collection.objects.link(obj)
+    apply_material(obj, material)
+    return obj
+
+
 def create_box(step):
-    s = studio()
     size = vector(step.get("size"), [1, 1, 1])
     if min(size) <= .001 or max(size) > 1000:
         raise ValueError("box dimensions invalid")
-    bpy.ops.mesh.primitive_cube_add(size=1, location=vector(step.get("location"), [0,0,0]))
-    obj = relocate_object(bpy.context.object, s)
-    obj.name = name_of(step,"AI Box")
-    obj.dimensions = size
-    bpy.context.view_layer.update()
+    sx, sy, sz = (v * .5 for v in size)
+    verts = [[-sx,-sy,-sz],[sx,-sy,-sz],[sx,sy,-sz],[-sx,sy,-sz],
+             [-sx,-sy,sz],[sx,-sy,sz],[sx,sy,sz],[-sx,sy,sz]]
+    faces = [[3,2,1,0],[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]]
+    obj = make_mesh_object(name_of(step,"AI Box"), verts, faces, step.get("material"))
+    obj.location = vector(step.get("location"), [0,0,0])
     bevel = number(step.get("bevel", 0), 0, 0, .5)
     if bevel:
         mod = obj.modifiers.new(name="Beveled edges", type="BEVEL")
@@ -132,31 +143,46 @@ def create_box(step):
         mod.segments = 2
         if hasattr(mod, "affect"):
             mod.affect = "EDGES"
-    apply_material(obj, step.get("material"))
     return obj
 
 
 def create_cylinder(step):
-    s = studio()
     radius = number(step.get("radius", .5), .5, .001, 100)
     depth = number(step.get("depth", 1), 1, .001, 1000)
-    vertices = int(number(step.get("vertices", 32), 32, 6, 96))
-    bpy.ops.mesh.primitive_cylinder_add(vertices=vertices, radius=radius, depth=depth, location=vector(step.get("location"), [0,0,0]))
-    obj = relocate_object(bpy.context.object, s)
-    obj.name = name_of(step,"AI Cylinder")
-    apply_material(obj, step.get("material"))
+    segs = int(number(step.get("vertices", 32), 32, 6, 96))
+    vertices = []
+    for z in (-depth/2,depth/2):
+        for k in range(segs):
+            a = 2*math.pi*k/segs
+            vertices.append([radius*math.cos(a),radius*math.sin(a),z])
+    faces = [list(range(segs-1,-1,-1)),list(range(segs,2*segs))]
+    faces += [[k,(k+1)%segs,(k+1)%segs+segs,k+segs] for k in range(segs)]
+    obj = make_mesh_object(name_of(step,"AI Cylinder"),vertices,faces,step.get("material"))
+    obj.location = vector(step.get("location"), [0,0,0])
     return obj
 
 
 def create_sphere(step):
-    s = studio()
     radius = number(step.get("radius", .5), .5, .001, 100)
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=16, radius=radius, location=vector(step.get("location"), [0,0,0]))
-    obj = relocate_object(bpy.context.object, s)
-    obj.name = name_of(step,"AI Sphere")
+    segments, rings = 24, 12
+    vertices = [[0,0,radius]]
+    for j in range(1,rings):
+        phi = math.pi*j/rings
+        for k in range(segments):
+            theta = 2*math.pi*k/segments
+            vertices.append([radius*math.sin(phi)*math.cos(theta),radius*math.sin(phi)*math.sin(theta),radius*math.cos(phi)])
+    bottom = len(vertices)
+    vertices.append([0,0,-radius])
+    faces = [[0,1+k,1+(k+1)%segments] for k in range(segments)]
+    for j in range(rings-2):
+        a=1+j*segments
+        b=1+(j+1)*segments
+        faces += [[a+k,b+k,b+(k+1)%segments,a+(k+1)%segments] for k in range(segments)]
+    faces += [[bottom,1+(rings-2)*segments+(k+1)%segments,1+(rings-2)*segments+k] for k in range(segments)]
+    obj = make_mesh_object(name_of(step,"AI Sphere"),vertices,faces,step.get("material"))
+    obj.location = vector(step.get("location"), [0,0,0])
     for face in obj.data.polygons:
         face.use_smooth = True
-    apply_material(obj, step.get("material"))
     return obj
 
 
