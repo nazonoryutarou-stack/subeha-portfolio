@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import time
 from pathlib import Path
 from unittest import TestCase, main
 from unittest.mock import patch
@@ -18,6 +19,12 @@ class BridgeTests(TestCase):
         for op in ('shell','install','unlock','text','grant_permission','adb','eval'):
             with self.assertRaises(ValueError):
                 pb.validate_job({"id":"bad1","target_package":"org.blender.test","steps":[{"op":op}]})
+    def test_expired_remote_input(self):
+        with self.assertRaises(ValueError):
+            pb.validate_job({"id":"stale", "expires_at":time.time()-120, "target_package":"org.blender.test", "steps":[{"op":"back"}]})
+    def test_fresh_remote_input(self):
+        job={"id":"fresh", "expires_at":time.time()+300, "target_package":"org.blender.test", "steps":[{"op":"back"}]}
+        self.assertEqual(pb.validate_job(job), "fresh")
     def test_untrusted_coordinates(self):
         for x in ('0.5', -0.1, 1.1, None, True, []):
             with self.assertRaises(ValueError):
@@ -45,13 +52,13 @@ class BridgeTests(TestCase):
             with self.assertRaises(PermissionError):
                 pb.upload_private('owner/public','latest.png',Path(__file__),'fake')
     def test_fail_after_partial_input_does_not_repeat(self):
-        job={"id":"half-done","target_package":"org.blender.test","steps":[{"op":"tap","x":.5,"y":.5},{"op":"back"}]}
+        job={"id":"half-done","expires_at":time.time()+300,"target_package":"org.blender.test","steps":[{"op":"tap","x":.5,"y":.5},{"op":"back"}]}
         fake_st={"armed_until":10000000000,"completed":[],"last_result":None}
         with patch.object(pb,'state',return_value=fake_st),patch.object(pb,'json_load',return_value={"completed":[]}),patch.object(pb,'config',return_value={"allowed_packages":["org.blender.test"]}),patch.object(pb,'authorized_foreground'),patch.object(pb,'step_execute',side_effect=[{'tap':[100,100]},RuntimeError('lost focus')]),patch.object(pb,'json_save') as save:
             r=pb.run_job(job,capture=False)
             self.assertFalse(r['ok'])
             self.assertIn('half-done',save.call_args.args[1]['completed'])
-            self.assertEqual(save.call_count,1)
+            self.assertEqual(save.call_count,2)
 
 if __name__ == '__main__':
     main()
