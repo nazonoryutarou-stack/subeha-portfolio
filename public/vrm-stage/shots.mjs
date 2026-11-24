@@ -1,6 +1,7 @@
 /* VRM Stage / shot data model. No browser globals; testable in Node. */
 export const EXPRESSIONS=Object.freeze(['neutral','happy','angry','sad','relaxed','surprised']);
-export const MOVEMENTS=Object.freeze(['idle','nod','shake','wave','bow','listen','talk']);
+import {MOTION_LABELS} from './motion-rig.mjs';
+export const MOVEMENTS=Object.freeze(MOTION_LABELS.map(([id])=>id));
 export const CAMERAS=Object.freeze(['full','medium','close']);
 export const MOUTHS=Object.freeze(['auto','closed','aa','ee','ih','oh','ou']);
 
@@ -15,8 +16,11 @@ export const POSE_BONES=Object.freeze([
 ]);
 const BONE_KEYS=new Set(POSE_BONES.map(([key])=>key));
 export const POSE_PRESETS=Object.freeze([
- ['neutral','基本姿勢'],['armsOpen','腕を広げる'],['greeting','挨拶'],
- ['point','指さし'],['thinking','考える'],['dance','ダンス姿勢'],
+ ['neutral','自然な立ち姿'],['tPose','T字（確認用）'],['armsOpen','腕を広げる'],
+ ['greeting','挨拶'],['point','右を指す'],['pointLeft','左を指す'],
+ ['thinking','考える'],['handsOnHips','腰に手を添える'],['armsCrossed','腕組み風'],
+ ['prayer','祈る'],['shy','照れる'],['proud','胸を張る'],
+ ['idolPose','決めポーズ'],['crouchReady','身構える'],['dance','ダンス姿勢'],
  ['sit','座り姿勢（簡易）']
 ]);
 export function normalizePose(raw){
@@ -41,15 +45,39 @@ export function normalizeExpressionMix(raw){
  return out;
 }
 
+/* Presets are offsets from the relaxed base pose, not absolute T-pose rotations.
+   The tPose exception is an optional rig diagnostic that cancels the base. */
 export function presetPose(name){
  const result={
   neutral:{},
-  armsOpen:{leftUpperArm:[-12,0,72],rightUpperArm:[-12,0,-72],leftLowerArm:[0,0,-12],rightLowerArm:[0,0,12]},
-  greeting:{rightUpperArm:[-10,0,-115],rightLowerArm:[0,0,-65],head:[10,0,0]},
-  point:{rightUpperArm:[-70,0,-45],rightLowerArm:[0,0,-22],head:[0,-10,0]},
-  thinking:{rightUpperArm:[-35,0,-45],rightLowerArm:[-35,0,-75],head:[12,-8,0]},
-  dance:{leftUpperArm:[-25,0,92],rightUpperArm:[-20,0,-100],leftUpperLeg:[-18,0,12],rightUpperLeg:[22,0,-8],spine:[0,12,12]},
-  sit:{leftUpperLeg:[-78,0,0],rightUpperLeg:[-78,0,0],leftLowerLeg:[77,0,0],rightLowerLeg:[77,0,0],spine:[-5,0,0]}
+  tPose:{spine:[-2,0,0],chest:[2,0,0],neck:[1,0,0],
+   leftUpperArm:[6,0,-70],rightUpperArm:[6,0,70],
+   leftLowerArm:[7,0,7],rightLowerArm:[7,0,-7],
+   leftHand:[3,0,3],rightHand:[3,0,-3],
+   leftUpperLeg:[2,0,-2],rightUpperLeg:[2,0,2],
+   leftLowerLeg:[-3,0,0],rightLowerLeg:[-3,0,0]},
+  armsOpen:{leftUpperArm:[0,0,-55],rightUpperArm:[0,0,55],leftLowerArm:[-5,0,0],rightLowerArm:[-5,0,0]},
+  greeting:{rightUpperArm:[-23,0,-47],rightLowerArm:[-45,0,14],rightHand:[0,0,-8],head:[4,-7,0]},
+  point:{rightUpperArm:[-33,0,-50],rightLowerArm:[-7,0,0],head:[0,-10,0],chest:[0,-7,0]},
+  pointLeft:{leftUpperArm:[-33,0,50],leftLowerArm:[-7,0,0],head:[0,10,0],chest:[0,7,0]},
+  thinking:{rightUpperArm:[-23,0,-20],rightLowerArm:[-68,0,12],rightHand:[9,0,10],head:[9,-8,-4]},
+  handsOnHips:{leftUpperArm:[-18,0,-16],rightUpperArm:[-18,0,16],
+   leftLowerArm:[-64,0,15],rightLowerArm:[-64,0,-15],chest:[-5,0,0]},
+  armsCrossed:{leftUpperArm:[-30,0,-24],rightUpperArm:[-30,0,24],
+   leftLowerArm:[-88,0,-25],rightLowerArm:[-88,0,25],chest:[-3,0,0]},
+  prayer:{leftUpperArm:[-35,0,-15],rightUpperArm:[-35,0,15],
+   leftLowerArm:[-48,0,0],rightLowerArm:[-48,0,0],head:[8,0,0]},
+  shy:{head:[9,-7,5],chest:[7,0,0],leftUpperArm:[-12,0,-8],rightUpperArm:[-12,0,8],
+   leftLowerArm:[-26,0,0],rightLowerArm:[-26,0,0],leftUpperLeg:[0,0,-4],rightUpperLeg:[0,0,4]},
+  proud:{spine:[-5,0,0],chest:[-7,0,0],head:[-4,0,0],leftUpperArm:[0,0,-6],rightUpperArm:[0,0,6]},
+  idolPose:{leftUpperArm:[-20,0,-26],rightUpperArm:[-36,0,-42],
+   rightLowerArm:[-42,0,0],spine:[-3,0,8],head:[-5,0,-7],leftUpperLeg:[0,0,-6]},
+  crouchReady:{spine:[18,0,0],leftUpperLeg:[-33,0,0],rightUpperLeg:[-36,0,0],
+   leftLowerLeg:[52,0,0],rightLowerLeg:[54,0,0],leftUpperArm:[-25,0,-10],rightUpperArm:[-25,0,10]},
+  dance:{leftUpperArm:[-25,0,-30],rightUpperArm:[-25,0,-48],
+   leftUpperLeg:[-18,0,12],rightUpperLeg:[22,0,-8],spine:[0,12,12]},
+  sit:{leftUpperLeg:[-78,0,0],rightUpperLeg:[-78,0,0],
+   leftLowerLeg:[77,0,0],rightLowerLeg:[77,0,0],spine:[-5,0,0]},
  };
  return normalizePose(result[name]||{});
 }
