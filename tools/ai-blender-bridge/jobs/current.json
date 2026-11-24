@@ -1,0 +1,24 @@
+{
+  "id": "initial-ai-bridge-demo-20261124",
+  "title": "AI操作ブリッジ初期検証：光と材質を持つ部屋",
+  "steps": [
+    {"op":"reset"},
+    {"op":"box","name":"床","location":[0,0,-0.12],"size":[9,7,0.24],"material":{"name":"Warm Limestone","color":[0.55,0.50,0.42,1],"roughness":0.82}},
+    {"op":"box","name":"背面の壁","location":[0,3.48,1.7],"size":[9,0.25,3.4],"material":{"name":"Ivory Plaster","color":[0.68,0.65,0.58,1],"roughness":0.96}},
+    {"op":"box","name":"左壁","location":[-4.38,0,1.7],"size":[0.24,7,3.4],"material":{"name":"Ivory Plaster","color":[0.68,0.65,0.58,1],"roughness":0.96}},
+    {"op":"box","name":"木のテーブル","location":[0.4,0.1,0.9],"size":[2.5,1.3,0.13],"bevel":0.045,"material":{"name":"Oiled Oak","color":[0.38,0.22,0.12,1],"roughness":0.43}},
+    {"op":"cylinder","name":"テーブル脚1","location":[-0.55,-0.35,0.46],"radius":0.055,"depth":0.88,"material":{"name":"Steel","color":[0.19,0.21,0.23,1],"roughness":0.3,"metallic":0.85}},
+    {"op":"cylinder","name":"テーブル脚2","location":[1.3,-0.35,0.46],"radius":0.055,"depth":0.88,"material":{"name":"Steel","color":[0.19,0.21,0.23,1],"roughness":0.3,"metallic":0.85}},
+    {"op":"cylinder","name":"テーブル脚3","location":[-0.55,0.57,0.46],"radius":0.055,"depth":0.88,"material":{"name":"Steel","color":[0.19,0.21,0.23,1],"roughness":0.3,"metallic":0.85}},
+    {"op":"cylinder","name":"テーブル脚4","location":[1.3,0.57,0.46],"radius":0.055,"depth":0.88,"material":{"name":"Steel","color":[0.19,0.21,0.23,1],"roughness":0.3,"metallic":0.85}},
+    {"op":"sphere","name":"試験用ガラス球","location":[0.3,0.1,1.40],"radius":0.31,"material":{"name":"Orange Lacquer","color":[0.92,0.21,0.04,1],"roughness":0.16,"metallic":0.2}},
+    {"op":"box","name":"ソファ本体","location":[-2.6,0.5,0.47],"size":[1.7,1.3,0.65],"bevel":0.15,"material":{"name":"Blue Fabric","color":[0.11,0.24,0.38,1],"roughness":0.94}},
+    {"op":"box","name":"ソファ背もたれ","location":[-2.6,1.04,0.94],"size":[1.7,0.22,1.1],"bevel":0.10,"material":{"name":"Blue Fabric","color":[0.11,0.24,0.38,1],"roughness":0.94}},
+    {"op":"light","name":"窓からの光","type":"AREA","location":[-2.2,-1.2,4.7],"target":[0,0,0],"energy":1100,"size":4.0,"color":[0.84,0.91,1.0]},
+    {"op":"light","name":"室内暖色灯","type":"AREA","location":[2.8,1.8,3.1],"target":[0,0,1],"energy":480,"size":2.0,"color":[1.0,0.73,0.45]},
+    {"op":"camera","location":[6.8,-9.3,5.5],"target":[0,0,1.1],"lens":36},
+    {"op":"world","color":[0.24,0.27,0.31],"strength":0.6},
+    {"op":"render_settings","width":960,"height":640},
+    {"op":"status"}
+  ]
+}
