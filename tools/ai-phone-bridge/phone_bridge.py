@@ -175,6 +175,11 @@ def validate_job(job):
         raise ValueError("job exceeds action limit")
     if inputs and not package:
         raise ValueError("input job requires target_package")
+    if inputs or any(step["op"] == "snapshot" for step in steps):
+        expires_at = job.get("expires_at")
+        now = time.time()
+        if type(expires_at) not in (int, float) or not (now <= expires_at <= now + 900):
+            raise ValueError("screen/input job needs expires_at within 15 minutes of now (Unix seconds)")
     if len(json.dumps(job, ensure_ascii=False).encode()) > MAX_JOB_BYTES:
         raise ValueError("job too large")
     return jid
@@ -241,6 +246,12 @@ def run_job(job, *, capture=True):
         if not consent_active():
             raise PermissionError("操作未許可: Termux から arm してから実行")
         authorized_foreground(target)
+    # Journal the ID BEFORE making a single change to the phone.
+    # A force-closed Termux process must never replay partially completed taps.
+    journal = json_load(STATE_PATH, {})
+    journal["completed"] = (list(journal.get("completed", [])) + [jid])[-50:]
+    journal["last_result"] = {"id": jid, "ok": False, "status": "started; result not yet confirmed"}
+    json_save(STATE_PATH, journal)
     trace = []
     last_image = None
     ok = True
