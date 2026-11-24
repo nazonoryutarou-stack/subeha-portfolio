@@ -64,7 +64,7 @@
    </nav>
    <div class="editor-grid">
     <label>表情 <select id="expression"><option value="neutral">通常</option><option value="happy">笑顔</option><option value="angry">怒り</option><option value="sad">悲しみ</option><option value="relaxed">リラックス</option><option value="surprised">驚き</option></select></label>
-    <label>動き <select id="movement"><option value="idle">待機・呼吸</option><option value="talk">話す・身振り</option><option value="nod">うなずく</option><option value="shake">首を振る</option><option value="wave">手を振る</option><option value="bow">お辞儀</option><option value="listen">聞き入る</option></select></label>
+    <label>動き <select id="movement"><option value="idle">待機・呼吸</option><option value="talk">話す・身振り</option><option value="nod">うなずく</option><option value="shake">首を振る</option><option value="wave">手を振る</option><option value="bow">お辞儀</option><option value="listen">聞き入る</option><option value="breathe">深呼吸</option><option value="sway">ゆったり揺れる</option><option value="explain">説明する</option><option value="point">右を指す</option><option value="pointLeft">左を指す</option><option value="celebrate">喜ぶ</option><option value="shyMove">照れる</option><option value="thinkingMove">考え込む</option><option value="lookAround">見回す</option><option value="stepShift">重心を移す</option><option value="idolBounce">リズムに乗る</option><option value="prayerMove">祈る</option><option value="tired">疲れる</option><option value="confident">堂々とする</option><option value="danceLight">軽く踊る</option><option value="sneak">忍び足</option></select></label>
     <label>カメラ <select id="camera"><option value="full">全身</option><option value="medium">上半身</option><option value="close">顔アップ</option></select></label>
     <label>口の動き <select id="mouth"><option value="auto">音量に連動</option><option value="closed">閉じる</option><option value="aa">あ</option><option value="ee">え</option><option value="ih">い</option><option value="oh">お</option><option value="ou">う</option></select></label>
     <label class="slider">動きの大きさ <output id="intensity-value">75%</output><input id="intensity" type="range" min="0" max="1" step=".05" value=".75"></label>
@@ -79,6 +79,31 @@
     <header class="pose-heading"><div><strong>全身ポーズ編集</strong><small>関節の指操作 · カット別保存 · 取り消し可能</small></div><div class="pose-toolbar"><button id="touch-pose" type="button" aria-pressed="false">指でポーズ編集</button><button id="pose-undo" type="button" title="直前のポーズ編集を戻す" disabled>↶ 戻す</button><button id="pose-redo" type="button" title="ポーズをやり直す" disabled>↷ 進む</button><button id="pose-reset" type="button">姿勢をリセット</button></div></header>
     <p class="pose-help">「指でポーズ編集」を押すとモデル上に関節の点が表示されます。点を選んでドラッグすると骨が動きます（上下＝X、左右＝Z、ねじり＝Yスライダー）。点のない場所のドラッグはカメラ回転です。</p>
     <div class="pose-presets" id="pose-presets"></div>
+    <div class="pose-motion-control"><label for="pose-movement">動きのバリエーション</label><select id="pose-movement" aria-label="このカットの動きを選択">
+    <option value="idle">自然な待機</option>
+    <option value="breathe">深呼吸</option>
+    <option value="sway">ゆったり揺れる</option>
+    <option value="talk">話す</option>
+    <option value="explain">説明する</option>
+    <option value="nod">うなずく</option>
+    <option value="shake">首を横に振る</option>
+    <option value="wave">手を振る</option>
+    <option value="bow">お辞儀</option>
+    <option value="listen">耳を傾ける</option>
+    <option value="point">右を指す</option>
+    <option value="pointLeft">左を指す</option>
+    <option value="celebrate">喜ぶ</option>
+    <option value="shyMove">照れる</option>
+    <option value="thinkingMove">考え込む</option>
+    <option value="lookAround">見回す</option>
+    <option value="stepShift">重心を移す</option>
+    <option value="idolBounce">リズムに乗る</option>
+    <option value="prayerMove">祈る</option>
+    <option value="tired">疲れる</option>
+    <option value="confident">堂々とする</option>
+    <option value="danceLight">軽く踊る</option>
+    <option value="sneak">忍び足</option>
+    </select></div>
     <div class="pose-bone-controls">
      <label>動かす関節<select id="pose-bone"></select></label>
      <button id="pose-reset-bone" type="button">この関節だけ戻す</button>
