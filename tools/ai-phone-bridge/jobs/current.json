@@ -1,0 +1,7 @@
+{
+  "id": "ai-phone-bridge-initial-status-20261125",
+  "description": "安全な初回接続テスト。画面取得やタップをせず、前面のアプリ名と画面解像度だけを取得します。",
+  "steps": [
+    { "op": "status" }
+  ]
+}
