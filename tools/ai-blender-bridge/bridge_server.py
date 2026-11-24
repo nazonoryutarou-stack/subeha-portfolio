@@ -75,12 +75,18 @@ def verify_job(job):
     steps = job.get("steps")
     if not isinstance(steps, list) or not (1 <= len(steps) <= 240):
         raise ValueError("steps must contain 1-240 commands")
+    total_vertices = 0
     for i, step in enumerate(steps):
         if not isinstance(step, dict) or step.get("op") not in OPERATIONS:
             raise ValueError(f"invalid operation at step {i}")
         if step["op"] == "mesh":
             if len(step.get("vertices", [])) > 12000 or len(step.get("faces", [])) > 16000:
                 raise ValueError("mesh too large")
+            total_vertices += len(step["vertices"])
+        elif step["op"] in ("box", "cylinder", "sphere"):
+            total_vertices += 320
+        if total_vertices > 100000:
+            raise ValueError("job exceeds mobile geometry budget")
     if len(json.dumps(job, ensure_ascii=False).encode()) > MAX_JOB_BYTES:
         raise ValueError("job too large")
     return jid
@@ -268,6 +274,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply_json({"error": "filename refused"}, 422)
             path = OUTPUT_DIR / name
             path.write_bytes(raw)
+            # Keep local artifacts bounded. A phone must not silently fill its storage.
+            candidates = sorted((f for f in OUTPUT_DIR.iterdir() if f.is_file()), key=lambda f: f.stat().st_mtime)
+            while sum(f.stat().st_size for f in candidates) > 100 * 1024 * 1024 and len(candidates) > 1:
+                oldest = candidates.pop(0)
+                oldest.unlink(missing_ok=True)
             return self.reply_json({"ok": True, "bytes": len(raw), "filename": name})
         self.reply_json({"error": "route not found"}, 404)
 
