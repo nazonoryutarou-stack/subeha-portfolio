@@ -307,6 +307,56 @@ def render_named(step, jid):
     return submit_artifact(dest, jid, step.get("label"))
 
 
+def restore_saved_scene(step):
+    """Recover a trusted previously uploaded .blend without opening/replacing UI file."""
+    from urllib.parse import quote
+    name = step.get("filename")
+    if (not isinstance(name, str) or not name.endswith(".blend") or
+        len(name) > 120 or name.startswith(".") or ".." in name or
+        any(c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_."
+            for c in name)):
+        raise ValueError("unsafe restore filename")
+    url = BASE_URL + "/output/" + quote(name) + "?token=" + BRIDGE_TOKEN
+    tmpdir = tempfile.mkdtemp(prefix="ai_bridge_restore_")
+    filepath = os.path.join(tmpdir, "source.blend")
+    try:
+        with urllib.request.urlopen(url, timeout=20) as reply:
+            size = 0
+            with open(filepath, "wb") as out:
+                while True:
+                    chunk = reply.read(262144)
+                    if not chunk:
+                        break
+                    size += len(chunk)
+                    if size > 20 * 1024 * 1024:
+                        raise ValueError("restore file exceeds 20 MB")
+                    out.write(chunk)
+        if size < 64 or open(filepath, "rb").read(7) != b"BLENDER":
+            raise ValueError("invalid Blender file")
+        with bpy.data.libraries.load(filepath, link=False) as (source, target):
+            names = [n for n in source.objects if n.startswith("KWC_") or n.startswith("九龍城_")]
+            if not names:
+                raise ValueError("saved file contains no Kowloon objects")
+            target.objects = names
+        recovered = [obj for obj in target.objects if obj is not None]
+        if len(recovered) < 100:
+            raise ValueError("incomplete saved Kowloon scene")
+        s = reset()
+        for obj in recovered:
+            s.collection.objects.link(obj)
+            if obj.type == "CAMERA" and obj.name.startswith("九龍城_"):
+                s.camera = obj
+        if s.camera is None:
+            raise RuntimeError("restored scene has no camera")
+        return len(recovered)
+    finally:
+        try:
+            os.unlink(filepath)
+            os.rmdir(tmpdir)
+        except OSError:
+            pass
+
+
 def save_named(step, jid):
     dest = os.path.join(bpy.app.tempdir or tempfile.gettempdir(), "ai_bridge_scene.blend")
     bpy.ops.wm.save_as_mainfile(filepath=dest, check_existing=False, compress=True)
@@ -334,6 +384,7 @@ def run_one(job):
                 apply_material(obj, step.get("material", {}))
             elif op == "render_settings": set_render(step)
             elif op == "render": render_named(step, jid)
+            elif op == "restore": restore_saved_scene(step)
             elif op == "save": save_named(step, jid)
             elif op == "status":
                 print("[AI Bridge] status",len(studio().objects),"objects; Blender",bpy.app.version_string)
