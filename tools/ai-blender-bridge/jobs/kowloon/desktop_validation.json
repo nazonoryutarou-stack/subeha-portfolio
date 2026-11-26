@@ -1,0 +1,62 @@
+{
+  "status": "passed",
+  "runtime": "Desktop Blender 4.3.2",
+  "actual_phone_result": "not received",
+  "source_revision": "0.12",
+  "views": [
+    {
+      "view": "no24",
+      "job_id": "kowloon-no24-v12-20261126-a1",
+      "file_bytes": 43587,
+      "mesh_objects": 49,
+      "source_components": 49,
+      "source_faces": 1120,
+      "max_float32_error_m": 9.5367431640625e-07,
+      "existing_relay_accepts": true,
+      "existing_agent_executes": true,
+      "repeated_scene_stable": true,
+      "localhost_submit_receive_acknowledgement": true,
+      "completed_job_not_requeued": true,
+      "native_PNG_delivered_to_Termux_relay": true,
+      "source_part_faces_preserved": true,
+      "painted_materials": 0,
+      "user_source_scene_preserved": true
+    },
+    {
+      "view": "city",
+      "job_id": "kowloon-city-v12-20261126-a1",
+      "file_bytes": 426913,
+      "mesh_objects": 18,
+      "source_components": 313,
+      "source_faces": 13203,
+      "max_float32_error_m": 0.000717966664346783,
+      "existing_relay_accepts": true,
+      "existing_agent_executes": true,
+      "repeated_scene_stable": true,
+      "localhost_submit_receive_acknowledgement": true,
+      "completed_job_not_requeued": true,
+      "native_PNG_delivered_to_Termux_relay": false,
+      "source_part_faces_preserved": true,
+      "painted_materials": 0,
+      "user_source_scene_preserved": true
+    },
+    {
+      "view": "roofs",
+      "job_id": "kowloon-roofs-v12-20261126-a1",
+      "file_bytes": 6634,
+      "mesh_objects": 18,
+      "source_components": 18,
+      "source_faces": 52,
+      "max_float32_error_m": 0.0,
+      "existing_relay_accepts": true,
+      "existing_agent_executes": true,
+      "repeated_scene_stable": true,
+      "localhost_submit_receive_acknowledgement": true,
+      "completed_job_not_requeued": true,
+      "native_PNG_delivered_to_Termux_relay": false,
+      "source_part_faces_preserved": true,
+      "painted_materials": 0,
+      "user_source_scene_preserved": true
+    }
+  ]
+}

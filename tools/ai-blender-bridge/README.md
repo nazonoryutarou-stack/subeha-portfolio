@@ -29,6 +29,10 @@ Ask: **「Blenderの部屋に照明を増やせ」「九龍城の外観をモデ
 
 The terminal status page shows last job, errors and output files. ChatGPT **cannot independently watch your phone's logs**; paste status output or share a screenshot when troubleshooting. Future integration could report job results to a private cloud account with explicit authorization.
 
+## Kowloon reconstruction
+
+The existing bridge can execute the evidence-led Kowloon OBJ meshes. See [KOWLOON_JA.md](KOWLOON_JA.md) for the room, city and rooftop jobs, their source records, and regeneration.
+
 ## Job schema
 
 `{"id":"unique-job-id-001","steps":[{"op":"reset"},{"op":"box","name":"Wall","location":[0,0,1],"size":[3,0.2,2],"material":{"name":"Plaster","color":[0.8,0.7,0.6,1],"roughness":0.9}},{"op":"light","name":"Sun","type":"AREA","location":[1,-3,5],"target":[0,0,0],"energy":900},{"op":"camera","location":[4,-7,5],"target":[0,0,0]}]}`
