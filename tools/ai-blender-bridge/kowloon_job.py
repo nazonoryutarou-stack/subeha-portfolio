@@ -13,6 +13,7 @@ MAX_BYTES = 512_000
 MAX_VERTICES = 12_000
 MAX_FACES = 16_000
 VIEWS = {
+    "facade": ("25_SW_extended_galleries_two_view_UNSCALED.obj", "九龍城西南角・下層ギャラリーと張出しの接続部"),
     "no24": ("20_No24_seven_flats_SECTION.obj", "東頭村道24号の7住戸・水平断面"),
     "city": ("00_CITY_whole_area_WORKING.obj", "九龍城砦の全域・街路と区画"),
     "roofs": ("24A_No19_No3_roof_section_SMALL.obj", "信義里19号・長安里3号の屋上・小さい縮尺案"),
@@ -120,7 +121,7 @@ def evidence_table(records):
     return columns, values, rows
 
 
-def build_job(root, view, job_id, render=False):
+def build_job(root, view, job_id, render=False, save_before=False):
     filename, title = VIEWS[view]
     source = root / "model" / filename
     manifest = json.loads((root / "evidence" / "project_manifest.json").read_text(encoding="utf-8"))
@@ -142,9 +143,12 @@ def build_job(root, view, job_id, render=False):
              {"op": "light", "name": "九龍城_中立光", "type": "SUN", "location": [-span, -span, span*2], "target": target, "energy": 2.5},
              {"op": "world", "color": [.68, .68, .68], "strength": .65},
              {"op": "render_settings", "width": 960, "height": 720}, {"op": "status"}]
+    if save_before:
+        steps.insert(0, {"op": "save", "label": "before-kowloon"})
     if render:
         steps.insert(-1, {"op": "render", "width": 640, "height": 426})
     status = {
+        "facade": "昼夜の原写真から採録した外壁。4組の張出しの帯、下層7段の帯材、縦材39片。実寸・全域図への配置・隠れた内部は未確定。相対単位。",
         "no24": "公文書図面の7住戸。水平寸法の単位は仮定、断面の表示高は0.82m。階の標高と城砦内での室内の向きは未確定。",
         "city": "全域234区画、北部19棟の階数記録。北部の階高・通路の高さは作業値。215区画の高さは未確定。西側2面の屋根高は写真推定。",
         "roofs": "屋上の平面図と13本の階段投影線。屋根の標高は未確定。水平縮尺は面積注記からの小さい案、柵高は図記載の3.5ft。",
@@ -152,14 +156,17 @@ def build_job(root, view, job_id, render=False):
     columns, evidence, rows = evidence_table(record["parts"])
     job = {
         "id": job_id, "title": title, "project": "kowloon", "model_revision": manifest["version"],
-        "source_file": filename, "render_requested": render, "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "source_file": filename, "render_requested": render, "save_before_reset": save_before, "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "source_units": record["units"], "source_origin_OBJ": origin,
         "axis_rotation": [[1,0,0],[0,0,-1],[0,1,0]],
-        "viewport_coordinate_precision_m": .001 if view == "city" else .000001,
+        "viewport_coordinate_precision": .001 if view == "city" else .000001,
+        "viewport_coordinate_unit": "model_unit" if record["units"].startswith("RELATIVE") else "metre",
         "source_range_columns": ["source_part_index", "face_start", "face_count"],
         "evidence_status": status, "evidence_columns": columns, "evidence_values": evidence, "source_parts": rows,
         "steps": steps,
     }
+    if not record["units"].startswith("RELATIVE"):
+        job["viewport_coordinate_precision_m"] = job["viewport_coordinate_precision"]
     encoded = json.dumps(job, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
     # The installed relay reserializes with spaces, and /next adds a wrapper.
     if len(json.dumps(job, ensure_ascii=False).encode()) > MAX_BYTES:
@@ -173,13 +180,14 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("root", type=Path, help="Unpacked Kowloon deliverable with model/ and evidence/")
     ap.add_argument("--view", choices=VIEWS, default="no24")
+    ap.add_argument("--save-before", action="store_true", help="Save the current Blender project to the local relay before resetting its studio")
     ap.add_argument("--render", action="store_true", help="Also render a 640x426 PNG to the local relay")
     ap.add_argument("--id", required=True, help="New job ID for this model revision")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     if not (3 <= len(args.id) <= 80) or any(not c.isascii() or not (c.isalnum() or c in "-_.") for c in args.id):
         ap.error("id must contain 3–80 ASCII letters, digits, hyphens, underscores or periods")
-    job, data = build_job(args.root, args.view, args.id, args.render)
+    job, data = build_job(args.root, args.view, args.id, args.render, args.save_before)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(data+"\n", encoding="utf-8")
     print(json.dumps({"id": job["id"], "file": str(args.out), "bytes": len((data+"\n").encode()),
