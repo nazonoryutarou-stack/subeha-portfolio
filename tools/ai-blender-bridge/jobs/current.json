@@ -548,6 +548,10 @@
       "lens": 48
     },
     {
+      "op": "save",
+      "label": "scene"
+    },
+    {
       "op": "render",
       "camera": "V2_Front",
       "label": "front",
@@ -567,10 +571,6 @@
       "label": "side",
       "width": 640,
       "height": 426
-    },
-    {
-      "op": "save",
-      "label": "scene"
     },
     {
       "op": "status"
