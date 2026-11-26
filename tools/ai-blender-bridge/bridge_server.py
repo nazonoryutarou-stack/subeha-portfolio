@@ -27,7 +27,7 @@ OUTPUT_DIR = DATA_DIR / "outputs"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 JOB_URL = "https://raw.githubusercontent.com/nazonoryutarou-stack/subeha-portfolio/main/tools/ai-blender-bridge/jobs/current.json"
 AGENT_FILE = APP_DIR / "blender_agent.py"
-OPERATIONS = {"reset", "box", "cylinder", "sphere", "mesh", "material", "light", "camera", "world", "render_settings", "render", "save", "status"}
+OPERATIONS = {"reset", "box", "cylinder", "sphere", "mesh", "material", "light", "camera", "world", "render_settings", "render", "save", "restore", "status"}
 MAX_JOB_BYTES = 512_000
 MAX_ARTIFACT_BYTES = 20 * 1024 * 1024
 
