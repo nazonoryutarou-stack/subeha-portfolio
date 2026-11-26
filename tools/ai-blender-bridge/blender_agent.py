@@ -266,21 +266,51 @@ def set_render(step):
             break
 
 
-def submit_artifact(path, jid):
+def submit_artifact(path, jid, label=None):
     if not path or not os.path.isfile(path):
-        return None
+        raise RuntimeError("artifact file missing")
     size = os.stat(path).st_size
-    if size > 20*1024*1024:
-        return "artifact exceeded 20 MB limit"
+    if size <= 0 or size > 20*1024*1024:
+        raise RuntimeError("artifact empty or exceeded 20 MB")
     safe_id = "".join(c for c in str(jid) if c.isalnum() or c in "-_.")[:40]
-    name = safe_id + os.path.splitext(path)[1]
-    with open(path,"rb") as f:
+    suffix = "".join(c for c in str(label or "") if c.isalnum() or c in "-_")[:30]
+    ext = os.path.splitext(path)[1]
+    name = safe_id + ("_" + suffix if suffix else "") + ext
+    with open(path, "rb") as f:
         payload = f.read()
     req = urllib.request.Request(BASE_URL+"/artifact?token="+BRIDGE_TOKEN+"&name="+name,
                                  data=payload, headers={"Content-Type":"application/octet-stream"}, method="POST")
-    with urllib.request.urlopen(req, timeout=25) as res:
+    with urllib.request.urlopen(req, timeout=40) as res:
         data = json.loads(res.read().decode())
+    if data.get("ok") is not True:
+        raise RuntimeError("artifact upload was not acknowledged")
     return data.get("filename")
+
+
+def render_named(step, jid):
+    set_render(step)
+    s = studio()
+    camera_name = step.get("camera")
+    if camera_name is not None:
+        if not isinstance(camera_name, str) or len(camera_name) > 90:
+            raise ValueError("invalid camera name")
+        camera_obj = s.objects.get(camera_name)
+        if camera_obj is None or camera_obj.type != "CAMERA":
+            raise ValueError("camera not found: " + camera_name)
+        s.camera = camera_obj
+    if s.camera is None:
+        raise RuntimeError("render requires a camera")
+    dest = os.path.join(bpy.app.tempdir or tempfile.gettempdir(), "ai_bridge_preview.png")
+    s.render.filepath = dest
+    s.render.image_settings.file_format = "PNG"
+    bpy.ops.render.render(write_still=True, scene=s.name)
+    return submit_artifact(dest, jid, step.get("label"))
+
+
+def save_named(step, jid):
+    dest = os.path.join(bpy.app.tempdir or tempfile.gettempdir(), "ai_bridge_scene.blend")
+    bpy.ops.wm.save_as_mainfile(filepath=dest, check_existing=False, compress=True)
+    return submit_artifact(dest, jid, step.get("label"))
 
 
 def run_one(job):
@@ -303,17 +333,8 @@ def run_one(job):
                 if obj is None: raise ValueError("material target not found")
                 apply_material(obj, step.get("material", {}))
             elif op == "render_settings": set_render(step)
-            elif op == "render":
-                set_render(step)
-                dest = os.path.join(bpy.app.tempdir or tempfile.gettempdir(),"ai_bridge_preview.png")
-                studio().render.filepath = dest
-                studio().render.image_settings.file_format = "PNG"
-                bpy.ops.render.render(write_still=True, scene=studio().name)
-                submit_artifact(dest,jid)
-            elif op == "save":
-                dest = os.path.join(bpy.app.tempdir or tempfile.gettempdir(),"ai_bridge_scene.blend")
-                bpy.ops.wm.save_as_mainfile(filepath=dest, check_existing=False, compress=True)
-                submit_artifact(dest,jid)
+            elif op == "render": render_named(step, jid)
+            elif op == "save": save_named(step, jid)
             elif op == "status":
                 print("[AI Bridge] status",len(studio().objects),"objects; Blender",bpy.app.version_string)
             else:
