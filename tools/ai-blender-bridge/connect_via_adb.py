@@ -7,6 +7,9 @@ general remote command. User must have the Python Console visible.
 import base64
 from pathlib import Path
 import shlex
+import json
+from urllib.request import urlopen
+from urllib.parse import urlencode
 import struct
 import subprocess
 import sys
@@ -50,18 +53,34 @@ def main():
     w, h = struct.unpack(">II", png[16:24])
     if not (300 <= w <= 5000 and 300 <= h <= 5000):
         raise SystemExit("Unexpected screen size; refusing to tap")
-    x, y = round(w * .53), round(h * .93)
+    # Focus the center Console's bottom prompt (screenshot-verified layout).
+    x, y = round(w * .43), round(h * .967)
+    print(f"Console focus tap: {x},{y} / {w}x{h}", flush=True)
     adb("shell", "input", "tap", str(x), str(y))
-    time.sleep(.5)
+    time.sleep(1.0)
     # shlex.quote is for the remote Android shell, not for Python syntax.
     command = "input text " + shlex.quote(expression)
     adb("shell", command, timeout=45)
-    # Android's virtual keyboard may not faithfully type Python punctuation.
-    # Enter is intentionally left to the user, so the typed expression can
-    # be inspected before executing.
-    print("Consoleに文字を入力しました。入力内容が正しければEnterを押してください。")
-    print("実行後 [AI Bridge] ACTIVE が表示されれば接続完了。")
-    print("Note: if characters were lost, do NOT press Enter; clear the line.")
+    # Connect to the existing local bridge, and verify the live heartbeat.
+    print("入力しました。Enterも自動で押します。", flush=True)
+    adb("shell", "input", "keyevent", "66")
+    time.sleep(6)
+    url = "http://127.0.0.1:8765/status?" + urlencode({"token": token})
+    try:
+        with urlopen(url, timeout=5) as response:
+            data = json.load(response)
+        last_seen = float(data.get("status", {}).get("blender_last_seen") or 0)
+        age = time.time() - last_seen
+        print("最終通信から:", round(age, 1), "秒", flush=True)
+        if age < 10:
+            print("CONNECTED: Blenderとの通信が復活しました。", flush=True)
+            print("待機中:", data.get("pending"), flush=True)
+            print("直近の結果:", data.get("status", {}).get("last_result"), flush=True)
+        else:
+            print("NOT CONNECTED: 文字入力に失敗したか、Consoleの位置が違います。", flush=True)
+            print("Blender画面とこの出力を送ってください（トークンは貼らない）。", flush=True)
+    except Exception as exc:
+        print("通信診断失敗:", type(exc).__name__, str(exc)[:140], flush=True)
 
 if __name__ == "__main__":
     try:
