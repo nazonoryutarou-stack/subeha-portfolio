@@ -36,7 +36,7 @@ def main():
     code64 = base64.b64encode(bootstrap.encode("ascii")).decode("ascii")
     expression = "exec(__import__('base64').b64decode('" + code64 + "'))"
     print("BlenderのPython Consoleを表示してください。10秒後に自動入力します。", flush=True)
-    print("入力先はConsole右側の最下部 >>> です。ほかの画面に移った場合はCtrl+Cで中止。", flush=True)
+    print("入力先は画面中央の大きなConsoleの最下部 >>> です。ほかの画面に移った場合はCtrl+Cで中止。", flush=True)
     time.sleep(10)
     from importlib.util import spec_from_file_location, module_from_spec
     spec = spec_from_file_location("phone_bridge", str(Path.home() / "ai-phone-bridge" / "phone_bridge.py"))
@@ -54,7 +54,7 @@ def main():
     if not (300 <= w <= 5000 and 300 <= h <= 5000):
         raise SystemExit("Unexpected screen size; refusing to tap")
     # Focus the center Console's bottom prompt (screenshot-verified layout).
-    x, y = round(w * .43), round(h * .967)
+    x, y = round(w * .34), round(h * .970)
     print(f"Console focus tap: {x},{y} / {w}x{h}", flush=True)
     adb("shell", "input", "tap", str(x), str(y))
     time.sleep(1.0)
