@@ -331,8 +331,12 @@ def restore_saved_scene(step):
                     if size > 20 * 1024 * 1024:
                         raise ValueError("restore file exceeds 20 MB")
                     out.write(chunk)
-        if size < 64 or open(filepath, "rb").read(7) != b"BLENDER":
-            raise ValueError("invalid Blender file")
+        # Blender may store compressed .blend files with a Zstandard wrapper.
+        # The on-disk magic then starts with 28 B5 2F FD instead of BLENDER.
+        with open(filepath, "rb") as source_file:
+            magic = source_file.read(7)
+        if size < 64 or not (magic == b"BLENDER" or magic.startswith(b"\x28\xb5\x2f\xfd")):
+            raise ValueError("invalid Blender file header: " + magic.hex())
         with bpy.data.libraries.load(filepath, link=False) as (source, target):
             names = [n for n in source.objects if n.startswith("KWC_") or n.startswith("九龍城_")]
             if not names:
