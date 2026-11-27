@@ -124,6 +124,27 @@ def github_loop(interval=60):
         time.sleep(interval)
 
 
+def latest_kowloon_checkpoint():
+    """Only completed Kowloon models; never choose before-restore backups or PNGs."""
+    allowed_suffixes = (
+        "_completed-kowloon.blend",
+        "_restored-persistent.blend",
+        "_checkpoint.blend",
+        "_autosave.blend",
+    )
+    matches = [
+        p for p in OUTPUT_DIR.iterdir()
+        if p.is_file() and p.name.endswith(allowed_suffixes)
+        and (p.name.startswith("kowloon-") or p.name.startswith("kowloon_"))
+        and 64 <= p.stat().st_size <= MAX_ARTIFACT_BYTES
+    ]
+    if not matches:
+        return None
+    latest = max(matches, key=lambda p: (p.stat().st_mtime_ns, p.name))
+    return {"filename": latest.name, "size": latest.stat().st_size,
+            "modified": latest.stat().st_mtime}
+
+
 def local_demo():
     return {
         "id": "local-demo-" + str(int(time.time() * 1000)),
@@ -184,6 +205,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(data)))
             self.end_headers()
             return self.wfile.write(data)
+        if route == "/latest-kowloon":
+            return self.reply_json({"latest": latest_kowloon_checkpoint()})
         if route == "/next":
             with LOCK:
                 STATUS["blender_last_seen"] = time.time()
