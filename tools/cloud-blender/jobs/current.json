@@ -1,0 +1,14 @@
+{
+  "id": "kowloon-cloud-preview-v1",
+  "title": "Kowloon saved project cloud preview",
+  "input": "kowloon-v13.blend",
+  "scene": "AI Bridge Studio",
+  "render": {
+    "width": 960,
+    "height": 720,
+    "frame": 1,
+    "engine": "BLENDER_EEVEE_NEXT"
+  },
+  "save_blend": true,
+  "export_glb": false
+}
