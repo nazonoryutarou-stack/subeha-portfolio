@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "agent_revision": "current",
+  "runtime": "Desktop Blender 4.3.2",
+  "phone_execution": "unconfirmed",
+  "job_id": "kwc-v15-gallery-20261128-a1",
+  "source_meshes": 157,
+  "source_faces": 902,
+  "max_coordinate_error_model_units": 0.0,
+  "original_user_scene_preserved": true,
+  "previous_studio_saved_before_reset": true,
+  "previous_snapshot_contains_robot": true,
+  "http_submission_receive_acknowledgement": true,
+  "completed_id_not_requeued": true,
+  "native_png_delivered": true,
+  "png_dimensions": [
+    640,
+    426
+  ],
+  "painted_materials": 0
+}

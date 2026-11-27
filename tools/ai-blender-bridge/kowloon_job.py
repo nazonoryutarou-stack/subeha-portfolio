@@ -13,6 +13,7 @@ MAX_BYTES = 512_000
 MAX_VERTICES = 12_000
 MAX_FACES = 16_000
 VIEWS = {
+    "gallery": ("30_SW_gallery_extensions_with_facade_UNSCALED.obj", "九龍城西南角・上層帯材3段の可視面を追加"),
     "facade": ("25_SW_extended_galleries_two_view_UNSCALED.obj", "九龍城西南角・下層ギャラリーと張出しの接続部"),
     "no24": ("20_No24_seven_flats_SECTION.obj", "東頭村道24号の7住戸・水平断面"),
     "city": ("00_CITY_whole_area_WORKING.obj", "九龍城砦の全域・街路と区画"),
@@ -121,7 +122,7 @@ def evidence_table(records):
     return columns, values, rows
 
 
-def build_job(root, view, job_id, render=False, save_before=False):
+def build_job(root, view, job_id, render=False, save_before=False, save_after=False):
     filename, title = VIEWS[view]
     source = root / "model" / filename
     manifest = json.loads((root / "evidence" / "project_manifest.json").read_text(encoding="utf-8"))
@@ -138,16 +139,32 @@ def build_job(root, view, job_id, render=False, save_before=False):
     span = max(hi[i]-lo[i] for i in range(3))
     target = [0, 0, (lo[1]+hi[1])/2]
     camera = [span*.88, -span*1.15, target[2]+span*1.45]
+    if view == "gallery":
+        # Frame the actual mesh at the preview's3:2 aspect instead of placing
+        # a camera at a fixed distance from the bounding-box size.
+        dot = lambda a,b: sum(x*y for x,y in zip(a,b))
+        normalise = lambda a: [x/math.sqrt(dot(a,a)) for x in a]
+        eye = normalise([.72,-1.7,.7])
+        right = normalise([-eye[1],eye[0],0])
+        up = [eye[1]*right[2]-eye[2]*right[1],eye[2]*right[0]-eye[0]*right[2],eye[0]*right[1]-eye[1]*right[0]]
+        coords = [[x-origin[0],-(z-origin[2]),y] for x,y,z in points]
+        offsets = [[v[i]-target[i] for i in range(3)] for v in coords]
+        tan_x = 36/(2*42);tan_y=tan_x*426/640
+        distance = max(dot(v,eye)+max(abs(dot(v,right))/(tan_x*.83),abs(dot(v,up))/(tan_y*.83)) for v in offsets)
+        camera = [target[i]+distance*eye[i] for i in range(3)]
     steps = [{"op": "reset"}, *commands,
              {"op": "camera", "name": "九龍城_確認カメラ", "location": camera, "target": target, "lens": 42},
              {"op": "light", "name": "九龍城_中立光", "type": "SUN", "location": [-span, -span, span*2], "target": target, "energy": 2.5},
-             {"op": "world", "color": [.68, .68, .68], "strength": .65},
+             {"op": "world", "color": [.035, .035, .035] if view == "gallery" else [.68, .68, .68], "strength": .4 if view == "gallery" else .65},
              {"op": "render_settings", "width": 960, "height": 720}, {"op": "status"}]
     if save_before:
         steps.insert(0, {"op": "save", "label": "before-kowloon"})
+    if save_after:
+        steps.insert(-1, {"op": "save", "label": "completed-kowloon"})
     if render:
         steps.insert(-1, {"op": "render", "width": 640, "height": 426})
     status = {
+        "gallery": "昼夜双方で読める上層帯材3段の面を追加。既存の面を延長する作業上の制約を含む。1段は照合差により保留。隠れた裏面・厚み・実寸・全域配置は未確定。",
         "facade": "昼夜の原写真から採録した外壁。4組の張出しの帯、下層7段の帯材、縦材39片。実寸・全域図への配置・隠れた内部は未確定。相対単位。",
         "no24": "公文書図面の7住戸。水平寸法の単位は仮定、断面の表示高は0.82m。階の標高と城砦内での室内の向きは未確定。",
         "city": "全域234区画、北部19棟の階数記録。北部の階高・通路の高さは作業値。215区画の高さは未確定。西側2面の屋根高は写真推定。",
@@ -156,7 +173,7 @@ def build_job(root, view, job_id, render=False, save_before=False):
     columns, evidence, rows = evidence_table(record["parts"])
     job = {
         "id": job_id, "title": title, "project": "kowloon", "model_revision": manifest["version"],
-        "source_file": filename, "render_requested": render, "save_before_reset": save_before, "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "source_file": filename, "render_requested": render, "save_before_reset": save_before, "save_after_build": save_after, "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "source_units": record["units"], "source_origin_OBJ": origin,
         "axis_rotation": [[1,0,0],[0,0,-1],[0,1,0]],
         "viewport_coordinate_precision": .001 if view == "city" else .000001,
@@ -181,13 +198,14 @@ def main():
     ap.add_argument("root", type=Path, help="Unpacked Kowloon deliverable with model/ and evidence/")
     ap.add_argument("--view", choices=VIEWS, default="no24")
     ap.add_argument("--save-before", action="store_true", help="Save the current Blender project to the local relay before resetting its studio")
+    ap.add_argument("--save-after", action="store_true", help="Save the completed studio to the local relay before optional rendering")
     ap.add_argument("--render", action="store_true", help="Also render a 640x426 PNG to the local relay")
     ap.add_argument("--id", required=True, help="New job ID for this model revision")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     if not (3 <= len(args.id) <= 80) or any(not c.isascii() or not (c.isalnum() or c in "-_.") for c in args.id):
         ap.error("id must contain 3–80 ASCII letters, digits, hyphens, underscores or periods")
-    job, data = build_job(args.root, args.view, args.id, args.render, args.save_before)
+    job, data = build_job(args.root, args.view, args.id, args.render, args.save_before, args.save_after)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(data+"\n", encoding="utf-8")
     print(json.dumps({"id": job["id"], "file": str(args.out), "bytes": len((data+"\n").encode()),
@@ -197,3 +215,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
