@@ -132,12 +132,20 @@ def latest_kowloon_checkpoint():
         "_checkpoint.blend",
         "_autosave.blend",
     )
-    matches = [
-        p for p in OUTPUT_DIR.iterdir()
-        if p.is_file() and p.name.endswith(allowed_suffixes)
-        and (p.name.startswith("kowloon-") or p.name.startswith("kowloon_"))
-        and 64 <= p.stat().st_size <= MAX_ARTIFACT_BYTES
-    ]
+    def valid_checkpoint(path):
+        if (not path.is_file() or not path.name.endswith(allowed_suffixes)
+            or not (path.name.startswith("kowloon-") or path.name.startswith("kowloon_"))):
+            return False
+        if not 64 <= path.stat().st_size <= MAX_ARTIFACT_BYTES:
+            return False
+        try:
+            with path.open("rb") as handle:
+                header = handle.read(7)
+            return header == b"BLENDER" or header.startswith(b"\x28\xb5\x2f\xfd")
+        except OSError:
+            return False
+
+    matches = [p for p in OUTPUT_DIR.iterdir() if valid_checkpoint(p)]
     if not matches:
         return None
     latest = max(matches, key=lambda p: (p.stat().st_mtime_ns, p.name))
@@ -296,7 +304,24 @@ class Handler(BaseHTTPRequestHandler):
             if not name.endswith((".png", ".glb", ".blend")) or len(name) > 90 or any(c not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-" for c in name):
                 return self.reply_json({"error": "filename refused"}, 422)
             path = OUTPUT_DIR / name
-            path.write_bytes(raw)
+            # Atomic replacement prevents automatic restore from reading half-written files.
+            import tempfile
+            with tempfile.NamedTemporaryFile(dir=OUTPUT_DIR, prefix=".upload-", delete=False) as stream:
+                temporary = Path(stream.name)
+                try:
+                    stream.write(raw)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                except BaseException:
+                    temporary.unlink(missing_ok=True)
+                    raise
+            temporary.replace(path)
+            # Retain the newest 24 timestamped autosaves plus named checkpoints.
+            autosaves = sorted(
+                (p for p in OUTPUT_DIR.glob("kowloon-live-*_autosave.blend") if p.is_file()),
+                key=lambda p: p.stat().st_mtime_ns, reverse=True)
+            for stale in autosaves[24:]:
+                stale.unlink(missing_ok=True)
             # Keep local artifacts bounded. A phone must not silently fill its storage.
             candidates = sorted((f for f in OUTPUT_DIR.iterdir() if f.is_file()), key=lambda f: f.stat().st_mtime)
             while sum(f.stat().st_size for f in candidates) > 100 * 1024 * 1024 and len(candidates) > 1:
