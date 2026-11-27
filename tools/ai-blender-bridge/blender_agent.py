@@ -402,6 +402,59 @@ def run_one(job):
                 "step":step_no,"elapsed":round(time.monotonic()-started,2),"object_count":len(studio().objects)}
 
 
+# These values belong to the current Blender agent session only.
+_AUTO_RESTORE_CHECKED = False
+_LAST_AUTO_SAVE_AT = time.monotonic()
+
+
+def kowloon_object_count(scene):
+    return sum(1 for obj in scene.objects if obj.name.startswith("KWC_"))
+
+
+def startup_kowloon_restore():
+    """Restore the most recent completed Kowloon scene once per Blender session.
+
+    Never replace an already populated studio; ordinary user scenes are untouched.
+    Failed transfers may be retried on the next idle tick.
+    """
+    global _AUTO_RESTORE_CHECKED, _LAST_AUTO_SAVE_AT
+    scene = bpy.data.scenes.get(STUDIO)
+    if scene is not None and len(scene.objects):
+        # A loaded Kowloon scene or a user's existing studio is never overwritten.
+        if kowloon_object_count(scene) >= 100:
+            if bpy.context.window is not None:
+                bpy.context.window.scene = scene
+            print("[AI Bridge] Existing Kowloon studio retained; automatic restore skipped")
+        else:
+            print("[AI Bridge] Studio contains other work; automatic restore skipped")
+        _AUTO_RESTORE_CHECKED = True
+        _LAST_AUTO_SAVE_AT = time.monotonic()
+        return
+    latest = request("/latest-kowloon", timeout=5).get("latest")
+    if not latest:
+        print("[AI Bridge] No saved Kowloon checkpoint yet")
+        _AUTO_RESTORE_CHECKED = True
+        return
+    count = restore_saved_scene({"filename": latest["filename"]})
+    _AUTO_RESTORE_CHECKED = True
+    _LAST_AUTO_SAVE_AT = time.monotonic()
+    print("[AI Bridge] Automatically resumed Kowloon:", latest["filename"], count, "objects")
+
+
+def idle_kowloon_autosave():
+    """Keep one rolling backup of manual Kowloon edits approximately every 5 minutes."""
+    global _LAST_AUTO_SAVE_AT
+    if time.monotonic() - _LAST_AUTO_SAVE_AT < 300:
+        return
+    scene = bpy.data.scenes.get(STUDIO)
+    window = bpy.context.window
+    if scene is None or window is None or window.scene != scene or kowloon_object_count(scene) < 100:
+        return
+    _LAST_AUTO_SAVE_AT = time.monotonic()
+    filename = save_named({"label": "autosave"}, "kowloon-live")
+    print("[AI Bridge] Rolling Kowloon autosave:", filename)
+
+
 def ai_bridge_tick():
     try:
         reply = request("/next",timeout=3)
@@ -409,8 +462,25 @@ def ai_bridge_tick():
         if job:
             print("[AI Bridge] Starting job",job.get("id"))
             result = run_one(job)
+            # Persist successful Kowloon geometry jobs, even when the job author
+            # forgot to add an explicit save operation.
+            if result.get("ok") and any(step.get("op") in
+                    {"mesh", "box", "cylinder", "sphere", "material", "reset", "restore"}
+                    for step in job.get("steps", [])):
+                scene = bpy.data.scenes.get(STUDIO)
+                if scene is not None and kowloon_object_count(scene) >= 100:
+                    try:
+                        saved = save_named({"label": "checkpoint"}, job["id"])
+                        print("[AI Bridge] Kowloon checkpoint:", saved)
+                    except Exception as exc:
+                        result["ok"] = False
+                        result["message"] = "Checkpoint failed: " + str(exc)[:160]
             print("[AI Bridge]",result)
             request("/result",result,timeout=8)
+        elif not _AUTO_RESTORE_CHECKED:
+            startup_kowloon_restore()
+        else:
+            idle_kowloon_autosave()
     except Exception as exc:
         if time.monotonic()-globals().get("_LAST_BRIDGE_ERROR",0)>25:
             print("[AI Bridge] Waiting for Termux connection:",type(exc).__name__,exc)
