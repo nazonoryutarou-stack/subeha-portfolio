@@ -7,7 +7,7 @@
     "width": 960,
     "height": 720,
     "frame": 1,
-    "engine": "BLENDER_EEVEE_NEXT"
+    "engine": "BLENDER_WORKBENCH"
   },
   "save_blend": true,
   "export_glb": false
