@@ -92,7 +92,9 @@ def main():
     try:
         with (out / "blender.log").open("w", encoding="utf-8") as log:
             subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
-        upload_s3([p for p in out.iterdir() if p.is_file()], jid)
+        # Publish finished deliverables only; keep logs and the job specification private.
+        deliverables = ("preview.png", "kowloon-cloud.blend", "kowloon-cloud.glb", "render-report.json")
+        upload_s3([out / name for name in deliverables if (out / name).is_file()], jid)
         print("COMPLETED:", str(out))
     except BaseException:
         print("FAILED; inspect log:", out / "blender.log", file=sys.stderr)
