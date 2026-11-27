@@ -450,9 +450,12 @@ def idle_kowloon_autosave():
     window = bpy.context.window
     if scene is None or window is None or window.scene != scene or kowloon_object_count(scene) < 100:
         return
+    # Keep generations instead of silently overwriting one rolling file.
+    # Each generation survives unexpected Blender/app termination.
+    stamp = time.strftime("%Y%m%d-%H%M%S", time.localtime())
+    filename = save_named({"label": "autosave"}, "kowloon-live-" + stamp)
     _LAST_AUTO_SAVE_AT = time.monotonic()
-    filename = save_named({"label": "autosave"}, "kowloon-live")
-    print("[AI Bridge] Rolling Kowloon autosave:", filename)
+    print("[AI Bridge] Kowloon autosave generation:", filename)
 
 
 def ai_bridge_tick():
@@ -475,6 +478,8 @@ def ai_bridge_tick():
                     except Exception as exc:
                         result["ok"] = False
                         result["message"] = "Checkpoint failed: " + str(exc)[:160]
+            if result.get("ok"):
+                globals()["_LAST_AUTO_SAVE_AT"] = time.monotonic()
             print("[AI Bridge]",result)
             request("/result",result,timeout=8)
         elif not _AUTO_RESTORE_CHECKED:
