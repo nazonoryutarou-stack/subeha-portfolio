@@ -1,0 +1,19 @@
+{
+  "job_id": "kowloon-phase-a18-display-02",
+  "revision": "0.18",
+  "source_file": "36_Phase_A_city.obj",
+  "static_audit": true,
+  "execution_verified": false,
+  "historical_completeness_verified": false,
+  "plot_total_in_metadata": 234,
+  "north_storey_records_in_metadata": 19,
+  "unknown_height_plots_in_metadata": 215,
+  "source_parts": 467,
+  "evidence_parts_referenced": 467,
+  "mesh_commands": 115,
+  "faces": 7730,
+  "vertices": 7067,
+  "out_of_range_refs": 0,
+  "save_after_present": true,
+  "note": "静的解析値。19棟の階高は作業値、215区画の高さは未確定。全域完成、内部接続、燃焼物性の確立を示さない。"
+}
